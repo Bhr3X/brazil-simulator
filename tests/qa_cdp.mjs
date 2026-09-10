@@ -400,6 +400,122 @@ async function runTestSuite(url) {
       throw new Error(`TEST 2d FAILED: Visual parameters test failed: ${JSON.stringify(visualTest)}`);
     }
 
+    // TEST 2e: 3rd Person Perspective & Avatar Rigging & Controls
+    const thirdPersonTest = await evaluate(`
+      (() => {
+        const c = window.app.controls;
+        const cam = window.app.renderer.camera;
+        const btn = document.getElementById('btn-camera');
+        const initial3rd = c.isThirdPerson;
+        const initialMeshVis = c.avatarMesh ? c.avatarMesh.visible : false;
+        const initialBtnText = btn ? btn.textContent : '';
+
+        // 1. Hotkey [B] Toggle
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', key: 'b' }));
+        const postB3rd = c.isThirdPerson;
+        const postBMeshVis = c.avatarMesh ? c.avatarMesh.visible : false;
+        const postBBtnText = btn ? btn.textContent : '';
+
+        // Check camera pulled back in 3rd person
+        c.update(0.05);
+        const camDist3rd = Math.sqrt(
+          (cam.position.x - c.position.x) ** 2 +
+          (cam.position.z - c.position.z) ** 2
+        );
+
+        // Check avatar hierarchy
+        const hasTorso = !!c.avatarTorso;
+        const hasHead = !!c.avatarHead;
+        const hasLimbs = !!(c.avatarLeftArm && c.avatarRightArm && c.avatarLeftLeg && c.avatarRightLeg);
+
+        // 2. Walking animation gait test
+        c.moveForward = true;
+        c.canJump = true;
+        c.update(0.12);
+        const walkLegL = c.avatarLeftLeg ? c.avatarLeftLeg.rotation.x : 0;
+        const walkLegR = c.avatarRightLeg ? c.avatarRightLeg.rotation.x : 0;
+        const walkArmL = c.avatarLeftArm ? c.avatarLeftArm.rotation.x : 0;
+        const walkArmR = c.avatarRightArm ? c.avatarRightArm.rotation.x : 0;
+        c.moveForward = false;
+
+        // 3. Crouch squash test
+        c.isCrouching = true;
+        c.update(0.1);
+        const crouchScaleY = c.avatarMesh ? c.avatarMesh.scale.y : 1.0;
+        c.isCrouching = false;
+        c.update(0.3);
+        const uncrouchScaleY = c.avatarMesh ? c.avatarMesh.scale.y : 1.0;
+
+        // 4. UI Button Click toggle back to 1st person
+        if (btn) btn.click();
+        const postClick3rd = c.isThirdPerson;
+        const postClickMeshVis = c.avatarMesh ? c.avatarMesh.visible : false;
+        c.update(0.05);
+        const camDist1st = Math.sqrt(
+          (cam.position.x - c.position.x) ** 2 +
+          (cam.position.z - c.position.z) ** 2
+        );
+
+        // 5. Mouse wheel zoom toggle
+        // Scroll down (deltaY > 0) -> activates 3rd person
+        window.dispatchEvent(new WheelEvent('wheel', { deltaY: 100 }));
+        const postWheelDown3rd = c.isThirdPerson;
+        // Scroll up multiple times (deltaY < 0) -> zooms in until 1st person
+        for (let i = 0; i < 10; i++) {
+          window.dispatchEvent(new WheelEvent('wheel', { deltaY: -100 }));
+        }
+        const postWheelUp3rd = c.isThirdPerson;
+
+        return {
+          ok: true,
+          initial3rd,
+          initialMeshVis,
+          initialBtnText,
+          postB3rd,
+          postBMeshVis,
+          postBBtnText,
+          camDist3rd,
+          hasTorso,
+          hasHead,
+          hasLimbs,
+          legsSwingOpposite: (walkLegL * walkLegR) < 0,
+          armsSwingOpposite: (walkArmL * walkArmR) < 0,
+          crouchSquashed: crouchScaleY < 0.95,
+          uncrouchRecovered: uncrouchScaleY > crouchScaleY,
+          postClick3rd,
+          postClickMeshVis,
+          camDist1st,
+          postWheelDown3rd,
+          postWheelUp3rd
+        };
+      })()
+    `);
+    console.log('[TEST 2e] 3rd Person Mode & Avatar Rigging:', thirdPersonTest);
+    if (
+      !thirdPersonTest.ok ||
+      thirdPersonTest.initial3rd !== false ||
+      thirdPersonTest.initialMeshVis !== false ||
+      !thirdPersonTest.initialBtnText.includes('1ª PESSOA') ||
+      thirdPersonTest.postB3rd !== true ||
+      thirdPersonTest.postBMeshVis !== true ||
+      !thirdPersonTest.postBBtnText.includes('3ª PESSOA') ||
+      thirdPersonTest.camDist3rd < 1.5 ||
+      !thirdPersonTest.hasTorso ||
+      !thirdPersonTest.hasHead ||
+      !thirdPersonTest.hasLimbs ||
+      !thirdPersonTest.legsSwingOpposite ||
+      !thirdPersonTest.armsSwingOpposite ||
+      !thirdPersonTest.crouchSquashed ||
+      !thirdPersonTest.uncrouchRecovered ||
+      thirdPersonTest.postClick3rd !== false ||
+      thirdPersonTest.postClickMeshVis !== false ||
+      thirdPersonTest.camDist1st > 0.1 ||
+      thirdPersonTest.postWheelDown3rd !== true ||
+      thirdPersonTest.postWheelUp3rd !== false
+    ) {
+      throw new Error(`TEST 2e FAILED: 3rd person mode test failed: ${JSON.stringify(thirdPersonTest)}`);
+    }
+
     // TEST 3: Clock advancement & Exploit Prevention
     // 3a. Forward-only RunClock monotonicity
     await evaluate(`

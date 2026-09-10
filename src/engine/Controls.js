@@ -4,11 +4,12 @@
  */
 
 export class FirstPersonControls {
-  constructor(camera, domElement, physics, soundEngine) {
+  constructor(camera, domElement, physics, soundEngine, scene = null) {
     this.camera = camera;
     this.domElement = domElement;
     this.physics = physics;
     this.sound = soundEngine;
+    this.scene = scene;
 
     // Movement state
     this.moveForward = false;
@@ -45,6 +46,16 @@ export class FirstPersonControls {
     this.stepDistance = 0;
     this.lastFootstepDist = 0;
 
+    // 3rd Person Perspective & Player Character Avatar
+    this.isThirdPerson = false;
+    this.thirdPersonDistance = 2.6; // Distance behind player
+    this.thirdPersonHeight = 0.45;   // Height offset above shoulders
+    this.thirdPersonShoulderOffset = 0.40; // Over-the-shoulder right offset
+    this.avatarMesh = null;
+    this.walkTimer = 0;
+    this.idleTimer = 0;
+    this.onPerspectiveChange = null;
+
     // Mouse look state
     this.euler = new THREE.Euler(0, 0, 0, 'YXZ');
     this.mouseSensitivity = 0.0022;
@@ -73,6 +84,10 @@ export class FirstPersonControls {
       { pos: new THREE.Vector3(2.0, 4.8, -20), look: new THREE.Vector3(2.0, 6.5, -36) },
       { pos: new THREE.Vector3(1.0, 9.8, -44), look: new THREE.Vector3(28, 45, -190) }
     ];
+
+    if (this.scene) {
+      this.createPlayerAvatar();
+    }
 
     this.initListeners();
   }
@@ -136,6 +151,29 @@ export class FirstPersonControls {
     document.addEventListener('mouseup', () => {
       this.isMouseDown = false;
     });
+
+    // Mouse wheel zoom: smooth transition between 1st Person and 3rd Person
+    window.addEventListener('wheel', (e) => {
+      if (!this.hasStarted || this.freeze) return;
+
+      // Scrolling down (deltaY > 0) pulls camera back; scrolling up (deltaY < 0) zooms in
+      if (e.deltaY > 0) {
+        if (!this.isThirdPerson) {
+          this.togglePerspective(true);
+          this.thirdPersonDistance = 1.8;
+        } else {
+          this.thirdPersonDistance = Math.min(4.5, this.thirdPersonDistance + 0.25);
+        }
+      } else if (e.deltaY < 0) {
+        if (this.isThirdPerson) {
+          this.thirdPersonDistance -= 0.25;
+          if (this.thirdPersonDistance < 1.2) {
+            this.togglePerspective(false);
+            this.thirdPersonDistance = 2.6;
+          }
+        }
+      }
+    }, { passive: true });
 
     // Mouse movement: works with Pointer Lock OR Drag-to-look fallback
     document.addEventListener('mousemove', (e) => {
@@ -473,11 +511,280 @@ export class FirstPersonControls {
       this.bobTimer = 0;
     }
 
-    // 7. Update camera position with eye height + bobbing
-    this.camera.position.set(
-      this.position.x,
-      this.position.y + this.eyeHeight + bobOffsetY,
-      this.position.z
-    );
+    // 7. Update player avatar animations & 3rd person camera
+    this.updateAvatarAnimation(delta, isMoving, this.isSprinting, this.isCrouching);
+    this.updateCameraPosition(bobOffsetY);
+  }
+
+  setScene(scene) {
+    this.scene = scene;
+    if (!this.avatarMesh) {
+      this.createPlayerAvatar();
+    }
+  }
+
+  togglePerspective(forceState) {
+    this.isThirdPerson = typeof forceState === 'boolean' ? forceState : !this.isThirdPerson;
+    if (this.avatarMesh) {
+      this.avatarMesh.visible = this.isThirdPerson;
+    }
+    if (typeof this.onPerspectiveChange === 'function') {
+      this.onPerspectiveChange(this.isThirdPerson);
+    }
+    return this.isThirdPerson;
+  }
+
+  createPlayerAvatar() {
+    if (typeof THREE === 'undefined') return null;
+
+    const avatar = new THREE.Group();
+    avatar.name = 'player_avatar';
+
+    // Materials
+    // Skin tone
+    const skinMat = new THREE.MeshLambertMaterial({ color: 0xba7d56 });
+    // Brazilian Soccer Jersey: Canarinho yellow with green trim
+    const jerseyMat = new THREE.MeshLambertMaterial({ color: 0xffdf00 });
+    const greenTrimMat = new THREE.MeshLambertMaterial({ color: 0x009b3a });
+    // Bermuda Tactel: Navy blue / Dark cyan
+    const shortsMat = new THREE.MeshLambertMaterial({ color: 0x1d3557 });
+    // Cap: Royal blue with green/yellow visor
+    const capMat = new THREE.MeshLambertMaterial({ color: 0x0d47a1 });
+    const capVisorMat = new THREE.MeshLambertMaterial({ color: 0xffcc00 });
+    // Sunglasses (Juliet): Metallic chrome with gold/iridescent tint
+    const glassesMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+    // Flip-Flops (Havaianas): White rubber sole with blue straps
+    const soleMat = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
+    const strapMat = new THREE.MeshBasicMaterial({ color: 0x1565c0 });
+
+    // 1. Torso
+    const torsoGroup = new THREE.Group();
+    torsoGroup.position.set(0, 1.05, 0);
+    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.52, 0.24), jerseyMat);
+    torsoGroup.add(torso);
+
+    // Green collar band
+    const collar = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.25), greenTrimMat);
+    collar.position.set(0, 0.24, 0);
+    torsoGroup.add(collar);
+
+    // Brazilian badge on chest
+    const badge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.02), greenTrimMat);
+    badge.position.set(-0.12, 0.12, 0.125);
+    torsoGroup.add(badge);
+
+    avatar.add(torsoGroup);
+    this.avatarTorso = torsoGroup;
+
+    // 2. Head & Neck
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 1.48, 0);
+
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.26, 0.24), skinMat);
+    headGroup.add(head);
+
+    // Backward / sideways baseball cap (Boné)
+    const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.12, 0.26), capMat);
+    capCrown.position.set(0, 0.10, 0);
+    headGroup.add(capCrown);
+
+    // Visor pointed backward
+    const capVisor = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, 0.16), capVisorMat);
+    capVisor.position.set(0, 0.08, -0.19);
+    capVisor.rotation.x = -0.15;
+    headGroup.add(capVisor);
+
+    // Sunglasses (Óculos Juliet)
+    const glassLens = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.05, 0.04), glassesMat);
+    glassLens.position.set(0, 0.02, 0.13);
+    headGroup.add(glassLens);
+
+    avatar.add(headGroup);
+    this.avatarHead = headGroup;
+
+    // 3. Left Arm
+    const leftArmGroup = new THREE.Group();
+    leftArmGroup.position.set(-0.28, 1.25, 0);
+    const leftSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.16), jerseyMat);
+    leftSleeve.position.set(0, -0.09, 0);
+    leftArmGroup.add(leftSleeve);
+    const leftForearm = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.32, 0.12), skinMat);
+    leftForearm.position.set(0, -0.32, 0);
+    leftArmGroup.add(leftForearm);
+    avatar.add(leftArmGroup);
+    this.avatarLeftArm = leftArmGroup;
+
+    // 4. Right Arm
+    const rightArmGroup = new THREE.Group();
+    rightArmGroup.position.set(0.28, 1.25, 0);
+    const rightSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.16), jerseyMat);
+    rightSleeve.position.set(0, -0.09, 0);
+    rightArmGroup.add(rightSleeve);
+    const rightForearm = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.32, 0.12), skinMat);
+    rightForearm.position.set(0, -0.32, 0);
+    rightArmGroup.add(rightForearm);
+    avatar.add(rightArmGroup);
+    this.avatarRightArm = rightArmGroup;
+
+    // 5. Left Leg
+    const leftLegGroup = new THREE.Group();
+    leftLegGroup.position.set(-0.13, 0.78, 0);
+    const leftShort = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.30, 0.20), shortsMat);
+    leftShort.position.set(0, -0.15, 0);
+    leftLegGroup.add(leftShort);
+    const leftCalf = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.36, 0.14), skinMat);
+    leftCalf.position.set(0, -0.45, 0);
+    leftLegGroup.add(leftCalf);
+    // Left Flip-Flop
+    const leftSole = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.26), soleMat);
+    leftSole.position.set(0, -0.66, 0.04);
+    leftLegGroup.add(leftSole);
+    const leftStrap = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.04, 0.10), strapMat);
+    leftStrap.position.set(0, -0.63, 0.03);
+    leftLegGroup.add(leftStrap);
+    avatar.add(leftLegGroup);
+    this.avatarLeftLeg = leftLegGroup;
+
+    // 6. Right Leg
+    const rightLegGroup = new THREE.Group();
+    rightLegGroup.position.set(0.13, 0.78, 0);
+    const rightShort = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.30, 0.20), shortsMat);
+    rightShort.position.set(0, -0.15, 0);
+    rightLegGroup.add(rightShort);
+    const rightCalf = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.36, 0.14), skinMat);
+    rightCalf.position.set(0, -0.45, 0);
+    rightLegGroup.add(rightCalf);
+    // Right Flip-Flop
+    const rightSole = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.26), soleMat);
+    rightSole.position.set(0, -0.66, 0.04);
+    rightLegGroup.add(rightSole);
+    const rightStrap = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.04, 0.10), strapMat);
+    rightStrap.position.set(0, -0.63, 0.03);
+    rightLegGroup.add(rightStrap);
+    avatar.add(rightLegGroup);
+    this.avatarRightLeg = rightLegGroup;
+
+    avatar.visible = false;
+    if (this.scene) {
+      this.scene.add(avatar);
+    }
+    this.avatarMesh = avatar;
+    return avatar;
+  }
+
+  updateAvatarAnimation(delta, isMoving, isSprinting, isCrouching) {
+    if (!this.avatarMesh || !this.avatarMesh.visible) return;
+
+    // Position avatar at player base coordinates
+    this.avatarMesh.position.set(this.position.x, this.position.y, this.position.z);
+
+    // Orient avatar to camera horizontal yaw
+    this.avatarMesh.rotation.y = this.euler.y;
+
+    if (isMoving && this.canJump) {
+      this.walkTimer = (this.walkTimer || 0) + delta * (isSprinting ? 14 : 9);
+      const legSwing = Math.sin(this.walkTimer) * (isSprinting ? 0.75 : 0.55);
+      const armSwing = Math.cos(this.walkTimer) * (isSprinting ? 0.70 : 0.50);
+
+      this.avatarLeftLeg.rotation.x = legSwing;
+      this.avatarRightLeg.rotation.x = -legSwing;
+      this.avatarLeftArm.rotation.x = -armSwing;
+      this.avatarRightArm.rotation.x = armSwing;
+
+      // Torso slight forward lean when sprinting
+      this.avatarTorso.rotation.x = isSprinting ? 0.2 : 0.05;
+      this.avatarHead.rotation.x = this.euler.x * 0.4;
+    } else {
+      // Idle breathing and gentle return to rest position
+      this.idleTimer = (this.idleTimer || 0) + delta * 2.5;
+      const breathe = Math.sin(this.idleTimer) * 0.015;
+
+      this.avatarLeftLeg.rotation.x *= 0.8;
+      this.avatarRightLeg.rotation.x *= 0.8;
+      this.avatarLeftArm.rotation.x *= 0.8;
+      this.avatarRightArm.rotation.x *= 0.8;
+      this.avatarTorso.position.y = 1.05 + breathe;
+      this.avatarTorso.rotation.x *= 0.8;
+      this.avatarHead.position.y = 1.48 + breathe * 1.2;
+      this.avatarHead.rotation.x = this.euler.x * 0.6;
+    }
+
+    // Squash avatar if crouching
+    const targetScaleY = isCrouching ? 0.65 : 1.0;
+    this.avatarMesh.scale.y += (targetScaleY - this.avatarMesh.scale.y) * Math.min(delta * 12, 1);
+  }
+
+  updateCameraPosition(bobOffsetY) {
+    if (!this.isThirdPerson) {
+      if (this.avatarMesh) this.avatarMesh.visible = false;
+      this.camera.position.set(
+        this.position.x,
+        this.position.y + this.eyeHeight + bobOffsetY,
+        this.position.z
+      );
+      this.camera.quaternion.setFromEuler(this.euler);
+      return;
+    }
+
+    // 3rd Person Active: make avatar visible
+    if (this.avatarMesh) this.avatarMesh.visible = true;
+
+    // Focal target is around player upper chest / head
+    const focusY = this.position.y + this.eyeHeight * 0.85;
+    const focusPoint = new THREE.Vector3(this.position.x, focusY, this.position.z);
+
+    // Calculate camera offset vectors from current view orientation
+    const yaw = this.euler.y;
+    const pitch = this.euler.x;
+
+    const cosPitch = Math.cos(pitch);
+    const sinPitch = Math.sin(pitch);
+    const sinYaw = Math.sin(yaw);
+    const cosYaw = Math.cos(yaw);
+
+    // Backward vector (away from where player looks)
+    const backDir = new THREE.Vector3(
+      sinYaw * cosPitch,
+      -sinPitch,
+      cosYaw * cosPitch
+    ).normalize();
+
+    // Right-hand shoulder offset vector
+    const rightDir = new THREE.Vector3(cosYaw, 0, -sinYaw).normalize();
+
+    let targetDist = this.thirdPersonDistance;
+
+    // Calculate preliminary camera position
+    let camPos = focusPoint.clone()
+      .addScaledVector(backDir, targetDist)
+      .addScaledVector(rightDir, this.thirdPersonShoulderOffset)
+      .add(new THREE.Vector3(0, this.thirdPersonHeight, 0));
+
+    // Spring-arm collision avoidance: raycast against world colliders
+    if (this.physics && this.physics.colliders) {
+      for (const col of this.physics.colliders) {
+        if (col.isStep || col.isStair) continue;
+        if (camPos.x >= col.min.x - 0.2 && camPos.x <= col.max.x + 0.2 &&
+            camPos.y >= col.min.y - 0.2 && camPos.y <= col.max.y + 0.2 &&
+            camPos.z >= col.min.z - 0.2 && camPos.z <= col.max.z + 0.2) {
+          // Camera would be inside wall; shorten distance
+          targetDist = Math.max(0.9, targetDist * 0.5);
+          camPos = focusPoint.clone()
+            .addScaledVector(backDir, targetDist)
+            .addScaledVector(rightDir, this.thirdPersonShoulderOffset * (targetDist / this.thirdPersonDistance))
+            .add(new THREE.Vector3(0, this.thirdPersonHeight, 0));
+          break;
+        }
+      }
+    }
+
+    // Ensure camera does not go below ground
+    const groundY = this.physics ? this.physics.getGroundHeight(camPos.x, camPos.z) : 0;
+    if (camPos.y < groundY + 0.35) {
+      camPos.y = groundY + 0.35;
+    }
+
+    this.camera.position.copy(camPos);
+    this.camera.quaternion.setFromEuler(this.euler);
   }
 }

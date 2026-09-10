@@ -64,6 +64,8 @@ Pressione `[P]` a qualquer momento para abrir o painel de nitidez:
 | `Ctrl` ou `C` | Agachar (Crouch) |
 | `Espaço` | Pular |
 | `E` | Interagir com pessoas e pontos da quebrada |
+| `B` ou `F5` | Alternar Visão: 1ª Pessoa / 3ª Pessoa (com avatar brasileiro animado) |
+| `Scroll do Mouse` | Zoom suave de câmera (transição automática 1ª e 3ª Pessoa) |
 | `P` | Abrir / Fechar Painel de Parâmetros Visuais & Nitidez |
 | `[` / `]` | Diminuir / Aumentar Densidade de Caracteres no jogo |
 | `-` / `+` (ou `=`) | Diminuir / Aumentar Brilho em tempo real |

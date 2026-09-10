@@ -35,7 +35,8 @@ class GameApp {
       this.renderer.camera,
       document.body,
       this.physics,
-      this.sound
+      this.sound,
+      this.renderer.scene
     );
 
     const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
@@ -81,6 +82,8 @@ class GameApp {
     this.emptyBtn = document.getElementById('btn-empty');
     this.streetViewBtn = document.getElementById('btn-streetview');
     this.visualsBtn = document.getElementById('btn-visuals');
+    this.cameraBtn = document.getElementById('btn-camera');
+    this.cameraLabel = document.getElementById('hud-camera-label');
 
     // Google Street View Modal Elements
     this.streetViewModal = document.getElementById('street-view-modal');
@@ -280,6 +283,22 @@ class GameApp {
     // Visual Parameters modal toggle button
     if (this.visualsBtn) {
       this.visualsBtn.addEventListener('click', () => this.toggleVisualsModal());
+    }
+
+    // Camera perspective toggle button & Controls callback
+    if (this.controls) {
+      this.controls.onPerspectiveChange = (is3rd) => {
+        this.updateCameraLabel(is3rd);
+      };
+    }
+
+    if (this.cameraBtn) {
+      this.cameraBtn.addEventListener('click', () => {
+        const is3rd = this.controls.togglePerspective();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(is3rd ? '👤 Visão em 3ª Pessoa Ativada' : '👁️ Visão em 1ª Pessoa Ativada', 1500);
+        }
+      });
     }
 
     const btnCloseVisuals = document.getElementById('btn-close-visuals');
@@ -610,6 +629,14 @@ class GameApp {
         if (!this.controls.freeze) {
           this.game.handleInteract();
         }
+      } else if (e.code === 'KeyB' || e.key === 'b' || e.key === 'B' || e.code === 'F5') {
+        if (!isRouletteOpen && !this.isVisualsModalOpen && !this.isStreetViewOpen) {
+          if (e.code === 'F5') e.preventDefault();
+          const is3rd = this.controls.togglePerspective();
+          if (this.game && this.game.hud && this.game.hud.showToast) {
+            this.game.hud.showToast(is3rd ? '👤 Visão em 3ª Pessoa [B]' : '👁️ Visão em 1ª Pessoa [B]', 1500);
+          }
+        }
       }
     });
 
@@ -658,6 +685,14 @@ class GameApp {
     };
     if (this.modeElem) {
       this.modeElem.textContent = labels[mode] || mode;
+    }
+  }
+
+  updateCameraLabel(isThirdPerson) {
+    if (this.cameraLabel) {
+      this.cameraLabel.textContent = isThirdPerson ? '👤 VISÃO: 3ª PESSOA' : '👤 VISÃO: 1ª PESSOA';
+    } else if (this.cameraBtn) {
+      this.cameraBtn.innerHTML = `<span>${isThirdPerson ? '👤 VISÃO: 3ª PESSOA' : '👤 VISÃO: 1ª PESSOA'}</span><small style="opacity:0.7">[B]</small>`;
     }
   }
 
