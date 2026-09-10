@@ -8,6 +8,7 @@ This repository contains the full 3D/ASCII immersive simulation engine for **"Br
 - Canonical architectural constraints are strictly defined in `INVARIANTS.md` (Invariants I1 through I13).
 - **Dual-Build Parity (I1)**: `index.html` (ESM modular) and `pirituba_standalone.html` (single-file distribution bundle generated via `node build.js`).
 - **QA Governance**: Claude Fable 5.1 (`claude -p --model claude-fable-5-1`) is the designated architectural reviewer and QA authority.
+  * **Quota / Credits Policy**: If Claude Code runs out of credits or hits a quota/rate limit, wait 1 hour (using `schedule` tool with `DurationSeconds=3600`) and retry iteratively until credits are restored.
 
 ### Automated Testing
 - Automated CDP headless Chrome test suite: `node tests/qa_cdp.mjs`
