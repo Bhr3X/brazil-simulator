@@ -152,6 +152,12 @@ export class FirstPersonControls {
       if (overlay) overlay.style.display = 'none';
       if (this.sound) this.sound.init();
 
+      const roulette = document.getElementById('roulette-modal');
+      if (roulette && (!window.app || !window.app.game || !window.app.game.isRunActive)) {
+        roulette.classList.remove('modal-hidden');
+      }
+      if (this.refreshFreeze) this.refreshFreeze();
+
       // Attempt pointer lock gracefully
       try {
         const target = document.body;

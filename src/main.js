@@ -1156,7 +1156,14 @@ class GameApp {
   }
 }
 
-// Start application when DOM is ready
-window.addEventListener('DOMContentLoaded', () => {
+// Start application when DOM is ready, or immediately if already loaded
+function bootGameApp() {
+  if (window.app) return;
   new GameApp();
-});
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', bootGameApp);
+} else {
+  bootGameApp();
+}

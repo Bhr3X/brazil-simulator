@@ -254,6 +254,16 @@ html, body {
   background: rgba(0, 255, 102, 0.1);
   box-shadow: 0 0 25px rgba(0, 255, 102, 0.3);
   animation: pulse 1.6s infinite alternate;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.start-prompt:hover {
+  background: #00ff66;
+  color: #040706;
+  box-shadow: 0 0 40px #00ff66;
+  transform: scale(1.06);
 }
 
 @keyframes pulse {

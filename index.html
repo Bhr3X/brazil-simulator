@@ -427,11 +427,11 @@
   </div>
 
   <!-- Click to Start / Resume Overlay -->
-  <div id="click-overlay">
-    <div class="studio-badge"><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer">★ game.md PRESENTS ★</a></div>
+  <div id="click-overlay" onclick="if(window.app){if(window.app.controls){window.app.controls.hasStarted=true;window.app.controls.isLocked=true;}if(window.app.sound){window.app.sound.init();}this.style.display='none';var r=document.getElementById('roulette-modal');if(r&&(!window.app.game||!window.app.game.isRunActive)){r.classList.remove('modal-hidden');}if(window.app.controls&&window.app.controls.refreshFreeze){window.app.controls.refreshFreeze();}}else{this.style.display='none';var r=document.getElementById('roulette-modal');if(r)r.classList.remove('modal-hidden');}">
+    <div class="studio-badge"><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">★ game.md PRESENTS ★</a></div>
     <div class="start-title">PIRITUBA // FAVELA SUBURBS</div>
     <div class="start-subtitle">MOTOR DE 1ª & 3ª PESSOA EM ASCII & 3D</div>
-    <div class="start-prompt">CLIQUE AQUI PARA ENTRAR // CLICK TO PLAY</div>
+    <div class="start-prompt" role="button" tabindex="0">CLIQUE AQUI PARA ENTRAR // CLICK TO PLAY</div>
     <div class="start-controls-hints">
       <span>⌨️ <strong>WASD / Setas</strong>: Mover</span>
       <span>👁️ <strong>Mouse</strong>: Olhar</span>
