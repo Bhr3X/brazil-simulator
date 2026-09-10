@@ -521,9 +521,11 @@ class GameApp {
     if (btnResetVisuals) {
       btnResetVisuals.addEventListener('click', () => {
         this.renderer.resetVisualParams();
+        this.renderer.setRenderMode('RETRO_3D');
+        this.updateModeLabel('RETRO_3D');
         this.syncVisualControlsUI();
         if (this.game && this.game.hud && this.game.hud.showToast) {
-          this.game.hud.showToast('🔄 Padrões visuais restaurados', 2000);
+          this.game.hud.showToast('🔄 Padrões visuais restaurados (Retro 3D)', 2000);
         }
       });
     }
@@ -783,8 +785,8 @@ class GameApp {
     if (btnPresetDefault) {
       btnPresetDefault.addEventListener('click', () => {
         setPresetActive(btnPresetDefault);
-        this.renderer.setRenderMode('ASCII_COLOR');
-        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setRenderMode('RETRO_3D');
+        this.updateModeLabel('RETRO_3D');
         this.renderer.resetVisualParams();
         this.syncVisualControlsUI();
       });

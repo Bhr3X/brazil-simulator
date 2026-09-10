@@ -66,7 +66,7 @@ export class CityRenderer {
       color: 0x00ff88
     });
 
-    this.currentMode = this.MODES.ASCII_COLOR;
+    this.currentMode = this.MODES.RETRO_3D;
 
     // Visual Parameters
     this.params = { ...DEFAULT_VISUAL_PARAMS };
@@ -140,14 +140,14 @@ export class CityRenderer {
     this.webglCanvas.style.left = '0';
     this.webglCanvas.style.width = '100%';
     this.webglCanvas.style.height = '100%';
-    this.webglCanvas.style.display = 'none';
+    this.webglCanvas.style.display = 'block';
 
     this.asciiCanvas.style.position = 'absolute';
     this.asciiCanvas.style.top = '0';
     this.asciiCanvas.style.left = '0';
     this.asciiCanvas.style.width = '100%';
     this.asciiCanvas.style.height = '100%';
-    this.asciiCanvas.style.display = 'block';
+    this.asciiCanvas.style.display = 'none';
 
     this.updateGridSize();
     window.addEventListener('resize', () => this.onWindowResize());

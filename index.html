@@ -36,7 +36,7 @@
     </button>
     <button class="hud-btn" id="btn-mode">
       <span>🖥️ MODO:</span>
-      <strong id="hud-mode">FAVELA ASCII (RGB)</strong>
+      <strong id="hud-mode">RETRO 3D (TEXTURAS)</strong>
       <small style="opacity:0.7">[M]</small>
     </button>
     <button class="hud-btn" id="btn-visuals" style="border-color:#00f0ff; color:#00f0ff;">
@@ -263,12 +263,13 @@
             <button class="preset-btn" id="preset-gameboy">🕹️ GAME BOY</button>
             <button class="preset-btn" id="preset-matrix">🟢 MATRIX</button>
             <button class="preset-btn" id="preset-3d">🖥️ 3D REAL</button>
-            <button class="preset-btn active" id="preset-default">🔄 PADRÃO</button>
+            <button class="preset-btn active" id="preset-default">🔄 PADRÃO (3D)</button>
           </div>
 
           <div class="select-group" style="margin-top: 10px;">
             <label for="select-render-mode">🖥️ Modo de Renderização / Shader [M]</label>
             <select id="select-render-mode" class="visual-select">
+              <option value="RETRO_3D" selected>🖥️ MODO 3D REAL (Texturas Three.js)</option>
               <option value="ASCII_COLOR">FAVELA ASCII (True Color RGB)</option>
               <option value="ASCII_MATRIX">CYBER MATRIX (Verde Fósforo)</option>
               <option value="ASCII_AMBER">TERMINAL ÂMBAR (CRT 1980)</option>
@@ -279,7 +280,6 @@
               <option value="SHADER_COMIC">🗯️ HQ / MANGÁ (Cel-Shaded Comic)</option>
               <option value="SHADER_WIREFRAME">📐 WIREFRAME VETORIAL (Vectrex / Tron)</option>
               <option value="SHADER_VHS">📼 FITA VHS PIRATA (Glitch CRT / Camcorder)</option>
-              <option value="RETRO_3D">🖥️ MODO 3D REAL (Texturas Three.js)</option>
             </select>
           </div>
         </div>
