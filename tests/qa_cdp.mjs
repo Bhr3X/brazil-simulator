@@ -704,8 +704,9 @@ async function runTestSuite(url) {
           state.applyPassiveDecay(3.0);
 
           if (classId === 'CLASSE_C') {
-            const optPastel = encs.PASTEL_FEIRA.getOptions(state).find(o => o.id === 'combo_pastel_garapa');
-            if (optPastel && !optPastel.disabled) optPastel.execute(state, sound);
+            // Padaria Estrela (open until 20:00): afternoon coxinha + caldo de cana
+            const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
+            if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
           } else if (classId === 'CLASSE_DE') {
             // Work 2nd semáforo shift (+R$ 11,00) and clean windshield (+R$ 4,00) to surpass R$ 40 target
             const optBala2 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'vender_balas');
@@ -716,9 +717,9 @@ async function runTestSuite(url) {
             const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
             if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
           } else if (classId === 'CLASSE_AB') {
-            // Recover sanity with pastel combo and conveniência snack
-            const optPastel = encs.PASTEL_FEIRA.getOptions(state).find(o => o.id === 'combo_pastel_garapa');
-            if (optPastel && !optPastel.disabled) optPastel.execute(state, sound);
+            // Recover sanity & hunger at Padaria Estrela (open until 20h) and Posto Pirituba (open 24h)
+            const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
+            if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
             const optSnack = encs.POSTO_PIRITUBA.getOptions(state).find(o => o.id === 'fandangos_refri');
             if (optSnack && !optSnack.disabled) optSnack.execute(state, sound);
           }

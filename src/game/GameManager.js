@@ -183,7 +183,7 @@ export class GameManager {
       const forceTrigger = elapsedHours >= 15.0;
       if (this.motoCheckTimer >= 8.0 || forceTrigger) {
         this.motoCheckTimer = 0;
-        if (this.rng.chance(0.12) || forceTrigger) {
+        if (forceTrigger || this.rng.chance(0.12)) {
           const isSV = typeof document !== 'undefined' && document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
           if (!this.dialog?.isOpen && !isSV) {
             this.triggerDoisCarasMoto();
