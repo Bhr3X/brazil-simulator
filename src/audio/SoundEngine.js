@@ -12,24 +12,27 @@ export class SoundEngine {
     this.isMuted = false;
     this.isInitialized = false;
     this.masterGain = null;
-    this.musicGain = null;
     this.ambientGain = null;
     this.musicEngine = null;
 
     this.isDay = true;
-    this.nextBeatTime = 0;
-    this.beatIndex = 0;
-    this.isPlayingMusic = true;
-    this.timerId = null;
     this.isRaining = false;
   }
 
   // Initialize Web Audio context upon user interaction (browser policy)
   init() {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
+      return;
+    }
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioCtx();
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
 
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.setValueAtTime(0.4, this.ctx.currentTime);
@@ -39,17 +42,6 @@ export class SoundEngine {
       this.ambientGain = this.ctx.createGain();
       this.ambientGain.gain.setValueAtTime(0.32, this.ctx.currentTime);
       this.ambientGain.connect(this.masterGain);
-
-      // Distant music channel (low-passed to sound muffled through walls/hills)
-      this.musicGain = this.ctx.createGain();
-      this.musicGain.gain.setValueAtTime(0.25, this.ctx.currentTime);
-
-      this.musicFilter = this.ctx.createBiquadFilter();
-      this.musicFilter.type = 'lowpass';
-      this.musicFilter.frequency.setValueAtTime(320, this.ctx.currentTime); // Muffled laje party
-      this.musicFilter.Q.setValueAtTime(3.0, this.ctx.currentTime);
-      this.musicGain.connect(this.musicFilter);
-      this.musicFilter.connect(this.masterGain);
 
       // Initialize Procedural Brazilian Music Engine (MPB, Pagode, Baile Funk)
       this.musicEngine = new BrazilianMusicEngine(this.ctx, this.masterGain);
@@ -66,6 +58,9 @@ export class SoundEngine {
     if (!this.isInitialized) {
       this.init();
       return false;
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
     }
     this.isMuted = !this.isMuted;
     if (this.masterGain) {
@@ -232,78 +227,7 @@ export class SoundEngine {
     osc.stop(t + 0.25);
   }
 
-  // 4. Muffled Distant Favela Funk & Pagode Bass Beat
-  // Simulates a low-frequency syncopated drum beat echoing softly from a terrace
-  startMusicLoop() {
-    const stepDuration = 0.22; // ~136 BPM (classic baile funk / pagode tempo)
-
-    const scheduleBeats = () => {
-      if (!this.ctx) return;
-      const t = this.ctx.currentTime;
-
-      // Brazilian syncopated funk beat pattern (16 steps):
-      // Kick:   X . . X . X . . X . . X . X . .
-      // Snare:  . . X . . . X . . . X . . . X .
-      const patternKick = [1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0];
-      const patternSnare = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0];
-
-      while (this.nextBeatTime < t + 0.5) {
-        const step = this.beatIndex % 16;
-
-        if (patternKick[step] && this.isPlayingMusic && !this.isMuted) {
-          this.triggerDistantKick(this.nextBeatTime);
-        }
-        if (patternSnare[step] && this.isPlayingMusic && !this.isMuted) {
-          this.triggerDistantSnare(this.nextBeatTime);
-        }
-
-        this.nextBeatTime += stepDuration;
-        this.beatIndex++;
-      }
-    };
-
-    this.nextBeatTime = this.ctx.currentTime + 0.1;
-    setInterval(scheduleBeats, 100);
-  }
-
-  triggerDistantKick(time) {
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-
-    osc.type = 'sine';
-    // Deep 808 pitch dive
-    osc.frequency.setValueAtTime(110, time);
-    osc.frequency.exponentialRampToValueAtTime(42, time + 0.15);
-
-    gain.gain.setValueAtTime(0.4, time);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
-
-    osc.connect(gain);
-    gain.connect(this.musicGain);
-
-    osc.start(time);
-    osc.stop(time + 0.25);
-  }
-
-  triggerDistantSnare(time) {
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(190, time);
-    osc.frequency.exponentialRampToValueAtTime(80, time + 0.08);
-
-    gain.gain.setValueAtTime(0.18, time);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
-
-    osc.connect(gain);
-    gain.connect(this.musicGain);
-
-    osc.start(time);
-    osc.stop(time + 0.12);
-  }
-
-  // 5. Motorcycle Rev / "Grau" exhaust sound
+  // 4. Motorcycle Rev / "Grau" exhaust sound
   playMotorcycleRev() {
     if (!this.isInitialized || this.isMuted) return;
     const t = this.ctx.currentTime;
@@ -542,6 +466,7 @@ export class SoundEngine {
       if (this.rainGain && this.rainSource && this.ctx) {
         try {
           const t = this.ctx.currentTime;
+          this.rainGain.gain.setValueAtTime(this.rainGain.gain.value, t);
           this.rainGain.gain.linearRampToValueAtTime(0.001, t + 0.8);
           const oldSrc = this.rainSource;
           setTimeout(() => {

@@ -59,15 +59,6 @@ export class BrazilianMusicEngine {
 
     // Shared white noise buffer for shakers, pandeiros, and snares
     this.noiseBuffer = this.createNoiseBuffer(2.0);
-
-    // Synchronize scheduler timing upon returning from hidden / background tab
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && this.ctx) {
-          this.nextNoteTime = this.ctx.currentTime + 0.05;
-        }
-      });
-    }
   }
 
   createNoiseBuffer(durationSeconds = 2.0) {
@@ -152,9 +143,10 @@ export class BrazilianMusicEngine {
     const fadeDuration = 0.65; // Smooth crossfade
 
     for (const [genre, gainNode] of Object.entries(this.genreGains)) {
+      // Capture current value before canceling scheduled values to maintain continuity on WebKit/Gecko
+      const currentVal = gainNode.gain.value;
       gainNode.gain.cancelScheduledValues(t);
-      // Anchor current gain value at time t before scheduling ramp
-      gainNode.gain.setValueAtTime(gainNode.gain.value, t);
+      gainNode.gain.setValueAtTime(currentVal, t);
 
       if (targetGenre === 'OFF') {
         gainNode.gain.linearRampToValueAtTime(0.0001, t + fadeDuration);
@@ -171,6 +163,8 @@ export class BrazilianMusicEngine {
   // Lookahead scheduler: schedules note events ahead of time for jitter-free audio
   scheduler() {
     if (!this.ctx || !this.isPlaying) return;
+    // Skip scheduling while tab is in background (pausing music in sync with sim clock)
+    if (typeof document !== 'undefined' && document.hidden) return;
 
     // If audio clock has advanced past nextNoteTime (tab throttle/hidden), skip ahead cleanly
     if (this.nextNoteTime < this.ctx.currentTime) {
@@ -181,8 +175,7 @@ export class BrazilianMusicEngine {
     const currentBpm = this.tempos[this.effectiveGenre] || 100;
     const stepDuration = 60 / currentBpm / 4; // 16th note step duration
 
-    let stepsScheduled = 0;
-    while (this.nextNoteTime < this.ctx.currentTime + lookahead && stepsScheduled < 8) {
+    while (this.nextNoteTime < this.ctx.currentTime + lookahead) {
       const step = this.stepIndex % 16;
       const measure = Math.floor(this.stepIndex / 16) % 4;
 
@@ -196,7 +189,6 @@ export class BrazilianMusicEngine {
 
       this.nextNoteTime += stepDuration;
       this.stepIndex++;
-      stepsScheduled++;
     }
   }
 
