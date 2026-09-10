@@ -3863,7 +3863,9 @@ class SoundEngine {
       if (this.rainGain && this.rainSource && this.ctx) {
         try {
           const t = this.ctx.currentTime;
-          this.rainGain.gain.setValueAtTime(this.rainGain.gain.value, t);
+          const currentVal = this.rainGain.gain.value;
+          this.rainGain.gain.cancelScheduledValues(t);
+          this.rainGain.gain.setValueAtTime(currentVal, t);
           this.rainGain.gain.linearRampToValueAtTime(0.001, t + 0.8);
           const oldSrc = this.rainSource;
           setTimeout(() => {

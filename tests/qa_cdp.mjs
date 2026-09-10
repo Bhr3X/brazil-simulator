@@ -232,7 +232,15 @@ async function runTestSuite(url) {
       musicTest.lajeGenre !== 'FUNK' ||
       musicTest.morningGenre !== 'MPB' ||
       musicTest.eveningGenre !== 'PAGODE' ||
-      musicTest.nightGenre !== 'FUNK'
+      musicTest.nightGenre !== 'FUNK' ||
+      musicTest.postKeyNStation !== 'MPB' ||
+      !musicTest.radioText?.includes('MPB') ||
+      musicTest.cycled.length !== 5 ||
+      musicTest.cycled[0].station !== 'MPB' ||
+      musicTest.cycled[1].station !== 'PAGODE' ||
+      musicTest.cycled[2].station !== 'FUNK' ||
+      musicTest.cycled[3].station !== 'OFF' ||
+      musicTest.cycled[4].station !== 'AUTO'
     ) {
       throw new Error(`TEST 2c FAILED: Music engine test failed: ${JSON.stringify(musicTest)}`);
     }
