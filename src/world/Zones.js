@@ -156,6 +156,15 @@ export const WORLD_ZONES = [
     openHour: 7.0,
     closeHour: 22.0,
     description: 'Esquina arterial no semáforo da Edgar Facó. Ponto de venda de paçoca e malabares no sinal fechado.'
+  },
+  {
+    id: 'FLANELINHA_PAULA_FERREIRA',
+    name: 'FLANELINHA (VAGAS DA RUA PAULA FERREIRA)',
+    min: { x: 1.0, y: 0.0, z: 28.0 },
+    max: { x: 8.0, y: 5.0, z: 36.0 },
+    openHour: 7.0,
+    closeHour: 21.0,
+    description: 'Ponto de parada e vagas de estacionamento da Rua Paula Ferreira vigiadas pelo flanelinha.'
   }
 ];
 

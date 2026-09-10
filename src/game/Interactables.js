@@ -53,7 +53,7 @@ export class InteractableSystem {
         position: new THREE.Vector3(4.5, 1.2, 32.5),
         maxDist: 3.5,
         encounterId: 'FLANELINHA',
-        zoneId: 'CRUZAMENTO_EDGAR_FACCO'
+        zoneId: 'FLANELINHA_PAULA_FERREIRA'
       },
       {
         id: 'posto',

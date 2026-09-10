@@ -643,7 +643,7 @@ async function runTestSuite(url) {
       throw new Error(`TEST 18 FAILED: Anti-farm exploit failure: ${antiExploitTested.reason}`);
     }
 
-    // TEST 19: Full 15-Minute Playthrough Verification Across All 3 Classes
+    // TEST 19: Full 15-Minute Playthrough Verification Across All 3 Classes (Asserting Survival in Every Phase)
     const playthroughResults = await evaluate(`
       (() => {
         const classIds = ['CLASSE_DE', 'CLASSE_C', 'CLASSE_AB'];
@@ -655,74 +655,140 @@ async function runTestSuite(url) {
           const sound = window.app.sound;
           const encs = window.app.game.encounters;
 
-          // Phase 1 (06:00 - 11:30): Trampo, café, feira
-          state.currentHour = 7.0;
-          state.currentHourFormatted = '07:00';
-          state.elapsedSeconds = 37.5;
-          state.applyPassiveDecay(1.0);
+          // ==================== PHASE 1 (06:00 - 14:00 | 8 In-Game Hours) ====================
+          // Advance 4 hours (06:00 -> 10:00)
+          state.currentHour = 10.0;
+          state.currentHourFormatted = '10:00';
+          state.elapsedSeconds = 150.0;
+          state.applyPassiveDecay(4.0);
 
           if (classId === 'CLASSE_C') {
+            // Pay Enel bill, eat pingado, pay flanelinha
             const optEnel = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'pagar_boleto_enel');
             if (optEnel && !optEnel.disabled) optEnel.execute(state, sound);
+            const optCafe = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'pingado_pao');
+            if (optCafe && !optCafe.disabled) optCafe.execute(state, sound);
             const optFlan = encs.FLANELINHA.getOptions(state).find(o => o.id === 'pagar_cinco');
             if (optFlan && !optFlan.disabled) optFlan.execute(state, sound);
           } else if (classId === 'CLASSE_DE') {
+            // Sell latinhas (+R$ 21,00) and buy food immediately with earnings
             const optLatinhas = encs.ADEGA_DO_ZE.getOptions(state).find(o => o.id === 'vender_latinhas');
             if (optLatinhas && !optLatinhas.disabled) optLatinhas.execute(state, sound);
-          } else if (classId === 'CLASSE_AB') {
-            const optCafe = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'pingado_pao');
-            if (optCafe && !optCafe.disabled) optCafe.execute(state, sound);
-          }
-
-          // Phase 2 (11:30 - 17:30): Feira, bico, storm
-          state.currentHour = 13.0;
-          state.currentHourFormatted = '13:00';
-          state.elapsedSeconds = 262.5;
-          state.applyPassiveDecay(6.0);
-
-          const optPastel = encs.PASTEL_FEIRA.getOptions(state).find(o => o.id === 'combo_pastel_garapa');
-          if (optPastel && !optPastel.disabled) optPastel.execute(state, sound);
-
-          if (classId === 'CLASSE_DE') {
+            // Buy pastel simples (+30 fome) to stay well-fed
+            const optPastel = encs.PASTEL_FEIRA.getOptions(state).find(o => o.id === 'pastel_simples');
+            if (optPastel && !optPastel.disabled) optPastel.execute(state, sound);
+            // Work first semáforo shift (+R$ 11,00)
             const optBala1 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'vender_balas');
             if (optBala1 && !optBala1.disabled) optBala1.execute(state, sound);
-            const optBala2 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'vender_balas');
-            if (optBala2 && !optBala2.disabled) optBala2.execute(state, sound);
+          } else if (classId === 'CLASSE_AB') {
+            // Faria Limer buys breakfast and almanaque for sanity recovery
+            const optCafe = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'pingado_pao');
+            if (optCafe && !optCafe.disabled) optCafe.execute(state, sound);
+            const optAlmanaque = encs.BANCA_JORNAL.getOptions(state).find(o => o.id === 'comprar_almanaque');
+            if (optAlmanaque && !optAlmanaque.disabled) optAlmanaque.execute(state, sound);
           }
 
-          // Phase 3 (17:30 - 21:30): Rush hour, Dois Caras
-          state.currentHour = 19.0;
-          state.currentHourFormatted = '19:00';
-          state.elapsedSeconds = 487.5;
-          state.applyPassiveDecay(6.0);
-
-          const motoEnc = encs.DOIS_CARAS_MOTO;
-          const motoOpt = classId === 'CLASSE_AB'
-            ? motoEnc.getOptions(state).find(o => o.id === 'dar_celular_falso')
-            : motoEnc.getOptions(state).find(o => o.id === 'entrar_padoca');
-          if (motoOpt && !motoOpt.disabled) motoOpt.execute(state, sound);
-
-          // Phase 4 (21:30 - 01:30): Boteco / Baile
-          state.currentHour = 23.0;
-          state.currentHourFormatted = '23:00';
-          state.elapsedSeconds = 637.5;
+          // Advance to end of Phase 1 (10:00 -> 14:00)
+          state.currentHour = 14.0;
+          state.currentHourFormatted = '14:00';
+          state.elapsedSeconds = 300.0;
           state.applyPassiveDecay(4.0);
 
-          if (classId === 'CLASSE_DE') {
-            state.ginga = Math.max(state.ginga, 55);
+          const defeatP1 = state.checkDefeat();
+          if (defeatP1) return { ok: false, reason: \`\${classId} died in Phase 1: \${defeatP1.cause}\` };
+
+          // ==================== PHASE 2 (14:00 - 17:30 | 3.5 In-Game Hours) ====================
+          state.currentHour = 17.0;
+          state.currentHourFormatted = '17:00';
+          state.elapsedSeconds = 412.5;
+          state.applyPassiveDecay(3.0);
+
+          if (classId === 'CLASSE_C') {
+            const optPastel = encs.PASTEL_FEIRA.getOptions(state).find(o => o.id === 'combo_pastel_garapa');
+            if (optPastel && !optPastel.disabled) optPastel.execute(state, sound);
+          } else if (classId === 'CLASSE_DE') {
+            // Work 2nd semáforo shift (+R$ 11,00) and clean windshield (+R$ 4,00) to surpass R$ 40 target
+            const optBala2 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'vender_balas');
+            if (optBala2 && !optBala2.disabled) optBala2.execute(state, sound);
+            const optRodo = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'limpar_parabrisa');
+            if (optRodo && !optRodo.disabled) optRodo.execute(state, sound);
+            // Buy coxinha at padaria to maintain stamina
+            const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
+            if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
+          } else if (classId === 'CLASSE_AB') {
+            // Recover sanity with pastel combo and conveniência snack
+            const optPastel = encs.PASTEL_FEIRA.getOptions(state).find(o => o.id === 'combo_pastel_garapa');
+            if (optPastel && !optPastel.disabled) optPastel.execute(state, sound);
+            const optSnack = encs.POSTO_PIRITUBA.getOptions(state).find(o => o.id === 'fandangos_refri');
+            if (optSnack && !optSnack.disabled) optSnack.execute(state, sound);
           }
 
-          // Phase 5 (01:30 - 06:00): Madrugada, Blitz, Fornada
+          const defeatP2 = state.checkDefeat();
+          if (defeatP2) return { ok: false, reason: \`\${classId} died in Phase 2: \${defeatP2.cause}\` };
+
+          // ==================== PHASE 3 (17:30 - 21:30 | 4 In-Game Hours) ====================
+          state.currentHour = 20.0;
+          state.currentHourFormatted = '20:00';
+          state.elapsedSeconds = 525.0;
+          state.applyPassiveDecay(3.0);
+
+          // All classes encounter Dois Caras numa Moto: enter padaria safely
+          const motoEnc = encs.DOIS_CARAS_MOTO;
+          const motoOpt = motoEnc.getOptions(state).find(o => o.id === 'entrar_padoca');
+          if (motoOpt && !motoOpt.disabled) motoOpt.execute(state, sound);
+
+          if (classId === 'CLASSE_AB') {
+            // Bar do Tião cerveja 600ml for high sanity recovery (+35)
+            const optCerveja = encs.BAR_DO_TIAO.getOptions(state).find(o => o.id === 'cerveja_600');
+            if (optCerveja && !optCerveja.disabled) optCerveja.execute(state, sound);
+          } else if (classId === 'CLASSE_C') {
+            const optCerveja = encs.BAR_DO_TIAO.getOptions(state).find(o => o.id === 'cerveja_600');
+            if (optCerveja && !optCerveja.disabled) optCerveja.execute(state, sound);
+          }
+
+          const defeatP3 = state.checkDefeat();
+          if (defeatP3) return { ok: false, reason: \`\${classId} died in Phase 3: \${defeatP3.cause}\` };
+
+          // ==================== PHASE 4 (21:30 - 01:30 | 4 In-Game Hours) ====================
+          state.currentHour = 23.5;
+          state.currentHourFormatted = '23:30';
+          state.elapsedSeconds = 656.25;
+          state.applyPassiveDecay(3.5);
+
+          if (classId === 'CLASSE_AB') {
+            // Adega litrão de Skol (+30 sanidade)
+            const optLitrao = encs.ADEGA_DO_ZE.getOptions(state).find(o => o.id === 'litrao_skol');
+            if (optLitrao && !optLitrao.disabled) optLitrao.execute(state, sound);
+          } else if (classId === 'CLASSE_DE') {
+            const optLitrao = encs.ADEGA_DO_ZE.getOptions(state).find(o => o.id === 'litrao_skol');
+            if (optLitrao && !optLitrao.disabled) optLitrao.execute(state, sound);
+          }
+
+          const defeatP4 = state.checkDefeat();
+          if (defeatP4) return { ok: false, reason: \`\${classId} died in Phase 4: \${defeatP4.cause}\` };
+
+          // ==================== PHASE 5 (01:30 - 06:00 | 4.5 In-Game Hours) ====================
+          // 03:00 - Blitz da PM
           state.currentHour = 3.0;
           state.currentHourFormatted = '03:00';
           state.elapsedSeconds = 787.5;
-          state.applyPassiveDecay(4.0);
+          state.applyPassiveDecay(3.5);
 
           const blitzEnc = encs.BLITZ_PM;
-          const blitzOpt = blitzEnc.getOptions(state).find(o => o.id === 'apresentar_documento');
-          if (blitzOpt && !blitzOpt.disabled) blitzOpt.execute(state, sound);
+          if (classId === 'CLASSE_DE') {
+            // Baile passinho (+25 sanidade, +25 ginga)
+            const optPassinho = encs.BAILE_LAJE.getOptions(state).find(o => o.id === 'dancar_passinho');
+            if (optPassinho && !optPassinho.disabled) optPassinho.execute(state, sound);
+            // Desenrolo de morador na blitz
+            const blitzOpt = blitzEnc.getOptions(state).find(o => o.id === 'desenrolo_ginga');
+            if (blitzOpt && !blitzOpt.disabled) blitzOpt.execute(state, sound);
+          } else {
+            // Present RG calmly
+            const blitzOpt = blitzEnc.getOptions(state).find(o => o.id === 'apresentar_documento');
+            if (blitzOpt && !blitzOpt.disabled) blitzOpt.execute(state, sound);
+          }
 
-          // 05:30: Fornada das 5h
+          // 05:30 - Primeira Fornada das 05h
           state.currentHour = 5.5;
           state.currentHourFormatted = '05:30';
           state.elapsedSeconds = 880.0;
@@ -731,8 +797,14 @@ async function runTestSuite(url) {
           const optFornada = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'fornada_cinco_manha');
           if (optFornada && !optFornada.disabled) optFornada.execute(state, sound);
 
-          const defeat = state.checkDefeat();
-          const survived = !defeat;
+          // Advance to full 24h completion (06:00 | 900s)
+          state.currentHour = 6.0;
+          state.currentHourFormatted = '06:00';
+          state.elapsedSeconds = 900.0;
+          state.applyPassiveDecay(0.5);
+
+          const defeatFinal = state.checkDefeat();
+          if (defeatFinal) return { ok: false, reason: \`\${classId} died in final hour: \${defeatFinal.cause}\` };
 
           let objectiveMet = false;
           if (classId === 'CLASSE_DE') {
@@ -740,16 +812,15 @@ async function runTestSuite(url) {
           } else if (classId === 'CLASSE_C') {
             objectiveMet = Boolean(state.flags.boletoPago && !state.flags.carroRiscado);
           } else if (classId === 'CLASSE_AB') {
-            objectiveMet = survived;
+            objectiveMet = true;
           }
 
           summaries.push({
             classId,
-            survived,
+            survived: true,
             objectiveMet,
             finalGrana: state.formattedGrana,
             totalBicoGain: state.flags.totalBicoGain,
-            flags: state.flags,
             finalFome: state.fome,
             finalSanidade: state.sanidade,
             finalPerigo: state.perigo
@@ -792,8 +863,8 @@ async function runTestSuite(url) {
 
 async function main() {
   try {
-    await runTestSuite('http://localhost:8090/index.html');
-    await runTestSuite('http://localhost:8090/pirituba_standalone.html');
+    await runTestSuite('http://localhost:8090/index.html?seed=42');
+    await runTestSuite('http://localhost:8090/pirituba_standalone.html?seed=42');
     console.log('🎉 ALL TEST SUITES PASSED WITH 100% INVARIANT COMPLIANCE!');
     process.exit(0);
   } catch (e) {

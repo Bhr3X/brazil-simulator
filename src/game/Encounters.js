@@ -51,16 +51,19 @@ export const BRAZILIAN_ENCOUNTERS = {
       },
       {
         id: 'nota_100',
-        label: 'Tentar pagar um cafezinho de R$ 3,00 com nota de R$ 100',
-        costLabel: 'Teste de Ginga',
+        label: state.flags.tentouNota100
+          ? 'Pagar com nota de R$ 100 (O caixa já te avisou que está sem troco hoje)'
+          : 'Tentar pagar um cafezinho de R$ 3,00 com nota de R$ 100',
+        costLabel: 'Teste de Ginga (1x por dia)',
+        disabled: Boolean(state.flags.tentouNota100) || !state.canAfford(300),
         execute: (state, sound) => {
           const success = state.rng.chance(state.ginga / 100);
           if (success) {
             if (sound) sound.playCoin();
-            state.apply({ grana: -300, fome: 15, sanidade: 10, ginga: 5 }, 'Desenrolo na padaria com nota de cem');
+            state.apply({ grana: -300, fome: 15, sanidade: 10, ginga: 5, flags: { tentouNota100: true } }, 'Desenrolo na padaria com nota de cem');
             return 'O caixa deu aquela respirada funda, olhou feio, mas foi até o cofre e te deu R$ 97,00 em notas miúdas. Vitória do jeitinho (+5 Ginga)!';
           } else {
-            state.apply({ sanidade: -12, ginga: -5 }, 'Bronca do balconista');
+            state.apply({ sanidade: -12, ginga: -5, flags: { tentouNota100: true } }, 'Bronca do balconista');
             return '"— Brincadeira né patrão? Seis e meia da manhã e você me vem com nota de cem?! Tem Pix não?!" Você saiu de mãos vazias e com a orelha quente (-12% sanidade).';
           }
         }
@@ -757,8 +760,11 @@ export const BRAZILIAN_ENCOUNTERS = {
       },
       {
         id: 'dancar_passinho',
-        label: 'Entrar no círculo da laje e lançar o Passinho dos Crias',
-        costLabel: 'Ritmo & Malemolência',
+        label: state.flags.mandouPassinho
+          ? 'Passinho dos Crias (Você já deu seu show no passinho por hoje)'
+          : 'Entrar no círculo da laje e lançar o Passinho dos Crias',
+        costLabel: 'Ritmo & Malemolência (1x por dia)',
+        disabled: Boolean(state.flags.mandouPassinho),
         execute: (state) => {
           const mandouBem = state.ginga >= 35 || state.rng.chance(0.65);
           if (mandouBem) {
@@ -769,7 +775,7 @@ export const BRAZILIAN_ENCOUNTERS = {
             }, 'Show no passinho do baile');
             return 'Perna direita cruzando, rodopio no ar e travada seca no bumbo da música! A galera gritou e bateu palma na lata de cerveja. Você ganhou moral total na comunidade (+25 Ginga, +25% Sanidade)!';
           } else {
-            state.apply({ sanidade: -15, ginga: -5 }, 'Tropeço no baile');
+            state.apply({ sanidade: -15, ginga: -5, flags: { mandouPassinho: true } }, 'Tropeço no baile');
             return 'Você tentou mandar o passo de ponta de pé, escorregou no piso molhado de gelo e caiu sentado. Riram com respeito, mas ardeu a moral (-15% Sanidade).';
           }
         }
