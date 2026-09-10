@@ -44,6 +44,7 @@ function bundle() {
   const props = cleanModule(read('src/game/Props.js'));
   const dialog = cleanModule(read('src/game/Dialog.js'));
   const encounters = cleanModule(read('src/game/Encounters.js'));
+  const npcs = cleanModule(read('src/game/NpcSystem.js'));
   const interactables = cleanModule(read('src/game/Interactables.js'));
   const hud = cleanModule(read('src/game/HudGame.js'));
   const gameManager = cleanModule(read('src/game/GameManager.js'));
@@ -93,6 +94,7 @@ ${dayCycle}
 ${props}
 ${dialog}
 ${encounters}
+${npcs}
 ${interactables}
 ${hud}
 ${gameManager}

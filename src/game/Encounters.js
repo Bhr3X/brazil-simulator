@@ -855,5 +855,267 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  NPC_BALEIRO: {
+    id: 'NPC_BALEIRO',
+    title: '🍬 CLODOALDO DAS BALAS // AMBULANTE DA EDGAR FACÓ',
+    getIntroText: (state) => `
+      Clodoaldo caminha firme com sua caixa de isopor azul e branca no peito e boné virado pra trás.<br>
+      <em>"— Ó a paçoca! Três é dez! Halls preto, dropes de menta e energético trincando de gelado! E aí guerreiro, vai levar o que hoje?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Fome: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'comprar_pacoca',
+        label: 'Comprar Kit Paçoca & Halls Preto (Energia rápida)',
+        costLabel: 'R$ 5,00',
+        costCentavos: 500,
+        disabled: !state.canAfford(500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -500, fome: 25, ginga: 5 }, 'Comprou paçocas do Clodoaldo');
+          return 'Você mastiga a paçoca esfarelenta e joga um Halls preto na boca. O açúcar no sangue sobe na hora! (+25% Fome, +5 Ginga).';
+        }
+      },
+      {
+        id: 'comprar_energetico',
+        label: 'Comprar Energético Furacão 500ml geladinho',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -800, sanidade: 30, fome: 5 }, 'Tomou energético do ambulante');
+          return 'Gole gelado estalando no peito! A taurina e o gás dão um reset mental imediato (+30% Sanidade).';
+        }
+      },
+      {
+        id: 'bico_fardo',
+        label: (state.flags.bicoFardoCount || 0) >= 2
+          ? 'Ajudar a descarregar fardo (Bicos encerrados por hoje)'
+          : 'Ajudar Clodoaldo a descarregar um fardo de refrigerante na esquina',
+        costLabel: '+R$ 10,00 | -8% Fome',
+        disabled: (state.flags.bicoFardoCount || 0) >= 2 || state.fome < 10,
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const count = (state.flags.bicoFardoCount || 0) + 1;
+          state.apply({
+            grana: 1000,
+            fome: -8,
+            ginga: 8,
+            flags: { bicoFardoCount: count }
+          }, 'Bico com ambulante Clodoaldo');
+          return 'Força no muque! Em três minutos o fardo de latas tá empilhado no carrinho. Clodoaldo saca uma nota de dez amassada: "— Valeu parceiro, salvou meu corre!" (+R$ 10,00, +8 Ginga, -8% Fome).';
+        }
+      },
+      {
+        id: 'conversar_ambulante',
+        label: 'Trocar uma ideia sobre o movimento da avenida',
+        costLabel: 'Papo reto',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Trocou ideia com o ambulante');
+          return 'Clodoaldo dá a visão: "— Fica esperto ali perto do semáforo depois das seis, a motoquinha anda rondando. Se precisar de rango forte, procura a Dona Neide perto da feira!" (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_CARAMELO: {
+    id: 'NPC_CARAMELO',
+    title: '🐕 CARAMELO DE PIRITUBA // O CÃO COMUNITÁRIO',
+    getIntroText: (state) => `
+      O lendário vira-lata Caramelo se aproxima trotando alegremente pela calçada, com as orelhas em pé e o rabo abanando freneticamente.<br>
+      Ele solta um latidinho amigável e encosta a cabeça na sua perna, pedindo carinho e atenção.<br>
+      <small style="color:#00ff88">★ O Guardião Espiritual das Ruas de Pirituba ★</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'carinho_caramelo',
+        label: 'Fazer aquele carinho caprichado atrás das orelhas',
+        costLabel: 'Puro Afeto',
+        execute: (state, sound) => {
+          if (sound && sound.playDogBark) sound.playDogBark();
+          state.apply({ sanidade: 20, perigo: -10 }, 'Carinho no cão caramelo');
+          return 'O Caramelo fecha os olhos, dá uma lambida na sua mão e bate as patinhas de felicidade. A ansiedade da cidade grande simplesmente evapora (+20% Sanidade, -10% Perigo)!';
+        }
+      },
+      {
+        id: 'alimentar_caramelo',
+        label: state.flags.carameloCompanheiro
+          ? 'Caramelo já é seu fiel guardião na rua!'
+          : 'Dividir um naco de pastel / salgado com o Caramelo',
+        costLabel: 'R$ 4,00 (Comprar coxinha de petisco)',
+        costCentavos: 400,
+        disabled: !state.canAfford(400) || Boolean(state.flags.carameloCompanheiro),
+        execute: (state, sound) => {
+          if (sound) {
+            sound.playCoin();
+            if (sound.playDogBark) sound.playDogBark();
+          }
+          state.apply({
+            grana: -400,
+            sanidade: 25,
+            perigo: -20,
+            flags: { carameloCompanheiro: true }
+          }, 'Alimentou o Caramelo');
+          return 'O Caramelo devora a coxinha com entusiasmo canino lendário e começa a latir com alegria! Ele agora é seu protetor oficial de Pirituba, diminuindo o Perigo da rua (-20% Perigo, +25% Sanidade)!';
+        }
+      },
+      {
+        id: 'seguir_faro',
+        label: state.flags.faroCaramelo
+          ? 'Seguir o faro do cão (Já farejou achados hoje)'
+          : 'Seguir o Caramelo farejando o pé de uma árvore',
+        costLabel: 'Faro de Ouro',
+        disabled: Boolean(state.flags.faroCaramelo),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 850,
+            sanidade: 10,
+            flags: { faroCaramelo: true }
+          }, 'Achado com o faro do Caramelo');
+          return 'O Caramelo cava rapidinho na terra do canteiro e puxa com a pata uma nota de R$ 5 e um punhado de moedas perdidas por alguém! (+R$ 8,50, +10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_BIKE: {
+    id: 'NPC_BIKE',
+    title: '🚲 JUNINHO DA MONARK // O MOLEQUE DO GRAU',
+    getIntroText: (state) => `
+      Juninho freia sua Monark vermelha no meio-fio com uma puxada rápida de guidão.<br>
+      <em>"— E aí meu parceiro! Firmeza total? Se precisar de carona no cano da bike ou de um corre na quebrada, só dar o toque!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga}</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'carona_padaria',
+        label: 'Pedir carona no cano até a Padaria Estrela',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) {
+            sound.playCoin();
+            if (sound.playBikeBell) sound.playBikeBell();
+          }
+          state.apply({ grana: -300, ginga: 5 }, 'Carona de bike até a Padaria');
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(28.0, 1.2, 36.5);
+          }
+          return 'Você subiu no cano e o Juninho desceu a Paula Ferreira no embalo, cantando campainha! Chegou na Padaria Estrela num piscar de olhos (+5 Ginga).';
+        }
+      },
+      {
+        id: 'carona_posto',
+        label: 'Pedir carona no cano até o Posto Pirituba 24h',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) {
+            sound.playCoin();
+            if (sound.playBikeBell) sound.playBikeBell();
+          }
+          state.apply({ grana: -300, ginga: 5 }, 'Carona de bike até o Posto');
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(-40.0, 1.2, 38.0);
+          }
+          return 'Vento na cara e pedalada firme! O Juninho cortou o trânsito da Edgar Facó e te deixou na porta do Posto Pirituba (+5 Ginga).';
+        }
+      },
+      {
+        id: 'bico_marmita',
+        label: state.flags.correBike
+          ? 'Bico de entrega (Entrega já finalizada hoje)'
+          : 'Pegar encomenda de marmita para entregar no ponto de ônibus',
+        costLabel: '+R$ 20,00 | -10% Fome',
+        disabled: Boolean(state.flags.correBike) || state.fome < 15,
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 2000,
+            fome: -10,
+            ginga: 12,
+            flags: { correBike: true }
+          }, 'Bico de entrega expressa');
+          return 'Você pegou a sacola térmica e correu rapidinho até o ponto de ônibus. Entrega feita a tempo e pagamento na mão! (+R$ 20,00, +12 Ginga, -10% Fome).';
+        }
+      },
+      {
+        id: 'desafio_grau',
+        label: 'Aprender manobra de empinar bike (Trocar ideia)',
+        costLabel: 'Ginga & Resenha',
+        execute: (state, sound) => {
+          if (sound && sound.playBikeBell) sound.playBikeBell();
+          state.apply({ ginga: 10, sanidade: 10 }, 'Resenha com Juninho');
+          return 'Juninho puxa o guidão no grau perfeito de uma roda só: "— O segredo tá no freio traseiro e no equilíbrio do quadril, parça!" (+10 Ginga, +10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_DONA_NEIDE: {
+    id: 'NPC_DONA_NEIDE',
+    title: '🥘 DONA NEIDE // A TIA DA MARMITA E DA FEIRA',
+    getIntroText: (state) => `
+      Dona Neide sobe a calçada com passos calmos, avental florido e sacolas de feira cheirosas de cheiro-verde e banana-da-terra.<br>
+      <em>"— Ô meu filho! Que bom te ver por aqui. Você tá com uma cara de quem tá na correria desde cedo. Quer uma forragem nessa barriga ou uma bênção de mãe?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Fome: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'comprar_marmita',
+        label: state.fome <= 20
+          ? 'Aceitar marmita caseira (Dona Neide dá de presente para quem tá faminto!)'
+          : 'Comprar Marmita Caseira da Dona Neide (Arroz, feijão, bife e farofa)',
+        costLabel: state.fome <= 20 ? 'GRÁTIS (Solidariedade)' : 'R$ 14,00',
+        costCentavos: state.fome <= 20 ? 0 : 1400,
+        disabled: state.fome > 20 && !state.canAfford(1400),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const cost = state.fome <= 20 ? 0 : -1400;
+          state.apply({
+            grana: cost,
+            fome: 50,
+            sanidade: 25
+          }, 'Marmita caseira da Dona Neide');
+          return state.fome <= 20
+            ? 'Dona Neide toca no seu ombro com compaixão: "— Come tudo, meu filho! Ninguém anda nesse asfalto de barriga vazia não." Você devora a comida caseira e recupera as forças na hora (+50% Fome, +25% Sanidade, Grátis)!'
+            : 'Marmita de isopor caprichada, feijão fresquinho com tempero caseiro e bife suculento. Você almoça sentado no meio-fio como um rei (+50% Fome, +25% Sanidade).';
+        }
+      },
+      {
+        id: 'ajudar_sacolas',
+        label: state.flags.ajudouDonaNeide
+          ? 'Ajudar com as sacolas (Já ajudou a Dona Neide hoje)'
+          : 'Ajudar a carregar as sacolas pesadas da feira até a viela',
+        costLabel: '+R$ 10,00 pro café | +Bolo de Fubá',
+        disabled: Boolean(state.flags.ajudouDonaNeide) || state.fome < 10,
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 1000,
+            fome: 15,
+            ginga: 12,
+            sanidade: 15,
+            flags: { ajudouDonaNeide: true }
+          }, 'Ajudou a Dona Neide com as sacolas');
+          return 'Você pega as duas sacolas pesadas e acompanha Dona Neide até a esquina. Ela sorri agradecida e coloca uma nota de dez no seu bolso e um pedaço quentinho de bolo de fubá embrulhado no guardanapo (+R$ 10,00, +15% Fome, +12 Ginga, +15% Sanidade)!';
+        }
+      },
+      {
+        id: 'fofoca_bairro',
+        label: 'Ouvir conselhos de mãe e fofocas quentes da vizinhança',
+        costLabel: 'Papo Acolhedor',
+        execute: (state) => {
+          state.apply({ sanidade: 20, perigo: -15 }, 'Conselho de mãe da Dona Neide');
+          return 'Dona Neide conta tudo: "— Fica atento, meu anjo: de tarde arma temporal daquele jeito, o céu fica preto! E não deixa dinheiro fácil à mostra na avenida. Toma juízo e vai com Deus!" (+20% Sanidade, -15% Perigo).';
+        }
+      }
+    ]
   }
 };

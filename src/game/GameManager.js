@@ -11,6 +11,7 @@ import { DayCycle } from './DayCycle.js';
 import { GameProps } from './Props.js';
 import { DialogSystem } from './Dialog.js';
 import { InteractableSystem } from './Interactables.js';
+import { NpcSystem } from './NpcSystem.js';
 import { HudGame } from './HudGame.js';
 import { BRAZILIAN_ENCOUNTERS } from './Encounters.js';
 import { WORLD_ZONES } from '../world/Zones.js';
@@ -33,7 +34,8 @@ export class GameManager {
     this.state = null;
     this.dayCycle = new DayCycle(this.city);
     this.dialog = new DialogSystem(this.controls);
-    this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound, this.traffic);
+    this.npcs = new NpcSystem(this.scene, this.sound, this.rng, this.textures);
+    this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound, this.traffic, this.npcs);
     this.hud = new HudGame();
     this.props = new GameProps(this.scene, this.physics, this.textures, this.sound);
     this.encounters = BRAZILIAN_ENCOUNTERS;
@@ -170,6 +172,12 @@ export class GameManager {
     const forwardVec = new THREE.Vector3();
     this.camera.getWorldDirection(forwardVec);
 
+    // 5b. Update autonomous roaming NPCs (Clodoaldo, Caramelo, Juninho, Dona Neide)
+    const isModalOpen = this.isAnyModalActive();
+    if (this.npcs) {
+      this.npcs.update(delta, playerPos, isModalOpen, this.state);
+    }
+
     // 6. Raycast interactables check
     this.interactables.update(playerPos, forwardVec, this.clock, this.state);
 
@@ -234,6 +242,16 @@ export class GameManager {
       for (const v of this.traffic.vehicles) {
         if (!v.currentSpeed || v.currentSpeed < 2.5) continue;
         const dist = Math.sqrt((v.x - playerPos.x) ** 2 + (v.z - playerPos.z) ** 2);
+
+        // Companion Caramelo bark warning if vehicle speeds close
+        if (dist < 3.8 && dist > 1.8 && this.state && this.state.flags && this.state.flags.carameloCompanheiro) {
+          if (!this.lastCarameloWarning || this.clock.elapsed - this.lastCarameloWarning > 4.0) {
+            this.lastCarameloWarning = this.clock.elapsed;
+            if (this.sound && this.sound.playDogBark) this.sound.playDogBark();
+            this.hud.showToast('🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!', 2500);
+          }
+        }
+
         if (dist < 1.8) {
           // Player hit by vehicle!
           if (this.sound) this.sound.playSiren();

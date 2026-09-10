@@ -4482,6 +4482,62 @@ class SoundEngine {
     });
   }
 
+  // 17. Brazilian Stray Dog Bark (Latido do Cão Caramelo)
+  playDogBark() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    [0, 0.16].forEach((delay, idx) => {
+      const startT = t + delay;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(idx === 0 ? 320 : 380, startT);
+      osc.frequency.exponentialRampToValueAtTime(140, startT + 0.12);
+
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(900, startT);
+      filter.Q.setValueAtTime(3.0, startT);
+
+      gain.gain.setValueAtTime(0.001, startT);
+      gain.gain.linearRampToValueAtTime(0.25, startT + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.14);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(startT);
+      osc.stop(startT + 0.15);
+    });
+  }
+
+  // 18. Bicycle Bell Clink (Triiim da Monark)
+  playBikeBell() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    [0, 0.09].forEach((delay) => {
+      const startT = t + delay;
+      [2093, 3136].forEach(freq => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startT);
+
+        gain.gain.setValueAtTime(0.15, startT);
+        gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.22);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start(startT);
+        osc.stop(startT + 0.24);
+      });
+    });
+  }
+
   setTimeOfDay(isDay) {
     this.isDay = isDay;
     if (this.ambientGain && this.ctx) {
@@ -10427,8 +10483,857 @@ const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  NPC_BALEIRO: {
+    id: 'NPC_BALEIRO',
+    title: '🍬 CLODOALDO DAS BALAS // AMBULANTE DA EDGAR FACÓ',
+    getIntroText: (state) => `
+      Clodoaldo caminha firme com sua caixa de isopor azul e branca no peito e boné virado pra trás.<br>
+      <em>"— Ó a paçoca! Três é dez! Halls preto, dropes de menta e energético trincando de gelado! E aí guerreiro, vai levar o que hoje?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Fome: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'comprar_pacoca',
+        label: 'Comprar Kit Paçoca & Halls Preto (Energia rápida)',
+        costLabel: 'R$ 5,00',
+        costCentavos: 500,
+        disabled: !state.canAfford(500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -500, fome: 25, ginga: 5 }, 'Comprou paçocas do Clodoaldo');
+          return 'Você mastiga a paçoca esfarelenta e joga um Halls preto na boca. O açúcar no sangue sobe na hora! (+25% Fome, +5 Ginga).';
+        }
+      },
+      {
+        id: 'comprar_energetico',
+        label: 'Comprar Energético Furacão 500ml geladinho',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -800, sanidade: 30, fome: 5 }, 'Tomou energético do ambulante');
+          return 'Gole gelado estalando no peito! A taurina e o gás dão um reset mental imediato (+30% Sanidade).';
+        }
+      },
+      {
+        id: 'bico_fardo',
+        label: (state.flags.bicoFardoCount || 0) >= 2
+          ? 'Ajudar a descarregar fardo (Bicos encerrados por hoje)'
+          : 'Ajudar Clodoaldo a descarregar um fardo de refrigerante na esquina',
+        costLabel: '+R$ 10,00 | -8% Fome',
+        disabled: (state.flags.bicoFardoCount || 0) >= 2 || state.fome < 10,
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const count = (state.flags.bicoFardoCount || 0) + 1;
+          state.apply({
+            grana: 1000,
+            fome: -8,
+            ginga: 8,
+            flags: { bicoFardoCount: count }
+          }, 'Bico com ambulante Clodoaldo');
+          return 'Força no muque! Em três minutos o fardo de latas tá empilhado no carrinho. Clodoaldo saca uma nota de dez amassada: "— Valeu parceiro, salvou meu corre!" (+R$ 10,00, +8 Ginga, -8% Fome).';
+        }
+      },
+      {
+        id: 'conversar_ambulante',
+        label: 'Trocar uma ideia sobre o movimento da avenida',
+        costLabel: 'Papo reto',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Trocou ideia com o ambulante');
+          return 'Clodoaldo dá a visão: "— Fica esperto ali perto do semáforo depois das seis, a motoquinha anda rondando. Se precisar de rango forte, procura a Dona Neide perto da feira!" (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_CARAMELO: {
+    id: 'NPC_CARAMELO',
+    title: '🐕 CARAMELO DE PIRITUBA // O CÃO COMUNITÁRIO',
+    getIntroText: (state) => `
+      O lendário vira-lata Caramelo se aproxima trotando alegremente pela calçada, com as orelhas em pé e o rabo abanando freneticamente.<br>
+      Ele solta um latidinho amigável e encosta a cabeça na sua perna, pedindo carinho e atenção.<br>
+      <small style="color:#00ff88">★ O Guardião Espiritual das Ruas de Pirituba ★</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'carinho_caramelo',
+        label: 'Fazer aquele carinho caprichado atrás das orelhas',
+        costLabel: 'Puro Afeto',
+        execute: (state, sound) => {
+          if (sound && sound.playDogBark) sound.playDogBark();
+          state.apply({ sanidade: 20, perigo: -10 }, 'Carinho no cão caramelo');
+          return 'O Caramelo fecha os olhos, dá uma lambida na sua mão e bate as patinhas de felicidade. A ansiedade da cidade grande simplesmente evapora (+20% Sanidade, -10% Perigo)!';
+        }
+      },
+      {
+        id: 'alimentar_caramelo',
+        label: state.flags.carameloCompanheiro
+          ? 'Caramelo já é seu fiel guardião na rua!'
+          : 'Dividir um naco de pastel / salgado com o Caramelo',
+        costLabel: 'R$ 4,00 (Comprar coxinha de petisco)',
+        costCentavos: 400,
+        disabled: !state.canAfford(400) || Boolean(state.flags.carameloCompanheiro),
+        execute: (state, sound) => {
+          if (sound) {
+            sound.playCoin();
+            if (sound.playDogBark) sound.playDogBark();
+          }
+          state.apply({
+            grana: -400,
+            sanidade: 25,
+            perigo: -20,
+            flags: { carameloCompanheiro: true }
+          }, 'Alimentou o Caramelo');
+          return 'O Caramelo devora a coxinha com entusiasmo canino lendário e começa a latir com alegria! Ele agora é seu protetor oficial de Pirituba, diminuindo o Perigo da rua (-20% Perigo, +25% Sanidade)!';
+        }
+      },
+      {
+        id: 'seguir_faro',
+        label: state.flags.faroCaramelo
+          ? 'Seguir o faro do cão (Já farejou achados hoje)'
+          : 'Seguir o Caramelo farejando o pé de uma árvore',
+        costLabel: 'Faro de Ouro',
+        disabled: Boolean(state.flags.faroCaramelo),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 850,
+            sanidade: 10,
+            flags: { faroCaramelo: true }
+          }, 'Achado com o faro do Caramelo');
+          return 'O Caramelo cava rapidinho na terra do canteiro e puxa com a pata uma nota de R$ 5 e um punhado de moedas perdidas por alguém! (+R$ 8,50, +10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_BIKE: {
+    id: 'NPC_BIKE',
+    title: '🚲 JUNINHO DA MONARK // O MOLEQUE DO GRAU',
+    getIntroText: (state) => `
+      Juninho freia sua Monark vermelha no meio-fio com uma puxada rápida de guidão.<br>
+      <em>"— E aí meu parceiro! Firmeza total? Se precisar de carona no cano da bike ou de um corre na quebrada, só dar o toque!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga}</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'carona_padaria',
+        label: 'Pedir carona no cano até a Padaria Estrela',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) {
+            sound.playCoin();
+            if (sound.playBikeBell) sound.playBikeBell();
+          }
+          state.apply({ grana: -300, ginga: 5 }, 'Carona de bike até a Padaria');
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(28.0, 1.2, 36.5);
+          }
+          return 'Você subiu no cano e o Juninho desceu a Paula Ferreira no embalo, cantando campainha! Chegou na Padaria Estrela num piscar de olhos (+5 Ginga).';
+        }
+      },
+      {
+        id: 'carona_posto',
+        label: 'Pedir carona no cano até o Posto Pirituba 24h',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) {
+            sound.playCoin();
+            if (sound.playBikeBell) sound.playBikeBell();
+          }
+          state.apply({ grana: -300, ginga: 5 }, 'Carona de bike até o Posto');
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(-40.0, 1.2, 38.0);
+          }
+          return 'Vento na cara e pedalada firme! O Juninho cortou o trânsito da Edgar Facó e te deixou na porta do Posto Pirituba (+5 Ginga).';
+        }
+      },
+      {
+        id: 'bico_marmita',
+        label: state.flags.correBike
+          ? 'Bico de entrega (Entrega já finalizada hoje)'
+          : 'Pegar encomenda de marmita para entregar no ponto de ônibus',
+        costLabel: '+R$ 20,00 | -10% Fome',
+        disabled: Boolean(state.flags.correBike) || state.fome < 15,
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 2000,
+            fome: -10,
+            ginga: 12,
+            flags: { correBike: true }
+          }, 'Bico de entrega expressa');
+          return 'Você pegou a sacola térmica e correu rapidinho até o ponto de ônibus. Entrega feita a tempo e pagamento na mão! (+R$ 20,00, +12 Ginga, -10% Fome).';
+        }
+      },
+      {
+        id: 'desafio_grau',
+        label: 'Aprender manobra de empinar bike (Trocar ideia)',
+        costLabel: 'Ginga & Resenha',
+        execute: (state, sound) => {
+          if (sound && sound.playBikeBell) sound.playBikeBell();
+          state.apply({ ginga: 10, sanidade: 10 }, 'Resenha com Juninho');
+          return 'Juninho puxa o guidão no grau perfeito de uma roda só: "— O segredo tá no freio traseiro e no equilíbrio do quadril, parça!" (+10 Ginga, +10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_DONA_NEIDE: {
+    id: 'NPC_DONA_NEIDE',
+    title: '🥘 DONA NEIDE // A TIA DA MARMITA E DA FEIRA',
+    getIntroText: (state) => `
+      Dona Neide sobe a calçada com passos calmos, avental florido e sacolas de feira cheirosas de cheiro-verde e banana-da-terra.<br>
+      <em>"— Ô meu filho! Que bom te ver por aqui. Você tá com uma cara de quem tá na correria desde cedo. Quer uma forragem nessa barriga ou uma bênção de mãe?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Fome: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'comprar_marmita',
+        label: state.fome <= 20
+          ? 'Aceitar marmita caseira (Dona Neide dá de presente para quem tá faminto!)'
+          : 'Comprar Marmita Caseira da Dona Neide (Arroz, feijão, bife e farofa)',
+        costLabel: state.fome <= 20 ? 'GRÁTIS (Solidariedade)' : 'R$ 14,00',
+        costCentavos: state.fome <= 20 ? 0 : 1400,
+        disabled: state.fome > 20 && !state.canAfford(1400),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const cost = state.fome <= 20 ? 0 : -1400;
+          state.apply({
+            grana: cost,
+            fome: 50,
+            sanidade: 25
+          }, 'Marmita caseira da Dona Neide');
+          return state.fome <= 20
+            ? 'Dona Neide toca no seu ombro com compaixão: "— Come tudo, meu filho! Ninguém anda nesse asfalto de barriga vazia não." Você devora a comida caseira e recupera as forças na hora (+50% Fome, +25% Sanidade, Grátis)!'
+            : 'Marmita de isopor caprichada, feijão fresquinho com tempero caseiro e bife suculento. Você almoça sentado no meio-fio como um rei (+50% Fome, +25% Sanidade).';
+        }
+      },
+      {
+        id: 'ajudar_sacolas',
+        label: state.flags.ajudouDonaNeide
+          ? 'Ajudar com as sacolas (Já ajudou a Dona Neide hoje)'
+          : 'Ajudar a carregar as sacolas pesadas da feira até a viela',
+        costLabel: '+R$ 10,00 pro café | +Bolo de Fubá',
+        disabled: Boolean(state.flags.ajudouDonaNeide) || state.fome < 10,
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 1000,
+            fome: 15,
+            ginga: 12,
+            sanidade: 15,
+            flags: { ajudouDonaNeide: true }
+          }, 'Ajudou a Dona Neide com as sacolas');
+          return 'Você pega as duas sacolas pesadas e acompanha Dona Neide até a esquina. Ela sorri agradecida e coloca uma nota de dez no seu bolso e um pedaço quentinho de bolo de fubá embrulhado no guardanapo (+R$ 10,00, +15% Fome, +12 Ginga, +15% Sanidade)!';
+        }
+      },
+      {
+        id: 'fofoca_bairro',
+        label: 'Ouvir conselhos de mãe e fofocas quentes da vizinhança',
+        costLabel: 'Papo Acolhedor',
+        execute: (state) => {
+          state.apply({ sanidade: 20, perigo: -15 }, 'Conselho de mãe da Dona Neide');
+          return 'Dona Neide conta tudo: "— Fica atento, meu anjo: de tarde arma temporal daquele jeito, o céu fica preto! E não deixa dinheiro fácil à mostra na avenida. Toma juízo e vai com Deus!" (+20% Sanidade, -15% Perigo).';
+        }
+      }
+    ]
   }
 };
+
+/**
+ * Autonomous Roaming NPC System for Brazil Simulator (Pirituba, SP)
+ * Features 4 iconic Brazilian characters roaming sidewalks with procedural 3D meshes,
+ * waypoint navigation, walking animations, and dynamic interaction hooks.
+ */
+
+class NpcSystem {
+  constructor(scene, soundEngine, rng, textures = null) {
+    this.scene = scene;
+    this.sound = soundEngine;
+    this.rng = rng;
+    this.textures = textures;
+
+    this.npcGroup = new THREE.Group();
+    this.npcGroup.name = 'roaming_npcs';
+    this.scene.add(this.npcGroup);
+
+    this.npcs = [];
+    this.activeTalkingNpc = null;
+
+    this.initNpcs();
+  }
+
+  initNpcs() {
+    // 1. Clodoaldo das Balas (Ambulante / Baleiro da Edgar Facó)
+    const clodoaldo = this.createHumanoidNpc({
+      id: 'clodoaldo',
+      name: 'CLODOALDO DAS BALAS',
+      prompt: 'CONVERSAR COM CLODOALDO (AMBULANTE)',
+      encounterId: 'NPC_BALEIRO',
+      shirtColor: 0x1a66b8,
+      skinColor: 0x8d5524,
+      pantsColor: 0x2b384a,
+      capColor: 0xffcc00,
+      hasCap: true,
+      hasCoolerBox: true,
+      speed: 1.4,
+      waypoints: [
+        { x: -22.0, z: 33.5 },
+        { x: -8.0, z: 33.5 },
+        { x: 6.0, z: 33.5 },
+        { x: 22.0, z: 33.5 },
+        { x: 6.0, z: 33.5 },
+        { x: -8.0, z: 33.5 }
+      ]
+    });
+    this.npcs.push(clodoaldo);
+
+    // 2. Caramelo de Pirituba (O Lendário Cão Caramelo Comunitário)
+    const caramelo = this.createCarameloNpc({
+      id: 'caramelo',
+      name: 'CARAMELO (CÃO COMUNITÁRIO)',
+      prompt: 'FAZER CARINHO NO CÃO CARAMELO',
+      encounterId: 'NPC_CARAMELO',
+      speed: 2.0,
+      waypoints: [
+        { x: 26.0, z: 36.0 },
+        { x: 13.0, z: 36.0 },
+        { x: 4.0, z: 34.5 },
+        { x: -5.0, z: 36.0 },
+        { x: 10.0, z: 36.0 }
+      ]
+    });
+    this.npcs.push(caramelo);
+
+    // 3. Juninho da Monark (O Moleque do Grau de Bike)
+    const juninho = this.createBikeNpc({
+      id: 'juninho',
+      name: 'JUNINHO DA MONARK',
+      prompt: 'FALAR COM JUNINHO DA BIKE',
+      encounterId: 'NPC_BIKE',
+      shirtColor: 0x009944,
+      skinColor: 0xa0673d,
+      pantsColor: 0x18181a,
+      speed: 3.2,
+      waypoints: [
+        { x: -36.0, z: 37.5 },
+        { x: -16.0, z: 36.5 },
+        { x: 8.0, z: 36.5 },
+        { x: 28.0, z: 36.5 },
+        { x: 8.0, z: 36.5 },
+        { x: -16.0, z: 36.5 }
+      ]
+    });
+    this.npcs.push(juninho);
+
+    // 4. Dona Neide (A Tia da Marmita e da Feira)
+    const donaNeide = this.createHumanoidNpc({
+      id: 'dona_neide',
+      name: 'DONA NEIDE (MARMITA & FEIRA)',
+      prompt: 'CUMPRIMENTAR DONA NEIDE (FEIRA)',
+      encounterId: 'NPC_DONA_NEIDE',
+      shirtColor: 0xd95b96,
+      skinColor: 0xb58055,
+      pantsColor: 0xf5f5f5,
+      hasCap: false,
+      hasHairBun: true,
+      hasShoppingBags: true,
+      speed: 1.0,
+      waypoints: [
+        { x: -8.0, z: 35.5 },
+        { x: -2.0, z: 35.5 },
+        { x: 5.5, z: 35.5 },
+        { x: -2.0, z: 35.5 }
+      ]
+    });
+    this.npcs.push(donaNeide);
+  }
+
+  // Build articulated humanoid 3D mesh
+  createHumanoidNpc(config) {
+    const group = new THREE.Group();
+    group.name = `npc_${config.id}`;
+
+    const skinMat = new THREE.MeshLambertMaterial({ color: config.skinColor || 0x8d5524 });
+    const shirtMat = new THREE.MeshLambertMaterial({ color: config.shirtColor || 0x1155cc });
+    const pantsMat = new THREE.MeshLambertMaterial({ color: config.pantsColor || 0x223344 });
+
+    // 1. Torso
+    const torsoGeo = new THREE.BoxGeometry(0.5, 0.65, 0.28);
+    const torsoMesh = new THREE.Mesh(torsoGeo, shirtMat);
+    torsoMesh.position.y = 1.05;
+    group.add(torsoMesh);
+
+    // 2. Head
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 1.55, 0);
+    const headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.32, 0.3), skinMat);
+    headGroup.add(headMesh);
+
+    // Head Accessories
+    if (config.hasCap) {
+      const capMat = new THREE.MeshLambertMaterial({ color: config.capColor || 0xffcc00 });
+      const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.32), capMat);
+      capCrown.position.y = 0.14;
+      headGroup.add(capCrown);
+      // Cap visor backwards
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.03, 0.18), capMat);
+      visor.position.set(0, 0.1, -0.22);
+      headGroup.add(visor);
+    } else if (config.hasHairBun) {
+      const hairMat = new THREE.MeshLambertMaterial({ color: 0xdddddd });
+      const hairBun = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), hairMat);
+      hairBun.position.set(0, 0.18, -0.12);
+      headGroup.add(hairBun);
+    }
+    group.add(headGroup);
+
+    // 3. Arms
+    const armGeo = new THREE.BoxGeometry(0.12, 0.55, 0.12);
+
+    const leftArm = new THREE.Group();
+    leftArm.position.set(-0.32, 1.35, 0);
+    const lArmMesh = new THREE.Mesh(armGeo, skinMat);
+    lArmMesh.position.y = -0.25;
+    leftArm.add(lArmMesh);
+    group.add(leftArm);
+
+    const rightArm = new THREE.Group();
+    rightArm.position.set(0.32, 1.35, 0);
+    const rArmMesh = new THREE.Mesh(armGeo, skinMat);
+    rArmMesh.position.y = -0.25;
+    rightArm.add(rArmMesh);
+    group.add(rightArm);
+
+    // 4. Legs
+    const legGeo = new THREE.BoxGeometry(0.18, 0.72, 0.18);
+
+    const leftLeg = new THREE.Group();
+    leftLeg.position.set(-0.15, 0.72, 0);
+    const lLegMesh = new THREE.Mesh(legGeo, pantsMat);
+    lLegMesh.position.y = -0.36;
+    leftLeg.add(lLegMesh);
+    group.add(leftLeg);
+
+    const rightLeg = new THREE.Group();
+    rightLeg.position.set(0.15, 0.72, 0);
+    const rLegMesh = new THREE.Mesh(legGeo, pantsMat);
+    rLegMesh.position.y = -0.36;
+    rightLeg.add(rLegMesh);
+    group.add(rightLeg);
+
+    // 5. Props (Cooler Box or Shopping Bags)
+    if (config.hasCoolerBox) {
+      const boxGroup = new THREE.Group();
+      boxGroup.position.set(0, 0.95, 0.32);
+
+      const coolerMat = new THREE.MeshLambertMaterial({ color: 0xf0f0f5 });
+      const coolerBox = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.36, 0.32), coolerMat);
+      boxGroup.add(coolerBox);
+
+      const lidMat = new THREE.MeshLambertMaterial({ color: 0x1166cc });
+      const coolerLid = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.08, 0.34), lidMat);
+      coolerLid.position.y = 0.2;
+      boxGroup.add(coolerLid);
+
+      group.add(boxGroup);
+    } else if (config.hasShoppingBags) {
+      const bagMatL = new THREE.MeshLambertMaterial({ color: 0xffd700 });
+      const bagMatR = new THREE.MeshLambertMaterial({ color: 0x00b050 });
+
+      const bagL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.32, 0.15), bagMatL);
+      bagL.position.set(-0.35, 0.65, 0.05);
+      group.add(bagL);
+
+      const bagR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.32, 0.15), bagMatR);
+      bagR.position.set(0.35, 0.65, 0.05);
+      group.add(bagR);
+    }
+
+    // Set initial position
+    const startWp = config.waypoints[0];
+    group.position.set(startWp.x, 0, startWp.z);
+    this.npcGroup.add(group);
+
+    return {
+      id: config.id,
+      name: config.name,
+      prompt: config.prompt,
+      encounterId: config.encounterId,
+      group,
+      leftArm,
+      rightArm,
+      leftLeg,
+      rightLeg,
+      headGroup,
+      waypoints: config.waypoints,
+      currentWpIndex: 0,
+      speed: config.speed || 1.4,
+      animTimer: 0,
+      animSpeed: 7.0,
+      type: 'HUMANOID'
+    };
+  }
+
+  // Build 4-legged articulated Cão Caramelo mesh
+  createCarameloNpc(config) {
+    const group = new THREE.Group();
+    group.name = 'npc_caramelo';
+
+    // Warm caramel fur material
+    const furMat = new THREE.MeshLambertMaterial({ color: 0xd49339 });
+    const darkFurMat = new THREE.MeshLambertMaterial({ color: 0x965a18 });
+    const noseMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+
+    // 1. Dog Torso
+    const bodyGeo = new THREE.BoxGeometry(0.32, 0.34, 0.62);
+    const bodyMesh = new THREE.Mesh(bodyGeo, furMat);
+    bodyMesh.position.y = 0.45;
+    group.add(bodyMesh);
+
+    // 2. Neck & Head
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.58, 0.35);
+
+    const headGeo = new THREE.BoxGeometry(0.24, 0.24, 0.28);
+    const headMesh = new THREE.Mesh(headGeo, furMat);
+    headMesh.position.set(0, 0.08, 0.06);
+    headGroup.add(headMesh);
+
+    // Snout / Focinho
+    const snoutMesh = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.16), furMat);
+    snoutMesh.position.set(0, 0.04, 0.24);
+    headGroup.add(snoutMesh);
+
+    // Black Nose tip
+    const noseMesh = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.04), noseMat);
+    noseMesh.position.set(0, 0.08, 0.32);
+    headGroup.add(noseMesh);
+
+    // Floppy Caramel Ears
+    const lEar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.1), darkFurMat);
+    lEar.position.set(-0.14, 0.14, 0.02);
+    lEar.rotation.z = 0.25;
+    headGroup.add(lEar);
+
+    const rEar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.1), darkFurMat);
+    rEar.position.set(0.14, 0.14, 0.02);
+    rEar.rotation.z = -0.25;
+    headGroup.add(rEar);
+
+    group.add(headGroup);
+
+    // 3. Four Articulated Legs
+    const legGeo = new THREE.CylinderGeometry(0.04, 0.035, 0.36, 6);
+
+    // Front Left Leg
+    const flLeg = new THREE.Group();
+    flLeg.position.set(-0.12, 0.32, 0.22);
+    const flMesh = new THREE.Mesh(legGeo, furMat);
+    flMesh.position.y = -0.16;
+    flLeg.add(flMesh);
+    group.add(flLeg);
+
+    // Front Right Leg
+    const frLeg = new THREE.Group();
+    frLeg.position.set(0.12, 0.32, 0.22);
+    const frMesh = new THREE.Mesh(legGeo, furMat);
+    frMesh.position.y = -0.16;
+    frLeg.add(frMesh);
+    group.add(frLeg);
+
+    // Back Left Leg
+    const blLeg = new THREE.Group();
+    blLeg.position.set(-0.12, 0.32, -0.22);
+    const blMesh = new THREE.Mesh(legGeo, furMat);
+    blMesh.position.y = -0.16;
+    blLeg.add(blMesh);
+    group.add(blLeg);
+
+    // Back Right Leg
+    const brLeg = new THREE.Group();
+    brLeg.position.set(0.12, 0.32, -0.22);
+    const brMesh = new THREE.Mesh(legGeo, furMat);
+    brMesh.position.y = -0.16;
+    brLeg.add(brMesh);
+    group.add(brLeg);
+
+    // 4. Wagging Tail
+    const tailGroup = new THREE.Group();
+    tailGroup.position.set(0, 0.55, -0.3);
+    const tailMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.04, 0.32, 6), furMat);
+    tailMesh.position.set(0, 0.12, -0.1);
+    tailMesh.rotation.x = -0.7;
+    tailGroup.add(tailMesh);
+    group.add(tailGroup);
+
+    const startWp = config.waypoints[0];
+    group.position.set(startWp.x, 0, startWp.z);
+    this.npcGroup.add(group);
+
+    return {
+      id: config.id,
+      name: config.name,
+      prompt: config.prompt,
+      encounterId: config.encounterId,
+      group,
+      headGroup,
+      flLeg,
+      frLeg,
+      blLeg,
+      brLeg,
+      tailGroup,
+      waypoints: config.waypoints,
+      currentWpIndex: 0,
+      speed: config.speed || 2.0,
+      animTimer: 0,
+      animSpeed: 10.0,
+      type: 'CARAMELO'
+    };
+  }
+
+  // Build Juninho riding bicycle mesh
+  createBikeNpc(config) {
+    const group = new THREE.Group();
+    group.name = 'npc_juninho_bike';
+
+    // 1. Red Bicycle Frame
+    const bikeGroup = new THREE.Group();
+    const frameMat = new THREE.MeshLambertMaterial({ color: 0xcc1111 });
+    const metalMat = new THREE.MeshLambertMaterial({ color: 0x888899 });
+    const rubberMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+
+    // Wheels (Front & Back)
+    const wheelGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.08, 12);
+    wheelGeo.rotateZ(Math.PI / 2);
+
+    const fWheel = new THREE.Mesh(wheelGeo, rubberMat);
+    fWheel.position.set(0, 0.32, 0.65);
+    bikeGroup.add(fWheel);
+
+    const rWheel = new THREE.Mesh(wheelGeo, rubberMat);
+    rWheel.position.set(0, 0.32, -0.65);
+    bikeGroup.add(rWheel);
+
+    // Frame tubes (Top tube, down tube, seat tube)
+    const tubeMat = frameMat;
+    const topTube = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 6), tubeMat);
+    topTube.position.set(0, 0.72, 0);
+    topTube.rotation.x = Math.PI / 2;
+    bikeGroup.add(topTube);
+
+    const downTube = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 6), tubeMat);
+    downTube.position.set(0, 0.52, 0.12);
+    downTube.rotation.x = -Math.PI / 4;
+    bikeGroup.add(downTube);
+
+    // Handlebars
+    const handleBar = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.04, 0.04), metalMat);
+    handleBar.position.set(0, 0.96, 0.45);
+    bikeGroup.add(handleBar);
+
+    // Seat / Selim
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.06, 0.26), rubberMat);
+    seat.position.set(0, 0.82, -0.22);
+    bikeGroup.add(seat);
+
+    group.add(bikeGroup);
+
+    // 2. Juninho Cyclist Avatar
+    const skinMat = new THREE.MeshLambertMaterial({ color: config.skinColor || 0xa0673d });
+    const shirtMat = new THREE.MeshLambertMaterial({ color: config.shirtColor || 0x009944 });
+    const pantsMat = new THREE.MeshLambertMaterial({ color: config.pantsColor || 0x18181a });
+
+    // Torso leaning forward
+    const riderTorso = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.55, 0.24), shirtMat);
+    riderTorso.position.set(0, 1.15, -0.1);
+    riderTorso.rotation.x = 0.35;
+    group.add(riderTorso);
+
+    // Head
+    const riderHead = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.28, 0.26), skinMat);
+    riderHead.position.set(0, 1.55, 0.04);
+    group.add(riderHead);
+
+    // Legs on pedals
+    const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.14), pantsMat);
+    leftLeg.position.set(-0.16, 0.68, -0.12);
+    leftLeg.rotation.x = 0.6;
+    group.add(leftLeg);
+
+    const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.55, 0.14), pantsMat);
+    rightLeg.position.set(0.16, 0.68, -0.12);
+    rightLeg.rotation.x = 0.2;
+    group.add(rightLeg);
+
+    const startWp = config.waypoints[0];
+    group.position.set(startWp.x, 0, startWp.z);
+    this.npcGroup.add(group);
+
+    return {
+      id: config.id,
+      name: config.name,
+      prompt: config.prompt,
+      encounterId: config.encounterId,
+      group,
+      fWheel,
+      rWheel,
+      leftLeg,
+      rightLeg,
+      waypoints: config.waypoints,
+      currentWpIndex: 0,
+      speed: config.speed || 3.2,
+      animTimer: 0,
+      animSpeed: 8.0,
+      type: 'BIKE'
+    };
+  }
+
+  // Update NPC navigation, motion, and visual animations
+  update(delta, playerPos, isModalOpen, gameState = null) {
+    for (const npc of this.npcs) {
+      // 1. Companion logic: If Caramelo is player's companion, follow player!
+      if (npc.id === 'caramelo' && gameState && gameState.flags && gameState.flags.carameloCompanheiro) {
+        this.updateCompanionCaramelo(npc, playerPos, delta, isModalOpen);
+        continue;
+      }
+
+      // 2. Waypoint navigation along streets and sidewalks
+      const targetWp = npc.waypoints[npc.currentWpIndex];
+      const dx = targetWp.x - npc.group.position.x;
+      const dz = targetWp.z - npc.group.position.z;
+      const distToWp = Math.sqrt(dx * dx + dz * dz);
+
+      // Advance to next waypoint if reached
+      if (distToWp < 1.0) {
+        npc.currentWpIndex = (npc.currentWpIndex + 1) % npc.waypoints.length;
+      }
+
+      // Check distance to player for conversational pauses
+      const distToPlayer = Math.sqrt(
+        (playerPos.x - npc.group.position.x) ** 2 +
+        (playerPos.z - npc.group.position.z) ** 2
+      );
+
+      // Pause moving if active dialog is open and player is interacting nearby
+      const isTalkingToThisNpc = isModalOpen && distToPlayer < 4.0;
+      if (isTalkingToThisNpc) {
+        // Face the player smoothly
+        const lookAngle = Math.atan2(playerPos.x - npc.group.position.x, playerPos.z - npc.group.position.z);
+        npc.group.rotation.y = lookAngle;
+        continue;
+      }
+
+      // Move towards target waypoint
+      if (distToWp > 0.05) {
+        const moveDist = Math.min(npc.speed * delta, distToWp);
+        const dirX = dx / distToWp;
+        const dirZ = dz / distToWp;
+
+        npc.group.position.x += dirX * moveDist;
+        npc.group.position.z += dirZ * moveDist;
+
+        // Orient heading along movement trajectory
+        const targetYaw = Math.atan2(dirX, dirZ);
+        npc.group.rotation.y = targetYaw;
+
+        // Advance animation
+        npc.animTimer += delta;
+        this.animateNpc(npc, delta);
+      }
+    }
+  }
+
+  // Update Caramelo trotting beside player as loyal companion
+  updateCompanionCaramelo(caramelo, playerPos, delta, isModalOpen) {
+    const dx = playerPos.x - caramelo.group.position.x;
+    const dz = playerPos.z - caramelo.group.position.z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
+
+    // Stop at friendly companion radius (~1.6m)
+    if (dist > 1.6) {
+      const moveDist = Math.min(caramelo.speed * 1.5 * delta, dist - 1.5);
+      const dirX = dx / dist;
+      const dirZ = dz / dist;
+
+      caramelo.group.position.x += dirX * moveDist;
+      caramelo.group.position.z += dirZ * moveDist;
+
+      caramelo.group.rotation.y = Math.atan2(dirX, dirZ);
+      caramelo.animTimer += delta * 1.4;
+      this.animateNpc(caramelo, delta);
+    } else {
+      // Idle tail wagging beside player
+      caramelo.animTimer += delta;
+      if (caramelo.tailGroup) {
+        caramelo.tailGroup.rotation.y = Math.sin(caramelo.animTimer * 14) * 0.45;
+      }
+    }
+  }
+
+  // Animate character limbs based on type
+  animateNpc(npc, delta) {
+    if (npc.type === 'HUMANOID') {
+      const legSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.55;
+      const armSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.45;
+
+      npc.leftLeg.rotation.x = legSwing;
+      npc.rightLeg.rotation.x = -legSwing;
+      npc.leftArm.rotation.x = -armSwing;
+      npc.rightArm.rotation.x = armSwing;
+
+      // Subtle walking vertical bob
+      npc.group.position.y = Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.05;
+    } else if (npc.type === 'CARAMELO') {
+      const trot = Math.sin(npc.animTimer * npc.animSpeed) * 0.5;
+
+      // Diagonal trotting gait
+      npc.flLeg.rotation.x = trot;
+      npc.brLeg.rotation.x = trot;
+      npc.frLeg.rotation.x = -trot;
+      npc.blLeg.rotation.x = -trot;
+
+      // Energetic tail wag
+      if (npc.tailGroup) {
+        npc.tailGroup.rotation.y = Math.sin(npc.animTimer * 16) * 0.5;
+      }
+
+      npc.group.position.y = Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.04;
+    } else if (npc.type === 'BIKE') {
+      // Spin bicycle wheels
+      const spinSpeed = npc.speed * 5.0 * delta;
+      npc.fWheel.rotation.x += spinSpeed;
+      npc.rWheel.rotation.x += spinSpeed;
+
+      // Pedaling legs
+      const pedalCycle = Math.sin(npc.animTimer * npc.animSpeed) * 0.35;
+      npc.leftLeg.rotation.x = 0.6 + pedalCycle;
+      npc.rightLeg.rotation.x = 0.2 - pedalCycle;
+    }
+  }
+
+  // Expose dynamic targets for raycast interaction in InteractableSystem
+  getInteractableTargets() {
+    return this.npcs.map(npc => ({
+      id: npc.id,
+      name: npc.name,
+      prompt: npc.prompt,
+      encounterId: npc.encounterId,
+      position: npc.group.position,
+      maxDist: npc.type === 'BIKE' ? 4.0 : 3.5,
+      isOpen: true,
+      isNpc: true
+    }));
+  }
+}
 
 /**
  * Interactables Registry & Raycast Picker
@@ -10437,12 +11342,13 @@ const BRAZILIAN_ENCOUNTERS = {
 
 
 class InteractableSystem {
-  constructor(scene, camera, dialogSystem, soundEngine, trafficSystem = null) {
+  constructor(scene, camera, dialogSystem, soundEngine, trafficSystem = null, npcSystem = null) {
     this.scene = scene;
     this.camera = camera;
     this.dialog = dialogSystem;
     this.sound = soundEngine;
     this.traffic = trafficSystem;
+    this.npcs = npcSystem;
 
     this.currentTarget = null;
     this.promptElem = document.getElementById('interact-prompt');
@@ -10562,9 +11468,12 @@ class InteractableSystem {
     let closestTarget = null;
     let closestDist = Infinity;
 
-    for (const anchor of this.anchors) {
+    const npcTargets = (this.npcs && this.npcs.getInteractableTargets) ? this.npcs.getInteractableTargets() : [];
+    const allTargets = [...this.anchors, ...npcTargets];
+
+    for (const anchor of allTargets) {
       const dx = anchor.position.x - playerPos.x;
-      const dy = anchor.position.y - playerPos.y;
+      const dy = ((anchor.position.y !== undefined ? anchor.position.y : 1.2)) - playerPos.y;
       const dz = anchor.position.z - playerPos.z;
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -10573,19 +11482,24 @@ class InteractableSystem {
         const toTarget = new THREE.Vector3(dx, dy, dz).normalize();
         const dot = cameraForward.dot(toTarget);
 
-        if (dot >= 0.40 && dist < closestDist) {
+        if (dot >= 0.35 && dist < closestDist) {
           closestDist = dist;
 
-          // Check if zone is currently open
-          const zone = WORLD_ZONES.find(z => z.id === anchor.zoneId);
-          let isOpen = ZoneManager.isZoneOpen(zone, inGameHour);
+          let isOpen = true;
+          if (anchor.isNpc) {
+            isOpen = true;
+          } else {
+            // Check if zone is currently open
+            const zone = WORLD_ZONES.find(z => z.id === anchor.zoneId);
+            isOpen = ZoneManager.isZoneOpen(zone, inGameHour);
 
-          // Invariant I5 Predicate Parity for Semáforo Bico:
-          // Must be RED light for vehicles and traffic must be active (not empty city)
-          if (anchor.id === 'semaforo_bico') {
-            const isRed = this.traffic && this.traffic.trafficLight && this.traffic.trafficLight.state === 'RED';
-            const notEmpty = !this.traffic || !this.traffic.isEmptyCity;
-            isOpen = isOpen && isRed && notEmpty;
+            // Invariant I5 Predicate Parity for Semáforo Bico:
+            // Must be RED light for vehicles and traffic must be active (not empty city)
+            if (anchor.id === 'semaforo_bico') {
+              const isRed = this.traffic && this.traffic.trafficLight && this.traffic.trafficLight.state === 'RED';
+              const notEmpty = !this.traffic || !this.traffic.isEmptyCity;
+              isOpen = isOpen && isRed && notEmpty;
+            }
           }
 
           closestTarget = {
@@ -10762,7 +11676,8 @@ class GameManager {
     this.state = null;
     this.dayCycle = new DayCycle(this.city);
     this.dialog = new DialogSystem(this.controls);
-    this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound, this.traffic);
+    this.npcs = new NpcSystem(this.scene, this.sound, this.rng, this.textures);
+    this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound, this.traffic, this.npcs);
     this.hud = new HudGame();
     this.props = new GameProps(this.scene, this.physics, this.textures, this.sound);
     this.encounters = BRAZILIAN_ENCOUNTERS;
@@ -10899,6 +11814,12 @@ class GameManager {
     const forwardVec = new THREE.Vector3();
     this.camera.getWorldDirection(forwardVec);
 
+    // 5b. Update autonomous roaming NPCs (Clodoaldo, Caramelo, Juninho, Dona Neide)
+    const isModalOpen = this.isAnyModalActive();
+    if (this.npcs) {
+      this.npcs.update(delta, playerPos, isModalOpen, this.state);
+    }
+
     // 6. Raycast interactables check
     this.interactables.update(playerPos, forwardVec, this.clock, this.state);
 
@@ -10963,6 +11884,16 @@ class GameManager {
       for (const v of this.traffic.vehicles) {
         if (!v.currentSpeed || v.currentSpeed < 2.5) continue;
         const dist = Math.sqrt((v.x - playerPos.x) ** 2 + (v.z - playerPos.z) ** 2);
+
+        // Companion Caramelo bark warning if vehicle speeds close
+        if (dist < 3.8 && dist > 1.8 && this.state && this.state.flags && this.state.flags.carameloCompanheiro) {
+          if (!this.lastCarameloWarning || this.clock.elapsed - this.lastCarameloWarning > 4.0) {
+            this.lastCarameloWarning = this.clock.elapsed;
+            if (this.sound && this.sound.playDogBark) this.sound.playDogBark();
+            this.hud.showToast('🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!', 2500);
+          }
+        }
+
         if (dist < 1.8) {
           // Player hit by vehicle!
           if (this.sound) this.sound.playSiren();

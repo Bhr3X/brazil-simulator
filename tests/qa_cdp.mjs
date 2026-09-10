@@ -1426,6 +1426,70 @@ async function runTestSuite(url) {
       throw new Error(`TEST 19 FAILED: Playthrough simulation failure: ${JSON.stringify(playthroughResults)}`);
     }
 
+    // TEST 20: Roaming NPC System & Dynamic Utility
+    const npcTest = await evaluate(`
+      (() => {
+        const game = window.app.game;
+        const npcs = game ? game.npcs : null;
+        if (!npcs || !npcs.npcs || npcs.npcs.length !== 4) {
+          return { ok: false, reason: 'NpcSystem or NPCs array missing' };
+        }
+
+        const ids = npcs.npcs.map(n => n.id);
+        const expectedIds = ['clodoaldo', 'caramelo', 'juninho', 'dona_neide'];
+        const hasAllIds = expectedIds.every(id => ids.includes(id));
+
+        // Check 3D groups and children
+        const validMeshes = npcs.npcs.every(n => n.group && n.group.children.length > 0);
+
+        // Check dynamic targets exported for raycasting
+        const targets = npcs.getInteractableTargets();
+        const validTargets = targets.length === 4 && targets.every(t => t.isOpen && t.position && t.prompt);
+
+        // Test motion update: advance coordinates along waypoints
+        const initialClodoaldoX = npcs.npcs[0].group.position.x;
+        npcs.update(1.0, { x: 0, y: 1.2, z: 0 }, false, game.state);
+        const postMoveClodoaldoX = npcs.npcs[0].group.position.x;
+        const hasMoved = initialClodoaldoX !== postMoveClodoaldoX;
+
+        // Test encounter definitions and options
+        const encBaleiro = window.app.game.encounters['NPC_BALEIRO'];
+        const encCaramelo = window.app.game.encounters['NPC_CARAMELO'];
+        const encBike = window.app.game.encounters['NPC_BIKE'];
+        const encNeide = window.app.game.encounters['NPC_DONA_NEIDE'];
+        const hasAllEncounters = !!(encBaleiro && encCaramelo && encBike && encNeide);
+
+        // Test Caramelo interaction execution
+        const petOption = encCaramelo.getOptions(game.state).find(o => o.id === 'carinho_caramelo');
+        const preSanidade = game.state.sanidade;
+        const petResult = petOption ? petOption.execute(game.state, window.app.sound) : null;
+        const postSanidade = game.state.sanidade;
+        const petSucceeded = postSanidade >= preSanidade && !!petResult;
+
+        // Test Dona Neide starving protection (free meal if hungry)
+        const savedFome = game.state.fome;
+        game.state.fome = 15;
+        const marmitaOption = encNeide.getOptions(game.state).find(o => o.id === 'comprar_marmita');
+        const isFreeWhenStarving = marmitaOption && marmitaOption.costCentavos === 0;
+        game.state.fome = savedFome;
+
+        return {
+          ok: hasAllIds && validMeshes && validTargets && hasMoved && hasAllEncounters && petSucceeded && isFreeWhenStarving,
+          ids,
+          validMeshes,
+          targetsCount: targets.length,
+          hasMoved,
+          hasAllEncounters,
+          petSucceeded,
+          isFreeWhenStarving
+        };
+      })()
+    `);
+    console.log(`[TEST 20] Roaming NPC System & Dynamic Utility:`, npcTest);
+    if (!npcTest.ok) {
+      throw new Error(`TEST 20 FAILED: NPC test failed: ${JSON.stringify(npcTest)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

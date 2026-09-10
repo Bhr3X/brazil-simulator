@@ -7,12 +7,13 @@ import { BRAZILIAN_ENCOUNTERS } from './Encounters.js';
 import { ZoneManager, WORLD_ZONES } from '../world/Zones.js';
 
 export class InteractableSystem {
-  constructor(scene, camera, dialogSystem, soundEngine, trafficSystem = null) {
+  constructor(scene, camera, dialogSystem, soundEngine, trafficSystem = null, npcSystem = null) {
     this.scene = scene;
     this.camera = camera;
     this.dialog = dialogSystem;
     this.sound = soundEngine;
     this.traffic = trafficSystem;
+    this.npcs = npcSystem;
 
     this.currentTarget = null;
     this.promptElem = document.getElementById('interact-prompt');
@@ -132,9 +133,12 @@ export class InteractableSystem {
     let closestTarget = null;
     let closestDist = Infinity;
 
-    for (const anchor of this.anchors) {
+    const npcTargets = (this.npcs && this.npcs.getInteractableTargets) ? this.npcs.getInteractableTargets() : [];
+    const allTargets = [...this.anchors, ...npcTargets];
+
+    for (const anchor of allTargets) {
       const dx = anchor.position.x - playerPos.x;
-      const dy = anchor.position.y - playerPos.y;
+      const dy = ((anchor.position.y !== undefined ? anchor.position.y : 1.2)) - playerPos.y;
       const dz = anchor.position.z - playerPos.z;
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -143,19 +147,24 @@ export class InteractableSystem {
         const toTarget = new THREE.Vector3(dx, dy, dz).normalize();
         const dot = cameraForward.dot(toTarget);
 
-        if (dot >= 0.40 && dist < closestDist) {
+        if (dot >= 0.35 && dist < closestDist) {
           closestDist = dist;
 
-          // Check if zone is currently open
-          const zone = WORLD_ZONES.find(z => z.id === anchor.zoneId);
-          let isOpen = ZoneManager.isZoneOpen(zone, inGameHour);
+          let isOpen = true;
+          if (anchor.isNpc) {
+            isOpen = true;
+          } else {
+            // Check if zone is currently open
+            const zone = WORLD_ZONES.find(z => z.id === anchor.zoneId);
+            isOpen = ZoneManager.isZoneOpen(zone, inGameHour);
 
-          // Invariant I5 Predicate Parity for Semáforo Bico:
-          // Must be RED light for vehicles and traffic must be active (not empty city)
-          if (anchor.id === 'semaforo_bico') {
-            const isRed = this.traffic && this.traffic.trafficLight && this.traffic.trafficLight.state === 'RED';
-            const notEmpty = !this.traffic || !this.traffic.isEmptyCity;
-            isOpen = isOpen && isRed && notEmpty;
+            // Invariant I5 Predicate Parity for Semáforo Bico:
+            // Must be RED light for vehicles and traffic must be active (not empty city)
+            if (anchor.id === 'semaforo_bico') {
+              const isRed = this.traffic && this.traffic.trafficLight && this.traffic.trafficLight.state === 'RED';
+              const notEmpty = !this.traffic || !this.traffic.isEmptyCity;
+              isOpen = isOpen && isRed && notEmpty;
+            }
           }
 
           closestTarget = {

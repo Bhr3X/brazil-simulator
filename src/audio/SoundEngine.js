@@ -577,6 +577,62 @@ export class SoundEngine {
     });
   }
 
+  // 17. Brazilian Stray Dog Bark (Latido do Cão Caramelo)
+  playDogBark() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    [0, 0.16].forEach((delay, idx) => {
+      const startT = t + delay;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(idx === 0 ? 320 : 380, startT);
+      osc.frequency.exponentialRampToValueAtTime(140, startT + 0.12);
+
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(900, startT);
+      filter.Q.setValueAtTime(3.0, startT);
+
+      gain.gain.setValueAtTime(0.001, startT);
+      gain.gain.linearRampToValueAtTime(0.25, startT + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.14);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(startT);
+      osc.stop(startT + 0.15);
+    });
+  }
+
+  // 18. Bicycle Bell Clink (Triiim da Monark)
+  playBikeBell() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    [0, 0.09].forEach((delay) => {
+      const startT = t + delay;
+      [2093, 3136].forEach(freq => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startT);
+
+        gain.gain.setValueAtTime(0.15, startT);
+        gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.22);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start(startT);
+        osc.stop(startT + 0.24);
+      });
+    });
+  }
+
   setTimeOfDay(isDay) {
     this.isDay = isDay;
     if (this.ambientGain && this.ctx) {
