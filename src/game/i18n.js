@@ -164,7 +164,9 @@ export const TRANSLATIONS = {
       barraca_pastel: { name: 'BARRACA DE PASTEL DA DONA MARIA', prompt: 'PEDIR PASTEL DE FEIRA & CALDO DE CANA' },
       baile_laje: { name: 'BAILE DA LAJE NO ALTO DO ESCADÃO', prompt: 'CURTIR BAILE NA QUEBRADA OU TOMAR COROTE' },
       semaforo_bico: { name: 'SEMÁFORO DA EDGAR FACÓ', prompt: 'VENDER PAÇOCA OU LIMPAR PÁRA-BRISA NO SINAL' },
-      banco: { name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)', prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO' }
+      banco: { name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)', prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO' },
+      elevador_penthouse: { name: 'ELEVADOR DA COBERTURA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (DESCER PARA A PORTARIA / TÉRREO)' },
+      elevador_terreo: { name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)' }
     },
 
     npcs: {
@@ -363,7 +365,9 @@ export const TRANSLATIONS = {
       barraca_pastel: { name: 'DONA MARIA\'S STREET FOOD STALL', prompt: 'ORDER CRISPY PASTEL & SUGARCANE JUICE' },
       baile_laje: { name: 'ROOFTOP STREET PARTY ATOP STAIRWAY', prompt: 'ENJOY ROOFTOP PARTY OR SIP CHEAP COCKTAILS' },
       semaforo_bico: { name: 'EDGAR FACÓ TRAFFIC LIGHT', prompt: 'SELL PEANUT CANDY OR WIPE WINDSHIELDS' },
-      banco: { name: 'BANCO PIRITUBA (BRANCH 0086 & 24H ATM)', prompt: 'ACCESS BANK 24H ATM TERMINAL' }
+      banco: { name: 'BANCO PIRITUBA (BRANCH 0086 & 24H ATM)', prompt: 'ACCESS BANK 24H ATM TERMINAL' },
+      elevador_penthouse: { name: 'PENTHOUSE ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (GO DOWN TO GROUND FLOOR LOBBY)' },
+      elevador_terreo: { name: 'LOBBY ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (RIDE UP TO 12TH FLOOR PENTHOUSE)' }
     },
 
     npcs: {

@@ -201,6 +201,33 @@ export const WORLD_ZONES = [
     openHour: 7.5,
     closeHour: 19.5,
     description: 'Oficina mecânica tradicional de bairro. Peças usadas, troca de pneus, cheiro de graxa e rádio de pilha ligado.'
+  },
+  {
+    id: 'CASA_CLASSE_C',
+    name: 'CASA DO TIOZÃO CLT (RUA EMÍLIO LESSORE)',
+    min: { x: -12.5, y: 0.0, z: -15.5 },
+    max: { x: -3.5, y: 6.0, z: -8.5 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Sobrado aconchegante da classe trabalhadora. Sofá de curvim, TV com toalhinha de crochê e carnês na mesa.'
+  },
+  {
+    id: 'EDIFICIO_PENTHOUSE',
+    name: 'COBERTURA DO EDIFÍCIO (VISTA 180° JARAGUÁ)',
+    min: { x: 27.5, y: 31.5, z: -1.5 },
+    max: { x: 42.5, y: 40.0, z: 11.5 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Cobertura duplex de alto padrão no 12º andar. Janelas panorâmicas de vidro 180 graus com vista deslumbrante do Pico do Jaraguá.'
+  },
+  {
+    id: 'EDIFICIO_PORTARIA',
+    name: 'PORTARIA DO EDIFÍCIO JARAGUÁ TOWER',
+    min: { x: 27.5, y: 0.0, z: -1.5 },
+    max: { x: 42.5, y: 5.0, z: 11.5 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Saguão principal e portaria do edifício residencial de luxo com elevador de alta velocidade para a cobertura.'
   }
 ];
 

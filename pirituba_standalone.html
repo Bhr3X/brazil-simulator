@@ -4195,6 +4195,136 @@ class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 55. Suburban Parquet Wooden Floor (Taco de Madeira Envernizado)
+  createParquetTexture(repeatX = 2, repeatY = 2) {
+    const key = `parquet_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#9e6234';
+    ctx.fillRect(0, 0, 256, 256);
+
+    const plankW = 64;
+    const plankH = 16;
+    for (let y = 0; y < 256; y += plankH) {
+      const offsetX = (Math.floor(y / plankH) % 2) * (plankW / 2);
+      for (let x = -plankW; x < 256 + plankW; x += plankW) {
+        const tone = 0.85 + Math.random() * 0.3;
+        const r = Math.min(255, Math.floor(160 * tone));
+        const g = Math.min(255, Math.floor(100 * tone));
+        const b = Math.min(255, Math.floor(55 * tone));
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(x + offsetX + 1, y + 1, plankW - 2, plankH - 2);
+
+        ctx.strokeStyle = '#4a2810';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + offsetX, y, plankW, plankH);
+      }
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 56. Luxury White Carrara Marble Floor (Mármore Carrara Penthouse)
+  createMarbleTexture(repeatX = 2, repeatY = 2) {
+    const key = `marble_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#f2f4f7';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Subtle natural veins
+    ctx.strokeStyle = '#d0d5dc';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      let cx = Math.random() * 256;
+      let cy = 0;
+      ctx.moveTo(cx, cy);
+      while (cy < 256) {
+        cx += (Math.random() - 0.5) * 30;
+        cy += 20 + Math.random() * 30;
+        ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 57. High-Rise Tower Architectural Facade (Vidro & Granito)
+  createTowerFacadeTexture(repeatX = 2, repeatY = 8) {
+    const key = `tower_facade_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#20242b';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Grid of large tinted executive glass windows
+    ctx.fillStyle = '#1c3044';
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        ctx.fillRect(col * 64 + 6, row * 64 + 6, 52, 48);
+        ctx.fillStyle = '#2b4c6b';
+        ctx.fillRect(col * 64 + 10, row * 64 + 10, 20, 20); // Reflection gleam
+        ctx.fillStyle = '#1c3044';
+      }
+    }
+
+    // Architectural aluminum mullions
+    ctx.strokeStyle = '#a8b0b8';
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 256; i += 64) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0); ctx.lineTo(i, 256);
+      ctx.moveTo(0, i); ctx.lineTo(256, i);
+      ctx.stroke();
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 58. Modern Brushed Stainless Steel Elevator Doors
+  createElevatorDoorTexture(label = '12') {
+    const key = `elevator_door_${label}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Brushed steel gradient
+    const grad = ctx.createLinearGradient(0, 0, 256, 0);
+    grad.addColorStop(0, '#888e96');
+    grad.addColorStop(0.48, '#c2c8d0');
+    grad.addColorStop(0.5, '#40444a'); // Center vertical split
+    grad.addColorStop(0.52, '#c2c8d0');
+    grad.addColorStop(1, '#888e96');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Floor indicator digital display
+    ctx.fillStyle = '#11151a';
+    ctx.fillRect(88, 15, 80, 36);
+    ctx.strokeStyle = '#333b45';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(88, 15, 80, 36);
+
+    ctx.fillStyle = '#00f5d4';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText(`▲ ${label} ▲`, 128, 40);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 
 
@@ -4467,13 +4597,791 @@ class PhysicsEngine {
 }
 
 /**
+ * SpatialSoundSystem.js
+ * Manages 3D positional audio emitters throughout Pirituba (Bar do Tião, Adega, Baile da Laje, etc.).
+ * Simulates realistic acoustic distance falloff and lowpass air-muffling so that
+ * as the player walks toward a sound source, the radio swells from distant muffled bass
+ * into full, crisp, vibrant sound.
+ */
+
+const CITY_EMITTERS = [
+  {
+    id: 'BAR_DO_TIAO',
+    name: 'Bar do Tião (Radinho do Balcão)',
+    x: 12.0,
+    y: 1.2,
+    z: 42.0,
+    refDist: 4.5,
+    maxDist: 42.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: 'media/audio/ambience/boteco_chatter.mp3'
+  },
+  {
+    id: 'ADEGA_DO_ZE',
+    name: 'Adega do Zé (Caixa da Calçada)',
+    x: -14.0,
+    y: 1.2,
+    z: 42.0,
+    refDist: 4.0,
+    maxDist: 36.0,
+    preferredGenre: 'SERTANEJO',
+    ambienceFile: 'media/audio/ambience/papo_calcada.mp3'
+  },
+  {
+    id: 'BAILE_LAJE',
+    name: 'Baile da Laje (Paredão de Som)',
+    x: -15.0,
+    y: 7.2,
+    z: -78.0,
+    refDist: 8.0,
+    maxDist: 70.0,
+    preferredGenre: 'FUNK',
+    ambienceFile: null
+  },
+  {
+    id: 'PADARIA_ESTRELA',
+    name: 'Padaria Estrela (Som Ambiente)',
+    x: 32.0,
+    y: 1.2,
+    z: 41.0,
+    refDist: 4.0,
+    maxDist: 35.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'CRUZAMENTO_EDGAR_FACCO',
+    name: 'Cruzamento Paula Ferreira (Banca / Camelô)',
+    x: 0.0,
+    y: 1.2,
+    z: 16.0,
+    refDist: 5.0,
+    maxDist: 46.0,
+    preferredGenre: 'ROCK',
+    ambienceFile: 'media/audio/ambience/feira_ambulante.mp3'
+  }
+];
+
+class SpatialSoundSystem {
+  constructor(ctx, destinationNode) {
+    this.ctx = ctx;
+    this.destination = destinationNode;
+    this.emitters = CITY_EMITTERS;
+
+    // Spatial filter (lowpass filter that opens up as player approaches)
+    this.spatialFilter = this.ctx.createBiquadFilter();
+    this.spatialFilter.type = 'lowpass';
+    this.spatialFilter.frequency.setValueAtTime(20000, this.ctx.currentTime);
+    this.spatialFilter.Q.setValueAtTime(1.2, this.ctx.currentTime);
+
+    // Spatial gain node
+    this.spatialGain = this.ctx.createGain();
+    this.spatialGain.gain.setValueAtTime(1.0, this.ctx.currentTime);
+
+    this.spatialFilter.connect(this.spatialGain);
+    this.spatialGain.connect(this.destination);
+
+    // Ambient chatter elements
+    this.chatterAudios = new Map();
+    this.initChatterStreams();
+
+    this.currentAudibleGain = 1.0;
+    this.nearestEmitter = null;
+    this.isPersonalRadio = false; // When true (headphones), spatial falloff is bypassed
+  }
+
+  // Pre-load ambient audio loops for locations
+  initChatterStreams() {
+    for (const emitter of this.emitters) {
+      if (!emitter.ambienceFile) continue;
+      try {
+        const audio = new Audio();
+        audio.src = emitter.ambienceFile;
+        audio.loop = true;
+        audio.volume = 0.0;
+        audio.preload = 'auto';
+        this.chatterAudios.set(emitter.id, {
+          audio,
+          emitter,
+          isPlaying: false
+        });
+      } catch (e) {
+        console.warn('[SpatialSound] Could not init chatter for', emitter.id, e);
+      }
+    }
+
+    // High danger police siren & enquadro chatter
+    try {
+      const pmAudio = new Audio();
+      pmAudio.src = 'media/audio/ambience/enquadro_pm.mp3';
+      pmAudio.loop = true;
+      pmAudio.volume = 0.0;
+      pmAudio.preload = 'auto';
+      this.policeAudio = pmAudio;
+    } catch (e) {
+      console.warn('[SpatialSound] Police chatter init failed:', e);
+    }
+  }
+
+  // Input node for music or radio to pass through the spatial filter & gain
+  get inputNode() {
+    return this.spatialFilter;
+  }
+
+  setPersonalRadio(enabled) {
+    this.isPersonalRadio = enabled;
+  }
+
+  // Main frame update: calculate distances to all emitters and adjust gain + filter
+  update(playerPos, dangerLevel = 0) {
+    if (!playerPos || !this.ctx) return;
+
+    // 1. Personal radio (headphone / manual dial override): always full volume
+    if (this.isPersonalRadio) {
+      const t = this.ctx.currentTime;
+      this.spatialGain.gain.setTargetAtTime(1.0, t, 0.2);
+      this.spatialFilter.frequency.setTargetAtTime(20000, t, 0.2);
+      this.currentAudibleGain = 1.0;
+      return;
+    }
+
+    // 2. Find closest emitter to player
+    let closest = null;
+    let minDist = Infinity;
+
+    for (const em of this.emitters) {
+      const dist = Math.hypot(playerPos.x - em.x, playerPos.z - em.z);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = em;
+      }
+    }
+
+    this.nearestEmitter = closest;
+    const t = this.ctx.currentTime;
+
+    if (!closest || minDist > closest.maxDist) {
+      // Out of range of all emitters: faint background murmur (5% volume, muffled)
+      const ambientFloor = 0.06;
+      this.spatialGain.gain.setTargetAtTime(ambientFloor, t, 0.35);
+      this.spatialFilter.frequency.setTargetAtTime(750, t, 0.35);
+      this.currentAudibleGain = ambientFloor;
+    } else {
+      // Smooth distance attenuation (inverse-power curve)
+      const range = closest.maxDist - closest.refDist;
+      const distDelta = Math.max(0, minDist - closest.refDist);
+      const factor = Math.max(0.0, 1.0 - (distDelta / range));
+      // Organic curve: volume swells quickly as you get close
+      const calculatedGain = Math.pow(factor, 1.6);
+      // Frequency opens up: from 700 Hz (distant muffled thud) up to 20,000 Hz (clear acoustic highs)
+      const targetFreq = 700 + 19300 * Math.pow(factor, 2.0);
+
+      this.spatialGain.gain.setTargetAtTime(Math.max(0.05, calculatedGain), t, 0.18);
+      this.spatialFilter.frequency.setTargetAtTime(targetFreq, t, 0.18);
+      this.currentAudibleGain = calculatedGain;
+    }
+
+    // 3. Update spatial chatter loops for local establishments
+    for (const [emitterId, item] of this.chatterAudios.entries()) {
+      const dist = Math.hypot(playerPos.x - item.emitter.x, playerPos.z - item.emitter.z);
+      const maxChatterDist = 28.0; // Audible within 28 meters of boteco/feira
+      if (dist < maxChatterDist) {
+        const chatterFactor = Math.max(0, 1.0 - (dist / maxChatterDist));
+        const chatterVol = Math.pow(chatterFactor, 1.4) * 0.45;
+        if (!item.isPlaying) {
+          item.audio.play().then(() => { item.isPlaying = true; }).catch(() => {});
+        }
+        item.audio.volume = chatterVol;
+      } else {
+        if (item.isPlaying && item.audio.volume > 0.01) {
+          item.audio.volume = Math.max(0, item.audio.volume - 0.05);
+        } else if (item.isPlaying) {
+          item.audio.pause();
+          item.isPlaying = false;
+        }
+      }
+    }
+
+    // 4. Update police chatter / sirens when danger is high
+    if (this.policeAudio) {
+      if (dangerLevel >= 55) {
+        const dangerFactor = Math.min(1.0, (dangerLevel - 55) / 45);
+        const targetVol = dangerFactor * 0.40;
+        if (this.policeAudio.paused) {
+          this.policeAudio.play().catch(() => {});
+        }
+        this.policeAudio.volume = targetVol;
+      } else {
+        if (!this.policeAudio.paused && this.policeAudio.volume > 0.02) {
+          this.policeAudio.volume = Math.max(0, this.policeAudio.volume - 0.04);
+        } else if (!this.policeAudio.paused) {
+          this.policeAudio.pause();
+        }
+      }
+    }
+  }
+
+  stopAll() {
+    for (const item of this.chatterAudios.values()) {
+      if (item.audio) {
+        item.audio.pause();
+        item.audio.currentTime = 0;
+      }
+    }
+    if (this.policeAudio) {
+      this.policeAudio.pause();
+      this.policeAudio.currentTime = 0;
+    }
+  }
+}
+
+/**
+ * NewsDesk.js
+ * In-game dynamic satirical radio breaking news & interactive weather broadcast.
+ *
+ * Tracks player activity over the last 5 minutes and generates a live debate between
+ * two deadpan Brazilian journalists:
+ * - Cadu da Bancada (Serious sensationalist studio anchor in the style of Datena / Jornal da Band)
+ * - Marcão da Madrugada (Investigative field reporter live on the streets of Pirituba)
+ *
+ * Concludes with a weather forecast announcement that directly triggers real-time
+ * in-game weather transitions (Summer Storm, São Paulo Drizzle, or Scorching Heat).
+ */
+
+class NewsDesk {
+  constructor(soundEngine) {
+    this.sound = soundEngine;
+    this.events = [];
+    this.maxEventAgeSeconds = 300; // Rolling 5-minute memory window
+    this.isPlayingNews = false;
+    this.newsTickerEl = null;
+    this.weatherCallback = null;
+
+    // Available PT-BR voices in browser
+    this.ptVoices = [];
+    this.initVoices();
+    this.createHudNewsTicker();
+  }
+
+  initVoices() {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    const loadVoices = () => {
+      const allVoices = window.speechSynthesis.getVoices() || [];
+      this.ptVoices = allVoices.filter(v => v.lang.startsWith('pt') || v.lang.includes('BR'));
+    };
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }
+
+  setWeatherCallback(cb) {
+    this.weatherCallback = cb;
+  }
+
+  // Record an action into the rolling 5-minute history buffer
+  recordAction(category, description, meta = {}) {
+    const now = Date.now();
+    this.events.push({
+      time: now,
+      category,
+      desc: description,
+      meta
+    });
+    // Prune events older than 5 minutes
+    const cutoff = now - (this.maxEventAgeSeconds * 1000);
+    this.events = this.events.filter(e => e.time >= cutoff);
+  }
+
+  createHudNewsTicker() {
+    if (typeof document === 'undefined') return;
+    let ticker = document.getElementById('radio-news-ticker');
+    if (!ticker) {
+      ticker = document.createElement('div');
+      ticker.id = 'radio-news-ticker';
+      ticker.style.cssText = `
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 88%;
+        max-width: 860px;
+        background: rgba(10, 14, 24, 0.94);
+        border: 2px solid #ffcc00;
+        border-radius: 6px;
+        box-shadow: 0 0 16px rgba(255, 204, 0, 0.4);
+        padding: 8px 16px;
+        display: none;
+        align-items: center;
+        gap: 12px;
+        z-index: 10000;
+        font-family: monospace;
+        color: #ffffff;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      `;
+      ticker.innerHTML = `
+        <div style="background: #cc0000; color: #fff; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 3px; white-space: nowrap; letter-spacing: 1px; animation: pulse 1s infinite alternate;">
+          🔴 PLANTÃO REDE SIMULAÇÃO
+        </div>
+        <div id="radio-news-speaker" style="color: #ffcc00; font-weight: bold; font-size: 12px; white-space: nowrap;">
+          CADU (ESTÚDIO):
+        </div>
+        <div id="radio-news-text" style="font-size: 13px; color: #f0f0f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          Sintonizando notícias urgentes de Pirituba...
+        </div>
+      `;
+      document.body.appendChild(ticker);
+    }
+    this.newsTickerEl = ticker;
+  }
+
+  showNewsTicker(speakerName, speechText) {
+    if (!this.newsTickerEl) return;
+    const speakerEl = document.getElementById('radio-news-speaker');
+    const textEl = document.getElementById('radio-news-text');
+    if (speakerEl) speakerEl.textContent = speakerName.toUpperCase() + ':';
+    if (textEl) textEl.textContent = speechText;
+    this.newsTickerEl.style.display = 'flex';
+  }
+
+  hideNewsTicker() {
+    if (this.newsTickerEl) {
+      this.newsTickerEl.style.display = 'none';
+    }
+  }
+
+  // Analyze events from the last 5 minutes and craft a satirical script
+  generateNewsScript(gameState) {
+    const recent = this.events;
+    const kicks = recent.filter(e => e.category === 'KICK');
+    const food = recent.filter(e => e.category === 'FOOD');
+    const debts = recent.filter(e => e.category === 'DEBT');
+    const encounters = recent.filter(e => e.category === 'ENCOUNTER');
+    const streetviews = recent.filter(e => e.category === 'STREETVIEW');
+
+    let story = null;
+
+    if (kicks.length >= 2) {
+      story = {
+        title: 'O Chutador Serial de Latinhas da Edgar Facó',
+        cadu1: 'Atenção, ouvintes da Rede Simulação! Um flagrante de desordem pública na Edgar Facó está mobilizando a vizinhança. Marcão, você está ao vivo. O que está acontecendo?',
+        marcao1: `Pois é, Cadu! A coisa tá feia! Um elemento descontrolado foi flagrado desferindo chutes violentos em ${kicks.length} objetos no asfalto, incluindo latinhas de cerveja e a bola da molecada!`,
+        cadu2: 'É um absurdo, Marcão! A que ponto chegamos? A pessoa não tem um lote pra carpir e fica chutando lixo pela avenida! As autoridades já foram acionadas?',
+        marcao2: 'O Seu Tião do bar já ameaçou pegar o cabo de vassoura, Cadu! A CET pede que os motoristas diminuam a velocidade para não atropelar a bola dente-de-leite!'
+      };
+    } else if (gameState && gameState.fome < 25) {
+      story = {
+        title: 'Calamidade Nutricional: Bucho Zerado em Pirituba',
+        cadu1: 'Urgente! O departamento de saúde comunitária emite alerta de nível vermelho para a região da Paula Ferreira. Marcão, qual é a gravidade da situação?',
+        marcao1: 'Gravíssima, Cadu! Um cidadão está perambulando pelo bairro com o bucho em estado de calamidade pública! O estômago do indivíduo está roncando mais alto que a moto dos Correios!',
+        cadu2: 'Mas pelo amor de Deus, Marcão! A Padaria Estrela está aberta, tem coxinha na vitrine! Por que o cidadão se recusa a se alimentar?',
+        marcao2: 'Fontes informam que ele tá guardando as moedas ou simplesmente esqueceu de mastigar, Cadu! Se não comer um pastel nos próximos minutos, vai desmaiar no meio-fio!'
+      };
+    } else if (gameState && gameState.debt > 0) {
+      const debtReais = (gameState.debt / 100).toFixed(2).replace('.', ',');
+      story = {
+        title: 'Crise Financeira: Calote Histórico no Bar do Tião',
+        cadu1: 'Economia em frangalhos em Pirituba! O rombo financeiro na praça já preocupa os comerciantes locais. Marcão, você tem os números?',
+        marcao1: `Exatamente, Cadu! Foi detectada uma dívida colossal de R$ ${debtReais} pendurada na caderneta de fiado do Seu Tião! O caloteiro segue foragido pelas esquinas!`,
+        cadu2: 'Inadmissível, Marcão! O Seu Tião trabalha de sol a sol, vendendo cerveja estalando de gelada, pro cidadão tomar fiado e sumir do mapa? Cadê a honra do trabalhador?',
+        marcao2: 'O Tião já cortou o fiado de todo o bairro, Cadu! Quem for tomar uma gelada agora, só no dinheiro vivo ou no Pix!'
+      };
+    } else if (gameState && gameState.perigo >= 50) {
+      story = {
+        title: 'Operação Policial: Tensão nas Vielas da Zona Oeste',
+        cadu1: 'Plantão policial! Viaturas da PM estão em patrulhamento ostensivo pelas artérias de Pirituba. Marcão, o cerco está se fechando?',
+        marcao1: 'O clima é tenso, Cadu! A polícia identificou um indivíduo com índice de perigo nas alturas! O helicóptero Águia já sobrevoa a ponte da Paula Ferreira!',
+        cadu2: 'A polícia de São Paulo não dorme em serviço, Marcão! Quem tiver com a ginga frouxa e documento vencido, melhor encostar na parede com a mão na cabeça!',
+        marcao2: 'Exatamente, Cadu! O conselho aqui é manter a calma e não fazer movimentos bruscos na frente da barca!'
+      };
+    } else if (streetviews.length > 0) {
+      story = {
+        title: 'Fenômeno Paranormal: O Homem que Encarava o Satélite',
+        cadu1: 'Mistério sem explicação em Pirituba! Moradores relatam um transe coletivo no cruzamento central. Marcão, você presenciou a cena?',
+        marcao1: 'Presenciei, Cadu! Um cidadão simplesmente parou no meio da rua, congelou o corpo e começou a encarar o céu em 360 graus, como se estivesse dentro do Google Street View!',
+        cadu2: 'Que loucura, Marcão! Será que o processador do cidadão travou na renderização dos prédios? É efeito do calor ou da cachaça?',
+        marcao2: 'Dizem que ele estava procurando o carro do satélite na Paula Ferreira, Cadu! Uma cena surreal!'
+      };
+    } else {
+      // General satirical filler news
+      story = {
+        title: 'Flagrante do Cotidiano: Rotina Agitada em Pirituba',
+        cadu1: 'Voltamos com as notícias do trânsito e do cotidiano em Pirituba. Marcão, como está a movimentação das calçadas neste momento?',
+        marcao1: 'Muita correria, Cadu! O pessoal descendo do trem da CPTM, a feira livre bombando e os cachorros vira-lata caramelo fazendo a ronda habitual na porta do açougue!',
+        cadu2: 'Essa é a verdadeira São Paulo que trabalha e não para, Marcão! Vida que segue na selva de pedra!',
+        marcao2: 'Com certeza, Cadu! O pastel tá saindo quentinho e a vida não para de rodar no servidor!'
+      };
+    }
+
+    // Weather forecast options that will trigger real weather changes
+    const weatherOptions = [
+      {
+        mode: 'STORM',
+        text: 'Atenção motoristas na Marginal Tietê e na Paula Ferreira! O radar meteorológico detectou uma tempestade de verão violenta se aproximando! Vai desabar o céu com chuva torrencial e trovoadas nos próximos minutos!'
+      },
+      {
+        mode: 'GAROA',
+        text: 'A previsão para as próximas horas em São Paulo é daquela clássica garoa paulistana, névoa baixa e pista molhada na Edgar Facó. Peguem o guarda-chuva porque o clima vai fechar!'
+      },
+      {
+        mode: 'CLEAR',
+        text: 'O sol vai abrir com força em Pirituba! Sensação térmica de 36 graus no asfalto quente. O céu limpo promete uma tarde de boteco e cerveja gelada!'
+      }
+    ];
+
+    // Pick weather
+    const selectedWeather = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
+
+    return {
+      story,
+      weather: selectedWeather
+    };
+  }
+
+  // Play dialogue sequentially using browser SpeechSynthesis with dual voices
+  broadcastBreakingNews(gameState, onComplete) {
+    if (this.isPlayingNews) return;
+    this.isPlayingNews = true;
+
+    const { story, weather } = this.generateNewsScript(gameState);
+
+    // Dialogue sequence
+    const lines = [
+      { speaker: 'Cadu (Estúdio)', text: story.cadu1, pitch: 0.88, rate: 1.02 },
+      { speaker: 'Marcão (Rua)', text: story.marcao1, pitch: 1.18, rate: 1.10 },
+      { speaker: 'Cadu (Estúdio)', text: story.cadu2, pitch: 0.88, rate: 1.02 },
+      { speaker: 'Marcão (Rua)', text: story.marcao2, pitch: 1.18, rate: 1.10 },
+      { speaker: 'Cadu (Estúdio)', text: 'E agora, Marcão, como fica o tempo nas próximas horas?', pitch: 0.88, rate: 1.04 },
+      { speaker: 'Marcão (Previsão)', text: weather.text, pitch: 1.15, rate: 1.08, isWeatherEnd: true }
+    ];
+
+    let currentIdx = 0;
+
+    const playNextLine = () => {
+      if (currentIdx >= lines.length) {
+        this.hideNewsTicker();
+        this.isPlayingNews = false;
+        // Trigger weather shift in game engine
+        if (this.weatherCallback) {
+          this.weatherCallback(weather.mode);
+        }
+        if (typeof onComplete === 'function') onComplete();
+        return;
+      }
+
+      const item = lines[currentIdx++];
+      this.showNewsTicker(item.speaker, item.text);
+
+      // Play walkie-talkie / radio click sound effect via SoundEngine
+      if (this.sound && this.sound.playRadioClick) {
+        this.sound.playRadioClick();
+      }
+
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel(); // Cancel any lingering speech
+        const utterance = new SpeechSynthesisUtterance(item.text);
+        utterance.lang = 'pt-BR';
+        utterance.pitch = item.pitch;
+        utterance.rate = item.rate;
+
+        // Pick specific voice if available
+        if (this.ptVoices.length > 0) {
+          // If Cadu, pick first male/standard voice; if Marcão, pick second or alternate
+          const voiceIdx = item.speaker.includes('Cadu') ? 0 : Math.min(1, this.ptVoices.length - 1);
+          utterance.voice = this.ptVoices[voiceIdx];
+        }
+
+        utterance.onend = () => {
+          setTimeout(playNextLine, 350);
+        };
+
+        utterance.onerror = () => {
+          setTimeout(playNextLine, 350);
+        };
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        // Fallback for browsers without speech synthesis: show text on screen for 4s
+        setTimeout(playNextLine, 4000);
+      }
+    };
+
+    // Begin sequence
+    playNextLine();
+  }
+}
+
+/**
+ * RadioBroadcast.js
+ * Comprehensive Brazilian FM Radio Station Engine for Brazil Simulator.
+ *
+ * Coordinates:
+ * - Full 13-track Brazilian music catalogue across all iconic genres
+ * - Authentic radio vinhetas (Alfa FM Pirituba, TransMatrix FM, etc.)
+ * - Programmed station flow: [1-3 Songs] -> [Vinheta] -> [Breaking News & Weather] -> [Vinheta] -> [Next Song]
+ * - Audio ducking during news and vinhetas
+ * - Seamless integration with SpatialSoundSystem for city sound box falloff
+ */
+
+const RADIO_STATIONS = {
+  AUTO: { id: 'AUTO', name: 'AUTO (ESPACIAL / BAIRRO)', icon: '📻', desc: 'Rádio espacial das caixas de som da cidade' },
+  MPB: { id: 'MPB', name: 'MPB / BOSSA PIRITUBA', icon: '☕', desc: 'Tom Gilberto, violão de nylon, choro e rock clássico' },
+  PAGODE: { id: 'PAGODE', name: 'PAGODE DO TIÃO', icon: '🍺', desc: 'Rollback do Zé, samba de raiz, forró e modão de boteco' },
+  FUNK: { id: 'FUNK', name: 'BAILE DA LAJE 114 BPM', icon: '🔊', desc: 'Bonde do Tigrão, tamborzão 2000s, rap nacional e axé' },
+  OFF: { id: 'OFF', name: 'DESLIGADO', icon: '🔇', desc: 'Rádio desligada (apenas sons do ambiente)' }
+};
+
+const TRACKS_CATALOGUE = [
+  { id: 'funk_bonde', title: 'Bonde da Simulação', artist: 'Bonde do Tigrão (Matrix Edition)', genre: 'FUNK', src: 'media/audio/tracks/funk_bonde_tigrao.mp3' },
+  { id: 'pagode_romantico', title: 'Rollback do Zé', artist: 'Só Pra Contrariar o Bug', genre: 'PAGODE', src: 'media/audio/tracks/pagode_romantico.mp3' },
+  { id: 'bossa_mpb', title: 'Bossa na Simulação', artist: 'Tom Gilberto dos Bytes', genre: 'MPB', src: 'media/audio/tracks/bossa_nova_mpb.mp3' },
+  { id: 'sertanejo_sofrencia', title: 'Código Binário', artist: 'Zezé di Camargo & o Servidor', genre: 'PAGODE', src: 'media/audio/tracks/sertanejo_sofrencia.mp3' },
+  { id: 'forro_xote', title: 'Matrix do Forró', artist: 'Trio Nordestino do Glitch', genre: 'PAGODE', src: 'media/audio/tracks/forro_pe_de_serra.mp3' },
+  { id: 'samba_carnaval', title: 'Tigre da Ilusão', artist: 'G.R.E.S. Vai-Vai do Byte', genre: 'PAGODE', src: 'media/audio/tracks/samba_enredo_carnaval.mp3' },
+  { id: 'samba_raiz', title: 'Samba do NPC', artist: 'Zeca do Boteco', genre: 'PAGODE', src: 'media/audio/tracks/samba_de_raiz.mp3' },
+  { id: 'axe_micareta', title: 'Pula no Glitch', artist: 'Chiclete com Firewall', genre: 'FUNK', src: 'media/audio/tracks/axe_micareta.mp3' },
+  { id: 'brega_romantico', title: 'Garçom, Me Reinicia', artist: 'Reginaldo do Cabaré', genre: 'PAGODE', src: 'media/audio/tracks/brega_romantico.mp3' },
+  { id: 'rap_sp', title: 'Sobreviver Não É Videogame', artist: 'Racionais do Asfalto', genre: 'FUNK', src: 'media/audio/tracks/rap_nacional_sp.mp3' },
+  { id: 'manguebeat', title: 'Da Lama ao Byte', artist: 'Chico Science & Transistor', genre: 'FUNK', src: 'media/audio/tracks/manguebeat_maracatu.mp3' },
+  { id: 'rock_80s', title: 'Aperte o Reset', artist: 'Titãs da Central', genre: 'MPB', src: 'media/audio/tracks/rock_nacional_80s.mp3' },
+  { id: 'choro', title: 'Doçura do Choro', artist: 'Pixinguinha do Algoritmo', genre: 'MPB', src: 'media/audio/tracks/chorinho_tradicional.mp3' }
+];
+
+const VINHETAS_CATALOGUE = [
+  { id: 'alfa_fm', title: 'Alfa FM Pirituba', src: 'media/audio/vinhetas/vinheta_alfa_fm.mp3' },
+  { id: 'transmatrix', title: 'TransMatrix FM', src: 'media/audio/vinhetas/vinheta_transmatrix.mp3' }
+];
+
+class RadioBroadcast {
+  constructor(ctx, spatialSystem, newsDesk, proceduralFallback) {
+    this.ctx = ctx;
+    this.spatial = spatialSystem;
+    this.newsDesk = newsDesk;
+    this.fallback = proceduralFallback;
+
+    this.activeStation = 'AUTO';
+    this.effectiveGenre = 'MPB';
+    this.isPlaying = false;
+
+    // Radio Audio Element
+    this.audioElement = new Audio();
+    this.audioElement.preload = 'auto';
+
+    // Connect audioElement through Web Audio API for spatial processing & ducking
+    this.sourceNode = null;
+    this.duckingGain = this.ctx.createGain();
+    this.duckingGain.gain.setValueAtTime(1.0, this.ctx.currentTime);
+
+    // Connect: duckingGain -> spatial input -> master
+    this.duckingGain.connect(this.spatial.inputNode);
+
+    try {
+      this.sourceNode = this.ctx.createMediaElementSource(this.audioElement);
+      this.sourceNode.connect(this.duckingGain);
+    } catch (e) {
+      console.warn('[RadioBroadcast] createMediaElementSource error:', e);
+    }
+
+    // Program rotation state
+    this.currentTrack = null;
+    this.songsPlayedInBlock = 0;
+    this.songsPerNewsBlock = 2; // News after every 2 songs
+    this.isBroadcastingNews = false;
+
+    // Listen for song end
+    this.audioElement.addEventListener('ended', () => {
+      this.onSongEnded();
+    });
+
+    this.audioElement.addEventListener('error', (e) => {
+      console.warn('[RadioBroadcast] Track load error, using procedural fallback:', e);
+      if (this.fallback) this.fallback.start();
+    });
+  }
+
+  start() {
+    this.isPlaying = true;
+    this.playNextProgramItem();
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.audioElement) {
+      this.audioElement.pause();
+    }
+  }
+
+  setStation(stationId) {
+    if (!RADIO_STATIONS[stationId]) return RADIO_STATIONS[this.activeStation];
+    this.activeStation = stationId;
+
+    if (stationId === 'OFF') {
+      this.effectiveGenre = 'OFF';
+      this.stop();
+      if (this.fallback) this.fallback.setStation('OFF');
+      return RADIO_STATIONS.OFF;
+    }
+
+    if (stationId !== 'AUTO') {
+      this.effectiveGenre = stationId;
+      if (this.fallback) this.fallback.setStation(stationId);
+    } else {
+      if (this.effectiveGenre === 'OFF') {
+        this.effectiveGenre = this.cachedAutoGenre || 'MPB';
+      }
+      if (this.fallback) this.fallback.setStation('AUTO');
+    }
+
+    // Update spatial mode: AUTO uses city speakers; specific station is direct
+    if (this.spatial) {
+      this.spatial.setPersonalRadio(stationId !== 'AUTO' && stationId !== 'OFF');
+    }
+
+    this.isPlaying = true;
+    this.playNextProgramItem();
+    return RADIO_STATIONS[stationId];
+  }
+
+  cycleStation() {
+    const order = ['AUTO', 'MPB', 'PAGODE', 'FUNK', 'OFF'];
+    const currentIdx = order.indexOf(this.activeStation);
+    const nextIdx = (currentIdx + 1) % order.length;
+    const nextStation = order[nextIdx];
+    return this.setStation(nextStation);
+  }
+
+  playClassMusic(genre) {
+    if (['MPB', 'PAGODE', 'FUNK'].includes(genre)) {
+      this.effectiveGenre = genre;
+      this.cachedAutoGenre = genre;
+      const classTrack = TRACKS_CATALOGUE.find(t => t.genre === genre);
+      if (classTrack) {
+        this.currentTrack = classTrack;
+        this.isPlaying = true;
+        this.playAudioFile(classTrack.src);
+      }
+    }
+  }
+
+  updateContext(zoneId, inGameHour) {
+    let targetGenre = 'MPB';
+    if (zoneId === 'BAR_DO_TIAO' || zoneId === 'ADEGA_DO_ZE') {
+      targetGenre = 'PAGODE';
+    } else if (zoneId === 'BAILE_LAJE') {
+      targetGenre = 'FUNK';
+    } else {
+      if (inGameHour >= 22.5 || inGameHour < 6.0) {
+        targetGenre = 'FUNK';
+      } else if (inGameHour >= 15.5) {
+        targetGenre = 'PAGODE';
+      } else {
+        targetGenre = 'MPB';
+      }
+    }
+
+    this.cachedAutoGenre = targetGenre;
+    if (this.activeStation !== 'AUTO') return;
+
+    if (targetGenre !== this.effectiveGenre) {
+      this.effectiveGenre = targetGenre;
+    }
+  }
+
+  getCurrentTrack() {
+    return this.currentTrack;
+  }
+
+  onSongEnded() {
+    this.songsPlayedInBlock++;
+    if (this.songsPlayedInBlock >= this.songsPerNewsBlock) {
+      this.songsPlayedInBlock = 0;
+      this.startRadioIntermission();
+    } else {
+      this.playNextSong();
+    }
+  }
+
+  // Intermission: Vinheta -> News & Weather -> Return Vinheta -> Next Song
+  startRadioIntermission() {
+    if (this.isBroadcastingNews) return;
+    this.isBroadcastingNews = true;
+
+    // Duck volume to 12%
+    const t = this.ctx.currentTime;
+    this.duckingGain.gain.setTargetAtTime(0.12, t, 0.5);
+
+    // 1. Play Station Vinheta
+    const vinheta = VINHETAS_CATALOGUE[Math.floor(Math.random() * VINHETAS_CATALOGUE.length)];
+    this.playAudioFile(vinheta.src, () => {
+      // 2. Broadcast Breaking News with dual journalists & Weather
+      if (this.newsDesk) {
+        this.newsDesk.broadcastBreakingNews(window.__BS_GAME_STATE__ || null, () => {
+          // 3. Play Return Vinheta and restore full volume
+          this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.8);
+          this.isBroadcastingNews = false;
+          this.playNextSong();
+        });
+      } else {
+        this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.8);
+        this.isBroadcastingNews = false;
+        this.playNextSong();
+      }
+    });
+  }
+
+  playNextProgramItem() {
+    this.playNextSong();
+  }
+
+  playNextSong() {
+    if (!this.isPlaying || this.activeStation === 'OFF') return;
+
+    let pool = TRACKS_CATALOGUE;
+    if (this.activeStation !== 'AUTO' && this.activeStation !== 'TODAS') {
+      pool = TRACKS_CATALOGUE.filter(tr => tr.genre === this.activeStation);
+      if (pool.length === 0) pool = TRACKS_CATALOGUE;
+    } else if (this.activeStation === 'AUTO') {
+      // Pick based on zone / time-of-day genre
+      const matching = TRACKS_CATALOGUE.filter(tr => tr.genre === this.effectiveGenre);
+      if (matching.length > 0) pool = matching;
+    }
+
+    // Pick a random track (avoid repeating immediate last track)
+    let pick = pool[Math.floor(Math.random() * pool.length)];
+    if (pool.length > 1 && this.currentTrack && pick.id === this.currentTrack.id) {
+      pick = pool.find(tr => tr.id !== this.currentTrack.id) || pick;
+    }
+
+    this.currentTrack = pick;
+    this.playAudioFile(pick.src);
+  }
+
+  playAudioFile(src, onEndCallback = null) {
+    if (!this.audioElement) return;
+    this.audioElement.src = src;
+    this.audioElement.play().catch(err => {
+      console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
+    });
+
+    if (onEndCallback) {
+      const handler = () => {
+        this.audioElement.removeEventListener('ended', handler);
+        onEndCallback();
+      };
+      this.audioElement.addEventListener('ended', handler);
+    }
+  }
+}
+
+/**
  * Brazilian Style Procedural Music Engine
  * Generates authentic MPB / Bossa Nova, Pagode Raiz / Samba de Roda,
  * and Baile Funk / Tamborzão Mandelão using the Web Audio API.
  * 100% procedural Web Audio synthesis, zero external audio assets.
  */
 
-const RADIO_STATIONS = {
+const PROCEDURAL_STATIONS = {
   AUTO: { id: 'AUTO', name: 'AUTO (ZONAS & HORAS)', icon: '📻', desc: 'Sintoniza automaticamente conforme o bairro e a hora' },
   MPB: { id: 'MPB', name: 'MPB / BOSSA PIRITUBA', icon: '☕', desc: 'Violão de nylon sincopado e jazz brasileiro' },
   PAGODE: { id: 'PAGODE', name: 'PAGODE DO TIÃO', icon: '🍺', desc: 'Cavaquinho, surdo e pandeiro de boteco' },
@@ -4558,7 +5466,7 @@ class BrazilianMusicEngine {
   }
 
   setStation(stationId) {
-    if (!RADIO_STATIONS[stationId]) return;
+    if (!PROCEDURAL_STATIONS[stationId]) return;
     this.activeStation = stationId;
 
     if (stationId === 'OFF') {
@@ -4574,7 +5482,7 @@ class BrazilianMusicEngine {
     const nextIdx = (currentIdx + 1) % order.length;
     const nextStation = order[nextIdx];
     this.setStation(nextStation);
-    return RADIO_STATIONS[nextStation];
+    return PROCEDURAL_STATIONS[nextStation];
   }
 
   updateContext(zoneId, inGameHour) {
@@ -5066,10 +5974,11 @@ class BrazilianMusicEngine {
 }
 
 
+
 /**
- * Procedural Web Audio Engine
- * Generates all suburban Brazilian soundscapes, distant beats, footsteps,
- * and ambient effects in real time without external audio files.
+ * Procedural Web Audio Engine & Spatial Radio Broadcasting
+ * Coordinates 13-track authentic Brazilian radio, 3D sound boxes with distance muffling,
+ * live breaking news desk with dual journalists, and procedural environmental effects.
  */
 
 class SoundEngine {
@@ -5080,6 +5989,9 @@ class SoundEngine {
     this.masterGain = null;
     this.ambientGain = null;
     this.musicEngine = null;
+    this.spatialSystem = null;
+    this.newsDesk = null;
+    this.radioBroadcast = null;
 
     this.isDay = true;
     this.isRaining = false;
@@ -5109,9 +6021,18 @@ class SoundEngine {
       this.ambientGain.gain.setValueAtTime(0.32, this.ctx.currentTime);
       this.ambientGain.connect(this.masterGain);
 
-      // Initialize Procedural Brazilian Music Engine (MPB, Pagode, Baile Funk)
-      this.musicEngine = new BrazilianMusicEngine(this.ctx, this.masterGain);
-      this.musicEngine.start();
+      // 1. Spatial Sound System (3D positional emitters in Bar do Tião, Adega, Laje, etc.)
+      this.spatialSystem = new SpatialSoundSystem(this.ctx, this.masterGain);
+
+      // 2. Satirical Breaking News Desk with Cadu & Marcão
+      this.newsDesk = new NewsDesk(this);
+
+      // 3. Procedural synthesis engine (offline/fallback)
+      this.musicEngine = new BrazilianMusicEngine(this.ctx, this.spatialSystem.inputNode);
+
+      // 4. Radio Broadcast Engine (13 recorded Brazilian tracks, vinhetas, ducking, weather triggers)
+      this.radioBroadcast = new RadioBroadcast(this.ctx, this.spatialSystem, this.newsDesk, this.musicEngine);
+      this.radioBroadcast.start();
 
       this.isInitialized = true;
       this.startAmbience();
@@ -5132,15 +6053,31 @@ class SoundEngine {
     if (this.masterGain) {
       this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime);
     }
+    if (this.radioBroadcast && this.radioBroadcast.audioElement) {
+      this.radioBroadcast.audioElement.muted = this.isMuted;
+    }
     if (!this.isMuted && this.isRaining) {
       this.playRain(true);
     }
     return this.isMuted;
   }
 
+  playClassMusic(genre) {
+    if (!this.isInitialized) this.init();
+    if (this.radioBroadcast) {
+      this.radioBroadcast.playClassMusic(genre);
+    }
+    if (this.musicEngine) {
+      this.musicEngine.fadeToGenre(genre);
+    }
+  }
+
   // Radio Station Controls (MPB, Pagode, Baile Funk, Auto, Off)
   setRadioStation(stationId) {
     if (!this.isInitialized) this.init();
+    if (this.radioBroadcast) {
+      this.radioBroadcast.setStation(stationId);
+    }
     if (this.musicEngine) {
       this.musicEngine.setStation(stationId);
     }
@@ -5148,24 +6085,100 @@ class SoundEngine {
 
   cycleRadioStation() {
     if (!this.isInitialized) this.init();
-    if (this.musicEngine) {
-      return this.musicEngine.cycleStation();
+    if (this.radioBroadcast) {
+      const st = this.radioBroadcast.cycleStation();
+      if (this.musicEngine) {
+        this.musicEngine.setStation(st.id);
+      }
+      this.playRadioTuningGlitch();
+      return st;
     }
     return RADIO_STATIONS.AUTO;
   }
 
   updateMusicContext(zoneId, inGameHour) {
+    if (this.radioBroadcast) {
+      this.radioBroadcast.updateContext(zoneId, inGameHour);
+    }
     if (this.musicEngine) {
       this.musicEngine.updateContext(zoneId, inGameHour);
     }
   }
 
+  updateSpatial(playerPos, dangerLevel = 0) {
+    if (this.spatialSystem) {
+      this.spatialSystem.update(playerPos, dangerLevel);
+    }
+  }
+
   getRadioStation() {
-    return this.musicEngine?.activeStation || 'AUTO';
+    return this.radioBroadcast?.activeStation || 'AUTO';
   }
 
   getEffectiveGenre() {
-    return this.musicEngine?.effectiveGenre || 'MPB';
+    return this.radioBroadcast?.effectiveGenre || 'MPB';
+  }
+
+  // Radio analog tuning static sound when cycling stations
+  playRadioTuningGlitch() {
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.08, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.25;
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+      noise.connect(gain);
+      gain.connect(this.masterGain);
+      noise.start();
+    } catch (e) {}
+  }
+
+  // Walkie-talkie / radio microphone click
+  playRadioClick() {
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1400, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.045);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.05);
+    } catch (e) {}
+  }
+
+  // Dual-tone classic elevator arrival chime
+  playElevatorChime() {
+    if (!this.isInitialized || this.isMuted) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(659.25, t); // E5
+      osc2.frequency.setValueAtTime(880.0, t + 0.16); // A5
+      gain.gain.setValueAtTime(0.28, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(this.masterGain);
+      osc1.start(t);
+      osc1.stop(t + 0.35);
+      osc2.start(t + 0.16);
+      osc2.stop(t + 1.2);
+    } catch (e) {}
   }
 
   // 1. Procedural Footstep (surface aware)
@@ -5911,6 +6924,33 @@ const WORLD_ZONES = [
     openHour: 7.5,
     closeHour: 19.5,
     description: 'Oficina mecânica tradicional de bairro. Peças usadas, troca de pneus, cheiro de graxa e rádio de pilha ligado.'
+  },
+  {
+    id: 'CASA_CLASSE_C',
+    name: 'CASA DO TIOZÃO CLT (RUA EMÍLIO LESSORE)',
+    min: { x: -12.5, y: 0.0, z: -15.5 },
+    max: { x: -3.5, y: 6.0, z: -8.5 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Sobrado aconchegante da classe trabalhadora. Sofá de curvim, TV com toalhinha de crochê e carnês na mesa.'
+  },
+  {
+    id: 'EDIFICIO_PENTHOUSE',
+    name: 'COBERTURA DO EDIFÍCIO (VISTA 180° JARAGUÁ)',
+    min: { x: 27.5, y: 31.5, z: -1.5 },
+    max: { x: 42.5, y: 40.0, z: 11.5 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Cobertura duplex de alto padrão no 12º andar. Janelas panorâmicas de vidro 180 graus com vista deslumbrante do Pico do Jaraguá.'
+  },
+  {
+    id: 'EDIFICIO_PORTARIA',
+    name: 'PORTARIA DO EDIFÍCIO JARAGUÁ TOWER',
+    min: { x: 27.5, y: 0.0, z: -1.5 },
+    max: { x: 42.5, y: 5.0, z: 11.5 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Saguão principal e portaria do edifício residencial de luxo com elevador de alta velocidade para a cobertura.'
   }
 ];
 
@@ -10800,7 +11840,456 @@ class CityBuilder {
     );
   }
 
-  // 25. Expanded Street Grid: Rua Paula Ferreira, Cel. Bento Bicudo, Emílio Lessore & Street View Details
+  // 25. Suburban Mid-Class Residence (Casa do Tiozão CLT on Rua Emílio Lessore)
+  buildMidClassHouse(x, y, z) {
+    const w = 8.5;
+    const h = 5.2;
+    const d = 6.0;
+    const posY = y + h / 2;
+
+    // Outer walls: Painted suburban warm beige / yellow ochre
+    const wallMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#e8cf8d', 2, 2)
+    });
+    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0xefefef });
+    const woodFloorMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createParquetTexture(3, 2)
+    });
+
+    // South Wall (Back)
+    const backWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.3), wallMat);
+    backWall.position.set(x, posY, z + d / 2 - 0.15);
+    this.scene.add(backWall);
+
+    // West Wall (Left)
+    const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, h, d), wallMat);
+    leftWall.position.set(x - w / 2 + 0.15, posY, z);
+    this.scene.add(leftWall);
+
+    // East Wall (Right)
+    const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, h, d), wallMat);
+    rightWall.position.set(x + w / 2 - 0.15, posY, z);
+    this.scene.add(rightWall);
+
+    // North Wall (Front facing Rua Emílio Lessore) - Left piece & Right piece with central open doorway
+    const doorW = 1.6;
+    const doorH = 2.4;
+    const frontWallW = (w - doorW) / 2;
+
+    const frontLeft = new THREE.Mesh(new THREE.BoxGeometry(frontWallW, h, 0.3), wallMat);
+    frontLeft.position.set(x - doorW / 2 - frontWallW / 2, posY, z - d / 2 + 0.15);
+    this.scene.add(frontLeft);
+
+    const frontRight = new THREE.Mesh(new THREE.BoxGeometry(frontWallW, h, 0.3), wallMat);
+    frontRight.position.set(x + doorW / 2 + frontWallW / 2, posY, z - d / 2 + 0.15);
+    this.scene.add(frontRight);
+
+    // Lintel above front door
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorW, h - doorH, 0.3), wallMat);
+    lintel.position.set(x, y + doorH + (h - doorH) / 2, z - d / 2 + 0.15);
+    this.scene.add(lintel);
+
+    // Interior floor (Parquet / Taco de madeira)
+    const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.6, d - 0.6), woodFloorMat);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.position.set(x, y + 0.015, z);
+    this.scene.add(floorMesh);
+
+    // Ceiling / Flat Roof
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.3, d + 0.4), ceilingMat);
+    roof.position.set(x, y + h + 0.15, z);
+    this.scene.add(roof);
+
+    // Blue Fortlev water tank on roof
+    this.buildWaterTank(x + 1.2, y + h + 0.3, z + 0.5);
+
+    // --- INTERIOR FURNISHINGS ---
+    // 1. Brown Faux-Leather Retro Sofa
+    const sofaMat = new THREE.MeshLambertMaterial({ color: 0x5a341e });
+    const sofaBase = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 0.85), sofaMat);
+    sofaBase.position.set(x - 2.0, y + 0.225, z + 1.2);
+    this.scene.add(sofaBase);
+    const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.65, 0.25), sofaMat);
+    sofaBack.position.set(x - 2.0, y + 0.55, z + 1.5);
+    this.scene.add(sofaBack);
+
+    // 2. Coffee Table with Unpaid Bills (Boleto Enel & Carnê Casas Bahia)
+    const tableMat = new THREE.MeshLambertMaterial({ color: 0x3d2716 });
+    const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.7), tableMat);
+    table.position.set(x - 2.0, y + 0.2, z - 0.1);
+    this.scene.add(table);
+
+    // Boleto on table
+    const paperMat = new THREE.MeshBasicMaterial({ color: 0xfafafa });
+    const boleto = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), paperMat);
+    boleto.rotation.x = -Math.PI / 2;
+    boleto.rotation.z = 0.2;
+    boleto.position.set(x - 2.2, y + 0.41, z - 0.1);
+    this.scene.add(boleto);
+
+    // Carnê booklet
+    const carneMat = new THREE.MeshLambertMaterial({ color: 0xcc2222 });
+    const carne = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.28), carneMat);
+    carne.position.set(x - 1.7, y + 0.42, z - 0.05);
+    this.scene.add(carne);
+
+    // 3. Wooden TV Rack with Vintage CRT Color TV
+    const rackMat = new THREE.MeshLambertMaterial({ color: 0x4a2e1b });
+    const tvRack = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.6), rackMat);
+    tvRack.position.set(x + 2.0, y + 0.3, z - 0.1);
+    this.scene.add(tvRack);
+
+    // CRT TV Body
+    const tvMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+    const tv = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.65, 0.55), tvMat);
+    tv.position.set(x + 2.0, y + 0.925, z - 0.1);
+    this.scene.add(tv);
+
+    // CRT Screen with subtle glow
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x5599cc });
+    const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.45), screenMat);
+    tvScreen.position.set(x + 2.0, y + 0.925, z - 0.38);
+    tvScreen.rotation.y = Math.PI;
+    this.scene.add(tvScreen);
+
+    // White Crochet Doily on top of TV (Toalhinha de crochê da vovó)
+    const crochetMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const crochet = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.4), crochetMat);
+    crochet.rotation.x = -Math.PI / 2;
+    crochet.position.set(x + 2.0, y + 1.26, z - 0.1);
+    this.scene.add(crochet);
+
+    // 4. White Refrigerator in Kitchenette Corner
+    const fridgeMat = new THREE.MeshLambertMaterial({ color: 0xf5f5f5 });
+    const fridge = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 0.85), fridgeMat);
+    fridge.position.set(x + 2.5, y + 0.9, z + 1.6);
+    this.scene.add(fridge);
+
+    // 5. Cozy Warm Overhead Ceiling Light
+    const warmLight = new THREE.PointLight(0xffd59e, 1.3, 9);
+    warmLight.position.set(x, y + 2.8, z);
+    this.scene.add(warmLight);
+
+    // 6. Solid Physics Colliders for Walls & Furnishings
+    // Back wall
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, y, z + d / 2 - 0.4),
+      new THREE.Vector3(x + w / 2, y + h, z + d / 2 + 0.1),
+      'solid'
+    );
+    // Left wall
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2 - 0.1, y, z - d / 2),
+      new THREE.Vector3(x - w / 2 + 0.4, y + h, z + d / 2),
+      'solid'
+    );
+    // Right wall
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + w / 2 - 0.4, y, z - d / 2),
+      new THREE.Vector3(x + w / 2 + 0.1, y + h, z + d / 2),
+      'solid'
+    );
+    // Front wall Left
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, y, z - d / 2 - 0.1),
+      new THREE.Vector3(x - doorW / 2, y + h, z - d / 2 + 0.4),
+      'solid'
+    );
+    // Front wall Right
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + doorW / 2, y, z - d / 2 - 0.1),
+      new THREE.Vector3(x + w / 2, y + h, z - d / 2 + 0.4),
+      'solid'
+    );
+    // Sofa & TV colliders
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - 3.2, y, z + 0.7),
+      new THREE.Vector3(x - 0.8, y + 1.2, z + 1.7),
+      'solid'
+    );
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + 1.2, y, z - 0.4),
+      new THREE.Vector3(x + 2.8, y + 1.5, z + 0.2),
+      'solid'
+    );
+  }
+
+  // 26. High-Rise Luxury Apartment Tower & Penthouse with 180° Glass View of Pico do Jaraguá & Elevator
+  buildLuxuryTowerAndPenthouse(x, y, z) {
+    const w = 14.0;
+    const d = 12.0;
+    const h = 36.5;
+
+    // Tower Exterior Facade (Dark granite with glass tiers)
+    const facadeMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createTowerFacadeTexture(2, 8)
+    });
+    const marbleFloorMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createMarbleTexture(3, 3)
+    });
+    const graniteFloorMat = new THREE.MeshLambertMaterial({ color: 0x181c22 });
+    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0x22262e });
+    const glassMat = new THREE.MeshLambertMaterial({
+      color: 0x99ddff,
+      transparent: true,
+      opacity: 0.32,
+      roughness: 0.05
+    });
+    const frameMat = new THREE.MeshLambertMaterial({ color: 0x15181d });
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xd8dde4 });
+
+    // -----------------------------------------------------------
+    // A. Tower Exterior Shell (Y = 4.0 to 32.0)
+    // -----------------------------------------------------------
+    const shaftH = 28.0;
+    const shaftMesh = new THREE.Mesh(new THREE.BoxGeometry(w, shaftH, d), facadeMat);
+    shaftMesh.position.set(x, 4.0 + shaftH / 2, z);
+    this.scene.add(shaftMesh);
+
+    // Tower Shaft Colliders (Solid perimeter)
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, 4.0, z - d / 2),
+      new THREE.Vector3(x + w / 2, 32.0, z + d / 2),
+      'solid'
+    );
+
+    // -----------------------------------------------------------
+    // B. Ground Floor Luxury Lobby (Y = 0.0 to 4.0)
+    // -----------------------------------------------------------
+    // Lobby Floor (Polished black granite)
+    const lobbyFloor = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, d - 0.4), graniteFloorMat);
+    lobbyFloor.rotation.x = -Math.PI / 2;
+    lobbyFloor.position.set(x, 0.015, z);
+    this.scene.add(lobbyFloor);
+
+    // Lobby Ceiling
+    const lobbyCeiling = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, d - 0.4), ceilingMat);
+    lobbyCeiling.rotation.x = Math.PI / 2;
+    lobbyCeiling.position.set(x, 3.95, z);
+    this.scene.add(lobbyCeiling);
+
+    // Lobby Walls (North, West, East, and South with entrance)
+    const lobbyWallMat = new THREE.MeshLambertMaterial({ color: 0x262c35 });
+    // North wall
+    const lobbyNorth = new THREE.Mesh(new THREE.BoxGeometry(w, 4.0, 0.4), lobbyWallMat);
+    lobbyNorth.position.set(x, 2.0, z - d / 2 + 0.2);
+    this.scene.add(lobbyNorth);
+    // West wall
+    const lobbyWest = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4.0, d), lobbyWallMat);
+    lobbyWest.position.set(x - w / 2 + 0.2, 2.0, z);
+    this.scene.add(lobbyWest);
+    // East wall
+    const lobbyEast = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4.0, d), lobbyWallMat);
+    lobbyEast.position.set(x + w / 2 - 0.2, 2.0, z);
+    this.scene.add(lobbyEast);
+    // South wall (Entrance facing Edgar Facó / sidewalk)
+    const entDoorW = 3.0;
+    const entSideW = (w - entDoorW) / 2;
+    const entLeft = new THREE.Mesh(new THREE.BoxGeometry(entSideW, 4.0, 0.4), lobbyWallMat);
+    entLeft.position.set(x - entDoorW / 2 - entSideW / 2, 2.0, z + d / 2 - 0.2);
+    this.scene.add(entLeft);
+    const entRight = new THREE.Mesh(new THREE.BoxGeometry(entSideW, 4.0, 0.4), lobbyWallMat);
+    entRight.position.set(x + entDoorW / 2 + entSideW / 2, 2.0, z + d / 2 - 0.2);
+    this.scene.add(entRight);
+
+    // Glass double doors at entrance
+    const lobbyGlassDoor = new THREE.Mesh(new THREE.BoxGeometry(entDoorW, 2.8, 0.08), glassMat);
+    lobbyGlassDoor.position.set(x, 1.4, z + d / 2 - 0.2);
+    this.scene.add(lobbyGlassDoor);
+
+    // Concierge Reception Desk
+    const desk = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 0.8), chromeMat);
+    desk.position.set(x + 3.0, 0.55, z + 2.0);
+    this.scene.add(desk);
+
+    // Security turnstile
+    const turnstile = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.2), chromeMat);
+    turnstile.position.set(x, 0.5, z + 3.5);
+    this.scene.add(turnstile);
+
+    // Ground Floor Elevator Doors & Frame at X = x - 3.5, Z = z - 2.5
+    const elevX = x - 3.5;
+    const elevZ = z - 2.5;
+    const elevDoorTerreo = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.0, 2.8),
+      new THREE.MeshLambertMaterial({ map: this.textures.createElevatorDoorTexture('T') })
+    );
+    elevDoorTerreo.position.set(elevX, 1.4, elevZ + 0.05);
+    this.scene.add(elevDoorTerreo);
+
+    // Blue elevator button glow
+    const btnLightTerreo = new THREE.PointLight(0x00f5d4, 1.2, 4);
+    btnLightTerreo.position.set(elevX + 1.2, 1.4, elevZ + 0.3);
+    this.scene.add(btnLightTerreo);
+
+    // Lobby Colliders
+    this.physics.addBoxCollider(new THREE.Vector3(x - w / 2, 0, z - d / 2), new THREE.Vector3(x + w / 2, 4.0, z - d / 2 + 0.5), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x - w / 2, 0, z - d / 2), new THREE.Vector3(x - w / 2 + 0.5, 4.0, z + d / 2), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x + w / 2 - 0.5, 0, z - d / 2), new THREE.Vector3(x + w / 2, 4.0, z + d / 2), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x - w / 2, 0, z + d / 2 - 0.5), new THREE.Vector3(x - entDoorW / 2, 4.0, z + d / 2 + 0.2), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x + entDoorW / 2, 0, z + d / 2 - 0.5), new THREE.Vector3(x + w / 2, 4.0, z + d / 2 + 0.2), 'solid');
+
+    // -----------------------------------------------------------
+    // C. 12th Floor Luxury Penthouse (Y = 32.0 to 36.5)
+    // -----------------------------------------------------------
+    const pY = 32.0;
+    const pH = 4.5;
+
+    // Marble Floor
+    const pentFloor = new THREE.Mesh(new THREE.PlaneGeometry(w, d), marbleFloorMat);
+    pentFloor.rotation.x = -Math.PI / 2;
+    pentFloor.position.set(x, pY + 0.02, z);
+    this.scene.add(pentFloor);
+
+    // Penthouse Ceiling / Rooftop slab
+    const pentRoof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 0.4, d + 0.6), frameMat);
+    pentRoof.position.set(x, pY + pH + 0.2, z);
+    this.scene.add(pentRoof);
+
+    // Helipad markings on roof slab
+    const heliMat = new THREE.MeshBasicMaterial({ color: 0xf5b800 });
+    const heliH = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 4.0), heliMat);
+    heliH.rotation.x = -Math.PI / 2;
+    heliH.position.set(x, pY + pH + 0.42, z);
+    this.scene.add(heliH);
+
+    // --- 180-DEGREE PANORAMIC GLASS BAY WINDOWS ---
+    // 1. Full North Wall Glass (Facing Pico do Jaraguá at Z = z - d/2)
+    const glassNorth = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, pH - 0.3), glassMat);
+    glassNorth.position.set(x, pY + pH / 2, z - d / 2 + 0.05);
+    this.scene.add(glassNorth);
+
+    // 2. West Wall Glass (Front Half towards North, Z = z - d/2 to z)
+    const glassWest = new THREE.Mesh(new THREE.PlaneGeometry(d / 2, pH - 0.3), glassMat);
+    glassWest.rotation.y = Math.PI / 2;
+    glassWest.position.set(x - w / 2 + 0.05, pY + pH / 2, z - d / 4);
+    this.scene.add(glassWest);
+
+    // 3. East Wall Glass (Front Half towards North, Z = z - d/2 to z)
+    const glassEast = new THREE.Mesh(new THREE.PlaneGeometry(d / 2, pH - 0.3), glassMat);
+    glassEast.rotation.y = -Math.PI / 2;
+    glassEast.position.set(x + w / 2 - 0.05, pY + pH / 2, z - d / 4);
+    this.scene.add(glassEast);
+
+    // Minimalist black structural window mullions / frames
+    for (let ox = -w / 2 + 2; ox < w / 2; ox += 2.5) {
+      const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.08, pH, 0.12), frameMat);
+      mullion.position.set(x + ox, pY + pH / 2, z - d / 2 + 0.06);
+      this.scene.add(mullion);
+    }
+
+    // South Solid Wall of Penthouse (Bedroom / bathroom backing)
+    const pentSouth = new THREE.Mesh(new THREE.BoxGeometry(w, pH, 0.4), frameMat);
+    pentSouth.position.set(x, pY + pH / 2, z + d / 2 - 0.2);
+    this.scene.add(pentSouth);
+
+    // Rear West Wall (Solid)
+    const pentRearWest = new THREE.Mesh(new THREE.BoxGeometry(0.4, pH, d / 2), frameMat);
+    pentRearWest.position.set(x - w / 2 + 0.2, pY + pH / 2, z + d / 4);
+    this.scene.add(pentRearWest);
+
+    // Rear East Wall (Solid)
+    const pentRearEast = new THREE.Mesh(new THREE.BoxGeometry(0.4, pH, d / 2), frameMat);
+    pentRearEast.position.set(x + w / 2 - 0.2, pY + pH / 2, z + d / 4);
+    this.scene.add(pentRearEast);
+
+    // --- PENTHOUSE LUXURY FURNISHINGS ---
+    // 1. Italian Designer Charcoal Leather Sectional Sofa
+    const pSofaMat = new THREE.MeshLambertMaterial({ color: 0x242830 });
+    const pSofa = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.5, 1.4), pSofaMat);
+    pSofa.position.set(x + 2.5, pY + 0.25, z + 1.5);
+    this.scene.add(pSofa);
+    const pSofaBack = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.7, 0.35), pSofaMat);
+    pSofaBack.position.set(x + 2.5, pY + 0.6, z + 2.1);
+    this.scene.add(pSofaBack);
+
+    // 2. Tempered Glass Coffee Table
+    const glassTable = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.4, 0.8), glassMat);
+    glassTable.position.set(x + 2.5, pY + 0.2, z - 0.2);
+    this.scene.add(glassTable);
+
+    // Green Stanley Tumbler on table
+    const stanleyMat = new THREE.MeshLambertMaterial({ color: 0x3d6647 });
+    const stanley = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.32, 10), stanleyMat);
+    stanley.position.set(x + 2.2, pY + 0.56, z - 0.2);
+    this.scene.add(stanley);
+
+    // iPhone 16 Pro Max Titanium
+    const phoneMat = new THREE.MeshLambertMaterial({ color: 0x8e8d8a });
+    const phone = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.24), phoneMat);
+    phone.position.set(x + 2.7, pY + 0.42, z - 0.15);
+    this.scene.add(phone);
+
+    // Black Centurion Card
+    const cardMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.1), cardMat);
+    card.rotation.x = -Math.PI / 2;
+    card.position.set(x + 2.8, pY + 0.42, z - 0.3);
+    this.scene.add(card);
+
+    // 3. Marble Kitchen Island / Espresso Bar
+    const islandMat = new THREE.MeshLambertMaterial({ map: this.textures.createMarbleTexture(1, 1) });
+    const island = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.1, 1.0), islandMat);
+    island.position.set(x - 2.0, pY + 0.55, z + 2.5);
+    this.scene.add(island);
+
+    // Chrome Italian Espresso Machine
+    const espresso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.55, 0.5), chromeMat);
+    espresso.position.set(x - 2.0, pY + 1.38, z + 2.5);
+    this.scene.add(espresso);
+
+    // 4. Designer Arc Floor Lamp & Warm Mood Light
+    const pentLight = new THREE.PointLight(0xffecd0, 1.4, 14);
+    pentLight.position.set(x + 2.0, pY + 3.2, z);
+    this.scene.add(pentLight);
+
+    // 5. Penthouse Elevator Doors & Call Panel at X = elevX, Z = elevZ
+    const elevDoorPent = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.0, 2.8),
+      new THREE.MeshLambertMaterial({ map: this.textures.createElevatorDoorTexture('12') })
+    );
+    elevDoorPent.position.set(elevX, pY + 1.4, elevZ + 0.05);
+    this.scene.add(elevDoorPent);
+
+    // Blue elevator button glow in Penthouse
+    const btnLightPent = new THREE.PointLight(0x00f5d4, 1.2, 4);
+    btnLightPent.position.set(elevX + 1.2, pY + 1.4, elevZ + 0.3);
+    this.scene.add(btnLightPent);
+
+    // --- PENTHOUSE COLLIDERS ---
+    // Floor collider
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, pY - 0.2, z - d / 2),
+      new THREE.Vector3(x + w / 2, pY + 0.05, z + d / 2),
+      'curb'
+    );
+    // North glass perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, pY, z - d / 2 - 0.2),
+      new THREE.Vector3(x + w / 2, pY + pH, z - d / 2 + 0.3),
+      'solid'
+    );
+    // West glass & solid perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2 - 0.2, pY, z - d / 2),
+      new THREE.Vector3(x - w / 2 + 0.3, pY + pH, z + d / 2),
+      'solid'
+    );
+    // East glass & solid perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + w / 2 - 0.3, pY, z - d / 2),
+      new THREE.Vector3(x + w / 2 + 0.2, pY + pH, z + d / 2),
+      'solid'
+    );
+    // South wall perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, pY, z + d / 2 - 0.4),
+      new THREE.Vector3(x + w / 2, pY + pH, z + d / 2 + 0.2),
+      'solid'
+    );
+  }
+
+  // 27. Expanded Street Grid: Rua Paula Ferreira, Cel. Bento Bicudo, Emílio Lessore & Street View Details
   buildExpandedStreetsAndDetails() {
     const asfaltoMat = new THREE.MeshLambertMaterial({
       map: this.textures.createAsfalto(12, 4)
@@ -11049,13 +12538,13 @@ class CityBuilder {
 
     // Block between Bento Bicudo and Emílio Lessore (Z = -12.0)
     addSobrado(-20.0, -12.0, 9.0, 5.5, 6.0, 'painted', '#4682b4');
-    addSobrado(-8.0, -12.0, 8.5, 6.0, 6.0, 'tijolo');
+    this.buildMidClassHouse(-8.0, 0.0, -12.0);
     addSobrado(38.0, -12.0, 8.5, 5.5, 6.0, 'reboco');
 
     // South of Bento Bicudo (Z = 4.5)
     addSobrado(-20.0, 4.5, 9.0, 5.8, 4.5, 'tijolo');
     addSobrado(22.0, 4.5, 8.5, 6.0, 4.5, 'painted', '#c47d4e');
-    addSobrado(34.0, 4.5, 8.5, 5.5, 4.5, 'reboco');
+    this.buildLuxuryTowerAndPenthouse(35.0, 0.0, 5.0);
 
     // -------------------------------------------------------------
     // I. Concrete Utility Poles with Street Lamps along Bento & Lessore
@@ -11727,6 +13216,50 @@ const EN_ENCOUNTER_TEXTS = {
           : 'The kid flashes a chrome revolver handle under his shirt: "— Lost, clown! Hand over the cash!" He takes R$ 25.00 from your pocket (-R$ 25.00, -20% Sanity).'
       }
     }
+  },
+
+  ELEVADOR_PENTHOUSE: {
+    title: '🛗 PENTHOUSE ELEVATOR (JARAGUÁ TOWER)',
+    intro: (state) => `
+      The private elevator's crystal-liquid touchscreen panel glows in cyan.<br>
+      Behind you, the 180° panoramic view of Pico do Jaraguá dominates the penthouse.<br>
+      The main lobby and concierge desk are 12 floors below.<br>
+      <small style="color:#00f5d4">Triplex Penthouse • 12th Floor • Jaraguá Tower</small>
+    `,
+    options: {
+      descer_terreo: {
+        label: 'Take elevator down to lobby (Ground Floor / Street Access)',
+        costLabel: 'Ride 12 Floors Down (Free)',
+        outcome: 'The panoramic elevator descends smoothly across all 12 floors down to the main lobby. The brushed steel doors slide open at the concierge entrance ready for you to explore Pirituba!'
+      },
+      ficar_cobertura: {
+        label: 'Stay in penthouse and admire the panoramic view of Pico do Jaraguá',
+        costLabel: '+10% Sanity (Relax)',
+        outcome: 'You take a deep breath looking out at the verdant mountain ridge on the horizon and miniature cars on Edgar Facó. An invigorating breeze lifts your spirits (+10% Sanity).'
+      }
+    }
+  },
+
+  ELEVADOR_TERREO: {
+    title: '🛗 LOBBY ELEVATOR (JARAGUÁ TOWER)',
+    intro: (state) => `
+      The high-speed elevator with brushed steel doors awaits in the social lobby.<br>
+      The concierge nods cordially from the polished black granite desk.<br>
+      The illuminated call button provides direct private access up to the Triplex Penthouse.<br>
+      <small style="color:#00f5d4">Concierge Lobby • Ground Floor • Jaraguá Tower</small>
+    `,
+    options: {
+      subir_penthouse: {
+        label: 'Ride elevator up to Penthouse (12th Floor - Jaraguá View)',
+        costLabel: 'Ride 12 Floors Up (Free)',
+        outcome: 'The doors close with a soft chime and the elevator ascends in seconds to the 12th floor. The breathtaking 180-degree vista of Pico do Jaraguá unfolds through the floor-to-ceiling glass walls!'
+      },
+      sair_rua: {
+        label: 'Step out onto the streets of Pirituba',
+        costLabel: 'Main Gate',
+        outcome: 'You step through the revolving glass doors onto the Pirituba sidewalk, feeling the authentic urban heat of São Paulo asphalt!'
+      }
+    }
   }
 };
 
@@ -11895,7 +13428,9 @@ const TRANSLATIONS = {
       barraca_pastel: { name: 'BARRACA DE PASTEL DA DONA MARIA', prompt: 'PEDIR PASTEL DE FEIRA & CALDO DE CANA' },
       baile_laje: { name: 'BAILE DA LAJE NO ALTO DO ESCADÃO', prompt: 'CURTIR BAILE NA QUEBRADA OU TOMAR COROTE' },
       semaforo_bico: { name: 'SEMÁFORO DA EDGAR FACÓ', prompt: 'VENDER PAÇOCA OU LIMPAR PÁRA-BRISA NO SINAL' },
-      banco: { name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)', prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO' }
+      banco: { name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)', prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO' },
+      elevador_penthouse: { name: 'ELEVADOR DA COBERTURA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (DESCER PARA A PORTARIA / TÉRREO)' },
+      elevador_terreo: { name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)' }
     },
 
     npcs: {
@@ -12094,7 +13629,9 @@ const TRANSLATIONS = {
       barraca_pastel: { name: 'DONA MARIA\'S STREET FOOD STALL', prompt: 'ORDER CRISPY PASTEL & SUGARCANE JUICE' },
       baile_laje: { name: 'ROOFTOP STREET PARTY ATOP STAIRWAY', prompt: 'ENJOY ROOFTOP PARTY OR SIP CHEAP COCKTAILS' },
       semaforo_bico: { name: 'EDGAR FACÓ TRAFFIC LIGHT', prompt: 'SELL PEANUT CANDY OR WIPE WINDSHIELDS' },
-      banco: { name: 'BANCO PIRITUBA (BRANCH 0086 & 24H ATM)', prompt: 'ACCESS BANK 24H ATM TERMINAL' }
+      banco: { name: 'BANCO PIRITUBA (BRANCH 0086 & 24H ATM)', prompt: 'ACCESS BANK 24H ATM TERMINAL' },
+      elevador_penthouse: { name: 'PENTHOUSE ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (GO DOWN TO GROUND FLOOR LOBBY)' },
+      elevador_terreo: { name: 'LOBBY ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (RIDE UP TO 12TH FLOOR PENTHOUSE)' }
     },
 
     npcs: {
@@ -12374,7 +13911,7 @@ const SOCIAL_CLASSES = {
     perigo: 20,
     ginga: 65,
     decay: { fomePerHour: 3.5, sanidadePerHour: 3.0 },
-    spawn: { x: 10.0, y: 0.25, z: 36.0 }, // Calçada Bar do Tião
+    spawn: { x: -8.0, y: 0.25, z: -12.5 }, // Casa do Tiozão CLT na Rua Emílio Lessore
     inventory: [
       { id: 'chave_carro', name: 'Chave do Celta 2004', desc: 'Está estacionado perto do posto, 2 portas na reserva.' },
       { id: 'boleto_enel', name: 'Boleto Enel (Vence Hoje!)', desc: 'R$ 124,50. Se não pagar cortam a luz amanhã.' },
@@ -12395,7 +13932,7 @@ const SOCIAL_CLASSES = {
     perigo: 5,
     ginga: 15,
     decay: { fomePerHour: 2.0, sanidadePerHour: 5.0 }, // Sanidade despenca rápido
-    spawn: { x: -14.0, y: 0.25, z: 35.0 }, // Calçada segura da Adega/Posto (fora da pista)
+    spawn: { x: 37.0, y: 32.25, z: 3.5 }, // Cobertura Penthouse 180° Vista Pico do Jaraguá
     inventory: [
       { id: 'iphone', name: 'iPhone 16 Pro Max Titânio', desc: 'Cobiçado por 10 entre 10 motoboys.' },
       { id: 'stanley', name: 'Copo Stanley com Matchá', desc: 'Mantém gelado por 18 horas.' },
@@ -12821,13 +14358,19 @@ class DayCycle {
     let sunIntensity = k1.sunInt + (k2.sunInt - k1.sunInt) * t;
     let ambIntensity = k1.ambInt + (k2.ambInt - k1.ambInt) * t;
 
-    // Apply São Paulo summer storm modifier
+    // Apply São Paulo weather modifiers
     if (this.weather === 'STORM') {
       sunColor = new THREE.Color(0x556677);
       sunIntensity *= 0.25;
       ambColor = new THREE.Color(0x3a4858);
       ambIntensity = Math.max(0.28, ambIntensity * 0.75); // Strictly enforce 0.28 ambient floor (I10)
       skyColor = new THREE.Color(0x202630); // Dark heavy storm cloud
+    } else if (this.weather === 'GAROA') {
+      sunColor = new THREE.Color(0x778899);
+      sunIntensity *= 0.45;
+      ambColor = new THREE.Color(0x4a5868);
+      ambIntensity = Math.max(0.28, ambIntensity * 0.85); // Strictly enforce 0.28 ambient floor (I10)
+      skyColor = new THREE.Color(0x3a4454); // Grey São Paulo drizzle sky
     }
 
     this.city.sunLight.color.copy(sunColor);
@@ -12895,7 +14438,12 @@ class GameProps {
       friction: 0.982,
       isKickable: true,
       onKick: (body, force) => {
-        if (this.sound) this.sound.playKickBall();
+        if (this.sound) {
+          this.sound.playKickBall();
+          if (this.sound.newsDesk) {
+            this.sound.newsDesk.recordAction('KICK', 'Chutou a bola dente-de-leite na calçada');
+          }
+        }
       }
     });
   }
@@ -12927,7 +14475,12 @@ class GameProps {
         friction: 0.94,
         isKickable: true,
         onKick: () => {
-          if (this.sound) this.sound.playCanOpen();
+          if (this.sound) {
+            this.sound.playCanOpen();
+            if (this.sound.newsDesk) {
+              this.sound.newsDesk.recordAction('KICK', 'Derrubou e chutou latinha de cerveja da mesa');
+            }
+          }
         }
       });
       this.canBodies.push(body);
@@ -14612,6 +16165,81 @@ const BRAZILIAN_ENCOUNTERS = {
         }
       ];
     }
+  },
+
+  ELEVADOR_PENTHOUSE: {
+    id: 'ELEVADOR_PENTHOUSE',
+    title: '🛗 ELEVADOR DA COBERTURA (JARAGUÁ TOWER)',
+    getIntroText: (state) => `
+      O display touchscreen de cristal líquido do elevador privativo brilha em ciano.<br>
+      Atrás de você, a vista panorâmica de 180° do Pico do Jaraguá domina a sala.<br>
+      O saguão principal e a portaria do edifício estão 12 andares abaixo.<br>
+      <small style="color:#00f5d4">Cobertura Triplex • 12º Andar • Jaraguá Tower</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'descer_terreo',
+        label: 'Descer para a portaria (Térreo / Acesso à Rua)',
+        costLabel: 'Descer 12 Andares (Grátis)',
+        execute: (state, sound) => {
+          if (sound && sound.playElevatorChime) sound.playElevatorChime();
+          else if (sound && sound.playCoin) sound.playCoin();
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(34.0, 0.25, 4.5);
+            window.app.controls.yaw = 0;
+          }
+          return 'O elevador panorâmico desce suavemente pelos 12 andares até o saguão principal. As portas de aço escovado se abrem na portaria térrea pronta para você explorar Pirituba!';
+        }
+      },
+      {
+        id: 'ficar_cobertura',
+        label: 'Ficar na cobertura apreciando a vista do Pico do Jaraguá',
+        costLabel: '+10% Sanidade (Relaxar)',
+        deltas: { sanidade: 10 },
+        execute: (state, sound) => {
+          state.apply({ sanidade: 10 }, 'Apreciou a vista panorâmica do Jaraguá');
+          return 'Você respira fundo olhando o contorno verdejante do morro no horizonte e os carros em miniatura na Edgar Facó. Uma brisa revigorante renova seu espírito (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  ELEVADOR_TERREO: {
+    id: 'ELEVADOR_TERREO',
+    title: '🛗 ELEVADOR DA PORTARIA (JARAGUÁ TOWER)',
+    getIntroText: (state) => `
+      O elevador de alta velocidade com portas de aço escovado aguarda no saguão social.<br>
+      O porteiro acena cordialmente do balcão de granito preto.<br>
+      O botão de chamada iluminado em azul dá acesso direto à Cobertura Triplex.<br>
+      <small style="color:#00f5d4">Portaria Social • Saguão Térreo • Jaraguá Tower</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'subir_penthouse',
+        label: 'Subir para a Cobertura (Penthouse 12º Andar - Vista Jaraguá)',
+        costLabel: 'Subir 12 Andares (Grátis)',
+        execute: (state, sound) => {
+          if (sound && sound.playElevatorChime) sound.playElevatorChime();
+          else if (sound && sound.playCoin) sound.playCoin();
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(37.0, 32.25, 3.5);
+            window.app.controls.yaw = Math.PI;
+          }
+          return 'As portas se fecham com um bip suave e o elevador sobe em segundos até o 12º andar. A vista espetacular de 180 graus do Pico do Jaraguá se descortina através das paredes de vidro!';
+        }
+      },
+      {
+        id: 'sair_rua',
+        label: 'Sair para as ruas de Pirituba',
+        costLabel: 'Portão Principal',
+        execute: (state, sound) => {
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(35.0, 0.25, 12.5);
+          }
+          return 'Você atravessa a porta de vidro giratória e pisa na calçada de Pirituba, sentindo o calor do asfalto paulistano!';
+        }
+      }
+    ]
   }
 };
 
@@ -15419,6 +17047,24 @@ class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'BANCO_PIRITUBA',
         zoneId: 'BANCO_PIRITUBA'
+      },
+      {
+        id: 'elevador_penthouse',
+        name: 'ELEVADOR DA COBERTURA (JARAGUÁ TOWER)',
+        prompt: 'PEGAR ELEVADOR (DESCER PARA A PORTARIA / TÉRREO)',
+        position: new THREE.Vector3(31.5, 33.2, 2.5),
+        maxDist: 3.5,
+        encounterId: 'ELEVADOR_PENTHOUSE',
+        zoneId: 'EDIFICIO_PENTHOUSE'
+      },
+      {
+        id: 'elevador_terreo',
+        name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)',
+        prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)',
+        position: new THREE.Vector3(31.5, 1.4, 2.5),
+        maxDist: 3.5,
+        encounterId: 'ELEVADOR_TERREO',
+        zoneId: 'EDIFICIO_PORTARIA'
       }
     ];
   }
@@ -15735,6 +17381,42 @@ class GameManager {
     if (this.sound) {
       this.sound.init();
       this.sound.playCoin();
+
+      // Trigger class-specific soundtrack: Funk for poor, Pagode for mid-class, MPB for rich
+      const classGenreMap = {
+        CLASSE_DE: 'FUNK',
+        CLASSE_C: 'PAGODE',
+        CLASSE_AB: 'MPB'
+      };
+      const genre = classGenreMap[chosenKey] || 'MPB';
+      this.sound.playClassMusic(genre);
+
+      // Register radio weather forecast broadcast callback
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.setWeatherCallback((weatherMode) => {
+          this.dayCycle.setWeather(weatherMode);
+          if (this.traffic) this.traffic.setWeather(weatherMode);
+          if (weatherMode === 'STORM') {
+            this.isStorming = true;
+            this.sound.playRain(true);
+            this.sound.playThunder();
+            this.hud.showToast('⛈️ <strong>ALERTA DA RÁDIO:</strong> Temporal desabando em Pirituba!', 5000);
+          } else if (weatherMode === 'GAROA') {
+            this.isStorming = false;
+            this.sound.playRain(true);
+            this.hud.showToast('🌧️ <strong>ALERTA DA RÁDIO:</strong> Garoa paulistana típica e asfalto molhado.', 5000);
+          } else {
+            this.isStorming = false;
+            this.sound.playRain(false);
+            this.hud.showToast('☀️ <strong>ALERTA DA RÁDIO:</strong> Sol abriu em Pirituba! Tarde quente!', 4000);
+          }
+        });
+      }
+    }
+
+    // Expose active state to window for live satirical radio reporting
+    if (typeof window !== 'undefined') {
+      window.__BS_GAME_STATE__ = this.state;
     }
 
     const toastTpl = t('toasts.spawn_intro', '🌟 <strong>VOCÊ NASCEU COMO: {title}</strong><br>{subtitle}');
@@ -15817,6 +17499,11 @@ class GameManager {
     const playerPos = this.controls.position;
     const forwardVec = new THREE.Vector3();
     this.camera.getWorldDirection(forwardVec);
+
+    // Update 3D spatial radio emitters (distance falloff & lowpass acoustic muffling)
+    if (this.sound && this.sound.updateSpatial) {
+      this.sound.updateSpatial(playerPos, this.state ? this.state.perigo : 0);
+    }
 
     // 5b. Update autonomous roaming NPCs (Clodoaldo, Caramelo, Juninho, Dona Neide)
     const isModalOpen = this.isAnyModalActive();
@@ -15940,7 +17627,12 @@ class GameManager {
   triggerDoisCarasMoto() {
     if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.hasMotoTriggered = true;
-    if (this.sound) this.sound.playMotorcycleRev();
+    if (this.sound) {
+      this.sound.playMotorcycleRev();
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('ENCOUNTER', 'Dois caras numa moto avistados na calçada');
+      }
+    }
 
     const enc = BRAZILIAN_ENCOUNTERS.DOIS_CARAS_MOTO;
     this.dialog.open({
@@ -15962,7 +17654,12 @@ class GameManager {
     if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.blitzCount++;
     this.lastBlitzHour = this.clock.inGameHour;
-    if (this.sound) this.sound.playSiren();
+    if (this.sound) {
+      this.sound.playSiren();
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('ENCOUNTER', 'Enquadro e blitz da Polícia Militar na madrugada');
+      }
+    }
 
     const enc = BRAZILIAN_ENCOUNTERS.BLITZ_PM;
     this.dialog.open({
@@ -16236,6 +17933,10 @@ class GameApp {
       if (this.streetViewModal) this.streetViewModal.classList.remove('modal-hidden');
       if (this.streetViewBtn) this.streetViewBtn.classList.add('active');
       if (this.controls && this.controls.refreshFreeze) this.controls.refreshFreeze();
+
+      if (this.sound && this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('STREETVIEW', 'Congelou e ficou encarando o céu em 360 graus na Edgar Facó');
+      }
 
       // Lazy-load iframe source if needed
       if (this.streetViewIframe && (this.streetViewIframe.src === 'about:blank' || !this.streetViewIframe.src)) {

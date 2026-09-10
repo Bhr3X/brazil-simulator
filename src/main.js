@@ -185,6 +185,10 @@ class GameApp {
       if (this.streetViewBtn) this.streetViewBtn.classList.add('active');
       if (this.controls && this.controls.refreshFreeze) this.controls.refreshFreeze();
 
+      if (this.sound && this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('STREETVIEW', 'Congelou e ficou encarando o céu em 360 graus na Edgar Facó');
+      }
+
       // Lazy-load iframe source if needed
       if (this.streetViewIframe && (this.streetViewIframe.src === 'about:blank' || !this.streetViewIframe.src)) {
         const dataSrc = this.streetViewIframe.getAttribute('data-src');

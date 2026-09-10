@@ -39,7 +39,7 @@ export const SOCIAL_CLASSES = {
     perigo: 20,
     ginga: 65,
     decay: { fomePerHour: 3.5, sanidadePerHour: 3.0 },
-    spawn: { x: 10.0, y: 0.25, z: 36.0 }, // Calçada Bar do Tião
+    spawn: { x: -8.0, y: 0.25, z: -12.5 }, // Casa do Tiozão CLT na Rua Emílio Lessore
     inventory: [
       { id: 'chave_carro', name: 'Chave do Celta 2004', desc: 'Está estacionado perto do posto, 2 portas na reserva.' },
       { id: 'boleto_enel', name: 'Boleto Enel (Vence Hoje!)', desc: 'R$ 124,50. Se não pagar cortam a luz amanhã.' },
@@ -60,7 +60,7 @@ export const SOCIAL_CLASSES = {
     perigo: 5,
     ginga: 15,
     decay: { fomePerHour: 2.0, sanidadePerHour: 5.0 }, // Sanidade despenca rápido
-    spawn: { x: -14.0, y: 0.25, z: 35.0 }, // Calçada segura da Adega/Posto (fora da pista)
+    spawn: { x: 37.0, y: 32.25, z: 3.5 }, // Cobertura Penthouse 180° Vista Pico do Jaraguá
     inventory: [
       { id: 'iphone', name: 'iPhone 16 Pro Max Titânio', desc: 'Cobiçado por 10 entre 10 motoboys.' },
       { id: 'stanley', name: 'Copo Stanley com Matchá', desc: 'Mantém gelado por 18 horas.' },

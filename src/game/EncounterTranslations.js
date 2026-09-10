@@ -606,5 +606,49 @@ export const EN_ENCOUNTER_TEXTS = {
           : 'The kid flashes a chrome revolver handle under his shirt: "— Lost, clown! Hand over the cash!" He takes R$ 25.00 from your pocket (-R$ 25.00, -20% Sanity).'
       }
     }
+  },
+
+  ELEVADOR_PENTHOUSE: {
+    title: '🛗 PENTHOUSE ELEVATOR (JARAGUÁ TOWER)',
+    intro: (state) => `
+      The private elevator's crystal-liquid touchscreen panel glows in cyan.<br>
+      Behind you, the 180° panoramic view of Pico do Jaraguá dominates the penthouse.<br>
+      The main lobby and concierge desk are 12 floors below.<br>
+      <small style="color:#00f5d4">Triplex Penthouse • 12th Floor • Jaraguá Tower</small>
+    `,
+    options: {
+      descer_terreo: {
+        label: 'Take elevator down to lobby (Ground Floor / Street Access)',
+        costLabel: 'Ride 12 Floors Down (Free)',
+        outcome: 'The panoramic elevator descends smoothly across all 12 floors down to the main lobby. The brushed steel doors slide open at the concierge entrance ready for you to explore Pirituba!'
+      },
+      ficar_cobertura: {
+        label: 'Stay in penthouse and admire the panoramic view of Pico do Jaraguá',
+        costLabel: '+10% Sanity (Relax)',
+        outcome: 'You take a deep breath looking out at the verdant mountain ridge on the horizon and miniature cars on Edgar Facó. An invigorating breeze lifts your spirits (+10% Sanity).'
+      }
+    }
+  },
+
+  ELEVADOR_TERREO: {
+    title: '🛗 LOBBY ELEVATOR (JARAGUÁ TOWER)',
+    intro: (state) => `
+      The high-speed elevator with brushed steel doors awaits in the social lobby.<br>
+      The concierge nods cordially from the polished black granite desk.<br>
+      The illuminated call button provides direct private access up to the Triplex Penthouse.<br>
+      <small style="color:#00f5d4">Concierge Lobby • Ground Floor • Jaraguá Tower</small>
+    `,
+    options: {
+      subir_penthouse: {
+        label: 'Ride elevator up to Penthouse (12th Floor - Jaraguá View)',
+        costLabel: 'Ride 12 Floors Up (Free)',
+        outcome: 'The doors close with a soft chime and the elevator ascends in seconds to the 12th floor. The breathtaking 180-degree vista of Pico do Jaraguá unfolds through the floor-to-ceiling glass walls!'
+      },
+      sair_rua: {
+        label: 'Step out onto the streets of Pirituba',
+        costLabel: 'Main Gate',
+        outcome: 'You step through the revolving glass doors onto the Pirituba sidewalk, feeling the authentic urban heat of São Paulo asphalt!'
+      }
+    }
   }
 };

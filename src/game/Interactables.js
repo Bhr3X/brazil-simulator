@@ -119,6 +119,24 @@ export class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'BANCO_PIRITUBA',
         zoneId: 'BANCO_PIRITUBA'
+      },
+      {
+        id: 'elevador_penthouse',
+        name: 'ELEVADOR DA COBERTURA (JARAGUÁ TOWER)',
+        prompt: 'PEGAR ELEVADOR (DESCER PARA A PORTARIA / TÉRREO)',
+        position: new THREE.Vector3(31.5, 33.2, 2.5),
+        maxDist: 3.5,
+        encounterId: 'ELEVADOR_PENTHOUSE',
+        zoneId: 'EDIFICIO_PENTHOUSE'
+      },
+      {
+        id: 'elevador_terreo',
+        name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)',
+        prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)',
+        position: new THREE.Vector3(31.5, 1.4, 2.5),
+        maxDist: 3.5,
+        encounterId: 'ELEVADOR_TERREO',
+        zoneId: 'EDIFICIO_PORTARIA'
       }
     ];
   }

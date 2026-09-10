@@ -40,7 +40,12 @@ export class GameProps {
       friction: 0.982,
       isKickable: true,
       onKick: (body, force) => {
-        if (this.sound) this.sound.playKickBall();
+        if (this.sound) {
+          this.sound.playKickBall();
+          if (this.sound.newsDesk) {
+            this.sound.newsDesk.recordAction('KICK', 'Chutou a bola dente-de-leite na calçada');
+          }
+        }
       }
     });
   }
@@ -72,7 +77,12 @@ export class GameProps {
         friction: 0.94,
         isKickable: true,
         onKick: () => {
-          if (this.sound) this.sound.playCanOpen();
+          if (this.sound) {
+            this.sound.playCanOpen();
+            if (this.sound.newsDesk) {
+              this.sound.newsDesk.recordAction('KICK', 'Derrubou e chutou latinha de cerveja da mesa');
+            }
+          }
         }
       });
       this.canBodies.push(body);

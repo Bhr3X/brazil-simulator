@@ -1555,5 +1555,135 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 55. Suburban Parquet Wooden Floor (Taco de Madeira Envernizado)
+  createParquetTexture(repeatX = 2, repeatY = 2) {
+    const key = `parquet_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#9e6234';
+    ctx.fillRect(0, 0, 256, 256);
+
+    const plankW = 64;
+    const plankH = 16;
+    for (let y = 0; y < 256; y += plankH) {
+      const offsetX = (Math.floor(y / plankH) % 2) * (plankW / 2);
+      for (let x = -plankW; x < 256 + plankW; x += plankW) {
+        const tone = 0.85 + Math.random() * 0.3;
+        const r = Math.min(255, Math.floor(160 * tone));
+        const g = Math.min(255, Math.floor(100 * tone));
+        const b = Math.min(255, Math.floor(55 * tone));
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(x + offsetX + 1, y + 1, plankW - 2, plankH - 2);
+
+        ctx.strokeStyle = '#4a2810';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + offsetX, y, plankW, plankH);
+      }
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 56. Luxury White Carrara Marble Floor (Mármore Carrara Penthouse)
+  createMarbleTexture(repeatX = 2, repeatY = 2) {
+    const key = `marble_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#f2f4f7';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Subtle natural veins
+    ctx.strokeStyle = '#d0d5dc';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      let cx = Math.random() * 256;
+      let cy = 0;
+      ctx.moveTo(cx, cy);
+      while (cy < 256) {
+        cx += (Math.random() - 0.5) * 30;
+        cy += 20 + Math.random() * 30;
+        ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 57. High-Rise Tower Architectural Facade (Vidro & Granito)
+  createTowerFacadeTexture(repeatX = 2, repeatY = 8) {
+    const key = `tower_facade_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#20242b';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Grid of large tinted executive glass windows
+    ctx.fillStyle = '#1c3044';
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        ctx.fillRect(col * 64 + 6, row * 64 + 6, 52, 48);
+        ctx.fillStyle = '#2b4c6b';
+        ctx.fillRect(col * 64 + 10, row * 64 + 10, 20, 20); // Reflection gleam
+        ctx.fillStyle = '#1c3044';
+      }
+    }
+
+    // Architectural aluminum mullions
+    ctx.strokeStyle = '#a8b0b8';
+    ctx.lineWidth = 2;
+    for (let i = 0; i <= 256; i += 64) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0); ctx.lineTo(i, 256);
+      ctx.moveTo(0, i); ctx.lineTo(256, i);
+      ctx.stroke();
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 58. Modern Brushed Stainless Steel Elevator Doors
+  createElevatorDoorTexture(label = '12') {
+    const key = `elevator_door_${label}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Brushed steel gradient
+    const grad = ctx.createLinearGradient(0, 0, 256, 0);
+    grad.addColorStop(0, '#888e96');
+    grad.addColorStop(0.48, '#c2c8d0');
+    grad.addColorStop(0.5, '#40444a'); // Center vertical split
+    grad.addColorStop(0.52, '#c2c8d0');
+    grad.addColorStop(1, '#888e96');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Floor indicator digital display
+    ctx.fillStyle = '#11151a';
+    ctx.fillRect(88, 15, 80, 36);
+    ctx.strokeStyle = '#333b45';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(88, 15, 80, 36);
+
+    ctx.fillStyle = '#00f5d4';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px monospace';
+    ctx.fillText(`▲ ${label} ▲`, 128, 40);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 

@@ -1,9 +1,14 @@
-import { BrazilianMusicEngine, RADIO_STATIONS } from './BrazilianMusic.js';
+import { BrazilianMusicEngine } from './BrazilianMusic.js';
+import { SpatialSoundSystem } from './SpatialSoundSystem.js';
+import { NewsDesk } from './NewsDesk.js';
+import { RadioBroadcast, RADIO_STATIONS } from './RadioBroadcast.js';
+
+export { RADIO_STATIONS };
 
 /**
- * Procedural Web Audio Engine
- * Generates all suburban Brazilian soundscapes, distant beats, footsteps,
- * and ambient effects in real time without external audio files.
+ * Procedural Web Audio Engine & Spatial Radio Broadcasting
+ * Coordinates 13-track authentic Brazilian radio, 3D sound boxes with distance muffling,
+ * live breaking news desk with dual journalists, and procedural environmental effects.
  */
 
 export class SoundEngine {
@@ -14,6 +19,9 @@ export class SoundEngine {
     this.masterGain = null;
     this.ambientGain = null;
     this.musicEngine = null;
+    this.spatialSystem = null;
+    this.newsDesk = null;
+    this.radioBroadcast = null;
 
     this.isDay = true;
     this.isRaining = false;
@@ -43,9 +51,18 @@ export class SoundEngine {
       this.ambientGain.gain.setValueAtTime(0.32, this.ctx.currentTime);
       this.ambientGain.connect(this.masterGain);
 
-      // Initialize Procedural Brazilian Music Engine (MPB, Pagode, Baile Funk)
-      this.musicEngine = new BrazilianMusicEngine(this.ctx, this.masterGain);
-      this.musicEngine.start();
+      // 1. Spatial Sound System (3D positional emitters in Bar do Tião, Adega, Laje, etc.)
+      this.spatialSystem = new SpatialSoundSystem(this.ctx, this.masterGain);
+
+      // 2. Satirical Breaking News Desk with Cadu & Marcão
+      this.newsDesk = new NewsDesk(this);
+
+      // 3. Procedural synthesis engine (offline/fallback)
+      this.musicEngine = new BrazilianMusicEngine(this.ctx, this.spatialSystem.inputNode);
+
+      // 4. Radio Broadcast Engine (13 recorded Brazilian tracks, vinhetas, ducking, weather triggers)
+      this.radioBroadcast = new RadioBroadcast(this.ctx, this.spatialSystem, this.newsDesk, this.musicEngine);
+      this.radioBroadcast.start();
 
       this.isInitialized = true;
       this.startAmbience();
@@ -66,15 +83,31 @@ export class SoundEngine {
     if (this.masterGain) {
       this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime);
     }
+    if (this.radioBroadcast && this.radioBroadcast.audioElement) {
+      this.radioBroadcast.audioElement.muted = this.isMuted;
+    }
     if (!this.isMuted && this.isRaining) {
       this.playRain(true);
     }
     return this.isMuted;
   }
 
+  playClassMusic(genre) {
+    if (!this.isInitialized) this.init();
+    if (this.radioBroadcast) {
+      this.radioBroadcast.playClassMusic(genre);
+    }
+    if (this.musicEngine) {
+      this.musicEngine.fadeToGenre(genre);
+    }
+  }
+
   // Radio Station Controls (MPB, Pagode, Baile Funk, Auto, Off)
   setRadioStation(stationId) {
     if (!this.isInitialized) this.init();
+    if (this.radioBroadcast) {
+      this.radioBroadcast.setStation(stationId);
+    }
     if (this.musicEngine) {
       this.musicEngine.setStation(stationId);
     }
@@ -82,24 +115,100 @@ export class SoundEngine {
 
   cycleRadioStation() {
     if (!this.isInitialized) this.init();
-    if (this.musicEngine) {
-      return this.musicEngine.cycleStation();
+    if (this.radioBroadcast) {
+      const st = this.radioBroadcast.cycleStation();
+      if (this.musicEngine) {
+        this.musicEngine.setStation(st.id);
+      }
+      this.playRadioTuningGlitch();
+      return st;
     }
     return RADIO_STATIONS.AUTO;
   }
 
   updateMusicContext(zoneId, inGameHour) {
+    if (this.radioBroadcast) {
+      this.radioBroadcast.updateContext(zoneId, inGameHour);
+    }
     if (this.musicEngine) {
       this.musicEngine.updateContext(zoneId, inGameHour);
     }
   }
 
+  updateSpatial(playerPos, dangerLevel = 0) {
+    if (this.spatialSystem) {
+      this.spatialSystem.update(playerPos, dangerLevel);
+    }
+  }
+
   getRadioStation() {
-    return this.musicEngine?.activeStation || 'AUTO';
+    return this.radioBroadcast?.activeStation || 'AUTO';
   }
 
   getEffectiveGenre() {
-    return this.musicEngine?.effectiveGenre || 'MPB';
+    return this.radioBroadcast?.effectiveGenre || 'MPB';
+  }
+
+  // Radio analog tuning static sound when cycling stations
+  playRadioTuningGlitch() {
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.08, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.25;
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+      noise.connect(gain);
+      gain.connect(this.masterGain);
+      noise.start();
+    } catch (e) {}
+  }
+
+  // Walkie-talkie / radio microphone click
+  playRadioClick() {
+    if (!this.ctx || this.isMuted) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1400, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(700, this.ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.045);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.05);
+    } catch (e) {}
+  }
+
+  // Dual-tone classic elevator arrival chime
+  playElevatorChime() {
+    if (!this.isInitialized || this.isMuted) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(659.25, t); // E5
+      osc2.frequency.setValueAtTime(880.0, t + 0.16); // A5
+      gain.gain.setValueAtTime(0.28, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(this.masterGain);
+      osc1.start(t);
+      osc1.stop(t + 0.35);
+      osc2.start(t + 0.16);
+      osc2.stop(t + 1.2);
+    } catch (e) {}
   }
 
   // 1. Procedural Footstep (surface aware)

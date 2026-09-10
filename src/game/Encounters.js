@@ -1375,5 +1375,80 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       ];
     }
+  },
+
+  ELEVADOR_PENTHOUSE: {
+    id: 'ELEVADOR_PENTHOUSE',
+    title: '🛗 ELEVADOR DA COBERTURA (JARAGUÁ TOWER)',
+    getIntroText: (state) => `
+      O display touchscreen de cristal líquido do elevador privativo brilha em ciano.<br>
+      Atrás de você, a vista panorâmica de 180° do Pico do Jaraguá domina a sala.<br>
+      O saguão principal e a portaria do edifício estão 12 andares abaixo.<br>
+      <small style="color:#00f5d4">Cobertura Triplex • 12º Andar • Jaraguá Tower</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'descer_terreo',
+        label: 'Descer para a portaria (Térreo / Acesso à Rua)',
+        costLabel: 'Descer 12 Andares (Grátis)',
+        execute: (state, sound) => {
+          if (sound && sound.playElevatorChime) sound.playElevatorChime();
+          else if (sound && sound.playCoin) sound.playCoin();
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(34.0, 0.25, 4.5);
+            window.app.controls.yaw = 0;
+          }
+          return 'O elevador panorâmico desce suavemente pelos 12 andares até o saguão principal. As portas de aço escovado se abrem na portaria térrea pronta para você explorar Pirituba!';
+        }
+      },
+      {
+        id: 'ficar_cobertura',
+        label: 'Ficar na cobertura apreciando a vista do Pico do Jaraguá',
+        costLabel: '+10% Sanidade (Relaxar)',
+        deltas: { sanidade: 10 },
+        execute: (state, sound) => {
+          state.apply({ sanidade: 10 }, 'Apreciou a vista panorâmica do Jaraguá');
+          return 'Você respira fundo olhando o contorno verdejante do morro no horizonte e os carros em miniatura na Edgar Facó. Uma brisa revigorante renova seu espírito (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  ELEVADOR_TERREO: {
+    id: 'ELEVADOR_TERREO',
+    title: '🛗 ELEVADOR DA PORTARIA (JARAGUÁ TOWER)',
+    getIntroText: (state) => `
+      O elevador de alta velocidade com portas de aço escovado aguarda no saguão social.<br>
+      O porteiro acena cordialmente do balcão de granito preto.<br>
+      O botão de chamada iluminado em azul dá acesso direto à Cobertura Triplex.<br>
+      <small style="color:#00f5d4">Portaria Social • Saguão Térreo • Jaraguá Tower</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'subir_penthouse',
+        label: 'Subir para a Cobertura (Penthouse 12º Andar - Vista Jaraguá)',
+        costLabel: 'Subir 12 Andares (Grátis)',
+        execute: (state, sound) => {
+          if (sound && sound.playElevatorChime) sound.playElevatorChime();
+          else if (sound && sound.playCoin) sound.playCoin();
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(37.0, 32.25, 3.5);
+            window.app.controls.yaw = Math.PI;
+          }
+          return 'As portas se fecham com um bip suave e o elevador sobe em segundos até o 12º andar. A vista espetacular de 180 graus do Pico do Jaraguá se descortina através das paredes de vidro!';
+        }
+      },
+      {
+        id: 'sair_rua',
+        label: 'Sair para as ruas de Pirituba',
+        costLabel: 'Portão Principal',
+        execute: (state, sound) => {
+          if (typeof window !== 'undefined' && window.app && window.app.controls) {
+            window.app.controls.teleport(35.0, 0.25, 12.5);
+          }
+          return 'Você atravessa a porta de vidro giratória e pisa na calçada de Pirituba, sentindo o calor do asfalto paulistano!';
+        }
+      }
+    ]
   }
 };

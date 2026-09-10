@@ -5,7 +5,7 @@
  * 100% procedural Web Audio synthesis, zero external audio assets.
  */
 
-export const RADIO_STATIONS = {
+export const PROCEDURAL_STATIONS = {
   AUTO: { id: 'AUTO', name: 'AUTO (ZONAS & HORAS)', icon: '📻', desc: 'Sintoniza automaticamente conforme o bairro e a hora' },
   MPB: { id: 'MPB', name: 'MPB / BOSSA PIRITUBA', icon: '☕', desc: 'Violão de nylon sincopado e jazz brasileiro' },
   PAGODE: { id: 'PAGODE', name: 'PAGODE DO TIÃO', icon: '🍺', desc: 'Cavaquinho, surdo e pandeiro de boteco' },
@@ -90,7 +90,7 @@ export class BrazilianMusicEngine {
   }
 
   setStation(stationId) {
-    if (!RADIO_STATIONS[stationId]) return;
+    if (!PROCEDURAL_STATIONS[stationId]) return;
     this.activeStation = stationId;
 
     if (stationId === 'OFF') {
@@ -106,7 +106,7 @@ export class BrazilianMusicEngine {
     const nextIdx = (currentIdx + 1) % order.length;
     const nextStation = order[nextIdx];
     this.setStation(nextStation);
-    return RADIO_STATIONS[nextStation];
+    return PROCEDURAL_STATIONS[nextStation];
   }
 
   updateContext(zoneId, inGameHour) {

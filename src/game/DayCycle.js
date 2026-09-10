@@ -52,13 +52,19 @@ export class DayCycle {
     let sunIntensity = k1.sunInt + (k2.sunInt - k1.sunInt) * t;
     let ambIntensity = k1.ambInt + (k2.ambInt - k1.ambInt) * t;
 
-    // Apply São Paulo summer storm modifier
+    // Apply São Paulo weather modifiers
     if (this.weather === 'STORM') {
       sunColor = new THREE.Color(0x556677);
       sunIntensity *= 0.25;
       ambColor = new THREE.Color(0x3a4858);
       ambIntensity = Math.max(0.28, ambIntensity * 0.75); // Strictly enforce 0.28 ambient floor (I10)
       skyColor = new THREE.Color(0x202630); // Dark heavy storm cloud
+    } else if (this.weather === 'GAROA') {
+      sunColor = new THREE.Color(0x778899);
+      sunIntensity *= 0.45;
+      ambColor = new THREE.Color(0x4a5868);
+      ambIntensity = Math.max(0.28, ambIntensity * 0.85); // Strictly enforce 0.28 ambient floor (I10)
+      skyColor = new THREE.Color(0x3a4454); // Grey São Paulo drizzle sky
     }
 
     this.city.sunLight.color.copy(sunColor);

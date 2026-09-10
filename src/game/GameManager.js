@@ -91,6 +91,42 @@ export class GameManager {
     if (this.sound) {
       this.sound.init();
       this.sound.playCoin();
+
+      // Trigger class-specific soundtrack: Funk for poor, Pagode for mid-class, MPB for rich
+      const classGenreMap = {
+        CLASSE_DE: 'FUNK',
+        CLASSE_C: 'PAGODE',
+        CLASSE_AB: 'MPB'
+      };
+      const genre = classGenreMap[chosenKey] || 'MPB';
+      this.sound.playClassMusic(genre);
+
+      // Register radio weather forecast broadcast callback
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.setWeatherCallback((weatherMode) => {
+          this.dayCycle.setWeather(weatherMode);
+          if (this.traffic) this.traffic.setWeather(weatherMode);
+          if (weatherMode === 'STORM') {
+            this.isStorming = true;
+            this.sound.playRain(true);
+            this.sound.playThunder();
+            this.hud.showToast('⛈️ <strong>ALERTA DA RÁDIO:</strong> Temporal desabando em Pirituba!', 5000);
+          } else if (weatherMode === 'GAROA') {
+            this.isStorming = false;
+            this.sound.playRain(true);
+            this.hud.showToast('🌧️ <strong>ALERTA DA RÁDIO:</strong> Garoa paulistana típica e asfalto molhado.', 5000);
+          } else {
+            this.isStorming = false;
+            this.sound.playRain(false);
+            this.hud.showToast('☀️ <strong>ALERTA DA RÁDIO:</strong> Sol abriu em Pirituba! Tarde quente!', 4000);
+          }
+        });
+      }
+    }
+
+    // Expose active state to window for live satirical radio reporting
+    if (typeof window !== 'undefined') {
+      window.__BS_GAME_STATE__ = this.state;
     }
 
     const toastTpl = t('toasts.spawn_intro', '🌟 <strong>VOCÊ NASCEU COMO: {title}</strong><br>{subtitle}');
@@ -173,6 +209,11 @@ export class GameManager {
     const playerPos = this.controls.position;
     const forwardVec = new THREE.Vector3();
     this.camera.getWorldDirection(forwardVec);
+
+    // Update 3D spatial radio emitters (distance falloff & lowpass acoustic muffling)
+    if (this.sound && this.sound.updateSpatial) {
+      this.sound.updateSpatial(playerPos, this.state ? this.state.perigo : 0);
+    }
 
     // 5b. Update autonomous roaming NPCs (Clodoaldo, Caramelo, Juninho, Dona Neide)
     const isModalOpen = this.isAnyModalActive();
@@ -296,7 +337,12 @@ export class GameManager {
   triggerDoisCarasMoto() {
     if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.hasMotoTriggered = true;
-    if (this.sound) this.sound.playMotorcycleRev();
+    if (this.sound) {
+      this.sound.playMotorcycleRev();
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('ENCOUNTER', 'Dois caras numa moto avistados na calçada');
+      }
+    }
 
     const enc = BRAZILIAN_ENCOUNTERS.DOIS_CARAS_MOTO;
     this.dialog.open({
@@ -318,7 +364,12 @@ export class GameManager {
     if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.blitzCount++;
     this.lastBlitzHour = this.clock.inGameHour;
-    if (this.sound) this.sound.playSiren();
+    if (this.sound) {
+      this.sound.playSiren();
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('ENCOUNTER', 'Enquadro e blitz da Polícia Militar na madrugada');
+      }
+    }
 
     const enc = BRAZILIAN_ENCOUNTERS.BLITZ_PM;
     this.dialog.open({

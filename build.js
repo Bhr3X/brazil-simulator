@@ -26,6 +26,9 @@ function bundle() {
   const rng = cleanModule(read('src/game/Rng.js'));
   const textures = cleanModule(read('src/world/Textures.js'));
   const physics = cleanModule(read('src/engine/Physics.js'));
+  const spatialSound = cleanModule(read('src/audio/SpatialSoundSystem.js'));
+  const newsDesk = cleanModule(read('src/audio/NewsDesk.js'));
+  const radioBroadcast = cleanModule(read('src/audio/RadioBroadcast.js'));
   const music = cleanModule(read('src/audio/BrazilianMusic.js'));
   const audio = cleanModule(read('src/audio/SoundEngine.js'));
   const zones = cleanModule(read('src/world/Zones.js'));
@@ -83,6 +86,9 @@ ${bodyMarkup}
 ${rng}
 ${textures}
 ${physics}
+${spatialSound}
+${newsDesk}
+${radioBroadcast}
 ${music}
 ${audio}
 ${zones}

@@ -2040,7 +2040,456 @@ export class CityBuilder {
     );
   }
 
-  // 25. Expanded Street Grid: Rua Paula Ferreira, Cel. Bento Bicudo, Emílio Lessore & Street View Details
+  // 25. Suburban Mid-Class Residence (Casa do Tiozão CLT on Rua Emílio Lessore)
+  buildMidClassHouse(x, y, z) {
+    const w = 8.5;
+    const h = 5.2;
+    const d = 6.0;
+    const posY = y + h / 2;
+
+    // Outer walls: Painted suburban warm beige / yellow ochre
+    const wallMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#e8cf8d', 2, 2)
+    });
+    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0xefefef });
+    const woodFloorMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createParquetTexture(3, 2)
+    });
+
+    // South Wall (Back)
+    const backWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.3), wallMat);
+    backWall.position.set(x, posY, z + d / 2 - 0.15);
+    this.scene.add(backWall);
+
+    // West Wall (Left)
+    const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, h, d), wallMat);
+    leftWall.position.set(x - w / 2 + 0.15, posY, z);
+    this.scene.add(leftWall);
+
+    // East Wall (Right)
+    const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, h, d), wallMat);
+    rightWall.position.set(x + w / 2 - 0.15, posY, z);
+    this.scene.add(rightWall);
+
+    // North Wall (Front facing Rua Emílio Lessore) - Left piece & Right piece with central open doorway
+    const doorW = 1.6;
+    const doorH = 2.4;
+    const frontWallW = (w - doorW) / 2;
+
+    const frontLeft = new THREE.Mesh(new THREE.BoxGeometry(frontWallW, h, 0.3), wallMat);
+    frontLeft.position.set(x - doorW / 2 - frontWallW / 2, posY, z - d / 2 + 0.15);
+    this.scene.add(frontLeft);
+
+    const frontRight = new THREE.Mesh(new THREE.BoxGeometry(frontWallW, h, 0.3), wallMat);
+    frontRight.position.set(x + doorW / 2 + frontWallW / 2, posY, z - d / 2 + 0.15);
+    this.scene.add(frontRight);
+
+    // Lintel above front door
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorW, h - doorH, 0.3), wallMat);
+    lintel.position.set(x, y + doorH + (h - doorH) / 2, z - d / 2 + 0.15);
+    this.scene.add(lintel);
+
+    // Interior floor (Parquet / Taco de madeira)
+    const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.6, d - 0.6), woodFloorMat);
+    floorMesh.rotation.x = -Math.PI / 2;
+    floorMesh.position.set(x, y + 0.015, z);
+    this.scene.add(floorMesh);
+
+    // Ceiling / Flat Roof
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.3, d + 0.4), ceilingMat);
+    roof.position.set(x, y + h + 0.15, z);
+    this.scene.add(roof);
+
+    // Blue Fortlev water tank on roof
+    this.buildWaterTank(x + 1.2, y + h + 0.3, z + 0.5);
+
+    // --- INTERIOR FURNISHINGS ---
+    // 1. Brown Faux-Leather Retro Sofa
+    const sofaMat = new THREE.MeshLambertMaterial({ color: 0x5a341e });
+    const sofaBase = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 0.85), sofaMat);
+    sofaBase.position.set(x - 2.0, y + 0.225, z + 1.2);
+    this.scene.add(sofaBase);
+    const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.65, 0.25), sofaMat);
+    sofaBack.position.set(x - 2.0, y + 0.55, z + 1.5);
+    this.scene.add(sofaBack);
+
+    // 2. Coffee Table with Unpaid Bills (Boleto Enel & Carnê Casas Bahia)
+    const tableMat = new THREE.MeshLambertMaterial({ color: 0x3d2716 });
+    const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.7), tableMat);
+    table.position.set(x - 2.0, y + 0.2, z - 0.1);
+    this.scene.add(table);
+
+    // Boleto on table
+    const paperMat = new THREE.MeshBasicMaterial({ color: 0xfafafa });
+    const boleto = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), paperMat);
+    boleto.rotation.x = -Math.PI / 2;
+    boleto.rotation.z = 0.2;
+    boleto.position.set(x - 2.2, y + 0.41, z - 0.1);
+    this.scene.add(boleto);
+
+    // Carnê booklet
+    const carneMat = new THREE.MeshLambertMaterial({ color: 0xcc2222 });
+    const carne = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.28), carneMat);
+    carne.position.set(x - 1.7, y + 0.42, z - 0.05);
+    this.scene.add(carne);
+
+    // 3. Wooden TV Rack with Vintage CRT Color TV
+    const rackMat = new THREE.MeshLambertMaterial({ color: 0x4a2e1b });
+    const tvRack = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.6), rackMat);
+    tvRack.position.set(x + 2.0, y + 0.3, z - 0.1);
+    this.scene.add(tvRack);
+
+    // CRT TV Body
+    const tvMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+    const tv = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.65, 0.55), tvMat);
+    tv.position.set(x + 2.0, y + 0.925, z - 0.1);
+    this.scene.add(tv);
+
+    // CRT Screen with subtle glow
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x5599cc });
+    const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.45), screenMat);
+    tvScreen.position.set(x + 2.0, y + 0.925, z - 0.38);
+    tvScreen.rotation.y = Math.PI;
+    this.scene.add(tvScreen);
+
+    // White Crochet Doily on top of TV (Toalhinha de crochê da vovó)
+    const crochetMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const crochet = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.4), crochetMat);
+    crochet.rotation.x = -Math.PI / 2;
+    crochet.position.set(x + 2.0, y + 1.26, z - 0.1);
+    this.scene.add(crochet);
+
+    // 4. White Refrigerator in Kitchenette Corner
+    const fridgeMat = new THREE.MeshLambertMaterial({ color: 0xf5f5f5 });
+    const fridge = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 0.85), fridgeMat);
+    fridge.position.set(x + 2.5, y + 0.9, z + 1.6);
+    this.scene.add(fridge);
+
+    // 5. Cozy Warm Overhead Ceiling Light
+    const warmLight = new THREE.PointLight(0xffd59e, 1.3, 9);
+    warmLight.position.set(x, y + 2.8, z);
+    this.scene.add(warmLight);
+
+    // 6. Solid Physics Colliders for Walls & Furnishings
+    // Back wall
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, y, z + d / 2 - 0.4),
+      new THREE.Vector3(x + w / 2, y + h, z + d / 2 + 0.1),
+      'solid'
+    );
+    // Left wall
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2 - 0.1, y, z - d / 2),
+      new THREE.Vector3(x - w / 2 + 0.4, y + h, z + d / 2),
+      'solid'
+    );
+    // Right wall
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + w / 2 - 0.4, y, z - d / 2),
+      new THREE.Vector3(x + w / 2 + 0.1, y + h, z + d / 2),
+      'solid'
+    );
+    // Front wall Left
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, y, z - d / 2 - 0.1),
+      new THREE.Vector3(x - doorW / 2, y + h, z - d / 2 + 0.4),
+      'solid'
+    );
+    // Front wall Right
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + doorW / 2, y, z - d / 2 - 0.1),
+      new THREE.Vector3(x + w / 2, y + h, z - d / 2 + 0.4),
+      'solid'
+    );
+    // Sofa & TV colliders
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - 3.2, y, z + 0.7),
+      new THREE.Vector3(x - 0.8, y + 1.2, z + 1.7),
+      'solid'
+    );
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + 1.2, y, z - 0.4),
+      new THREE.Vector3(x + 2.8, y + 1.5, z + 0.2),
+      'solid'
+    );
+  }
+
+  // 26. High-Rise Luxury Apartment Tower & Penthouse with 180° Glass View of Pico do Jaraguá & Elevator
+  buildLuxuryTowerAndPenthouse(x, y, z) {
+    const w = 14.0;
+    const d = 12.0;
+    const h = 36.5;
+
+    // Tower Exterior Facade (Dark granite with glass tiers)
+    const facadeMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createTowerFacadeTexture(2, 8)
+    });
+    const marbleFloorMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createMarbleTexture(3, 3)
+    });
+    const graniteFloorMat = new THREE.MeshLambertMaterial({ color: 0x181c22 });
+    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0x22262e });
+    const glassMat = new THREE.MeshLambertMaterial({
+      color: 0x99ddff,
+      transparent: true,
+      opacity: 0.32,
+      roughness: 0.05
+    });
+    const frameMat = new THREE.MeshLambertMaterial({ color: 0x15181d });
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xd8dde4 });
+
+    // -----------------------------------------------------------
+    // A. Tower Exterior Shell (Y = 4.0 to 32.0)
+    // -----------------------------------------------------------
+    const shaftH = 28.0;
+    const shaftMesh = new THREE.Mesh(new THREE.BoxGeometry(w, shaftH, d), facadeMat);
+    shaftMesh.position.set(x, 4.0 + shaftH / 2, z);
+    this.scene.add(shaftMesh);
+
+    // Tower Shaft Colliders (Solid perimeter)
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, 4.0, z - d / 2),
+      new THREE.Vector3(x + w / 2, 32.0, z + d / 2),
+      'solid'
+    );
+
+    // -----------------------------------------------------------
+    // B. Ground Floor Luxury Lobby (Y = 0.0 to 4.0)
+    // -----------------------------------------------------------
+    // Lobby Floor (Polished black granite)
+    const lobbyFloor = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, d - 0.4), graniteFloorMat);
+    lobbyFloor.rotation.x = -Math.PI / 2;
+    lobbyFloor.position.set(x, 0.015, z);
+    this.scene.add(lobbyFloor);
+
+    // Lobby Ceiling
+    const lobbyCeiling = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, d - 0.4), ceilingMat);
+    lobbyCeiling.rotation.x = Math.PI / 2;
+    lobbyCeiling.position.set(x, 3.95, z);
+    this.scene.add(lobbyCeiling);
+
+    // Lobby Walls (North, West, East, and South with entrance)
+    const lobbyWallMat = new THREE.MeshLambertMaterial({ color: 0x262c35 });
+    // North wall
+    const lobbyNorth = new THREE.Mesh(new THREE.BoxGeometry(w, 4.0, 0.4), lobbyWallMat);
+    lobbyNorth.position.set(x, 2.0, z - d / 2 + 0.2);
+    this.scene.add(lobbyNorth);
+    // West wall
+    const lobbyWest = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4.0, d), lobbyWallMat);
+    lobbyWest.position.set(x - w / 2 + 0.2, 2.0, z);
+    this.scene.add(lobbyWest);
+    // East wall
+    const lobbyEast = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4.0, d), lobbyWallMat);
+    lobbyEast.position.set(x + w / 2 - 0.2, 2.0, z);
+    this.scene.add(lobbyEast);
+    // South wall (Entrance facing Edgar Facó / sidewalk)
+    const entDoorW = 3.0;
+    const entSideW = (w - entDoorW) / 2;
+    const entLeft = new THREE.Mesh(new THREE.BoxGeometry(entSideW, 4.0, 0.4), lobbyWallMat);
+    entLeft.position.set(x - entDoorW / 2 - entSideW / 2, 2.0, z + d / 2 - 0.2);
+    this.scene.add(entLeft);
+    const entRight = new THREE.Mesh(new THREE.BoxGeometry(entSideW, 4.0, 0.4), lobbyWallMat);
+    entRight.position.set(x + entDoorW / 2 + entSideW / 2, 2.0, z + d / 2 - 0.2);
+    this.scene.add(entRight);
+
+    // Glass double doors at entrance
+    const lobbyGlassDoor = new THREE.Mesh(new THREE.BoxGeometry(entDoorW, 2.8, 0.08), glassMat);
+    lobbyGlassDoor.position.set(x, 1.4, z + d / 2 - 0.2);
+    this.scene.add(lobbyGlassDoor);
+
+    // Concierge Reception Desk
+    const desk = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 0.8), chromeMat);
+    desk.position.set(x + 3.0, 0.55, z + 2.0);
+    this.scene.add(desk);
+
+    // Security turnstile
+    const turnstile = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.2), chromeMat);
+    turnstile.position.set(x, 0.5, z + 3.5);
+    this.scene.add(turnstile);
+
+    // Ground Floor Elevator Doors & Frame at X = x - 3.5, Z = z - 2.5
+    const elevX = x - 3.5;
+    const elevZ = z - 2.5;
+    const elevDoorTerreo = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.0, 2.8),
+      new THREE.MeshLambertMaterial({ map: this.textures.createElevatorDoorTexture('T') })
+    );
+    elevDoorTerreo.position.set(elevX, 1.4, elevZ + 0.05);
+    this.scene.add(elevDoorTerreo);
+
+    // Blue elevator button glow
+    const btnLightTerreo = new THREE.PointLight(0x00f5d4, 1.2, 4);
+    btnLightTerreo.position.set(elevX + 1.2, 1.4, elevZ + 0.3);
+    this.scene.add(btnLightTerreo);
+
+    // Lobby Colliders
+    this.physics.addBoxCollider(new THREE.Vector3(x - w / 2, 0, z - d / 2), new THREE.Vector3(x + w / 2, 4.0, z - d / 2 + 0.5), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x - w / 2, 0, z - d / 2), new THREE.Vector3(x - w / 2 + 0.5, 4.0, z + d / 2), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x + w / 2 - 0.5, 0, z - d / 2), new THREE.Vector3(x + w / 2, 4.0, z + d / 2), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x - w / 2, 0, z + d / 2 - 0.5), new THREE.Vector3(x - entDoorW / 2, 4.0, z + d / 2 + 0.2), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(x + entDoorW / 2, 0, z + d / 2 - 0.5), new THREE.Vector3(x + w / 2, 4.0, z + d / 2 + 0.2), 'solid');
+
+    // -----------------------------------------------------------
+    // C. 12th Floor Luxury Penthouse (Y = 32.0 to 36.5)
+    // -----------------------------------------------------------
+    const pY = 32.0;
+    const pH = 4.5;
+
+    // Marble Floor
+    const pentFloor = new THREE.Mesh(new THREE.PlaneGeometry(w, d), marbleFloorMat);
+    pentFloor.rotation.x = -Math.PI / 2;
+    pentFloor.position.set(x, pY + 0.02, z);
+    this.scene.add(pentFloor);
+
+    // Penthouse Ceiling / Rooftop slab
+    const pentRoof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 0.4, d + 0.6), frameMat);
+    pentRoof.position.set(x, pY + pH + 0.2, z);
+    this.scene.add(pentRoof);
+
+    // Helipad markings on roof slab
+    const heliMat = new THREE.MeshBasicMaterial({ color: 0xf5b800 });
+    const heliH = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 4.0), heliMat);
+    heliH.rotation.x = -Math.PI / 2;
+    heliH.position.set(x, pY + pH + 0.42, z);
+    this.scene.add(heliH);
+
+    // --- 180-DEGREE PANORAMIC GLASS BAY WINDOWS ---
+    // 1. Full North Wall Glass (Facing Pico do Jaraguá at Z = z - d/2)
+    const glassNorth = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, pH - 0.3), glassMat);
+    glassNorth.position.set(x, pY + pH / 2, z - d / 2 + 0.05);
+    this.scene.add(glassNorth);
+
+    // 2. West Wall Glass (Front Half towards North, Z = z - d/2 to z)
+    const glassWest = new THREE.Mesh(new THREE.PlaneGeometry(d / 2, pH - 0.3), glassMat);
+    glassWest.rotation.y = Math.PI / 2;
+    glassWest.position.set(x - w / 2 + 0.05, pY + pH / 2, z - d / 4);
+    this.scene.add(glassWest);
+
+    // 3. East Wall Glass (Front Half towards North, Z = z - d/2 to z)
+    const glassEast = new THREE.Mesh(new THREE.PlaneGeometry(d / 2, pH - 0.3), glassMat);
+    glassEast.rotation.y = -Math.PI / 2;
+    glassEast.position.set(x + w / 2 - 0.05, pY + pH / 2, z - d / 4);
+    this.scene.add(glassEast);
+
+    // Minimalist black structural window mullions / frames
+    for (let ox = -w / 2 + 2; ox < w / 2; ox += 2.5) {
+      const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.08, pH, 0.12), frameMat);
+      mullion.position.set(x + ox, pY + pH / 2, z - d / 2 + 0.06);
+      this.scene.add(mullion);
+    }
+
+    // South Solid Wall of Penthouse (Bedroom / bathroom backing)
+    const pentSouth = new THREE.Mesh(new THREE.BoxGeometry(w, pH, 0.4), frameMat);
+    pentSouth.position.set(x, pY + pH / 2, z + d / 2 - 0.2);
+    this.scene.add(pentSouth);
+
+    // Rear West Wall (Solid)
+    const pentRearWest = new THREE.Mesh(new THREE.BoxGeometry(0.4, pH, d / 2), frameMat);
+    pentRearWest.position.set(x - w / 2 + 0.2, pY + pH / 2, z + d / 4);
+    this.scene.add(pentRearWest);
+
+    // Rear East Wall (Solid)
+    const pentRearEast = new THREE.Mesh(new THREE.BoxGeometry(0.4, pH, d / 2), frameMat);
+    pentRearEast.position.set(x + w / 2 - 0.2, pY + pH / 2, z + d / 4);
+    this.scene.add(pentRearEast);
+
+    // --- PENTHOUSE LUXURY FURNISHINGS ---
+    // 1. Italian Designer Charcoal Leather Sectional Sofa
+    const pSofaMat = new THREE.MeshLambertMaterial({ color: 0x242830 });
+    const pSofa = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.5, 1.4), pSofaMat);
+    pSofa.position.set(x + 2.5, pY + 0.25, z + 1.5);
+    this.scene.add(pSofa);
+    const pSofaBack = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.7, 0.35), pSofaMat);
+    pSofaBack.position.set(x + 2.5, pY + 0.6, z + 2.1);
+    this.scene.add(pSofaBack);
+
+    // 2. Tempered Glass Coffee Table
+    const glassTable = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.4, 0.8), glassMat);
+    glassTable.position.set(x + 2.5, pY + 0.2, z - 0.2);
+    this.scene.add(glassTable);
+
+    // Green Stanley Tumbler on table
+    const stanleyMat = new THREE.MeshLambertMaterial({ color: 0x3d6647 });
+    const stanley = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.32, 10), stanleyMat);
+    stanley.position.set(x + 2.2, pY + 0.56, z - 0.2);
+    this.scene.add(stanley);
+
+    // iPhone 16 Pro Max Titanium
+    const phoneMat = new THREE.MeshLambertMaterial({ color: 0x8e8d8a });
+    const phone = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.24), phoneMat);
+    phone.position.set(x + 2.7, pY + 0.42, z - 0.15);
+    this.scene.add(phone);
+
+    // Black Centurion Card
+    const cardMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.1), cardMat);
+    card.rotation.x = -Math.PI / 2;
+    card.position.set(x + 2.8, pY + 0.42, z - 0.3);
+    this.scene.add(card);
+
+    // 3. Marble Kitchen Island / Espresso Bar
+    const islandMat = new THREE.MeshLambertMaterial({ map: this.textures.createMarbleTexture(1, 1) });
+    const island = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.1, 1.0), islandMat);
+    island.position.set(x - 2.0, pY + 0.55, z + 2.5);
+    this.scene.add(island);
+
+    // Chrome Italian Espresso Machine
+    const espresso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.55, 0.5), chromeMat);
+    espresso.position.set(x - 2.0, pY + 1.38, z + 2.5);
+    this.scene.add(espresso);
+
+    // 4. Designer Arc Floor Lamp & Warm Mood Light
+    const pentLight = new THREE.PointLight(0xffecd0, 1.4, 14);
+    pentLight.position.set(x + 2.0, pY + 3.2, z);
+    this.scene.add(pentLight);
+
+    // 5. Penthouse Elevator Doors & Call Panel at X = elevX, Z = elevZ
+    const elevDoorPent = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.0, 2.8),
+      new THREE.MeshLambertMaterial({ map: this.textures.createElevatorDoorTexture('12') })
+    );
+    elevDoorPent.position.set(elevX, pY + 1.4, elevZ + 0.05);
+    this.scene.add(elevDoorPent);
+
+    // Blue elevator button glow in Penthouse
+    const btnLightPent = new THREE.PointLight(0x00f5d4, 1.2, 4);
+    btnLightPent.position.set(elevX + 1.2, pY + 1.4, elevZ + 0.3);
+    this.scene.add(btnLightPent);
+
+    // --- PENTHOUSE COLLIDERS ---
+    // Floor collider
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, pY - 0.2, z - d / 2),
+      new THREE.Vector3(x + w / 2, pY + 0.05, z + d / 2),
+      'curb'
+    );
+    // North glass perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, pY, z - d / 2 - 0.2),
+      new THREE.Vector3(x + w / 2, pY + pH, z - d / 2 + 0.3),
+      'solid'
+    );
+    // West glass & solid perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2 - 0.2, pY, z - d / 2),
+      new THREE.Vector3(x - w / 2 + 0.3, pY + pH, z + d / 2),
+      'solid'
+    );
+    // East glass & solid perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + w / 2 - 0.3, pY, z - d / 2),
+      new THREE.Vector3(x + w / 2 + 0.2, pY + pH, z + d / 2),
+      'solid'
+    );
+    // South wall perimeter
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, pY, z + d / 2 - 0.4),
+      new THREE.Vector3(x + w / 2, pY + pH, z + d / 2 + 0.2),
+      'solid'
+    );
+  }
+
+  // 27. Expanded Street Grid: Rua Paula Ferreira, Cel. Bento Bicudo, Emílio Lessore & Street View Details
   buildExpandedStreetsAndDetails() {
     const asfaltoMat = new THREE.MeshLambertMaterial({
       map: this.textures.createAsfalto(12, 4)
@@ -2289,13 +2738,13 @@ export class CityBuilder {
 
     // Block between Bento Bicudo and Emílio Lessore (Z = -12.0)
     addSobrado(-20.0, -12.0, 9.0, 5.5, 6.0, 'painted', '#4682b4');
-    addSobrado(-8.0, -12.0, 8.5, 6.0, 6.0, 'tijolo');
+    this.buildMidClassHouse(-8.0, 0.0, -12.0);
     addSobrado(38.0, -12.0, 8.5, 5.5, 6.0, 'reboco');
 
     // South of Bento Bicudo (Z = 4.5)
     addSobrado(-20.0, 4.5, 9.0, 5.8, 4.5, 'tijolo');
     addSobrado(22.0, 4.5, 8.5, 6.0, 4.5, 'painted', '#c47d4e');
-    addSobrado(34.0, 4.5, 8.5, 5.5, 4.5, 'reboco');
+    this.buildLuxuryTowerAndPenthouse(35.0, 0.0, 5.0);
 
     // -------------------------------------------------------------
     // I. Concrete Utility Poles with Street Lamps along Bento & Lessore
