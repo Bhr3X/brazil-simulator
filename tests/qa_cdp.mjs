@@ -111,29 +111,35 @@ async function runTestSuite(url) {
       throw new Error(`TEST 2 FAILED: Roulette should be closed, freeze should be false, run should be active.`);
     }
 
-    // TEST 3: Clock advancement forward-only on [T]
-    // Set clock to NIGHT (21.5)
+    // TEST 3: Clock advancement & Exploit Prevention
+    // 3a. Forward-only RunClock monotonicity
     await evaluate(`
       window.app.game.clock.elapsed = 387.5; // 21:30
-      window.app.timeOfDay = 'NIGHT';
+      window.app.game.clock.setHour(11.5, true); // forward to DAY
     `);
-    const elapsedAtNight = await evaluate(`window.app.game.clock.elapsed`);
-    const hourAtNight = await evaluate(`window.app.game.clock.inGameHour`);
-    console.log(`[TEST 3a] At Night: elapsed=${elapsedAtNight}, inGameHour=${hourAtNight}`);
-
-    // Trigger [T] to cycle time to DAY
-    await evaluate(`
-      window.app.cycleTimeOfDay();
-    `);
-    const elapsedAfterT = await evaluate(`window.app.game.clock.elapsed`);
-    const hourAfterT = await evaluate(`window.app.game.clock.inGameHour`);
-    const hasEndedAfterT = await evaluate(`window.app.game.clock.hasEnded`);
-    console.log(`[TEST 3b] After [T] cycle to DAY: elapsed=${elapsedAfterT}, inGameHour=${hourAfterT}, hasEnded=${hasEndedAfterT}`);
-
-    if (elapsedAfterT < elapsedAtNight) {
-      throw new Error(`TEST 3 FAILED: Clock rewound! Before: ${elapsedAtNight}s, After: ${elapsedAfterT}s`);
+    const elapsedAfterForward = await evaluate(`window.app.game.clock.elapsed`);
+    const hasEndedAfterForward = await evaluate(`window.app.game.clock.hasEnded`);
+    console.log(`[TEST 3a] RunClock forward advancement: elapsed=${elapsedAfterForward}, hasEnded=${hasEndedAfterForward}`);
+    if (elapsedAfterForward < 387.5 || elapsedAfterForward !== 600) {
+      throw new Error(`TEST 3a FAILED: RunClock should have clamped forward to 600s, got ${elapsedAfterForward}`);
     }
-    console.log(`[TEST 3 PASS] Forward-only advancement confirmed: elapsed ${elapsedAtNight}s -> ${elapsedAfterT}s (never rewinds)`);
+
+    // 3b. Anti-cheat exploit check: cycleTimeOfDay during active run must NOT skip time or grant instant victory
+    await evaluate(`
+      window.app.game.clock.elapsed = 100; // 10:00
+      window.app.game.clock.hasEnded = false;
+      window.app.game.isRunActive = true;
+      document.getElementById('end-run-modal').classList.add('modal-hidden');
+      window.app.controls.refreshFreeze();
+      window.app.cycleTimeOfDay(); // Try to skip time during run
+    `);
+    const elapsedAfterExploitAttempt = await evaluate(`window.app.game.clock.elapsed`);
+    const runStillActive = await evaluate(`window.app.game.isRunActive`);
+    console.log(`[TEST 3b] Anti-cheat exploit prevention: elapsed=${elapsedAfterExploitAttempt}, runStillActive=${runStillActive}`);
+    if (elapsedAfterExploitAttempt !== 100 || !runStillActive) {
+      throw new Error(`TEST 3b FAILED: cycleTimeOfDay allowed instant time skip or win during active run!`);
+    }
+    console.log(`[TEST 3 PASS] Forward-only clock math and active-run anti-cheat exploit lock verified`);
 
     // Reset clock for further tests
     await evaluate(`
@@ -258,10 +264,11 @@ async function runTestSuite(url) {
       })()
     `);
     const stepDistance = await evaluate(`window.app.controls.stepDistance`);
-    const isStepFinite = await evaluate(`Number.isFinite(window.app.controls.stepDistance)`);
-    console.log(`[TEST 9] Footstep regression test: stepDistance=${stepDistance}, isFinite=${isStepFinite}`);
-    if (!isStepFinite || stepDistance <= 0) {
-      throw new Error(`TEST 9 FAILED: stepDistance is not a positive finite number (got ${stepDistance})`);
+    const lastFootstepDist = await evaluate(`window.app.controls.lastFootstepDist`);
+    const isStepFinite = await evaluate(`Number.isFinite(window.app.controls.stepDistance) && Number.isFinite(window.app.controls.lastFootstepDist)`);
+    console.log(`[TEST 9] Footstep regression test: stepDistance=${stepDistance}, lastFootstepDist=${lastFootstepDist}, isFinite=${isStepFinite}`);
+    if (!isStepFinite || stepDistance <= 0 || lastFootstepDist <= 0) {
+      throw new Error(`TEST 9 FAILED: stepDistance (${stepDistance}) or lastFootstepDist (${lastFootstepDist}) not positive finite numbers!`);
     }
 
     // Check Console Errors

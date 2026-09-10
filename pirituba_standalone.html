@@ -8222,7 +8222,11 @@ class GameApp {
     // Time of day toggle button
     const timeBtn = document.getElementById('btn-time');
     if (timeBtn) {
-      timeBtn.addEventListener('click', () => this.cycleTimeOfDay());
+      timeBtn.addEventListener('click', () => {
+        if (!this.controls.freeze) {
+          this.cycleTimeOfDay();
+        }
+      });
     }
 
     // Audio toggle button
@@ -8260,7 +8264,9 @@ class GameApp {
         const nextMode = this.renderer.cycleRenderMode();
         this.updateModeLabel(nextMode);
       } else if (e.code === 'KeyT') {
-        this.cycleTimeOfDay();
+        if (!this.controls.freeze) {
+          this.cycleTimeOfDay();
+        }
       } else if (e.code === 'KeyO') {
         const muted = this.sound.toggleMute();
         if (this.audioBtn) {
@@ -8289,17 +8295,27 @@ class GameApp {
   }
 
   cycleTimeOfDay() {
+    if (this.controls && this.controls.freeze) return;
+
+    // During active survival run, time flows naturally to prevent instant-win exploits
+    if (this.game && this.game.isRunActive) {
+      if (this.game.hud && this.game.hud.showToast) {
+        this.game.hud.showToast('⏱️ O tempo corre naturalmente na sobrevivência! (Avanço manual desativado na run)', 3000);
+      }
+      return;
+    }
+
     const times = ['DAY', 'SUNSET', 'NIGHT'];
     const nextIdx = (times.indexOf(this.timeOfDay) + 1) % times.length;
     this.timeOfDay = times[nextIdx];
     this.city.setTimeOfDay(this.timeOfDay);
     this.sound.setTimeOfDay(this.timeOfDay !== 'NIGHT');
 
-    // Harmonize sim clock with manual time-of-day toggle (forward-only during active run)
+    // Harmonize sim clock with manual time-of-day toggle
     const hourTargets = { DAY: 11.5, SUNSET: 17.5, NIGHT: 21.5 };
     if (this.game && this.game.clock) {
       const targetH = hourTargets[this.timeOfDay] || 12.0;
-      this.game.clock.setHour(targetH, !!this.game.isRunActive);
+      this.game.clock.setHour(targetH, false);
     }
 
     const labels = {
