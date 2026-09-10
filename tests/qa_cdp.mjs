@@ -1113,11 +1113,13 @@ async function runTestSuite(url) {
             const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
             if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
           } else if (classId === 'CLASSE_DE') {
-            // Work 2nd semáforo shift (+R$ 11,00) and clean windshield (+R$ 4,00) to surpass R$ 40 target
+            // Work 2nd semáforo shift (+R$ 11,00) and clean windshields (2x) to guarantee R$ 40 target across any seed
             const optBala2 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'vender_balas');
             if (optBala2 && !optBala2.disabled) optBala2.execute(state, sound);
-            const optRodo = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'limpar_parabrisa');
-            if (optRodo && !optRodo.disabled) optRodo.execute(state, sound);
+            const optRodo1 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'limpar_parabrisa');
+            if (optRodo1 && !optRodo1.disabled) optRodo1.execute(state, sound);
+            const optRodo2 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'limpar_parabrisa');
+            if (optRodo2 && !optRodo2.disabled) optRodo2.execute(state, sound);
             // Buy coxinha at padaria to maintain stamina
             const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
             if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
