@@ -52,8 +52,19 @@ export class CityRenderer {
       ASCII_AMBER: 'ASCII_AMBER',         // 1980s Amber terminal
       ASCII_CYBER: 'ASCII_CYBER',         // Neon cyan/magenta
       ASCII_CYBERPUNK: 'ASCII_CYBER',     // Alias for backwards compatibility
+      ASCII_BRAILLE: 'ASCII_BRAILLE',     // Braille 2x4 Sub-Pixel Unicode Matrix
+      SHADER_THERMAL: 'SHADER_THERMAL',   // Thermal FLIR Heat Vision
+      SHADER_DITHER: 'SHADER_DITHER',     // 1-Bit Bayer Ordered Dithering
+      SHADER_COMIC: 'SHADER_COMIC',       // Cel-Shaded Graphic Novel
+      SHADER_WIREFRAME: 'SHADER_WIREFRAME', // Neon Vector Arcade
+      SHADER_VHS: 'SHADER_VHS',           // Fita VHS Glitch & CRT
       RETRO_3D: 'RETRO_3D'                // Low-poly textured 3D view
     };
+
+    this.wireframeMaterial = new THREE.MeshBasicMaterial({
+      wireframe: true,
+      color: 0x00ff88
+    });
 
     this.currentMode = this.MODES.ASCII_COLOR;
 
@@ -360,17 +371,36 @@ export class CityRenderer {
     } else if (Object.values(this.MODES).includes(modeName)) {
       this.currentMode = modeName;
     }
-    if (this.currentMode === this.MODES.RETRO_3D) {
+
+    if (this.currentMode === this.MODES.SHADER_WIREFRAME) {
+      if (this.scene) this.scene.overrideMaterial = this.wireframeMaterial;
+      this.webglCanvas.style.display = 'block';
+      this.asciiCanvas.style.display = 'none';
+    } else if (this.currentMode === this.MODES.RETRO_3D) {
+      if (this.scene) this.scene.overrideMaterial = null;
       this.webglCanvas.style.display = 'block';
       this.asciiCanvas.style.display = 'none';
     } else {
+      if (this.scene) this.scene.overrideMaterial = null;
       this.webglCanvas.style.display = 'none';
       this.asciiCanvas.style.display = 'block';
     }
   }
 
   cycleRenderMode() {
-    const modes = ['ASCII_COLOR', 'ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'RETRO_3D'];
+    const modes = [
+      'ASCII_COLOR',
+      'ASCII_MATRIX',
+      'ASCII_AMBER',
+      'ASCII_CYBER',
+      'ASCII_BRAILLE',
+      'SHADER_THERMAL',
+      'SHADER_DITHER',
+      'SHADER_COMIC',
+      'SHADER_WIREFRAME',
+      'SHADER_VHS',
+      'RETRO_3D'
+    ];
     const currentIndex = modes.indexOf(this.currentMode);
     const nextIndex = (currentIndex + 1) % modes.length;
     this.setRenderMode(modes[nextIndex]);
@@ -383,8 +413,8 @@ export class CityRenderer {
       this.webglRenderer.render(this.scene, this.camera);
     }
 
-    // If in pure 3D mode, the WebGL canvas is directly visible
-    if (this.currentMode === this.MODES.RETRO_3D) {
+    // If in pure 3D mode or Three.js wireframe mode, the WebGL canvas is directly visible
+    if (this.currentMode === this.MODES.RETRO_3D || this.currentMode === this.MODES.SHADER_WIREFRAME) {
       return;
     }
 
@@ -419,11 +449,25 @@ export class CityRenderer {
     const ramp = this.asciiRamp;
     const rampLen = this.rampLength;
 
-    // Configure mode coloring
+    // Configure mode coloring & shaders
     const isColor = this.currentMode === this.MODES.ASCII_COLOR;
     const isMatrix = this.currentMode === this.MODES.ASCII_MATRIX;
     const isAmber = this.currentMode === this.MODES.ASCII_AMBER;
     const isCyber = this.currentMode === this.MODES.ASCII_CYBER || this.currentMode === this.MODES.ASCII_CYBERPUNK;
+    const isBraille = this.currentMode === this.MODES.ASCII_BRAILLE;
+    const isThermal = this.currentMode === this.MODES.SHADER_THERMAL;
+    const isDither = this.currentMode === this.MODES.SHADER_DITHER;
+    const isComic = this.currentMode === this.MODES.SHADER_COMIC;
+    const isVhs = this.currentMode === this.MODES.SHADER_VHS;
+
+    const bayer4x4 = [
+       0/16,  8/16,  2/16, 10/16,
+      12/16,  4/16, 14/16,  6/16,
+       3/16, 11/16,  1/16,  9/16,
+      15/16,  7/16, 13/16,  5/16
+    ];
+    const brailleDotOrder = [0x40, 0x80, 0x04, 0x20, 0x02, 0x10, 0x01, 0x08];
+    const vhsTrackingRow = isVhs ? (Math.floor((performance.now() * 0.035) % (rows + 30)) - 15) : -99;
 
     if (isMatrix) ctx.fillStyle = '#00ff66';
     if (isAmber) ctx.fillStyle = '#ffb300';
@@ -480,16 +524,17 @@ export class CityRenderer {
         let lum = (red * 0.299 + green * 0.587 + blue * 0.114) / 255;
 
         // 2. Spatial gradient edge enhancement (detect silhouette contours)
+        let delta = 0;
         if (edgeEnhance && c < cols - 1 && r < rows - 1) {
           const lumRight = (data[pixelIndex + 4] * 0.299 + data[pixelIndex + 5] * 0.587 + data[pixelIndex + 6] * 0.114) / 255;
           const lumDown = (data[pixelIndex + cols * 4] * 0.299 + data[pixelIndex + cols * 4 + 1] * 0.587 + data[pixelIndex + cols * 4 + 2] * 0.114) / 255;
-          const delta = Math.abs(lum - lumRight) + Math.abs(lum - lumDown);
+          delta = Math.abs(lum - lumRight) + Math.abs(lum - lumDown);
           if (delta > edgeThreshold) {
             lum = Math.min(1.0, lum + delta * edgeStrength);
           }
         }
 
-        // 3. Non-linear gamma / shadow lift FIRST (lifts shadows before contrast/brightness)
+        // 3. Non-linear gamma / shadow lift FIRST
         if (gamma !== 1.0 && lum > 0.0001) {
           lum = Math.pow(lum, 1.0 / gamma);
         }
@@ -499,7 +544,7 @@ export class CityRenderer {
           lum = lum * brightness;
         }
 
-        // 5. Soft S-curve contrast expansion THIRD (centered at 0.35 to preserve dark ambient floor)
+        // 5. Soft S-curve contrast expansion THIRD
         if (contrast !== 1.0) {
           lum = lum < 0.35
             ? 0.35 * Math.pow(lum / 0.35, contrast)
@@ -507,7 +552,7 @@ export class CityRenderer {
         }
         lum = Math.max(0, Math.min(1, lum));
 
-        // Skip dark floor pixels for contrast and speed (0.015 protects night ambient floor ~0.057)
+        // Skip dark floor pixels for contrast and speed
         if (lum < 0.015) continue;
 
         // 6. Character selection from active ramp
@@ -516,7 +561,6 @@ export class CityRenderer {
         const posX = c * charW + (charW - glyphW) * 0.5;
 
         if (isColor) {
-          // Saturation and brightness adjustments on RGB
           if (saturation !== 1.0) {
             const gray = red * 0.299 + green * 0.587 + blue * 0.114;
             red = Math.min(255, Math.max(0, Math.round(gray + (red - gray) * saturation)));
@@ -546,6 +590,91 @@ export class CityRenderer {
 
           ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
           ctx.fillText(char, posX, posY);
+        } else if (isThermal) {
+          // False-color thermal FLIR spectrum
+          let tR = 0, tG = 0, tB = 0;
+          if (lum < 0.15) {
+            const t = lum / 0.15;
+            tR = Math.round(20 + 35 * t);
+            tG = 0;
+            tB = Math.round(55 + 120 * t);
+          } else if (lum < 0.38) {
+            const t = (lum - 0.15) / 0.23;
+            tR = 0;
+            tG = Math.round(180 * t);
+            tB = Math.round(255 - 40 * t);
+          } else if (lum < 0.62) {
+            const t = (lum - 0.38) / 0.24;
+            tR = Math.round(230 * t);
+            tG = Math.round(200 + 45 * t);
+            tB = Math.round(50 * (1 - t));
+          } else if (lum < 0.85) {
+            const t = (lum - 0.62) / 0.23;
+            tR = 255;
+            tG = Math.round(240 * (1 - t * 0.75));
+            tB = 0;
+          } else {
+            const t = (lum - 0.85) / 0.15;
+            tR = 255;
+            tG = Math.round(120 + 135 * t);
+            tB = Math.round(255 * t);
+          }
+          if (bloom > 0.05 && lum >= bloomThreshold) {
+            ctx.shadowBlur = Math.round(bloom * 8);
+            ctx.shadowColor = `rgb(${tR}, ${tG}, ${tB})`;
+            isGlowing = true;
+          } else if (isGlowing) {
+            ctx.shadowBlur = 0;
+            isGlowing = false;
+          }
+          ctx.fillStyle = `rgb(${tR}, ${tG}, ${tB})`;
+          ctx.fillText(char, posX, posY);
+        } else if (isComic) {
+          // Comic cel-shading + ink contours
+          const isContour = edgeEnhance && (delta > edgeThreshold * 1.15);
+          if (isContour) {
+            ctx.fillStyle = '#0a0a10';
+            ctx.fillText('#', posX, posY);
+          } else {
+            let toonMul = 0.40;
+            if (lum > 0.65) toonMul = 1.0;
+            else if (lum > 0.35) toonMul = 0.70;
+            const cR = Math.min(255, Math.round(red * toonMul));
+            const cG = Math.min(255, Math.round(green * toonMul));
+            const cB = Math.min(255, Math.round(blue * toonMul));
+            ctx.fillStyle = `rgb(${cR}, ${cG}, ${cB})`;
+            ctx.fillText(char, posX, posY);
+          }
+        } else if (isDither) {
+          // 1-Bit Bayer Ordered Dithering (Obra Dinn)
+          const bayerIdx = (r % 4) * 4 + (c % 4);
+          if (lum > bayer4x4[bayerIdx]) {
+            ctx.fillStyle = '#e5ebe5';
+            ctx.fillText('█', posX, posY);
+          }
+        } else if (isBraille) {
+          // 2x4 Sub-pixel Unicode Braille Matrix (8x resolution)
+          const dotCount = Math.min(8, Math.floor(lum * 9));
+          let brailleBits = 0;
+          for (let i = 0; i < dotCount; i++) {
+            brailleBits |= brailleDotOrder[i];
+          }
+          const brailleChar = String.fromCharCode(0x2800 + brailleBits);
+          ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+          ctx.fillText(brailleChar, posX, posY);
+        } else if (isVhs) {
+          // Chromatic aberration + tracking jitter
+          const leftIdx = Math.max(0, c - 1) * 4 + rowOffset;
+          const rightIdx = Math.min(cols - 1, c + 1) * 4 + rowOffset;
+          const vhsR = data[leftIdx];
+          const vhsG = green;
+          const vhsB = data[rightIdx + 2];
+          let vhsShiftX = 0;
+          if (Math.abs(r - vhsTrackingRow) < 3) {
+            vhsShiftX = ((c * 7) % 5) - 2;
+          }
+          ctx.fillStyle = `rgb(${vhsR}, ${vhsG}, ${vhsB})`;
+          ctx.fillText(char, posX + vhsShiftX, posY);
         } else if (isCyber) {
           const cyberColor = (c + r) % 2 === 0 ? '#00f0ff' : '#ff0077';
           if (bloom > 0.05 && lum >= bloomThreshold) {
@@ -576,6 +705,19 @@ export class CityRenderer {
     if (isGlowing) {
       ctx.shadowBlur = 0;
       isGlowing = false;
+    }
+
+    // VHS Camcorder on-screen display overlay
+    if (isVhs) {
+      ctx.font = 'bold 13px "Courier New", monospace';
+      ctx.fillStyle = '#00f0ff';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 4;
+      ctx.fillText('PLAY ▶ SP   PIRITUBA-011', 24, 32);
+      const sec = Math.floor(performance.now() / 1000) % 60;
+      const min = Math.floor(performance.now() / 60000) % 60;
+      ctx.fillText(`TC 00:${min < 10 ? '0' + min : min}:${sec < 10 ? '0' + sec : sec}  CH 04`, 24, 50);
+      ctx.shadowBlur = 0;
     }
 
     // 7. Optional CRT Scanlines overlay

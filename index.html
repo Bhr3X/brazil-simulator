@@ -231,13 +231,36 @@
           <div class="visual-presets-grid">
             <button class="preset-btn" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
             <button class="preset-btn" id="preset-blocks">🧱 BLOCOS 3D</button>
-            <button class="preset-btn" id="preset-favela">🌈 FAVELA VIBRANTE</button>
-            <button class="preset-btn" id="preset-matrix">🟢 CYBER MATRIX</button>
+            <button class="preset-btn" id="preset-favela">🌈 FAVELA</button>
+            <button class="preset-btn" id="preset-thermal">🔥 TÉRMICO</button>
+            <button class="preset-btn" id="preset-wireframe">📐 WIREFRAME</button>
+            <button class="preset-btn" id="preset-comic">🗯️ HQ MANGÁ</button>
+            <button class="preset-btn" id="preset-dither">🕹️ DITHER</button>
+            <button class="preset-btn" id="preset-vhs">📼 FITA VHS</button>
+            <button class="preset-btn" id="preset-braille">⠸ BRAILLE 8X</button>
             <button class="preset-btn" id="preset-vaporwave">🌆 VAPORWAVE</button>
             <button class="preset-btn" id="preset-gameboy">🕹️ GAME BOY</button>
-            <button class="preset-btn" id="preset-3d">🖥️ MODO 3D REAL</button>
+            <button class="preset-btn" id="preset-matrix">🟢 MATRIX</button>
+            <button class="preset-btn" id="preset-3d">🖥️ 3D REAL</button>
             <button class="preset-btn active" id="preset-default">🔄 PADRÃO</button>
           </div>
+        </div>
+
+        <div class="select-group" style="margin-bottom: 2px;">
+          <label for="select-render-mode">🖥️ Modo de Renderização / Shader [M]</label>
+          <select id="select-render-mode" class="visual-select">
+            <option value="ASCII_COLOR">FAVELA ASCII (True Color RGB)</option>
+            <option value="ASCII_MATRIX">CYBER MATRIX (Verde Fósforo)</option>
+            <option value="ASCII_AMBER">TERMINAL ÂMBAR (CRT 1980)</option>
+            <option value="ASCII_CYBER">CYBER NEON (Ciano / Rosa)</option>
+            <option value="ASCII_BRAILLE">⠸ BRAILLE SUB-PIXEL (Resolução 8x)</option>
+            <option value="SHADER_THERMAL">🔥 VISÃO TÉRMICA (Infravermelho FLIR)</option>
+            <option value="SHADER_DITHER">🕹️ 1-BIT BAYER DITHER (Obra Dinn / Mac)</option>
+            <option value="SHADER_COMIC">🗯️ HQ / MANGÁ (Cel-Shaded Comic)</option>
+            <option value="SHADER_WIREFRAME">📐 WIREFRAME VETORIAL (Vectrex / Tron)</option>
+            <option value="SHADER_VHS">📼 FITA VHS PIRATA (Glitch CRT / Camcorder)</option>
+            <option value="RETRO_3D">🖥️ MODO 3D REAL (Texturas Three.js)</option>
+          </select>
         </div>
 
         <div class="visual-controls-columns">

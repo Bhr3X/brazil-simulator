@@ -318,13 +318,20 @@ async function runTestSuite(url) {
         window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM', ctrlKey: true, bubbles: true }));
         const ctrlCrouchKeyMSuccess = renderer.currentMode === 'ASCII_MATRIX';
 
-        // 7. Test render mode cycling through all modes
+        // 7. Test render mode cycling through all 11 modes
         renderer.setRenderMode('ASCII_COLOR');
-        const m1 = renderer.cycleRenderMode(); // ASCII_MATRIX
-        const m2 = renderer.cycleRenderMode(); // ASCII_AMBER
-        const m3 = renderer.cycleRenderMode(); // ASCII_CYBER
-        const m4 = renderer.cycleRenderMode(); // RETRO_3D
-        const m5 = renderer.cycleRenderMode(); // ASCII_COLOR
+        const modeCycle = [];
+        for (let i = 0; i < 11; i++) {
+          modeCycle.push(renderer.cycleRenderMode());
+        }
+
+        // Test select-render-mode dropdown and preset buttons
+        const selectMode = document.getElementById('select-render-mode');
+        const hasSelectMode = !!selectMode && selectMode.options.length === 11;
+        const btnThermal = document.getElementById('preset-thermal');
+        const btnWireframe = document.getElementById('preset-wireframe');
+        const btnBraille = document.getElementById('preset-braille');
+        const hasNewPresets = !!(btnThermal && btnWireframe && btnBraille);
 
         // 8. Reset to defaults
         renderer.resetVisualParams();
@@ -363,7 +370,9 @@ async function runTestSuite(url) {
           guardProtectedBright,
           ctrlPProtected,
           ctrlCrouchKeyMSuccess,
-          modeCycle: [m1, m2, m3, m4, m5],
+          modeCycle,
+          hasSelectMode,
+          hasNewPresets,
           resetDensity,
           resetBrightness,
           resetContrast,
@@ -391,7 +400,9 @@ async function runTestSuite(url) {
       visualTest.guardProtectedBright !== visualTest.postBrightUp ||
       visualTest.ctrlPProtected !== true ||
       visualTest.ctrlCrouchKeyMSuccess !== true ||
-      JSON.stringify(visualTest.modeCycle) !== JSON.stringify(['ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'RETRO_3D', 'ASCII_COLOR']) ||
+      JSON.stringify(visualTest.modeCycle) !== JSON.stringify(['ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'ASCII_BRAILLE', 'SHADER_THERMAL', 'SHADER_DITHER', 'SHADER_COMIC', 'SHADER_WIREFRAME', 'SHADER_VHS', 'RETRO_3D', 'ASCII_COLOR']) ||
+      !visualTest.hasSelectMode ||
+      !visualTest.hasNewPresets ||
       visualTest.resetDensity !== 1.0 ||
       visualTest.resetBrightness !== 1.0 ||
       visualTest.resetContrast !== 1.0 ||

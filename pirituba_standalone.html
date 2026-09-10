@@ -1480,13 +1480,36 @@ input[type="range"]::-webkit-slider-thumb:hover {
           <div class="visual-presets-grid">
             <button class="preset-btn" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
             <button class="preset-btn" id="preset-blocks">🧱 BLOCOS 3D</button>
-            <button class="preset-btn" id="preset-favela">🌈 FAVELA VIBRANTE</button>
-            <button class="preset-btn" id="preset-matrix">🟢 CYBER MATRIX</button>
+            <button class="preset-btn" id="preset-favela">🌈 FAVELA</button>
+            <button class="preset-btn" id="preset-thermal">🔥 TÉRMICO</button>
+            <button class="preset-btn" id="preset-wireframe">📐 WIREFRAME</button>
+            <button class="preset-btn" id="preset-comic">🗯️ HQ MANGÁ</button>
+            <button class="preset-btn" id="preset-dither">🕹️ DITHER</button>
+            <button class="preset-btn" id="preset-vhs">📼 FITA VHS</button>
+            <button class="preset-btn" id="preset-braille">⠸ BRAILLE 8X</button>
             <button class="preset-btn" id="preset-vaporwave">🌆 VAPORWAVE</button>
             <button class="preset-btn" id="preset-gameboy">🕹️ GAME BOY</button>
-            <button class="preset-btn" id="preset-3d">🖥️ MODO 3D REAL</button>
+            <button class="preset-btn" id="preset-matrix">🟢 MATRIX</button>
+            <button class="preset-btn" id="preset-3d">🖥️ 3D REAL</button>
             <button class="preset-btn active" id="preset-default">🔄 PADRÃO</button>
           </div>
+        </div>
+
+        <div class="select-group" style="margin-bottom: 2px;">
+          <label for="select-render-mode">🖥️ Modo de Renderização / Shader [M]</label>
+          <select id="select-render-mode" class="visual-select">
+            <option value="ASCII_COLOR">FAVELA ASCII (True Color RGB)</option>
+            <option value="ASCII_MATRIX">CYBER MATRIX (Verde Fósforo)</option>
+            <option value="ASCII_AMBER">TERMINAL ÂMBAR (CRT 1980)</option>
+            <option value="ASCII_CYBER">CYBER NEON (Ciano / Rosa)</option>
+            <option value="ASCII_BRAILLE">⠸ BRAILLE SUB-PIXEL (Resolução 8x)</option>
+            <option value="SHADER_THERMAL">🔥 VISÃO TÉRMICA (Infravermelho FLIR)</option>
+            <option value="SHADER_DITHER">🕹️ 1-BIT BAYER DITHER (Obra Dinn / Mac)</option>
+            <option value="SHADER_COMIC">🗯️ HQ / MANGÁ (Cel-Shaded Comic)</option>
+            <option value="SHADER_WIREFRAME">📐 WIREFRAME VETORIAL (Vectrex / Tron)</option>
+            <option value="SHADER_VHS">📼 FITA VHS PIRATA (Glitch CRT / Camcorder)</option>
+            <option value="RETRO_3D">🖥️ MODO 3D REAL (Texturas Three.js)</option>
+          </select>
         </div>
 
         <div class="visual-controls-columns">
@@ -5514,8 +5537,19 @@ class CityRenderer {
       ASCII_AMBER: 'ASCII_AMBER',         // 1980s Amber terminal
       ASCII_CYBER: 'ASCII_CYBER',         // Neon cyan/magenta
       ASCII_CYBERPUNK: 'ASCII_CYBER',     // Alias for backwards compatibility
+      ASCII_BRAILLE: 'ASCII_BRAILLE',     // Braille 2x4 Sub-Pixel Unicode Matrix
+      SHADER_THERMAL: 'SHADER_THERMAL',   // Thermal FLIR Heat Vision
+      SHADER_DITHER: 'SHADER_DITHER',     // 1-Bit Bayer Ordered Dithering
+      SHADER_COMIC: 'SHADER_COMIC',       // Cel-Shaded Graphic Novel
+      SHADER_WIREFRAME: 'SHADER_WIREFRAME', // Neon Vector Arcade
+      SHADER_VHS: 'SHADER_VHS',           // Fita VHS Glitch & CRT
       RETRO_3D: 'RETRO_3D'                // Low-poly textured 3D view
     };
+
+    this.wireframeMaterial = new THREE.MeshBasicMaterial({
+      wireframe: true,
+      color: 0x00ff88
+    });
 
     this.currentMode = this.MODES.ASCII_COLOR;
 
@@ -5822,17 +5856,36 @@ class CityRenderer {
     } else if (Object.values(this.MODES).includes(modeName)) {
       this.currentMode = modeName;
     }
-    if (this.currentMode === this.MODES.RETRO_3D) {
+
+    if (this.currentMode === this.MODES.SHADER_WIREFRAME) {
+      if (this.scene) this.scene.overrideMaterial = this.wireframeMaterial;
+      this.webglCanvas.style.display = 'block';
+      this.asciiCanvas.style.display = 'none';
+    } else if (this.currentMode === this.MODES.RETRO_3D) {
+      if (this.scene) this.scene.overrideMaterial = null;
       this.webglCanvas.style.display = 'block';
       this.asciiCanvas.style.display = 'none';
     } else {
+      if (this.scene) this.scene.overrideMaterial = null;
       this.webglCanvas.style.display = 'none';
       this.asciiCanvas.style.display = 'block';
     }
   }
 
   cycleRenderMode() {
-    const modes = ['ASCII_COLOR', 'ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'RETRO_3D'];
+    const modes = [
+      'ASCII_COLOR',
+      'ASCII_MATRIX',
+      'ASCII_AMBER',
+      'ASCII_CYBER',
+      'ASCII_BRAILLE',
+      'SHADER_THERMAL',
+      'SHADER_DITHER',
+      'SHADER_COMIC',
+      'SHADER_WIREFRAME',
+      'SHADER_VHS',
+      'RETRO_3D'
+    ];
     const currentIndex = modes.indexOf(this.currentMode);
     const nextIndex = (currentIndex + 1) % modes.length;
     this.setRenderMode(modes[nextIndex]);
@@ -5845,8 +5898,8 @@ class CityRenderer {
       this.webglRenderer.render(this.scene, this.camera);
     }
 
-    // If in pure 3D mode, the WebGL canvas is directly visible
-    if (this.currentMode === this.MODES.RETRO_3D) {
+    // If in pure 3D mode or Three.js wireframe mode, the WebGL canvas is directly visible
+    if (this.currentMode === this.MODES.RETRO_3D || this.currentMode === this.MODES.SHADER_WIREFRAME) {
       return;
     }
 
@@ -5881,11 +5934,25 @@ class CityRenderer {
     const ramp = this.asciiRamp;
     const rampLen = this.rampLength;
 
-    // Configure mode coloring
+    // Configure mode coloring & shaders
     const isColor = this.currentMode === this.MODES.ASCII_COLOR;
     const isMatrix = this.currentMode === this.MODES.ASCII_MATRIX;
     const isAmber = this.currentMode === this.MODES.ASCII_AMBER;
     const isCyber = this.currentMode === this.MODES.ASCII_CYBER || this.currentMode === this.MODES.ASCII_CYBERPUNK;
+    const isBraille = this.currentMode === this.MODES.ASCII_BRAILLE;
+    const isThermal = this.currentMode === this.MODES.SHADER_THERMAL;
+    const isDither = this.currentMode === this.MODES.SHADER_DITHER;
+    const isComic = this.currentMode === this.MODES.SHADER_COMIC;
+    const isVhs = this.currentMode === this.MODES.SHADER_VHS;
+
+    const bayer4x4 = [
+       0/16,  8/16,  2/16, 10/16,
+      12/16,  4/16, 14/16,  6/16,
+       3/16, 11/16,  1/16,  9/16,
+      15/16,  7/16, 13/16,  5/16
+    ];
+    const brailleDotOrder = [0x40, 0x80, 0x04, 0x20, 0x02, 0x10, 0x01, 0x08];
+    const vhsTrackingRow = isVhs ? (Math.floor((performance.now() * 0.035) % (rows + 30)) - 15) : -99;
 
     if (isMatrix) ctx.fillStyle = '#00ff66';
     if (isAmber) ctx.fillStyle = '#ffb300';
@@ -5942,16 +6009,17 @@ class CityRenderer {
         let lum = (red * 0.299 + green * 0.587 + blue * 0.114) / 255;
 
         // 2. Spatial gradient edge enhancement (detect silhouette contours)
+        let delta = 0;
         if (edgeEnhance && c < cols - 1 && r < rows - 1) {
           const lumRight = (data[pixelIndex + 4] * 0.299 + data[pixelIndex + 5] * 0.587 + data[pixelIndex + 6] * 0.114) / 255;
           const lumDown = (data[pixelIndex + cols * 4] * 0.299 + data[pixelIndex + cols * 4 + 1] * 0.587 + data[pixelIndex + cols * 4 + 2] * 0.114) / 255;
-          const delta = Math.abs(lum - lumRight) + Math.abs(lum - lumDown);
+          delta = Math.abs(lum - lumRight) + Math.abs(lum - lumDown);
           if (delta > edgeThreshold) {
             lum = Math.min(1.0, lum + delta * edgeStrength);
           }
         }
 
-        // 3. Non-linear gamma / shadow lift FIRST (lifts shadows before contrast/brightness)
+        // 3. Non-linear gamma / shadow lift FIRST
         if (gamma !== 1.0 && lum > 0.0001) {
           lum = Math.pow(lum, 1.0 / gamma);
         }
@@ -5961,7 +6029,7 @@ class CityRenderer {
           lum = lum * brightness;
         }
 
-        // 5. Soft S-curve contrast expansion THIRD (centered at 0.35 to preserve dark ambient floor)
+        // 5. Soft S-curve contrast expansion THIRD
         if (contrast !== 1.0) {
           lum = lum < 0.35
             ? 0.35 * Math.pow(lum / 0.35, contrast)
@@ -5969,7 +6037,7 @@ class CityRenderer {
         }
         lum = Math.max(0, Math.min(1, lum));
 
-        // Skip dark floor pixels for contrast and speed (0.015 protects night ambient floor ~0.057)
+        // Skip dark floor pixels for contrast and speed
         if (lum < 0.015) continue;
 
         // 6. Character selection from active ramp
@@ -5978,7 +6046,6 @@ class CityRenderer {
         const posX = c * charW + (charW - glyphW) * 0.5;
 
         if (isColor) {
-          // Saturation and brightness adjustments on RGB
           if (saturation !== 1.0) {
             const gray = red * 0.299 + green * 0.587 + blue * 0.114;
             red = Math.min(255, Math.max(0, Math.round(gray + (red - gray) * saturation)));
@@ -6008,6 +6075,91 @@ class CityRenderer {
 
           ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
           ctx.fillText(char, posX, posY);
+        } else if (isThermal) {
+          // False-color thermal FLIR spectrum
+          let tR = 0, tG = 0, tB = 0;
+          if (lum < 0.15) {
+            const t = lum / 0.15;
+            tR = Math.round(20 + 35 * t);
+            tG = 0;
+            tB = Math.round(55 + 120 * t);
+          } else if (lum < 0.38) {
+            const t = (lum - 0.15) / 0.23;
+            tR = 0;
+            tG = Math.round(180 * t);
+            tB = Math.round(255 - 40 * t);
+          } else if (lum < 0.62) {
+            const t = (lum - 0.38) / 0.24;
+            tR = Math.round(230 * t);
+            tG = Math.round(200 + 45 * t);
+            tB = Math.round(50 * (1 - t));
+          } else if (lum < 0.85) {
+            const t = (lum - 0.62) / 0.23;
+            tR = 255;
+            tG = Math.round(240 * (1 - t * 0.75));
+            tB = 0;
+          } else {
+            const t = (lum - 0.85) / 0.15;
+            tR = 255;
+            tG = Math.round(120 + 135 * t);
+            tB = Math.round(255 * t);
+          }
+          if (bloom > 0.05 && lum >= bloomThreshold) {
+            ctx.shadowBlur = Math.round(bloom * 8);
+            ctx.shadowColor = `rgb(${tR}, ${tG}, ${tB})`;
+            isGlowing = true;
+          } else if (isGlowing) {
+            ctx.shadowBlur = 0;
+            isGlowing = false;
+          }
+          ctx.fillStyle = `rgb(${tR}, ${tG}, ${tB})`;
+          ctx.fillText(char, posX, posY);
+        } else if (isComic) {
+          // Comic cel-shading + ink contours
+          const isContour = edgeEnhance && (delta > edgeThreshold * 1.15);
+          if (isContour) {
+            ctx.fillStyle = '#0a0a10';
+            ctx.fillText('#', posX, posY);
+          } else {
+            let toonMul = 0.40;
+            if (lum > 0.65) toonMul = 1.0;
+            else if (lum > 0.35) toonMul = 0.70;
+            const cR = Math.min(255, Math.round(red * toonMul));
+            const cG = Math.min(255, Math.round(green * toonMul));
+            const cB = Math.min(255, Math.round(blue * toonMul));
+            ctx.fillStyle = `rgb(${cR}, ${cG}, ${cB})`;
+            ctx.fillText(char, posX, posY);
+          }
+        } else if (isDither) {
+          // 1-Bit Bayer Ordered Dithering (Obra Dinn)
+          const bayerIdx = (r % 4) * 4 + (c % 4);
+          if (lum > bayer4x4[bayerIdx]) {
+            ctx.fillStyle = '#e5ebe5';
+            ctx.fillText('█', posX, posY);
+          }
+        } else if (isBraille) {
+          // 2x4 Sub-pixel Unicode Braille Matrix (8x resolution)
+          const dotCount = Math.min(8, Math.floor(lum * 9));
+          let brailleBits = 0;
+          for (let i = 0; i < dotCount; i++) {
+            brailleBits |= brailleDotOrder[i];
+          }
+          const brailleChar = String.fromCharCode(0x2800 + brailleBits);
+          ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+          ctx.fillText(brailleChar, posX, posY);
+        } else if (isVhs) {
+          // Chromatic aberration + tracking jitter
+          const leftIdx = Math.max(0, c - 1) * 4 + rowOffset;
+          const rightIdx = Math.min(cols - 1, c + 1) * 4 + rowOffset;
+          const vhsR = data[leftIdx];
+          const vhsG = green;
+          const vhsB = data[rightIdx + 2];
+          let vhsShiftX = 0;
+          if (Math.abs(r - vhsTrackingRow) < 3) {
+            vhsShiftX = ((c * 7) % 5) - 2;
+          }
+          ctx.fillStyle = `rgb(${vhsR}, ${vhsG}, ${vhsB})`;
+          ctx.fillText(char, posX + vhsShiftX, posY);
         } else if (isCyber) {
           const cyberColor = (c + r) % 2 === 0 ? '#00f0ff' : '#ff0077';
           if (bloom > 0.05 && lum >= bloomThreshold) {
@@ -6038,6 +6190,19 @@ class CityRenderer {
     if (isGlowing) {
       ctx.shadowBlur = 0;
       isGlowing = false;
+    }
+
+    // VHS Camcorder on-screen display overlay
+    if (isVhs) {
+      ctx.font = 'bold 13px "Courier New", monospace';
+      ctx.fillStyle = '#00f0ff';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 4;
+      ctx.fillText('PLAY ▶ SP   PIRITUBA-011', 24, 32);
+      const sec = Math.floor(performance.now() / 1000) % 60;
+      const min = Math.floor(performance.now() / 60000) % 60;
+      ctx.fillText(`TC 00:${min < 10 ? '0' + min : min}:${sec < 10 ? '0' + sec : sec}  CH 04`, 24, 50);
+      ctx.shadowBlur = 0;
     }
 
     // 7. Optional CRT Scanlines overlay
@@ -11193,6 +11358,7 @@ class GameApp {
     const sliderBloom = document.getElementById('slider-bloom');
     const sliderFog = document.getElementById('slider-fog');
     const selectPalette = document.getElementById('select-palette');
+    const selectRenderMode = document.getElementById('select-render-mode');
 
     if (sliderDensity && document.activeElement !== sliderDensity) sliderDensity.value = params.density;
     if (sliderBrightness && document.activeElement !== sliderBrightness) sliderBrightness.value = params.brightness;
@@ -11204,6 +11370,7 @@ class GameApp {
     if (sliderBloom && document.activeElement !== sliderBloom) sliderBloom.value = params.bloom !== undefined ? params.bloom : 0.0;
     if (sliderFog && document.activeElement !== sliderFog) sliderFog.value = params.fogDensity !== undefined ? params.fogDensity : 0.8;
     if (selectPalette && document.activeElement !== selectPalette) selectPalette.value = params.colorPalette || 'DEFAULT';
+    if (selectRenderMode && document.activeElement !== selectRenderMode) selectRenderMode.value = this.renderer.currentMode;
   }
 
   initUI() {
@@ -11350,6 +11517,15 @@ class GameApp {
     if (paletteSelect) {
       paletteSelect.addEventListener('change', (e) => {
         this.renderer.setVisualParams({ colorPalette: e.target.value });
+      });
+    }
+
+    const renderModeSelect = document.getElementById('select-render-mode');
+    if (renderModeSelect) {
+      renderModeSelect.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        this.renderer.setRenderMode(mode);
+        this.updateModeLabel(mode);
       });
     }
 
@@ -11523,6 +11699,105 @@ class GameApp {
           colorPalette: 'GAMEBOY',
           edgeEnhance: true,
           rampType: 'BLOCKS',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetThermal = document.getElementById('preset-thermal');
+    if (btnPresetThermal) {
+      btnPresetThermal.addEventListener('click', () => {
+        setPresetActive(btnPresetThermal);
+        this.renderer.setRenderMode('SHADER_THERMAL');
+        this.updateModeLabel('SHADER_THERMAL');
+        this.renderer.setVisualParams({
+          density: 1.2,
+          brightness: 1.2,
+          contrast: 1.4,
+          gamma: 1.2,
+          bloom: 0.5,
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetWireframe = document.getElementById('preset-wireframe');
+    if (btnPresetWireframe) {
+      btnPresetWireframe.addEventListener('click', () => {
+        setPresetActive(btnPresetWireframe);
+        this.renderer.setRenderMode('SHADER_WIREFRAME');
+        this.updateModeLabel('SHADER_WIREFRAME');
+      });
+    }
+
+    const btnPresetComic = document.getElementById('preset-comic');
+    if (btnPresetComic) {
+      btnPresetComic.addEventListener('click', () => {
+        setPresetActive(btnPresetComic);
+        this.renderer.setRenderMode('SHADER_COMIC');
+        this.updateModeLabel('SHADER_COMIC');
+        this.renderer.setVisualParams({
+          density: 1.3,
+          brightness: 1.2,
+          contrast: 1.6,
+          gamma: 1.1,
+          edgeEnhance: true,
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetDither = document.getElementById('preset-dither');
+    if (btnPresetDither) {
+      btnPresetDither.addEventListener('click', () => {
+        setPresetActive(btnPresetDither);
+        this.renderer.setRenderMode('SHADER_DITHER');
+        this.updateModeLabel('SHADER_DITHER');
+        this.renderer.setVisualParams({
+          density: 1.2,
+          brightness: 1.1,
+          contrast: 1.5,
+          gamma: 1.0,
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetVhs = document.getElementById('preset-vhs');
+    if (btnPresetVhs) {
+      btnPresetVhs.addEventListener('click', () => {
+        setPresetActive(btnPresetVhs);
+        this.renderer.setRenderMode('SHADER_VHS');
+        this.updateModeLabel('SHADER_VHS');
+        this.renderer.setVisualParams({
+          density: 1.1,
+          brightness: 1.2,
+          contrast: 1.3,
+          gamma: 1.2,
+          saturation: 1.5,
+          bloom: 0.4,
+          scanlines: true
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetBraille = document.getElementById('preset-braille');
+    if (btnPresetBraille) {
+      btnPresetBraille.addEventListener('click', () => {
+        setPresetActive(btnPresetBraille);
+        this.renderer.setRenderMode('ASCII_BRAILLE');
+        this.updateModeLabel('ASCII_BRAILLE');
+        this.renderer.setVisualParams({
+          density: 1.0,
+          brightness: 1.3,
+          contrast: 1.4,
+          gamma: 1.2,
+          bloom: 0.2,
           scanlines: false
         });
         this.syncVisualControlsUI();
@@ -11734,10 +12009,20 @@ class GameApp {
       ASCII_MATRIX: 'CYBER MATRIX (VERDE)',
       ASCII_AMBER: 'TERMINAL AMBER (CRT)',
       ASCII_CYBER: 'CYBER NEON (CYAN/ROSA)',
+      ASCII_BRAILLE: 'BRAILLE HD 2x4 (SUBPIXEL)',
+      SHADER_THERMAL: 'FLIR TÉRMICO (INFRAVERMELHO)',
+      SHADER_DITHER: 'DITHER 1-BIT (OBRA DINN)',
+      SHADER_COMIC: 'CEL SHADING (QUADRINHOS)',
+      SHADER_WIREFRAME: 'VETORIAL ARCADE (WIREFRAME)',
+      SHADER_VHS: 'VHS GLITCH (CAMCORDER 1995)',
       RETRO_3D: 'RETRO 3D (TEXTURAS)'
     };
     if (this.modeElem) {
       this.modeElem.textContent = labels[mode] || mode;
+    }
+    const selectRenderMode = document.getElementById('select-render-mode');
+    if (selectRenderMode && document.activeElement !== selectRenderMode) {
+      selectRenderMode.value = mode;
     }
   }
 

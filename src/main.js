@@ -264,6 +264,7 @@ class GameApp {
     const sliderBloom = document.getElementById('slider-bloom');
     const sliderFog = document.getElementById('slider-fog');
     const selectPalette = document.getElementById('select-palette');
+    const selectRenderMode = document.getElementById('select-render-mode');
 
     if (sliderDensity && document.activeElement !== sliderDensity) sliderDensity.value = params.density;
     if (sliderBrightness && document.activeElement !== sliderBrightness) sliderBrightness.value = params.brightness;
@@ -275,6 +276,7 @@ class GameApp {
     if (sliderBloom && document.activeElement !== sliderBloom) sliderBloom.value = params.bloom !== undefined ? params.bloom : 0.0;
     if (sliderFog && document.activeElement !== sliderFog) sliderFog.value = params.fogDensity !== undefined ? params.fogDensity : 0.8;
     if (selectPalette && document.activeElement !== selectPalette) selectPalette.value = params.colorPalette || 'DEFAULT';
+    if (selectRenderMode && document.activeElement !== selectRenderMode) selectRenderMode.value = this.renderer.currentMode;
   }
 
   initUI() {
@@ -421,6 +423,15 @@ class GameApp {
     if (paletteSelect) {
       paletteSelect.addEventListener('change', (e) => {
         this.renderer.setVisualParams({ colorPalette: e.target.value });
+      });
+    }
+
+    const renderModeSelect = document.getElementById('select-render-mode');
+    if (renderModeSelect) {
+      renderModeSelect.addEventListener('change', (e) => {
+        const mode = e.target.value;
+        this.renderer.setRenderMode(mode);
+        this.updateModeLabel(mode);
       });
     }
 
@@ -594,6 +605,105 @@ class GameApp {
           colorPalette: 'GAMEBOY',
           edgeEnhance: true,
           rampType: 'BLOCKS',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetThermal = document.getElementById('preset-thermal');
+    if (btnPresetThermal) {
+      btnPresetThermal.addEventListener('click', () => {
+        setPresetActive(btnPresetThermal);
+        this.renderer.setRenderMode('SHADER_THERMAL');
+        this.updateModeLabel('SHADER_THERMAL');
+        this.renderer.setVisualParams({
+          density: 1.2,
+          brightness: 1.2,
+          contrast: 1.4,
+          gamma: 1.2,
+          bloom: 0.5,
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetWireframe = document.getElementById('preset-wireframe');
+    if (btnPresetWireframe) {
+      btnPresetWireframe.addEventListener('click', () => {
+        setPresetActive(btnPresetWireframe);
+        this.renderer.setRenderMode('SHADER_WIREFRAME');
+        this.updateModeLabel('SHADER_WIREFRAME');
+      });
+    }
+
+    const btnPresetComic = document.getElementById('preset-comic');
+    if (btnPresetComic) {
+      btnPresetComic.addEventListener('click', () => {
+        setPresetActive(btnPresetComic);
+        this.renderer.setRenderMode('SHADER_COMIC');
+        this.updateModeLabel('SHADER_COMIC');
+        this.renderer.setVisualParams({
+          density: 1.3,
+          brightness: 1.2,
+          contrast: 1.6,
+          gamma: 1.1,
+          edgeEnhance: true,
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetDither = document.getElementById('preset-dither');
+    if (btnPresetDither) {
+      btnPresetDither.addEventListener('click', () => {
+        setPresetActive(btnPresetDither);
+        this.renderer.setRenderMode('SHADER_DITHER');
+        this.updateModeLabel('SHADER_DITHER');
+        this.renderer.setVisualParams({
+          density: 1.2,
+          brightness: 1.1,
+          contrast: 1.5,
+          gamma: 1.0,
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetVhs = document.getElementById('preset-vhs');
+    if (btnPresetVhs) {
+      btnPresetVhs.addEventListener('click', () => {
+        setPresetActive(btnPresetVhs);
+        this.renderer.setRenderMode('SHADER_VHS');
+        this.updateModeLabel('SHADER_VHS');
+        this.renderer.setVisualParams({
+          density: 1.1,
+          brightness: 1.2,
+          contrast: 1.3,
+          gamma: 1.2,
+          saturation: 1.5,
+          bloom: 0.4,
+          scanlines: true
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetBraille = document.getElementById('preset-braille');
+    if (btnPresetBraille) {
+      btnPresetBraille.addEventListener('click', () => {
+        setPresetActive(btnPresetBraille);
+        this.renderer.setRenderMode('ASCII_BRAILLE');
+        this.updateModeLabel('ASCII_BRAILLE');
+        this.renderer.setVisualParams({
+          density: 1.0,
+          brightness: 1.3,
+          contrast: 1.4,
+          gamma: 1.2,
+          bloom: 0.2,
           scanlines: false
         });
         this.syncVisualControlsUI();
@@ -805,10 +915,20 @@ class GameApp {
       ASCII_MATRIX: 'CYBER MATRIX (VERDE)',
       ASCII_AMBER: 'TERMINAL AMBER (CRT)',
       ASCII_CYBER: 'CYBER NEON (CYAN/ROSA)',
+      ASCII_BRAILLE: 'BRAILLE HD 2x4 (SUBPIXEL)',
+      SHADER_THERMAL: 'FLIR TÉRMICO (INFRAVERMELHO)',
+      SHADER_DITHER: 'DITHER 1-BIT (OBRA DINN)',
+      SHADER_COMIC: 'CEL SHADING (QUADRINHOS)',
+      SHADER_WIREFRAME: 'VETORIAL ARCADE (WIREFRAME)',
+      SHADER_VHS: 'VHS GLITCH (CAMCORDER 1995)',
       RETRO_3D: 'RETRO 3D (TEXTURAS)'
     };
     if (this.modeElem) {
       this.modeElem.textContent = labels[mode] || mode;
+    }
+    const selectRenderMode = document.getElementById('select-render-mode');
+    if (selectRenderMode && document.activeElement !== selectRenderMode) {
+      selectRenderMode.value = mode;
     }
   }
 
