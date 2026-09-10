@@ -13,6 +13,7 @@ import { TrafficSystem } from './engine/TrafficSystem.js';
 import { GameManager } from './game/GameManager.js';
 import { ZoneManager } from './world/Zones.js';
 import { TouchController } from './engine/TouchControls.js';
+import { initLanguage, getLanguage, setLanguage, toggleLanguage, updateDomTranslations } from './game/i18n.js';
 
 class GameApp {
   constructor() {
@@ -97,6 +98,8 @@ class GameApp {
     this.visualsBtn = document.getElementById('btn-visuals');
     this.cameraBtn = document.getElementById('btn-camera');
     this.cameraLabel = document.getElementById('hud-camera-label');
+    this.langBtn = document.getElementById('btn-lang');
+    this.mobileLangBtn = document.getElementById('mobile-btn-lang');
 
     // Google Street View Modal Elements
     this.streetViewModal = document.getElementById('street-view-modal');
@@ -109,8 +112,10 @@ class GameApp {
     this.visualsModal = document.getElementById('visuals-modal');
     this.isVisualsModalOpen = false;
 
+    initLanguage();
     this.initUI();
     this.initRoulette();
+    updateDomTranslations();
     window.app = this;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
@@ -158,6 +163,15 @@ class GameApp {
         e.stopPropagation();
         const classKey = btn.getAttribute('data-class');
         startWithClass(classKey);
+      });
+    });
+
+    const rouletteLangBtns = document.querySelectorAll('#roulette-lang-group .lang-btn');
+    rouletteLangBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = btn.getAttribute('data-lang');
+        setLanguage(lang, this);
       });
     });
   }
@@ -840,6 +854,14 @@ class GameApp {
       });
     }
 
+    // Language Toggle Button [L]
+    if (this.langBtn) {
+      this.langBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleLanguage(this);
+      });
+    }
+
     // Wire Mobile Menu Drawer Buttons
     const closeMobileDrawer = () => {
       const drawer = document.getElementById('mobile-menu-drawer');
@@ -847,6 +869,14 @@ class GameApp {
       if (drawer) drawer.classList.add('modal-hidden');
       if (btnMenu) btnMenu.classList.remove('active');
     };
+
+    const mBtnLang = document.getElementById('mobile-btn-lang');
+    if (mBtnLang) {
+      mBtnLang.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleLanguage(this);
+      });
+    }
 
     const mBtnStreetview = document.getElementById('mobile-btn-streetview');
     if (mBtnStreetview) {
@@ -929,7 +959,9 @@ class GameApp {
 
       const isRouletteOpen = typeof document !== 'undefined' && document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
 
-      if (e.code === 'KeyV' || e.key === 'v' || e.key === 'V') {
+      if (e.code === 'KeyL' || e.key === 'l' || e.key === 'L') {
+        toggleLanguage(this);
+      } else if (e.code === 'KeyV' || e.key === 'v' || e.key === 'V') {
         this.toggleStreetView();
       } else if (e.code === 'KeyP' || e.key === 'p' || e.key === 'P') {
         if (isRouletteOpen) return;

@@ -6,7 +6,7 @@
 import { Rng } from './Rng.js';
 import { RunClock } from './RunClock.js';
 import { GameState } from './GameState.js';
-import { SOCIAL_CLASSES } from './Classes.js';
+import { SOCIAL_CLASSES, getActiveClassConfig } from './Classes.js';
 import { DayCycle } from './DayCycle.js';
 import { GameProps } from './Props.js';
 import { DialogSystem } from './Dialog.js';
@@ -15,6 +15,7 @@ import { NpcSystem } from './NpcSystem.js';
 import { HudGame } from './HudGame.js';
 import { BRAZILIAN_ENCOUNTERS } from './Encounters.js';
 import { WORLD_ZONES } from '../world/Zones.js';
+import { t, getLanguage } from './i18n.js';
 
 export class GameManager {
   constructor(scene, camera, controls, physics, textures, sound, cityBuilder, trafficSystem, initialSeed = null) {
@@ -76,7 +77,7 @@ export class GameManager {
       const roll = this.rng.random();
       chosenKey = roll < 0.60 ? 'CLASSE_DE' : (roll < 0.90 ? 'CLASSE_C' : 'CLASSE_AB');
     }
-    const classConfig = SOCIAL_CLASSES[chosenKey] || SOCIAL_CLASSES.CLASSE_DE;
+    const classConfig = getActiveClassConfig(chosenKey);
 
     this.state = new GameState(classConfig, this.rng, this.seed);
     this.isRunActive = true;
@@ -92,7 +93,8 @@ export class GameManager {
       this.sound.playCoin();
     }
 
-    this.hud.showToast(`🌟 <strong>VOCÊ NASCEU COMO: ${classConfig.title.toUpperCase()}</strong><br>${classConfig.subtitle}`, 5000);
+    const toastTpl = t('toasts.spawn_intro', '🌟 <strong>VOCÊ NASCEU COMO: {title}</strong><br>{subtitle}');
+    this.hud.showToast(toastTpl.replace('{title}', classConfig.title.toUpperCase()).replace('{subtitle}', classConfig.subtitle), 5000);
 
     // Run end callback
     this.clock.onRunEnd = () => this.handleRunEnd(true);
@@ -131,7 +133,7 @@ export class GameManager {
         this.sound.playRain(true);
         this.sound.playThunder();
       }
-      this.hud.showToast('⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.', 6000);
+      this.hud.showToast(t('toasts.storm_start', '⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.'), 6000);
     } else if (!inStormWindow && this.isStorming) {
       this.isStorming = false;
       this.dayCycle.setWeather('CLEAR');
@@ -139,7 +141,7 @@ export class GameManager {
       if (this.sound) {
         this.sound.playRain(false);
       }
-      this.hud.showToast('🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.', 4000);
+      this.hud.showToast(t('toasts.storm_end', '🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.'), 4000);
     }
 
     if (this.isStorming && this.sound) {
@@ -257,7 +259,7 @@ export class GameManager {
           if (!this.lastCarameloWarning || this.clock.elapsed - this.lastCarameloWarning > 4.0) {
             this.lastCarameloWarning = this.clock.elapsed;
             if (this.sound && this.sound.playDogBark) this.sound.playDogBark();
-            this.hud.showToast('🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!', 2500);
+            this.hud.showToast(t('toasts.caramelo_bark', '🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!'), 2500);
           }
         }
 
@@ -271,7 +273,7 @@ export class GameManager {
 
           // Push player back to nearest sidewalk
           playerPos.z = playerPos.z < (minZ + maxZ) / 2 ? minZ - 2.0 : maxZ + 2.0;
-          this.hud.showToast('🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)', 4000);
+          this.hud.showToast(t('toasts.traffic_hit', '🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)'), 4000);
           break;
         }
       }
@@ -298,6 +300,9 @@ export class GameManager {
 
     const enc = BRAZILIAN_ENCOUNTERS.DOIS_CARAS_MOTO;
     this.dialog.open({
+      id: 'DOIS_CARAS_MOTO',
+      encounterId: 'DOIS_CARAS_MOTO',
+      _state: this.state,
       title: enc.title,
       text: enc.getIntroText(this.state),
       options: enc.getOptions(this.state)
@@ -317,6 +322,9 @@ export class GameManager {
 
     const enc = BRAZILIAN_ENCOUNTERS.BLITZ_PM;
     this.dialog.open({
+      id: 'BLITZ_PM',
+      encounterId: 'BLITZ_PM',
+      _state: this.state,
       title: enc.title,
       text: enc.getIntroText(this.state),
       options: enc.getOptions(this.state)
@@ -349,12 +357,10 @@ export class GameManager {
     }
 
     if (won) {
-      if (this.endTitleElem) this.endTitleElem.innerHTML = '🏆 VOCÊ SOBREVIVEU A 24 HORAS NO BRASIL!';
+      if (this.endTitleElem) this.endTitleElem.innerHTML = t('ui.end_title_win', '🏆 VOCÊ SOBREVIVEU A 24 HORAS NO BRASIL!');
       if (this.endDescElem) {
-        this.endDescElem.innerHTML = `
-          Parabéns! Você completou os 15 minutos de run intacto(a) como <strong>${this.state.className}</strong>.<br>
-          Sobreviveu ao trânsito da Edgar Facó, ao temporal de verão, aos boletos e à madrugada na quebrada!
-        `;
+        const winTpl = t('ui.end_desc_win', 'Parabéns! Você completou os 15 minutos de run intacto(a) como <strong>{className}</strong>.<br>Sobreviveu ao trânsito da Edgar Facó, ao temporal de verão, aos boletos e à madrugada na quebrada!');
+        this.endDescElem.innerHTML = winTpl.replace('{className}', this.state.className);
       }
     } else {
       if (this.endTitleElem) this.endTitleElem.innerHTML = `💀 GAME OVER // ${defeatData.cause}`;
@@ -377,21 +383,33 @@ export class GameManager {
         .filter(h => !h.isDecay && h.reason !== 'Desgaste biológico/urbano contínuo' && !h.reason?.includes('Desgaste'))
         .slice(-3);
 
+      const emptyMoment = t('ui.end_moments_empty', 'Dia tranquilo em Pirituba sem grandes incidentes');
       const recentHistory = notableEvents.length > 0
         ? notableEvents.map(h => `<li><span style="color:#888">${h.hour || h.time}</span>: ${h.desc || h.reason}</li>`).join('')
-        : '<li>Dia tranquilo em Pirituba sem grandes incidentes</li>';
+        : `<li>${emptyMoment}</li>`;
+
+      const lblClass = t('ui.end_stat_class', 'Classe Social:');
+      const lblObj = t('ui.end_stat_objective', 'Meta do Dia:');
+      const objMsg = objCompleted ? t('ui.end_stat_obj_success', '✅ CUMPRIDA COM SUCESSO!') : t('ui.end_stat_obj_fail', '❌ NÃO CONCLUÍDA');
+      const lblGrana = t('ui.end_stat_grana', 'Saldo Final:');
+      const lblDebt = t('ui.end_stat_debt', 'Dívida / Fiado Pendente:');
+      const lblFome = t('ui.end_stat_fome', 'Bucho / Fome Final:');
+      const lblSanidade = t('ui.end_stat_sanidade', 'Sanidade Mental:');
+      const lblPerigo = t('ui.end_stat_perigo', 'Nível de B.O. / Perigo:');
+      const lblGinga = t('ui.end_stat_ginga', 'Ginga / Jeitinho Score:');
+      const lblMoments = t('ui.end_moments_title', 'Momentos Marcantes do Dia:');
 
       this.endStatsElem.innerHTML = `
-        <div class="end-stat-row"><span>Classe Social:</span> <strong>${this.state.className}</strong></div>
-        <div class="end-stat-row"><span>Meta do Dia:</span> <strong style="color:${objCompleted ? '#00ff66' : '#ffaa33'}">${objCompleted ? '✅ CUMPRIDA COM SUCESSO!' : '❌ NÃO CONCLUÍDA'}</strong></div>
-        <div class="end-stat-row"><span>Saldo Final:</span> <strong>${this.state.formattedGrana}</strong></div>
-        <div class="end-stat-row"><span>Dívida / Fiado Pendente:</span> <strong>${this.state.formattedDebt}</strong></div>
-        <div class="end-stat-row"><span>Bucho / Fome Final:</span> <strong>${Math.round(this.state.fome)}%</strong></div>
-        <div class="end-stat-row"><span>Sanidade Mental:</span> <strong>${Math.round(this.state.sanidade)}%</strong></div>
-        <div class="end-stat-row"><span>Nível de B.O. / Perigo:</span> <strong>${Math.round(this.state.perigo)}%</strong></div>
-        <div class="end-stat-row"><span>Ginga / Jeitinho Score:</span> <strong>${Math.round(this.state.ginga)} pts</strong></div>
+        <div class="end-stat-row"><span>${lblClass}</span> <strong>${this.state.className}</strong></div>
+        <div class="end-stat-row"><span>${lblObj}</span> <strong style="color:${objCompleted ? '#00ff66' : '#ffaa33'}">${objMsg}</strong></div>
+        <div class="end-stat-row"><span>${lblGrana}</span> <strong>${this.state.formattedGrana}</strong></div>
+        <div class="end-stat-row"><span>${lblDebt}</span> <strong>${this.state.formattedDebt}</strong></div>
+        <div class="end-stat-row"><span>${lblFome}</span> <strong>${Math.round(this.state.fome)}%</strong></div>
+        <div class="end-stat-row"><span>${lblSanidade}</span> <strong>${Math.round(this.state.sanidade)}%</strong></div>
+        <div class="end-stat-row"><span>${lblPerigo}</span> <strong>${Math.round(this.state.perigo)}%</strong></div>
+        <div class="end-stat-row"><span>${lblGinga}</span> <strong>${Math.round(this.state.ginga)} pts</strong></div>
         <div style="margin-top:12px;text-align:left;background:#151515;padding:8px 12px;border:1px solid #333;border-radius:4px;font-size:12px;">
-          <strong style="color:#00ffcc">Momentos Marcantes do Dia:</strong>
+          <strong style="color:#00ffcc">${lblMoments}</strong>
           <ul style="margin:4px 0 0 16px;padding:0;color:#bbb;">${recentHistory}</ul>
         </div>
       `;

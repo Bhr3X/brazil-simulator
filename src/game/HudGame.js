@@ -3,6 +3,8 @@
  * Invariant I11: DOM only, pt-BR, R$ formatted via Intl.
  */
 
+import { t, getLanguage } from './i18n.js';
+
 export class HudGame {
   constructor() {
     this.runClockElem = document.getElementById('hud-run-clock');
@@ -36,11 +38,13 @@ export class HudGame {
     if (this.debtElem) {
       if (state.grana < 0) {
         const remainingSec = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
-        this.debtElem.textContent = `[⚠️ DÉBITO BANCO: FALÊNCIA EM ${remainingSec}s]`;
+        const warnPrefix = t('ui.stat_debt_warning', '⚠️ DÉBITO BANCO: FALÊNCIA EM');
+        this.debtElem.textContent = `[${warnPrefix} ${remainingSec}s]`;
         this.debtElem.style.color = '#ff3344';
         this.debtElem.style.display = 'inline';
       } else if (state.debt > 0) {
-        this.debtElem.textContent = `(Fiado: ${state.formattedDebt})`;
+        const tabPrefix = t('ui.stat_tab', 'Fiado:');
+        this.debtElem.textContent = `(${tabPrefix} ${state.formattedDebt})`;
         this.debtElem.style.color = '';
         this.debtElem.style.display = 'inline';
       } else {
@@ -62,7 +66,8 @@ export class HudGame {
     if (this.perigoText) this.perigoText.textContent = `${perigoInt}%`;
 
     if (this.classBadge) this.classBadge.textContent = state.badge;
-    if (this.objectiveElem) this.objectiveElem.textContent = `META DO DIA: ${state.dailyObjective}`;
+    const objPrefix = t('ui.objective_prefix', 'META DO DIA:');
+    if (this.objectiveElem) this.objectiveElem.textContent = `${objPrefix} ${state.dailyObjective}`;
   }
 
   showToast(message, duration = 3500) {

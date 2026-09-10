@@ -1697,6 +1697,85 @@ async function runTestSuite(url) {
       throw new Error(`TEST 22 FAILED: Expansion test failed: ${JSON.stringify(expansionTest)}`);
     }
 
+    // TEST 23: Bilingual Language Switcher (PT 🇧🇷 / EN 🇺🇸)
+    const langTest = await evaluate(`
+      (() => {
+        const btnLang = document.getElementById('btn-lang');
+        const hudLangLabel = document.getElementById('hud-lang-label');
+        const mobileBtnLang = document.getElementById('mobile-btn-lang');
+        const rouletteGroup = document.getElementById('roulette-lang-group');
+        const ptBtn = document.querySelector('.lang-btn[data-lang="pt"]');
+        const enBtn = document.querySelector('.lang-btn[data-lang="en"]');
+        const statMoney = document.getElementById('stat-money');
+        const statFome = document.getElementById('stat-fome');
+        const statSanidade = document.getElementById('stat-sanidade');
+        const statPerigo = document.getElementById('stat-perigo');
+        const hudObj = document.getElementById('hud-objective');
+
+        const hasSwitchers = !!(btnLang && hudLangLabel && mobileBtnLang && rouletteGroup && ptBtn && enBtn);
+
+        // 1. Initial State should be Portuguese
+        const initialLabel = hudLangLabel ? hudLangLabel.textContent.trim() : '';
+        const initialPtActive = ptBtn ? ptBtn.classList.contains('active') : false;
+        const initialMoneyPt = statMoney ? statMoney.textContent.includes('GRANA') : false;
+        const initialObjPt = hudObj ? hudObj.textContent.includes('META DO DIA:') : false;
+
+        // 2. Toggle to English via button click
+        btnLang.click();
+        const enLabel = hudLangLabel ? hudLangLabel.textContent.trim() : '';
+        const enActive = enBtn ? enBtn.classList.contains('active') : false;
+        const moneyEn = statMoney ? statMoney.textContent.includes('CASH') : false;
+        const fomeEn = statFome ? statFome.textContent.includes('HUNGER') : false;
+        const sanidadeEn = statSanidade ? statSanidade.textContent.includes('SANITY') : false;
+        const perigoEn = statPerigo ? statPerigo.textContent.includes('HEAT') : false;
+        const objEn = hudObj ? hudObj.textContent.includes('DAILY GOAL:') : false;
+
+        // Verify Dialog Localization in English
+        const sampleDialog = window.app.game.dialog.localizeData({
+          id: 'PADARIA_ESTRELA',
+          encounterId: 'PADARIA_ESTRELA',
+          title: '🥖 PADARIA ESTRELA DE PIRITUBA',
+          options: [{ id: 'pingado_pao', label: 'Pingado no copo americano' }]
+        });
+        const dialogTranslated = sampleDialog && sampleDialog.title.includes('ESTRELA BAKERY') &&
+                                 sampleDialog.options[0].label.includes('Half-and-half');
+
+        // 3. Toggle back to Portuguese via roulette button click
+        ptBtn.click();
+        const backPtLabel = hudLangLabel ? hudLangLabel.textContent.trim() : '';
+        const backPtActive = ptBtn ? ptBtn.classList.contains('active') : false;
+        const backMoneyPt = statMoney ? statMoney.textContent.includes('GRANA') : false;
+        const backObjPt = hudObj ? hudObj.textContent.includes('META DO DIA:') : false;
+
+        return {
+          ok: hasSwitchers && initialLabel.includes('PT') && initialPtActive && initialMoneyPt && initialObjPt &&
+              enLabel.includes('EN') && enActive && moneyEn && fomeEn && sanidadeEn && perigoEn && objEn && dialogTranslated &&
+              backPtLabel.includes('PT') && backPtActive && backMoneyPt && backObjPt,
+          hasSwitchers,
+          initialLabel,
+          initialPtActive,
+          initialMoneyPt,
+          initialObjPt,
+          enLabel,
+          enActive,
+          moneyEn,
+          fomeEn,
+          sanidadeEn,
+          perigoEn,
+          objEn,
+          dialogTranslated,
+          backPtLabel,
+          backPtActive,
+          backMoneyPt,
+          backObjPt
+        };
+      })()
+    `);
+    console.log(`[TEST 23] Bilingual Language Switcher (PT 🇧🇷 / EN 🇺🇸):`, langTest);
+    if (!langTest.ok) {
+      throw new Error(`TEST 23 FAILED: Bilingual language switcher test failed: ${JSON.stringify(langTest)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

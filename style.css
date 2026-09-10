@@ -1995,7 +1995,61 @@ body.mobile-touch-active #hud-objective-bar {
   }
   #orientation-banner:not(.modal-hidden) {
     display: block;
-  }
+}
+
+/* Language Switcher Styling */
+.roulette-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lang-selector-group {
+  display: inline-flex;
+  background: rgba(0, 20, 10, 0.75);
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: #88bb99;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.lang-btn:hover {
+  color: #00ff88;
+  background: rgba(0, 255, 102, 0.15);
+}
+
+.lang-btn.active {
+  background: #00ff66;
+  color: #050a06;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+}
+
+#btn-lang {
+  border-color: #00ff88;
+  color: #00ff88;
+  font-weight: bold;
+}
+
+#btn-lang:hover {
+  background: rgba(0, 255, 102, 0.2);
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.4);
 }
 
 

@@ -4,6 +4,8 @@
  * Keys [1], [2], [3], [4] select options; [Q] / [Esc] cancels.
  */
 
+import { getLanguage, getLocalizedEncounter } from './i18n.js';
+
 export class DialogSystem {
   constructor(controls) {
     this.controls = controls;
@@ -50,7 +52,51 @@ export class DialogSystem {
     });
   }
 
-  open(dialogData, onChoice) {
+  localizeData(dialogData) {
+    if (typeof getLanguage !== 'function' || getLanguage() !== 'en' || !dialogData) return dialogData;
+    const encId = dialogData.encounterId || dialogData.id;
+    if (!encId) return dialogData;
+
+    const loc = getLocalizedEncounter(encId, 'en');
+    if (!loc) return dialogData;
+
+    const st = dialogData._state || (typeof window !== 'undefined' && window.app?.game?.state ? window.app.game.state : {});
+
+    const locOptions = (dialogData.options || []).map(opt => {
+      const optTrans = loc.options && loc.options[opt.id];
+      if (!optTrans) return opt;
+      const newLabel = typeof optTrans.label === 'function' ? optTrans.label(st) : optTrans.label;
+      const newCostLabel = typeof optTrans.costLabel === 'function' ? optTrans.costLabel(st) : (optTrans.costLabel || opt.costLabel);
+
+      return {
+        ...opt,
+        label: newLabel || opt.label,
+        costLabel: newCostLabel || opt.costLabel,
+        execute: (state, sound) => {
+          const ptResult = opt.execute(state, sound);
+          if (optTrans.outcome) {
+            if (typeof optTrans.outcome === 'function') {
+              return optTrans.outcome(state, ptResult || '');
+            }
+            return optTrans.outcome;
+          }
+          return ptResult;
+        }
+      };
+    });
+
+    const newIntro = typeof loc.intro === 'function' ? loc.intro(st) : (loc.intro || dialogData.text);
+
+    return {
+      ...dialogData,
+      title: loc.title || dialogData.title,
+      text: newIntro || dialogData.text,
+      options: locOptions
+    };
+  }
+
+  open(rawDialogData, onChoice) {
+    const dialogData = this.localizeData(rawDialogData);
     this.isOpen = true;
     this.currentEncounter = dialogData;
     this.onChoiceCallback = onChoice;

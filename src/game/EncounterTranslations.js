@@ -1,0 +1,610 @@
+/**
+ * English Translations & Cultural Localization for all 19 Brazilian Encounters
+ * Provides natural, flavorful English adaptations of dialogues, slang, and outcomes.
+ */
+
+export const EN_ENCOUNTER_TEXTS = {
+  PADARIA_ESTRELA: {
+    title: '🥖 ESTRELA BAKERY OF PIRITUBA',
+    intro: (state) => `
+      The aroma of warm French bread and fresh drip coffee drifts onto the sidewalk.<br>
+      The counter clerk in a coffee-stained apron asks in a raspy voice:<br>
+      <em>"— Hey boss, the usual on the grill?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pingado_pao: {
+        label: 'Half-and-half coffee in American glass + Crispy toasted French bread',
+        outcome: 'The toasted French bread arrived sizzling with melted butter, and the milky coffee hit the spot. Full stomach (+30%) and renewed sanity (+18%).'
+      },
+      coxinha_estufa: {
+        label: 'Chicken & Catupiry coxinha from the warmer + Fresh sugarcane juice',
+        outcome: (state, ptResult) => ptResult.includes('queimação')
+          ? 'The coxinha was golden, but the heavy oil sat rough on your stomach. Gained 45% stomach, but got a harsh dose of São Paulo heartburn (-10% Sanity).'
+          : 'Crispy coxinha, generous shredded chicken filling, and ice-cold sugarcane juice with lime! Stomach almost full (+45%).'
+      },
+      nota_100: {
+        label: (state) => state.flags.tentouNota100
+          ? 'Pay with R$ 100 bill (The cashier already warned you they have no change today)'
+          : 'Try paying for a R$ 3.00 espresso with a R$ 100 bill',
+        costLabel: 'Street Hustle Check (1x per day)',
+        outcome: (state, ptResult) => ptResult.includes('respirada')
+          ? 'The cashier took a deep breath, glared at you, but went into the back safe and handed you R$ 97.00 in crumpled small bills. Brazilian hustle victory (+5 Ginga)!'
+          : '"— You kidding me, boss? 6:30 in the morning and you hand me a hundred-real bill?! No Pix?!" You left empty-handed with your ears burning (-12% Sanity).'
+      },
+      agua_copo: {
+        label: (state) => state.flags.aguaPadaria
+          ? 'Ask for tap water (Already had your glass of water today)'
+          : 'Ask for a glass of tap water and browse the pastry display',
+        costLabel: 'Free (1x per day)',
+        outcome: 'The counter clerk handed you a plastic cup of ice water. Refreshed your head (+8% Sanity).'
+      },
+      pagar_boleto_enel: {
+        label: 'Pay Enel electric bill at the bakery lottery cashier',
+        outcome: 'Payment receipt printed on thermal paper! Huge relief: daily goal successfully completed (+35% Sanity)!'
+      },
+      fornada_cinco_manha: {
+        label: (state) => {
+          const isDawn = state.currentHour >= 5.0 && state.currentHour < 6.0 && ((state.elapsedSeconds || 0) >= 700);
+          if (!isDawn) return '05:00 First Bake (Only available during dawn hours from 05:00 to 06:00)';
+          return state.flags.primeiraFornada
+            ? '05:00 First Bake (Quota used — next batch tomorrow at 5 AM)'
+            : '🌅 First Bake of the Day (Piping Hot French Bread at 05:00) — R$ 5.00';
+        },
+        outcome: '🌅 The baker pulled the baking sheet of French bread crackling hot from the brick oven! Smells like victory, golden crispy crust. You survived the Pirituba night (+35% Stomach, +25% Sanity)!'
+      }
+    }
+  },
+
+  BAR_DO_TIAO: {
+    title: '🍺 TIÃO\'S CORNER PUB // POOL & COLD BEER',
+    intro: (state) => `
+      Seu Tião wipes a glass behind the tiled counter as pagode music plays on a small transistor radio.<br>
+      Two older regulars are intensely debating soccer over pickled eggs and cold beer:<br>
+      <em>"— Welcome! Table is free, beer is sub-zero, and the bar tab is open if you\'re a regular."</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Danger: ${state.perigo}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      cerveja_600: {
+        label: 'Order a 600ml ice-cold Brahma beer in a brown glass bottle',
+        outcome: 'Seu Tião pulled a bottle frosted with ice right out of the cooler. The cold foam washed away the street exhaustion (-15% Danger, +22% Sanity, +10% Stomach).'
+      },
+      desafio_sinuca: {
+        label: 'Challenge the local bar shark to an 8-ball pool game (R$ 10.00 bet)',
+        costLabel: 'Pool Check (Ginga)',
+        outcome: (state, ptResult) => ptResult.includes('Tabelou')
+          ? 'You banked the 8-ball off the rail straight into the corner pocket! The old-timers clapped their hands: "— Kid has smooth hands!" You pocketed R$ 20.00 and earned street cred (+R$ 20.00, +15 Ginga)!'
+          : 'You scratched the cue ball on the break and the old-timer cleaned the table in two turns. R$ 10.00 lost and a harsh lesson in neighborhood pool (-R$ 10.00, -10% Sanity).'
+      },
+      aposta_jogo_bicho: {
+        label: 'Place a R$ 5.00 bet on the illegal animal lottery (Jogo do Bicho) with Seu Tião',
+        costLabel: 'Animal Lottery (R$ 5.00)',
+        outcome: (state, ptResult) => ptResult.includes('DEU BICHO')
+          ? '🎰 JACKPOT ON THE DEER! The afternoon draw confirmed your number! Seu Tião reached into the wooden drawer and counted out R$ 50.00 in cash! Huge win in Pirituba (+R$ 50.00, +25 Ginga, +30% Sanity)!'
+          : 'The 2 PM draw came out as Ostrich. Not your lucky day, but hoping is part of the Brazilian soul (-R$ 5.00, -5% Sanity).'
+      },
+      caderninho_fiado: {
+        label: (state) => (state.debt || 0) >= 3500
+          ? 'Ask for credit on the tab (Tião\'s ledger is capped: pay your debt first)'
+          : 'Ask Seu Tião to put your drink on the tab (Credit)',
+        costLabel: 'Put on Tab (Max R$ 35.00)',
+        outcome: 'Seu Tião picked up his worn pencil behind his ear and scribbled your name in the spiral notebook: "— Pay me by the weekend, boss!" (+R$ 12.00 drink, debt recorded).'
+      },
+      ovo_conserva: {
+        label: 'Eat a pink pickled egg and a pickled sausage from the counter jar',
+        outcome: 'Vinegar, pepper, and street tradition. Heavy digestion, but filled your stomach on a budget (+28% Stomach, -6% Sanity).'
+      }
+    }
+  },
+
+  ADEGA_DO_ZE: {
+    title: '🍷 ZÉ\'S LIQUOR & BEVERAGE SHOP',
+    intro: (state) => `
+      Crates of beer bottles stacked to the ceiling, ice chests humming, and funk beats echoing from a mounted loudspeaker.<br>
+      Zé glances up from counting receipts behind the wire gate:<br>
+      <em>"— Looking for cold brews, a pack of ice, or bringing cans to sell by the kilo?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      litrao_skol: {
+        label: 'Buy a 1-liter Skol returnable bottle',
+        outcome: 'Ice-cold 1-liter bottle cracked open right at the sidewalk curb. Refreshed your mood instantly (+18% Sanity, -10% Danger).'
+      },
+      vender_latinhas: {
+        label: 'Sell the bag of crushed aluminum cans scavenged on the hill',
+        costLabel: '+R$ 18.00 in Cash',
+        outcome: 'Zé tossed the bag onto the analog hanging scale: "— Three point two kilos of clean aluminum!" He slapped R$ 18.00 in cash onto the counter (+R$ 18.00, +10 Ginga)!'
+      },
+      corote_canelinha: {
+        label: 'Buy a bottle of cheap cinnamon cachaça (Corote)',
+        outcome: 'Sweet, potent, and burning down your throat. Street anxiety vanished, but your stomach took a hit (-12% Stomach, +15% Sanity, +8 Ginga).'
+      }
+    }
+  },
+
+  FLANELINHA: {
+    title: '🚗 UNOFFICIAL PARKING VALET AT THE CROSSING',
+    intro: (state) => `
+      A man in a yellow reflective vest with a rag draped over his shoulder waves his arms energetically:<br>
+      <em>"— Back it up, boss! Cut the wheel, keep coming! Park here and nobody touches your ride!"</em><br>
+      <small style="color:#ffcc00">Danger: ${state.perigo}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      pagar_cinco: {
+        label: 'Pay R$ 5.00 to guarantee your car won\'t be scratched',
+        outcome: 'The valet tapped the hood with his rag: "— Right on, boss! Car is fully guarded. Peace of mind on Paula Ferreira!" (-R$ 5.00, -20% Danger, +10% Sanity).'
+      },
+      migue_cartao: {
+        label: 'Try the classic excuse: "Only got credit card and Pix, bro!"',
+        costLabel: 'Hustle Check',
+        outcome: (state, ptResult) => ptResult.includes('máquininha')
+          ? 'The valet pulled an orange card reader straight out of his back pocket: "— Accepts credit, debit, Pix, and crypto, boss!" You had to tap your card (-R$ 5.00, +5 Ginga).'
+          : 'He gave an understanding nod: "— Tough times, huh boss? Go in peace, next time you get me!" Smooth talk saved your cash (+8 Ginga).'
+      },
+      peitar_rua: {
+        label: 'Refuse to pay: "The street is public, pal!"',
+        costLabel: 'High Confrontation',
+        outcome: 'The valet stepped back with folded arms and a cold smirk: "— Street is public, boss, but glass is private..." You walked away with knots in your stomach (+30% Danger, -20% Sanity).'
+      }
+    }
+  },
+
+  POSTO_PIRITUBA: {
+    title: '⛽ PIRITUBA 24H GAS STATION',
+    intro: (state) => `
+      Neon gas pump canopy illuminating the asphalt, attendant in uniform, and tires hissing on the tarmac.<br>
+      <em>"— Ethanol or gas, chief? Want me to check the oil and wash the windshield?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}%</small>
+    `,
+    options: {
+      abastecer_30: {
+        label: 'Put R$ 30.00 of ethanol in the 2004 Celta',
+        outcome: 'Fuel needle rose safely above the empty reserve! Relief from the fear of stalling out on the avenue (-R$ 30.00, +25% Sanity).'
+      },
+      calibrar_agua: {
+        label: 'Check tire pressure at the air pump and drink from the water fountain',
+        outcome: '30 PSI in all four tires and two hearty gulps of chilled water. Refreshed without spending a cent (+10% Sanity).'
+      },
+      fandangos_refri: {
+        label: 'Buy a bag of corn chips and a soda at the convenience store',
+        outcome: 'Classic snack run. High sodium and quick energy (+30% Stomach, +15% Sanity).'
+      }
+    }
+  },
+
+  PONTO_ONIBUS: {
+    title: '🚌 SPTRANS BUS STOP // PIRITUBA TERMINAL',
+    intro: (state) => `
+      Crowd packed under the metal awning waiting for the 8400-10 bus line.<br>
+      The diesel roar of approaching articulated buses echoes off the asphalt.<br>
+      <em>"Attention passengers: tap your card on the validator."</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      pagar_onibus: {
+        label: 'Pay bus fare with Bus Pass or cash (R$ 4.40)',
+        outcome: 'Turnstile beeps green! You board, take a seat near the window, and watch the São Paulo cityscape glide by (+15% Sanity, -10% Danger).'
+      },
+      pular_catraca: {
+        label: 'Jump the turnstile when the conductor looks away',
+        costLabel: 'Ginga Check (Danger Risk)',
+        outcome: (state, ptResult) => ptResult.includes('gato')
+          ? 'Vaulted the bar like a cat! Slipped into the crowd at the back of the bus undetected (+12 Ginga, +10% Danger).'
+          : 'Turnstile metal caught your knee with a loud CLANG! The driver hit the brakes: "— Get down, freeloader!" Walked away humiliated and limping (-20% Sanity, +25% Danger).'
+      }
+    }
+  },
+
+  DOIS_CARAS_MOTO: {
+    title: '🏍️ TWO DUDES ON A MOTORCYCLE // NIGHT STICK-UP',
+    intro: (state) => `
+      The buzzing sound of an exhaust pipe cuts through the dark evening air.<br>
+      A black 160cc motorcycle mounts the sidewalk curb and blocks your path:<br>
+      <em>"— DON\'T MOVE! Pass the phone and the wallet! Quick!"</em><br>
+      <strong style="color:#ff3333">HIGH ADRENALINE SITUATION! CHOOSE YOUR REACTION:</strong>
+    `,
+    options: {
+      entrar_padoca: {
+        label: 'Duck quickly into the bakery before they pull over',
+        outcome: 'You sprinted through the bakery doors! The bright fluorescent lights and patrons startled the riders, and they sped off (-20% Danger, +15 Ginga)!'
+      },
+      dar_celular_falso: {
+        label: 'Hand over the decoy cracked phone: "Take it bro, don\'t shoot!"',
+        costLabel: 'Street Smarts (Decoy Phone)',
+        outcome: 'The rider snatched the decoy phone, stuffed it in his jacket, and sped away. Your real phone and wallet stayed safe in your sock! Masterful street survival (+20 Ginga, -30% Danger)!'
+      },
+      orelhao_disfarce: {
+        label: 'Pretend you\'re making an urgent call at the payphone',
+        outcome: (state, ptResult) => ptResult.includes('despistar')
+          ? 'You faked an animated conversation with your back turned. They decided you weren\'t worth the risk and zoomed off (+15 Ginga)!'
+          : 'They weren\'t fooled for a second. The rider patted your pockets and snatched whatever cash you had on you (-R$ 20.00, -25% Sanity, +20% Danger).'
+      }
+    }
+  },
+
+  BANCA_JORNAL: {
+    title: '📰 MÁRIO\'S CORNER NEWSSTAND',
+    intro: (state) => `
+      Magazines, comics, cold drinks, and lottery tickets hanging from clotheslines in the booth.<br>
+      Seu Mário pushes his glasses up his nose:<br>
+      <em>"— Morning, young blood! Got the daily news, crossword puzzles, and the latest gossip on the mayor."</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      raspadinha_sorte: {
+        label: 'Buy a R$ 2.00 lucky scratch-off ticket',
+        outcome: (state, ptResult) => ptResult.includes('PREMIADA')
+          ? '🎉 WINNER! Three matching treasure symbols! Seu Mário handed you R$ 25.00 in crisp bills (+R$ 25.00, +20% Sanity)!'
+          : 'Scratch-off came up empty: "Try again next time!" (-R$ 2.00, -3% Sanity).'
+      },
+      comprar_almanaque: {
+        label: 'Buy the Historical Almanac of Pirituba (R$ 15.00)',
+        outcome: 'Fascinating read about the English railway origins of Pirituba, the old brickworks, and the green hills (+30% Sanity, Almanac added to inventory).'
+      },
+      fofoca_bairro: {
+        label: 'Chat with Seu Mário about neighborhood politics and gossip',
+        outcome: 'Seu Mário shared all the local lore: "— That corner crossing has seen it all since the 70s..." (+10% Sanity).'
+      }
+    }
+  },
+
+  PASTEL_FEIRA: {
+    title: '🥟 DONA MARIA\'S STREET MARKET PASTEL STALL',
+    intro: (state) => `
+      Bubbling hot oil, golden crispy pastels, and fresh lime sugarcane juice flowing from the press.<br>
+      <em>"— Step right up, darling! Fresh beef, cheese, hearts of palm, and special pastels made with love!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}%</small>
+    `,
+    options: {
+      combo_pastel_garapa: {
+        label: 'Crispy beef pastel with vinaigrette + Sugarcane juice with lime',
+        outcome: 'The king of Brazilian street food! Piping hot, crispy bubbles, delicious seasoning, and iced sugarcane juice. Stomach fully satisfied (+50% Stomach, +20% Sanity).'
+      },
+      pastel_simples: {
+        label: 'Simple melted cheese pastel',
+        outcome: 'Crispy, gooey melted cheese stretching with every bite. Great comfort food on a budget (+35% Stomach, +12% Sanity).'
+      },
+      xepa_conversa: {
+        label: 'Wait for the end-of-market discount and ask for leftover scraps',
+        outcome: 'Dona Maria smiled warmly and handed you a warm pastel parcel: "— Take it, dear, eat well!" Free food through neighborly kindness (+30% Stomach, +15% Sanity).'
+      }
+    }
+  },
+
+  SEMAFORO_BICO: {
+    title: '🚦 EDGAR FACÓ TRAFFIC LIGHT // STREET HUSTLE',
+    intro: (state) => `
+      Line of idling cars, heat shimmering off the asphalt, and the countdown timer ticking on the traffic light.<br>
+      <em>Opportunity to earn quick honest cash between red lights!</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      vender_balas: {
+        label: 'Sell peanut candy and mints between stopped cars',
+        outcome: 'Walking briskly between lanes, offering treats to drivers. Earned R$ 15.00 in coins before the light turned green (+R$ 15.00, +10 Ginga, -10% Stomach)!'
+      },
+      limpar_parabrisa: {
+        label: 'Spray squeegee and wipe windshields at the red light',
+        outcome: 'Quick soapy spray, smooth squeegee pull, and a grateful driver tipped you R$ 10.00! Honest street hustle (+R$ 10.00, +8 Ginga, -8% Stomach).'
+      },
+      sair_canteiro: {
+        label: 'Step back onto the pedestrian median and catch your breath',
+        outcome: 'Stepped out of the exhaust fumes and rested on the concrete curb (+5% Sanity).'
+      }
+    }
+  },
+
+  BAILE_LAJE: {
+    title: '🔊 ROOFTOP STREET PARTY ATOP THE HILL',
+    intro: (state) => `
+      Wall of massive sound systems booming bass, colored strobe lights over the brick terraces, and the whole neighborhood dancing.<br>
+      <em>"Welcome to the Pirituba Rooftop Funk! Leave your worries down the hill!"</em><br>
+      <small style="color:#ffcc00">Sanity: ${state.sanidade}% | Danger: ${state.perigo}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      copao_whisky: {
+        label: 'Grab a big plastic cup of cheap whiskey & energy drink (R$ 15.00)',
+        outcome: 'Ice cubes clinking, sweet buzz, and bass shaking your ribs. Urban stress evaporated (+35% Sanity, +15 Ginga, -15% Stomach).'
+      },
+      dancar_passinho: {
+        label: 'Show off your funk dance moves in the circle',
+        outcome: 'Synchronized footwork, crowd cheered and hyped you up! Instant neighborhood respect (+25 Ginga, +20% Sanity).'
+      },
+      desenrolo_crias: {
+        label: 'Talk with the local homies by the speaker wall',
+        outcome: 'Great friendly conversation about life, jobs, and dreams on the hill (+15% Sanity, -15% Danger).'
+      }
+    }
+  },
+
+  BLITZ_PM: {
+    title: '🚔 MILITARY POLICE CHECKPOINT ON PAULA FERREIRA',
+    intro: (state) => `
+      Red and blue lightbars flashing against the houses in the dead of night.<br>
+      Two police cruisers parked across the street with officers inspecting IDs:<br>
+      <em>"— HALT RIGHT THERE, CITIZEN! Hands where I can see them and step against the wall!"</em><br>
+      <strong style="color:#ff3333">HIGH DANGER SITUATION! CHOOSE YOUR ATTITUDE:</strong>
+    `,
+    options: {
+      apresentar_documento: {
+        label: 'Stay calm, keep hands visible, and present your ID',
+        costLabel: 'Cool Citizen',
+        outcome: (state, ptResult) => ptResult.includes('esculacho')
+          ? 'Because you were noticeably nervous, officers conducted a thorough pat-down: pockets emptied, shoes checked on the cold asphalt. Nothing illegal, but the humiliation stung deep (-30% Sanity).'
+          : 'The sergeant inspected your national ID and checked the radio: "— Clean record. Watch your hours around here, son. Move along." (-40% Danger, massive relief)!'
+      },
+      desenrolo_ginga: {
+        label: 'Speak respectfully as a local: "Good evening, sergeant! Born and raised in Pirituba!"',
+        costLabel: 'Smooth Talk (Requires Ginga 55)',
+        outcome: (state, ptResult) => ptResult.includes('tranquila')
+          ? 'Your calm demeanor and respectful tone broke the tension immediately. The officer smiled: "— Resident of the area? Go in peace, head straight home." (+20 Ginga, -50% Danger)!'
+          : 'Your voice trembled and you stuttered. The officer frowned: "— Shaking for what? Something to hide?!" Pushed you against the car for a stern lecture (-35% Sanity, +25% Danger).'
+      },
+      viela_atalho: {
+        label: 'Silently back away down the alley before being spotted',
+        costLabel: 'Stealth Escape',
+        outcome: (state, ptResult) => ptResult.includes('penumbra')
+          ? 'You took two quiet steps back and vanished into the shadows of the graffiti alley. The officers never even noticed (+15 Ginga, -20% Danger)!'
+          : 'A sharp whistle cut through the air: "— HALT RIGHT THERE! STOP NOW!" You had to sprint for your life, jumping puddles to lose the cruiser (+45% Danger, -30% Sanity).'
+      }
+    }
+  },
+
+  NPC_BALEIRO: {
+    title: '🍬 CLODOALDO THE CANDY VENDOR // EDGAR FACÓ',
+    intro: (state) => `
+      Clodoaldo walks steadily with his blue-and-white styrofoam cooler slung across his chest and a backwards cap.<br>
+      <em>"— Fresh candy! Peanut bars, strong mints, and ice-cold energy drinks! What\'ll it be today, warrior?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      comprar_pacoca: {
+        label: 'Buy Peanut Candy & Strong Mints Kit (Quick Energy)',
+        outcome: 'You chew the crumbly peanut sweet and pop a strong mint. Instant sugar rush (+25% Stomach, +5 Ginga).'
+      },
+      comprar_energetico: {
+        label: 'Buy an Ice-Cold 500ml Energy Drink (R$ 8.00)',
+        outcome: 'Chilled bubbly gulp! Taurine and carbonation grant an instant mental reboot (+30% Sanity).'
+      },
+      bico_fardo: {
+        label: (state) => (state.flags.bicoFardoCount || 0) >= 2
+          ? 'Help unload crates (Odd jobs finished for today)'
+          : 'Help Clodoaldo unload a heavy soda crate at the corner',
+        costLabel: '+R$ 10.00 | -8% Hunger',
+        outcome: 'Muscle work! In three minutes the crate is neatly stacked. Clodoaldo hands you a crumpled ten-real bill: "— Thanks partner, saved my day!" (+R$ 10.00, +8 Ginga, -8% Stomach).'
+      },
+      conversar_ambulante: {
+        label: 'Ask for the lowdown on street movement and traffic',
+        outcome: 'Clodoaldo gives sound advice: "— Keep your wits about you near the traffic light after six; motorbikes circle around. If you need solid food, find Dona Neide near the market!" (+10% Sanity).'
+      }
+    }
+  },
+
+  NPC_CARAMELO: {
+    title: '🐕 CARAMELO OF PIRITUBA // THE COMMUNITY DOG',
+    intro: (state) => `
+      The legendary yellow stray dog Caramelo trots up cheerfully along the sidewalk, ears perked and tail wagging like crazy.<br>
+      He lets out a friendly bark and leans his head against your leg, asking for affection.<br>
+      <small style="color:#00ff88">★ The Spiritual Guardian of Pirituba\'s Streets ★</small>
+    `,
+    options: {
+      carinho_caramelo: {
+        label: 'Give a hearty scratch behind the ears',
+        outcome: 'Caramelo closes his eyes, licks your hand, and wiggles with joy. Big city stress completely evaporates (+20% Sanity, -10% Danger)!'
+      },
+      alimentar_caramelo: {
+        label: (state) => state.flags.carameloCompanheiro
+          ? 'Caramelo is already your loyal street guardian!'
+          : 'Share a piece of street snack / pastry with Caramelo',
+        costLabel: 'R$ 4.00 (Buy coxinha treat)',
+        outcome: 'Caramelo devours the treat with legendary canine zeal and barks triumphantly! He is now your official Pirituba protector, reducing street danger (-20% Danger, +25% Sanity)!'
+      },
+      seguir_faro: {
+        label: (state) => state.flags.faroCaramelo
+          ? 'Follow dog\'s nose (Already found buried items today)'
+          : 'Follow Caramelo sniffing at the base of a sidewalk tree',
+        costLabel: 'Golden Sniffer',
+        outcome: 'Caramelo digs quickly into the soil and unearths a R$ 5 bill and a handful of dropped coins! (+R$ 8.50, +10% Sanity).'
+      }
+    }
+  },
+
+  NPC_BIKE: {
+    title: '🚲 JUNINHO ON HIS BICYCLE // WHEELIE MASTER',
+    intro: (state) => `
+      Juninho skids his red vintage bicycle up to the curb with a smooth flick of the handlebars.<br>
+      <em>"— What\'s good, bro! All good? If you need a ride on the bike peg or a quick errand run, just shout!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      carona_padaria: {
+        label: 'Ask for a ride on the bike peg to Estrela Bakery (R$ 3.00)',
+        outcome: 'You hopped onto the back peg and Juninho sped down Paula Ferreira, ringing his bell! Arrived at the bakery in the blink of an eye (+5 Ginga).'
+      },
+      carona_posto: {
+        label: 'Ask for a ride on the bike peg to Pirituba Gas Station (R$ 3.00)',
+        outcome: 'Wind in your face and rapid pedaling! Juninho wove through Edgar Facó traffic and dropped you right at the gas station door (+5 Ginga).'
+      },
+      bico_marmita: {
+        label: (state) => state.flags.correBike
+          ? 'Meal box delivery (Delivery already completed today)'
+          : 'Take an express meal box delivery to the bus stop',
+        costLabel: '+R$ 20.00 | -10% Hunger',
+        outcome: 'Grabbed the thermal bag and jogged to the bus stop. Delivery completed on time and payment in hand! (+R$ 20.00, +12 Ginga, -10% Stomach).'
+      },
+      desafio_grau: {
+        label: 'Learn the secret to pulling a 1-wheel bike wheelie (Chat)',
+        outcome: 'Juninho pops a flawless 1-wheel wheelie: "— Secret is rear brake control and hip balance, bro!" (+10 Ginga, +10% Sanity).'
+      }
+    }
+  },
+
+  NPC_DONA_NEIDE: {
+    title: '🥘 DONA NEIDE // THE MEAL BOX & MARKET AUNTIE',
+    intro: (state) => `
+      Dona Neide walks calmly up the sidewalk with a floral apron and market bags full of fresh herbs and plantains.<br>
+      <em>"— Oh my child! Good to see you. You look like you\'ve been running errands since dawn. Need some home-cooked food in your belly or a mother\'s blessing?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      comprar_marmita: {
+        label: (state) => state.fome <= 20
+          ? 'Accept home-cooked meal box (Dona Neide gives it free to anyone starving!)'
+          : 'Buy Dona Neide\'s Homemade Meal Box (Rice, beans, steak, and farofa)',
+        costLabel: (state) => state.fome <= 20 ? 'FREE (Solidarity)' : 'R$ 14.00',
+        outcome: (state) => state.fome <= 20
+          ? 'Dona Neide touches your shoulder warmly: "— Eat every bite, my child! Nobody walks this pavement on an empty stomach." Delicious home cooking restores your strength immediately (+50% Stomach, +25% Sanity, Free)!'
+          : 'Packed styrofoam meal box, fresh beans with homestyle garlic, and juicy steak. You eat seated on the curb like a king (+50% Stomach, +25% Sanity).'
+      },
+      ajudar_sacolas: {
+        label: (state) => state.flags.ajudouDonaNeide
+          ? 'Help carry bags (Already helped Dona Neide today)'
+          : 'Help carry heavy grocery bags up to the alleyway',
+        costLabel: '+R$ 10.00 Coffee Money | +Corn Cake',
+        outcome: 'You take both heavy bags and escort Dona Neide to the corner. She smiles gratefully, tucks a ten-real bill into your pocket, and hands you a warm slice of fresh corn cake (+R$ 10.00, +15% Stomach, +12 Ginga, +15% Sanity)!'
+      },
+      fofoca_bairro: {
+        label: 'Listen to motherly advice and neighborhood gossip',
+        outcome: 'Dona Neide shares her wisdom: "— Watch out, sweet child: afternoon storms hit hard, sky turns black! And don\'t flash cash on the avenue. Stay safe and God bless you!" (+20% Sanity, -15% Danger).'
+      }
+    }
+  },
+
+  BANCO_PIRITUBA: {
+    title: '🏧 BANCO PIRITUBA // 24H ATM NETWORK',
+    intro: (state) => {
+      const isNegative = state.grana < 0;
+      const statusText = isNegative
+        ? `<strong style="color:#ff3344">⚠️ ACCOUNT OVERDRAWN: ${state.formattedGrana} (LIMIT: -R$ 150.00) • SERASA DEADLINE: ${Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)))}s</strong>`
+        : `<span style="color:#00ff88">Available Balance: ${state.formattedGrana} • Credit Status: GOOD STANDING</span>`;
+      return `
+        The ATM screen emits a sterile blue glow in the semi-darkness.<br>
+        The rubber keypad is worn by thousands of neighborhood fingers.<br>
+        <em>"Banco Pirituba: Connecting you to your money (or your debts)."</em><br>
+        <small>${statusText}</small>
+      `;
+    },
+    options: {
+      saque_cheque_especial: {
+        label: (state) => state.grana <= -10000
+          ? 'Overdraft Blocked (Credit limit nearly exhausted)'
+          : 'Take Emergency Bank Overdraft (Immediate cash, brutal interest)',
+        costLabel: 'Overdraft (-R$ 50.00 on account)',
+        outcome: 'Banknotes dispense smoothly from the lower tray. Instant relief, but your balance is in the red! Settle the debt before 90 seconds or your national ID will be blacklisted and you\'ll lose the run!'
+      },
+      quitar_divida_banco: {
+        label: (state) => state.grana >= 0
+          ? 'Cash Deposit (Account is already in positive balance)'
+          : 'Deposit Cash to Settle Overdraft Debt',
+        costLabel: (state) => state.grana >= 0 ? 'Savings Deposit' : 'Pay Down Debt',
+        outcome: 'You insert the cash deposit envelope. The immediate clearance relieves your account and banishes the threat of bankruptcy (+15% Sanity)!'
+      },
+      consulta_extrato_serasa: {
+        label: 'Check Detailed Bank Statement & Credit Score',
+        costLabel: 'Free',
+        outcome: (state) => {
+          if (state.grana < 0) {
+            const timeLeft = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
+            return `URGENT NOTICE FROM BANCO PIRITUBA: Your balance is ${state.formattedGrana}. You have exactly ${timeLeft} seconds remaining before judicial asset forfeiture ends your journey!`;
+          }
+          return `ACCOUNT STATEMENT: Positive balance of ${state.formattedGrana}. Your credit score is favorable and there are no active liens against your name. Move forward (+5% Sanity).`;
+        }
+      }
+    }
+  },
+
+  NPC_POLICIA: {
+    title: '👮 SERGEANT ROCHA // MILITARY POLICE OF SÃO PAULO',
+    intro: (state) => {
+      const isHighDanger = state.perigo >= 45;
+      const statusNote = isHighDanger
+        ? `<strong style="color:#ff3344">⚠️ YOUR HEAT IS HIGH (${state.perigo}%)! THE SERGEANT HAS HIS HAND ON HIS HOLSTER!</strong>`
+        : `<span style="color:#00ff88">Heat Level: ${state.perigo}% • Routine Patrol in Pirituba</span>`;
+      return `
+        The gray uniform and marked cruiser on the curb command authority.<br>
+        Sergeant Rocha sizes you up from head to toe with seasoned eyes:<br>
+        <em>"— Anything new around here, citizen? The 49th Battalion does not tolerate disorder."</em><br>
+        <small>${statusNote}</small>
+      `;
+    },
+    options: {
+      cumprimentar_pm: {
+        label: (state) => state.perigo >= 45
+          ? 'Try friendly conversation (Your heat level is too high!)'
+          : 'Greet respectfully and wish a safe patrol',
+        costLabel: 'Model Citizen',
+        outcome: 'The Sergeant offers a crisp salute to his beret: "— Good afternoon, law-abiding citizen. If you spot any suspicious activity on Paula Ferreira, let the cruiser know." (+16% Sanity, -12% Danger).'
+      },
+      caguetar_malandro: {
+        label: (state) => state.flags.caguetouMalandro
+          ? 'Report local crime (You already tipped off the patrol today)'
+          : 'Snitch on the street runner and report the drug spot on Bento Bicudo',
+        costLabel: '+R$ 40.00 Reward | Snitch Tag',
+        outcome: 'The officer pulls out a notepad and writes down the exact alley location: "— Good job, partner. First-class intel. Take R$ 40.00 from our community fund." You walk away with cash, but feel the chill of becoming a known snitch...'
+      },
+      enquadro_suborno: {
+        label: (state) => state.perigo < 45
+          ? 'Pay "Cruiser Coffee" (Available only during high danger)'
+          : 'Pay "Cruiser Coffee" (R$ 35.00 bribe to avoid the paddy wagon)',
+        costLabel: 'Bribe R$ 35.00',
+        outcome: 'The sergeant discreetly pockets the bill into his duty belt: "— Walk away slowly and don\'t look back. If I catch you again today, you\'re going to the 33rd Precinct!" (-R$ 35.00, -35% Danger, -12% Sanity).'
+      },
+      enquadro_revista: {
+        label: 'Comply with police stop-and-frisk: "Hands on your head and spread your legs!"',
+        costLabel: 'Police Search',
+        outcome: 'The sergeant checks your pockets, runs your ID on the cruiser radio, and pats your shoulder: "— Clean record on COPOM. Go about your business, but stay sharp." Harsh street stop (-20% Sanity, -15% Danger).'
+      }
+    }
+  },
+
+  NPC_MALANDRO: {
+    title: '🧢 STREET RUNNER // PIRITUBA HUSTLER',
+    intro: (state) => {
+      if (state.flags.caguetouMalandro) {
+        return `
+          <strong style="color:#ff2233">🚨 THE RUNNER STARES AT YOU WITH PURE HATRED!</strong><br>
+          Word traveled fast on the street: you were seen chatting with the Police Sergeant!<br>
+          <em>"— Talked to the cops, huh snitch?! Snitches don\'t last on this turf!"</em><br>
+          <small style="color:#ffcc00">Danger: ${state.perigo}% | Balance: ${state.formattedGrana}</small>
+        `;
+      }
+      return `
+        Track shorts, chain, and flip-flops on the hot asphalt of Cel. Bento Bicudo.<br>
+        The Street Runner keeps watch on the corner while chewing gum:<br>
+        <em>"— What\'s up, partner! You on your toes or slipping around here?"</em><br>
+        <small style="color:#00ff88">Street Savvy: ${state.ginga}% | Balance: ${state.formattedGrana} | Danger: ${state.perigo}%</small>
+      `;
+    },
+    options: {
+      cobranca_pedagio: {
+        label: 'Pay snitch ransom toll (R$ 50.00)',
+        costLabel: 'R$ 50.00 Snitch Ransom',
+        outcome: 'The runner rips the bills from your hand: "— Mistake paid for. But if you open your mouth to the Sergeant again, you disappear!" Your wallet weeps (-R$ 50.00, -25% Sanity).'
+      },
+      cobranca_apanhar: {
+        label: 'Defy the hustler and take a beating in the alley',
+        costLabel: 'Street Violence',
+        outcome: 'Two accomplices emerge from the alley. You take a brutal beating, hitting the asphalt with torn clothes and bruised ribs (-30% Stomach, -35% Sanity, +20% Danger)!'
+      },
+      salve_quebrada: {
+        label: 'Give a respectful handshake and talk smoothly',
+        costLabel: 'Street Respect',
+        outcome: 'You do the traditional West Zone hand clasp: "— Much respect, bro. Humility goes a long way." (+14% Sanity, +10 Ginga).'
+      },
+      fazer_corre_crime: {
+        label: 'Do a "Street Runner Delivery" (Drop off mystery package on Emílio Lessore)',
+        costLabel: '+R$ 75.00 Fast Cash | +35% Danger',
+        outcome: 'You tuck the sealed package into your waistband and sprint up Emílio Lessore. Quick drop-off, and you return with R$ 75.00 in warm cash (+$$$$$), but your heat spiked (+35% Danger, +18 Ginga)!'
+      },
+      assalto_mao_armada: {
+        label: (state) => state.perigo < 45
+          ? 'Buy a single cigarette from the pack'
+          : 'Armed hold-up: "Hand over your wallet and phone now!"',
+        costLabel: (state) => state.perigo < 45 ? 'R$ 2.00' : 'Robbery (-R$ 25.00)',
+        outcome: (state) => state.perigo < 45
+          ? 'You puff a cigarette on the corner watching the cars pass on Edgar Facó (-R$ 2.00, +10% Sanity).'
+          : 'The kid flashes a chrome revolver handle under his shirt: "— Lost, clown! Hand over the cash!" He takes R$ 25.00 from your pocket (-R$ 25.00, -20% Sanity).'
+      }
+    }
+  }
+};

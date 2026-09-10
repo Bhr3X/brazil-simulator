@@ -1,8 +1,4 @@
-/**
- * GameState: Single Source of Truth for Character & Run State
- * Invariant I4: Stats are ints clamped 0..100. Grana is integer centavos.
- * Mutation only occurs via apply(deltas, reason).
- */
+import { getLanguage, getLocalizedDefeat } from './i18n.js';
 
 export class GameState {
   constructor(classConfig, rng, seed = null) {
@@ -60,10 +56,12 @@ export class GameState {
     }
   }
 
-  // Format centavos to Brazilian Reais (e.g. R$ 14,50)
+  // Format centavos to Brazilian Reais (e.g. R$ 14,50 in PT, R$14.00 in EN)
   static formatBRL(centavos) {
     const val = (centavos || 0) / 100;
-    return new Intl.NumberFormat('pt-BR', {
+    const lang = typeof getLanguage === 'function' ? getLanguage() : 'pt';
+    const locale = lang === 'en' ? 'en-US' : 'pt-BR';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: 'BRL'
     }).format(val);
@@ -190,38 +188,43 @@ export class GameState {
   // Check Game Over conditions
   checkDefeat() {
     if (this.fome <= 0) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('fome') : null;
       return {
         isDead: true,
-        cause: 'DESMAIO DE FOME',
-        desc: 'Sua fome zerou e você desmaiou de fraqueza no meio-fio. Uma viatura do SAMU te levou pro Hospital Geral de Vila Penteado.'
+        cause: def ? def.cause : 'DESMAIO DE FOME',
+        desc: def ? def.desc : 'Sua fome zerou e você desmaiou de fraqueza no meio-fio. Uma viatura do SAMU te levou pro Hospital Geral de Vila Penteado.'
       };
     }
     if (this.sanidade <= 0) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('sanidade') : null;
       return {
         isDead: true,
-        cause: 'BURNOUT / SURTO URBANO',
-        desc: 'Sua sanidade zerou diante do caos de buzinas, boletos e calor. Você surtou, subiu no teto de um ônibus da SPTrans e foi contido.'
+        cause: def ? def.cause : 'BURNOUT / SURTO URBANO',
+        desc: def ? def.desc : 'Sua sanidade zerou diante do caos de buzinas, boletos e calor. Você surtou, subiu no teto de um ônibus da SPTrans e foi contido.'
       };
     }
     if (this.perigo >= 100) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('perigo') : null;
       return {
         isDead: true,
-        cause: 'XILINDRÓ / COBRANÇA DO AGIOTA',
-        desc: 'Seu medidor de B.O. chegou a 100%. A ROTA te levou detido pro 87º DP de Pirituba ou o agiota te pegou na esquina.'
+        cause: def ? def.cause : 'XILINDRÓ / COBRANÇA DO AGIOTA',
+        desc: def ? def.desc : 'Seu medidor de B.O. chegou a 100%. A ROTA te levou detido pro 87º DP de Pirituba ou o agiota te pegou na esquina.'
       };
     }
     if (this.grana <= -15000) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('falencia_limite') : null;
       return {
         isDead: true,
-        cause: 'FALÊNCIA & EXECUÇÃO DO CPF',
-        desc: 'Sua conta estourou o limite de cheque especial do Banco Pirituba (-R$ 150,00). O banco bloqueou seus bens e executou seu CPF no Serasa. Você faliu na quebrada!'
+        cause: def ? def.cause : 'FALÊNCIA & EXECUÇÃO DO CPF',
+        desc: def ? def.desc : 'Sua conta estourou o limite de cheque especial do Banco Pirituba (-R$ 150,00). O banco bloqueou seus bens e executou seu CPF no Serasa. Você faliu na quebrada!'
       };
     }
     if (this.bankruptTimer >= 90) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('falencia_tempo') : null;
       return {
         isDead: true,
-        cause: 'FALÊNCIA & PRAZO ESGOTADO',
-        desc: 'Você passou mais de 90 segundos com a conta no vermelho sem quitar a dívida no Banco Pirituba. O oficial de justiça confiscou seus pertences!'
+        cause: def ? def.cause : 'FALÊNCIA & PRAZO ESGOTADO',
+        desc: def ? def.desc : 'Você passou mais de 90 segundos com a conta no vermelho sem quitar a dívida no Banco Pirituba. O oficial de justiça confiscou seus pertences!'
       };
     }
     return null;

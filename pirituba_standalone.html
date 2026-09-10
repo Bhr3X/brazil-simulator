@@ -2002,7 +2002,61 @@ body.mobile-touch-active #hud-objective-bar {
   }
   #orientation-banner:not(.modal-hidden) {
     display: block;
-  }
+}
+
+/* Language Switcher Styling */
+.roulette-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lang-selector-group {
+  display: inline-flex;
+  background: rgba(0, 20, 10, 0.75);
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: #88bb99;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.lang-btn:hover {
+  color: #00ff88;
+  background: rgba(0, 255, 102, 0.15);
+}
+
+.lang-btn.active {
+  background: #00ff66;
+  color: #050a06;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+}
+
+#btn-lang {
+  border-color: #00ff88;
+  color: #00ff88;
+  font-weight: bold;
+}
+
+#btn-lang:hover {
+  background: rgba(0, 255, 102, 0.2);
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.4);
 }
 
 
@@ -2040,6 +2094,10 @@ body.mobile-touch-active #hud-objective-bar {
 
   <!-- Top-Right HUD: Interactive Buttons -->
   <div class="hud-layer" id="hud-top-right">
+    <button class="hud-btn" id="btn-lang" title="Alternar Idioma / Switch Language [L]">
+      <span id="hud-lang-label">🌐 🇧🇷 PT</span>
+      <small style="opacity:0.7">[L]</small>
+    </button>
     <button class="hud-btn" id="btn-streetview">
       <span>🌐 STREET VIEW</span>
       <small style="opacity:0.7">[V]</small>
@@ -2096,23 +2154,23 @@ body.mobile-touch-active #hud-objective-bar {
   <!-- Top Center: Survival HUD Status Dashboard -->
   <div class="hud-layer" id="hud-survival-bar">
     <div class="survival-stat-box" id="stat-time">
-      <div class="stat-label">⏱️ RUN 15 MIN</div>
+      <div class="stat-label" data-i18n="ui.stat_time">⏱️ RUN 15 MIN</div>
       <div class="stat-value"><span id="hud-run-clock">15:00</span> <small id="hud-ingame-clock">06:00</small></div>
     </div>
     <div class="survival-stat-box" id="stat-money">
-      <div class="stat-label">💵 GRANA</div>
+      <div class="stat-label" data-i18n="ui.stat_money">💵 GRANA</div>
       <div class="stat-value"><span id="hud-grana">R$ 14,00</span> <small id="hud-debt" style="display:none; color:#ff5555;"></small></div>
     </div>
     <div class="survival-stat-box" id="stat-fome">
-      <div class="stat-label">🍗 BUCHO <span id="hud-fome-text">70%</span></div>
+      <div class="stat-label"><span data-i18n="ui.stat_fome">🍗 BUCHO</span> <span id="hud-fome-text">70%</span></div>
       <div class="stat-bar-container"><div class="stat-bar-fill" id="hud-fome-bar" style="width:70%;"></div></div>
     </div>
     <div class="survival-stat-box" id="stat-sanidade">
-      <div class="stat-label">🧠 SANIDADE <span id="hud-sanidade-text">80%</span></div>
+      <div class="stat-label"><span data-i18n="ui.stat_sanidade">🧠 SANIDADE</span> <span id="hud-sanidade-text">80%</span></div>
       <div class="stat-bar-container"><div class="stat-bar-fill" id="hud-sanidade-bar" style="width:80%;"></div></div>
     </div>
     <div class="survival-stat-box" id="stat-perigo">
-      <div class="stat-label">🚨 B.O. / PERIGO <span id="hud-perigo-text">10%</span></div>
+      <div class="stat-label"><span data-i18n="ui.stat_perigo">🚨 B.O. / PERIGO</span> <span id="hud-perigo-text">10%</span></div>
       <div class="stat-bar-container"><div class="stat-bar-fill danger" id="hud-perigo-bar" style="width:10%;"></div></div>
     </div>
   </div>
@@ -2151,34 +2209,40 @@ body.mobile-touch-active #hud-objective-bar {
     <div class="modal-backdrop"></div>
     <div class="roulette-window">
       <div class="roulette-header">
-        <div class="roulette-title">🇧🇷 SOBREVIVÊNCIA BR // ROLETA SOCIAL DE NASCIMENTO</div>
-        <div class="roulette-subtitle">Você tem exatamente 15 minutos reais (24h de um dia paulistano). Onde você nasceu?</div>
+        <div class="roulette-top-row">
+          <div class="roulette-title" data-i18n="ui.roulette_title">🇧🇷 SOBREVIVÊNCIA BR // ROLETA SOCIAL DE NASCIMENTO</div>
+          <div class="lang-selector-group" id="roulette-lang-group">
+            <button type="button" class="lang-btn active" data-lang="pt" title="Português">🇧🇷 PT</button>
+            <button type="button" class="lang-btn" data-lang="en" title="English">🇺🇸 EN</button>
+          </div>
+        </div>
+        <div class="roulette-subtitle" data-i18n="ui.roulette_subtitle">Você tem exatamente 15 minutos reais (24h de um dia paulistano). Onde você nasceu?</div>
       </div>
       <div class="roulette-grid">
         <div class="class-card" id="card-classe-de">
-          <div class="class-badge-pill">60% POPULAÇÃO</div>
-          <div class="class-name">Muleque de Quebrada</div>
-          <div class="class-meta">R$ 14,00 • Laje & Favela</div>
-          <div class="class-desc">Nascido no alto do morro em Pirituba. Ginga no talo, chinelo com prego, celular com tela trincada e Bilhete Único no negativo.</div>
-          <button class="class-select-btn" data-class="CLASSE_DE">ESCOLHER QUEBRADA</button>
+          <div class="class-badge-pill" data-i18n="ui.roulette_pill_de">60% POPULAÇÃO</div>
+          <div class="class-name" data-i18n="classes.CLASSE_DE.title">Muleque de Quebrada</div>
+          <div class="class-meta" data-i18n="classes.CLASSE_DE.meta">R$ 14,00 • Laje & Favela</div>
+          <div class="class-desc" data-i18n="classes.CLASSE_DE.desc">Nascido no alto do morro em Pirituba. Ginga no talo, chinelo com prego, celular com tela trincada e Bilhete Único no negativo.</div>
+          <button class="class-select-btn" data-class="CLASSE_DE" data-i18n="ui.roulette_select_de">ESCOLHER QUEBRADA</button>
         </div>
         <div class="class-card featured" id="card-classe-c">
-          <div class="class-badge-pill">30% POPULAÇÃO</div>
-          <div class="class-name">Tiozão CLT do Subúrbio</div>
-          <div class="class-meta">R$ 180,00 • Subúrbio Raiz</div>
-          <div class="class-desc">Acorda às 05:30. Celta 2004 na reserva, boleto de luz vencendo hoje e carnê das Casas Bahia na gaveta.</div>
-          <button class="class-select-btn" data-class="CLASSE_C">ESCOLHER SUBÚRBIO</button>
+          <div class="class-badge-pill" data-i18n="ui.roulette_pill_c">30% POPULAÇÃO</div>
+          <div class="class-name" data-i18n="classes.CLASSE_C.title">Tiozão CLT do Subúrbio</div>
+          <div class="class-meta" data-i18n="classes.CLASSE_C.meta">R$ 180,00 • Subúrbio Raiz</div>
+          <div class="class-desc" data-i18n="classes.CLASSE_C.desc">Acorda às 05:30. Celta 2004 na reserva, boleto de luz vencendo hoje e carnê das Casas Bahia na gaveta.</div>
+          <button class="class-select-btn" data-class="CLASSE_C" data-i18n="ui.roulette_select_c">ESCOLHER SUBÚRBIO</button>
         </div>
         <div class="class-card" id="card-classe-ab">
-          <div class="class-badge-pill">10% POPULAÇÃO</div>
-          <div class="class-name">Herdeiro da Faria Lima</div>
-          <div class="class-meta">R$ 3.800,00 • Perdido na Quebrada</div>
-          <div class="class-desc">Desceu na Edgar Facó por engano no Waze. iPhone 16 Pro, copo Stanley, cartão black e pânico total de motoboy.</div>
-          <button class="class-select-btn" data-class="CLASSE_AB">ESCOLHER FARIA LIMER</button>
+          <div class="class-badge-pill" data-i18n="ui.roulette_pill_ab">10% POPULAÇÃO</div>
+          <div class="class-name" data-i18n="classes.CLASSE_AB.title">Herdeiro da Faria Lima</div>
+          <div class="class-meta" data-i18n="classes.CLASSE_AB.meta">R$ 3.800,00 • Perdido na Quebrada</div>
+          <div class="class-desc" data-i18n="classes.CLASSE_AB.desc">Desceu na Edgar Facó por engano no Waze. iPhone 16 Pro, copo Stanley, cartão black e pânico total de motoboy.</div>
+          <button class="class-select-btn" data-class="CLASSE_AB" data-i18n="ui.roulette_select_ab">ESCOLHER FARIA LIMER</button>
         </div>
       </div>
       <div class="roulette-footer">
-        <button id="btn-spin-roulette" class="roulette-spin-btn">🎲 GIRAR ROLETA SOCIAL ALEATÓRIA</button>
+        <button id="btn-spin-roulette" class="roulette-spin-btn" data-i18n="ui.roulette_spin_btn">🎲 GIRAR ROLETA SOCIAL ALEATÓRIA</button>
       </div>
     </div>
   </div>
@@ -2460,20 +2524,21 @@ body.mobile-touch-active #hud-objective-bar {
   <div id="mobile-menu-drawer" class="modal-hidden">
     <div class="mobile-drawer-content">
       <div class="drawer-header">
-        <span class="drawer-title">⚙️ MENU & AJUSTES</span>
+        <span class="drawer-title" data-i18n="ui.drawer_title">⚙️ MENU & AJUSTES</span>
         <button id="btn-close-mobile-menu" class="dialog-close-btn" title="Fechar Menu">✕</button>
       </div>
       <div class="drawer-buttons">
+        <button class="mobile-drawer-btn" id="mobile-btn-lang" data-i18n="ui.drawer_lang_label">🌐 Idioma: 🇧🇷 PT</button>
         <button class="mobile-drawer-btn" id="mobile-btn-toggle-touch">📱 Controles Touch: LIGADO</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-streetview">🌐 Street View [V]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-mode">🖥️ Modo Visual [M]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-visuals">🎨 Shaders & Cores [P]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-camera">👤 1ª / 3ª Pessoa [B]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-radio">📻 Rádio Pirituba [N]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-audio">🔊 Ligar/Desligar Som [O]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-tour">🎥 Auto Tour [U]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-traffic">🚗 Alternar Trânsito [X]</button>
-        <a class="mobile-drawer-btn" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">👾 Estúdio game.md ↗</a>
+        <button class="mobile-drawer-btn" id="mobile-btn-streetview" data-i18n="ui.drawer_streetview">🌐 Street View [V]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-mode" data-i18n="ui.drawer_mode">🖥️ Modo Visual [M]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-visuals" data-i18n="ui.drawer_visuals">🎨 Shaders & Cores [P]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-camera" data-i18n="ui.drawer_camera">👤 1ª / 3ª Pessoa [B]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-radio" data-i18n="ui.drawer_radio">📻 Rádio Pirituba [N]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-audio" data-i18n="ui.drawer_audio">🔊 Ligar/Desligar Som [O]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-tour" data-i18n="ui.drawer_tour">🎥 Auto Tour [U]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-traffic" data-i18n="ui.drawer_traffic">🚗 Alternar Trânsito [X]</button>
+        <a class="mobile-drawer-btn" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;" data-i18n="ui.drawer_studio">👾 Estúdio game.md ↗</a>
       </div>
     </div>
   </div>
@@ -11051,9 +11116,1225 @@ class CityBuilder {
 
 
 /**
+ * English Translations & Cultural Localization for all 19 Brazilian Encounters
+ * Provides natural, flavorful English adaptations of dialogues, slang, and outcomes.
+ */
+
+const EN_ENCOUNTER_TEXTS = {
+  PADARIA_ESTRELA: {
+    title: '🥖 ESTRELA BAKERY OF PIRITUBA',
+    intro: (state) => `
+      The aroma of warm French bread and fresh drip coffee drifts onto the sidewalk.<br>
+      The counter clerk in a coffee-stained apron asks in a raspy voice:<br>
+      <em>"— Hey boss, the usual on the grill?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pingado_pao: {
+        label: 'Half-and-half coffee in American glass + Crispy toasted French bread',
+        outcome: 'The toasted French bread arrived sizzling with melted butter, and the milky coffee hit the spot. Full stomach (+30%) and renewed sanity (+18%).'
+      },
+      coxinha_estufa: {
+        label: 'Chicken & Catupiry coxinha from the warmer + Fresh sugarcane juice',
+        outcome: (state, ptResult) => ptResult.includes('queimação')
+          ? 'The coxinha was golden, but the heavy oil sat rough on your stomach. Gained 45% stomach, but got a harsh dose of São Paulo heartburn (-10% Sanity).'
+          : 'Crispy coxinha, generous shredded chicken filling, and ice-cold sugarcane juice with lime! Stomach almost full (+45%).'
+      },
+      nota_100: {
+        label: (state) => state.flags.tentouNota100
+          ? 'Pay with R$ 100 bill (The cashier already warned you they have no change today)'
+          : 'Try paying for a R$ 3.00 espresso with a R$ 100 bill',
+        costLabel: 'Street Hustle Check (1x per day)',
+        outcome: (state, ptResult) => ptResult.includes('respirada')
+          ? 'The cashier took a deep breath, glared at you, but went into the back safe and handed you R$ 97.00 in crumpled small bills. Brazilian hustle victory (+5 Ginga)!'
+          : '"— You kidding me, boss? 6:30 in the morning and you hand me a hundred-real bill?! No Pix?!" You left empty-handed with your ears burning (-12% Sanity).'
+      },
+      agua_copo: {
+        label: (state) => state.flags.aguaPadaria
+          ? 'Ask for tap water (Already had your glass of water today)'
+          : 'Ask for a glass of tap water and browse the pastry display',
+        costLabel: 'Free (1x per day)',
+        outcome: 'The counter clerk handed you a plastic cup of ice water. Refreshed your head (+8% Sanity).'
+      },
+      pagar_boleto_enel: {
+        label: 'Pay Enel electric bill at the bakery lottery cashier',
+        outcome: 'Payment receipt printed on thermal paper! Huge relief: daily goal successfully completed (+35% Sanity)!'
+      },
+      fornada_cinco_manha: {
+        label: (state) => {
+          const isDawn = state.currentHour >= 5.0 && state.currentHour < 6.0 && ((state.elapsedSeconds || 0) >= 700);
+          if (!isDawn) return '05:00 First Bake (Only available during dawn hours from 05:00 to 06:00)';
+          return state.flags.primeiraFornada
+            ? '05:00 First Bake (Quota used — next batch tomorrow at 5 AM)'
+            : '🌅 First Bake of the Day (Piping Hot French Bread at 05:00) — R$ 5.00';
+        },
+        outcome: '🌅 The baker pulled the baking sheet of French bread crackling hot from the brick oven! Smells like victory, golden crispy crust. You survived the Pirituba night (+35% Stomach, +25% Sanity)!'
+      }
+    }
+  },
+
+  BAR_DO_TIAO: {
+    title: '🍺 TIÃO\'S CORNER PUB // POOL & COLD BEER',
+    intro: (state) => `
+      Seu Tião wipes a glass behind the tiled counter as pagode music plays on a small transistor radio.<br>
+      Two older regulars are intensely debating soccer over pickled eggs and cold beer:<br>
+      <em>"— Welcome! Table is free, beer is sub-zero, and the bar tab is open if you\'re a regular."</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Danger: ${state.perigo}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      cerveja_600: {
+        label: 'Order a 600ml ice-cold Brahma beer in a brown glass bottle',
+        outcome: 'Seu Tião pulled a bottle frosted with ice right out of the cooler. The cold foam washed away the street exhaustion (-15% Danger, +22% Sanity, +10% Stomach).'
+      },
+      desafio_sinuca: {
+        label: 'Challenge the local bar shark to an 8-ball pool game (R$ 10.00 bet)',
+        costLabel: 'Pool Check (Ginga)',
+        outcome: (state, ptResult) => ptResult.includes('Tabelou')
+          ? 'You banked the 8-ball off the rail straight into the corner pocket! The old-timers clapped their hands: "— Kid has smooth hands!" You pocketed R$ 20.00 and earned street cred (+R$ 20.00, +15 Ginga)!'
+          : 'You scratched the cue ball on the break and the old-timer cleaned the table in two turns. R$ 10.00 lost and a harsh lesson in neighborhood pool (-R$ 10.00, -10% Sanity).'
+      },
+      aposta_jogo_bicho: {
+        label: 'Place a R$ 5.00 bet on the illegal animal lottery (Jogo do Bicho) with Seu Tião',
+        costLabel: 'Animal Lottery (R$ 5.00)',
+        outcome: (state, ptResult) => ptResult.includes('DEU BICHO')
+          ? '🎰 JACKPOT ON THE DEER! The afternoon draw confirmed your number! Seu Tião reached into the wooden drawer and counted out R$ 50.00 in cash! Huge win in Pirituba (+R$ 50.00, +25 Ginga, +30% Sanity)!'
+          : 'The 2 PM draw came out as Ostrich. Not your lucky day, but hoping is part of the Brazilian soul (-R$ 5.00, -5% Sanity).'
+      },
+      caderninho_fiado: {
+        label: (state) => (state.debt || 0) >= 3500
+          ? 'Ask for credit on the tab (Tião\'s ledger is capped: pay your debt first)'
+          : 'Ask Seu Tião to put your drink on the tab (Credit)',
+        costLabel: 'Put on Tab (Max R$ 35.00)',
+        outcome: 'Seu Tião picked up his worn pencil behind his ear and scribbled your name in the spiral notebook: "— Pay me by the weekend, boss!" (+R$ 12.00 drink, debt recorded).'
+      },
+      ovo_conserva: {
+        label: 'Eat a pink pickled egg and a pickled sausage from the counter jar',
+        outcome: 'Vinegar, pepper, and street tradition. Heavy digestion, but filled your stomach on a budget (+28% Stomach, -6% Sanity).'
+      }
+    }
+  },
+
+  ADEGA_DO_ZE: {
+    title: '🍷 ZÉ\'S LIQUOR & BEVERAGE SHOP',
+    intro: (state) => `
+      Crates of beer bottles stacked to the ceiling, ice chests humming, and funk beats echoing from a mounted loudspeaker.<br>
+      Zé glances up from counting receipts behind the wire gate:<br>
+      <em>"— Looking for cold brews, a pack of ice, or bringing cans to sell by the kilo?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      litrao_skol: {
+        label: 'Buy a 1-liter Skol returnable bottle',
+        outcome: 'Ice-cold 1-liter bottle cracked open right at the sidewalk curb. Refreshed your mood instantly (+18% Sanity, -10% Danger).'
+      },
+      vender_latinhas: {
+        label: 'Sell the bag of crushed aluminum cans scavenged on the hill',
+        costLabel: '+R$ 18.00 in Cash',
+        outcome: 'Zé tossed the bag onto the analog hanging scale: "— Three point two kilos of clean aluminum!" He slapped R$ 18.00 in cash onto the counter (+R$ 18.00, +10 Ginga)!'
+      },
+      corote_canelinha: {
+        label: 'Buy a bottle of cheap cinnamon cachaça (Corote)',
+        outcome: 'Sweet, potent, and burning down your throat. Street anxiety vanished, but your stomach took a hit (-12% Stomach, +15% Sanity, +8 Ginga).'
+      }
+    }
+  },
+
+  FLANELINHA: {
+    title: '🚗 UNOFFICIAL PARKING VALET AT THE CROSSING',
+    intro: (state) => `
+      A man in a yellow reflective vest with a rag draped over his shoulder waves his arms energetically:<br>
+      <em>"— Back it up, boss! Cut the wheel, keep coming! Park here and nobody touches your ride!"</em><br>
+      <small style="color:#ffcc00">Danger: ${state.perigo}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      pagar_cinco: {
+        label: 'Pay R$ 5.00 to guarantee your car won\'t be scratched',
+        outcome: 'The valet tapped the hood with his rag: "— Right on, boss! Car is fully guarded. Peace of mind on Paula Ferreira!" (-R$ 5.00, -20% Danger, +10% Sanity).'
+      },
+      migue_cartao: {
+        label: 'Try the classic excuse: "Only got credit card and Pix, bro!"',
+        costLabel: 'Hustle Check',
+        outcome: (state, ptResult) => ptResult.includes('máquininha')
+          ? 'The valet pulled an orange card reader straight out of his back pocket: "— Accepts credit, debit, Pix, and crypto, boss!" You had to tap your card (-R$ 5.00, +5 Ginga).'
+          : 'He gave an understanding nod: "— Tough times, huh boss? Go in peace, next time you get me!" Smooth talk saved your cash (+8 Ginga).'
+      },
+      peitar_rua: {
+        label: 'Refuse to pay: "The street is public, pal!"',
+        costLabel: 'High Confrontation',
+        outcome: 'The valet stepped back with folded arms and a cold smirk: "— Street is public, boss, but glass is private..." You walked away with knots in your stomach (+30% Danger, -20% Sanity).'
+      }
+    }
+  },
+
+  POSTO_PIRITUBA: {
+    title: '⛽ PIRITUBA 24H GAS STATION',
+    intro: (state) => `
+      Neon gas pump canopy illuminating the asphalt, attendant in uniform, and tires hissing on the tarmac.<br>
+      <em>"— Ethanol or gas, chief? Want me to check the oil and wash the windshield?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}%</small>
+    `,
+    options: {
+      abastecer_30: {
+        label: 'Put R$ 30.00 of ethanol in the 2004 Celta',
+        outcome: 'Fuel needle rose safely above the empty reserve! Relief from the fear of stalling out on the avenue (-R$ 30.00, +25% Sanity).'
+      },
+      calibrar_agua: {
+        label: 'Check tire pressure at the air pump and drink from the water fountain',
+        outcome: '30 PSI in all four tires and two hearty gulps of chilled water. Refreshed without spending a cent (+10% Sanity).'
+      },
+      fandangos_refri: {
+        label: 'Buy a bag of corn chips and a soda at the convenience store',
+        outcome: 'Classic snack run. High sodium and quick energy (+30% Stomach, +15% Sanity).'
+      }
+    }
+  },
+
+  PONTO_ONIBUS: {
+    title: '🚌 SPTRANS BUS STOP // PIRITUBA TERMINAL',
+    intro: (state) => `
+      Crowd packed under the metal awning waiting for the 8400-10 bus line.<br>
+      The diesel roar of approaching articulated buses echoes off the asphalt.<br>
+      <em>"Attention passengers: tap your card on the validator."</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      pagar_onibus: {
+        label: 'Pay bus fare with Bus Pass or cash (R$ 4.40)',
+        outcome: 'Turnstile beeps green! You board, take a seat near the window, and watch the São Paulo cityscape glide by (+15% Sanity, -10% Danger).'
+      },
+      pular_catraca: {
+        label: 'Jump the turnstile when the conductor looks away',
+        costLabel: 'Ginga Check (Danger Risk)',
+        outcome: (state, ptResult) => ptResult.includes('gato')
+          ? 'Vaulted the bar like a cat! Slipped into the crowd at the back of the bus undetected (+12 Ginga, +10% Danger).'
+          : 'Turnstile metal caught your knee with a loud CLANG! The driver hit the brakes: "— Get down, freeloader!" Walked away humiliated and limping (-20% Sanity, +25% Danger).'
+      }
+    }
+  },
+
+  DOIS_CARAS_MOTO: {
+    title: '🏍️ TWO DUDES ON A MOTORCYCLE // NIGHT STICK-UP',
+    intro: (state) => `
+      The buzzing sound of an exhaust pipe cuts through the dark evening air.<br>
+      A black 160cc motorcycle mounts the sidewalk curb and blocks your path:<br>
+      <em>"— DON\'T MOVE! Pass the phone and the wallet! Quick!"</em><br>
+      <strong style="color:#ff3333">HIGH ADRENALINE SITUATION! CHOOSE YOUR REACTION:</strong>
+    `,
+    options: {
+      entrar_padoca: {
+        label: 'Duck quickly into the bakery before they pull over',
+        outcome: 'You sprinted through the bakery doors! The bright fluorescent lights and patrons startled the riders, and they sped off (-20% Danger, +15 Ginga)!'
+      },
+      dar_celular_falso: {
+        label: 'Hand over the decoy cracked phone: "Take it bro, don\'t shoot!"',
+        costLabel: 'Street Smarts (Decoy Phone)',
+        outcome: 'The rider snatched the decoy phone, stuffed it in his jacket, and sped away. Your real phone and wallet stayed safe in your sock! Masterful street survival (+20 Ginga, -30% Danger)!'
+      },
+      orelhao_disfarce: {
+        label: 'Pretend you\'re making an urgent call at the payphone',
+        outcome: (state, ptResult) => ptResult.includes('despistar')
+          ? 'You faked an animated conversation with your back turned. They decided you weren\'t worth the risk and zoomed off (+15 Ginga)!'
+          : 'They weren\'t fooled for a second. The rider patted your pockets and snatched whatever cash you had on you (-R$ 20.00, -25% Sanity, +20% Danger).'
+      }
+    }
+  },
+
+  BANCA_JORNAL: {
+    title: '📰 MÁRIO\'S CORNER NEWSSTAND',
+    intro: (state) => `
+      Magazines, comics, cold drinks, and lottery tickets hanging from clotheslines in the booth.<br>
+      Seu Mário pushes his glasses up his nose:<br>
+      <em>"— Morning, young blood! Got the daily news, crossword puzzles, and the latest gossip on the mayor."</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      raspadinha_sorte: {
+        label: 'Buy a R$ 2.00 lucky scratch-off ticket',
+        outcome: (state, ptResult) => ptResult.includes('PREMIADA')
+          ? '🎉 WINNER! Three matching treasure symbols! Seu Mário handed you R$ 25.00 in crisp bills (+R$ 25.00, +20% Sanity)!'
+          : 'Scratch-off came up empty: "Try again next time!" (-R$ 2.00, -3% Sanity).'
+      },
+      comprar_almanaque: {
+        label: 'Buy the Historical Almanac of Pirituba (R$ 15.00)',
+        outcome: 'Fascinating read about the English railway origins of Pirituba, the old brickworks, and the green hills (+30% Sanity, Almanac added to inventory).'
+      },
+      fofoca_bairro: {
+        label: 'Chat with Seu Mário about neighborhood politics and gossip',
+        outcome: 'Seu Mário shared all the local lore: "— That corner crossing has seen it all since the 70s..." (+10% Sanity).'
+      }
+    }
+  },
+
+  PASTEL_FEIRA: {
+    title: '🥟 DONA MARIA\'S STREET MARKET PASTEL STALL',
+    intro: (state) => `
+      Bubbling hot oil, golden crispy pastels, and fresh lime sugarcane juice flowing from the press.<br>
+      <em>"— Step right up, darling! Fresh beef, cheese, hearts of palm, and special pastels made with love!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}%</small>
+    `,
+    options: {
+      combo_pastel_garapa: {
+        label: 'Crispy beef pastel with vinaigrette + Sugarcane juice with lime',
+        outcome: 'The king of Brazilian street food! Piping hot, crispy bubbles, delicious seasoning, and iced sugarcane juice. Stomach fully satisfied (+50% Stomach, +20% Sanity).'
+      },
+      pastel_simples: {
+        label: 'Simple melted cheese pastel',
+        outcome: 'Crispy, gooey melted cheese stretching with every bite. Great comfort food on a budget (+35% Stomach, +12% Sanity).'
+      },
+      xepa_conversa: {
+        label: 'Wait for the end-of-market discount and ask for leftover scraps',
+        outcome: 'Dona Maria smiled warmly and handed you a warm pastel parcel: "— Take it, dear, eat well!" Free food through neighborly kindness (+30% Stomach, +15% Sanity).'
+      }
+    }
+  },
+
+  SEMAFORO_BICO: {
+    title: '🚦 EDGAR FACÓ TRAFFIC LIGHT // STREET HUSTLE',
+    intro: (state) => `
+      Line of idling cars, heat shimmering off the asphalt, and the countdown timer ticking on the traffic light.<br>
+      <em>Opportunity to earn quick honest cash between red lights!</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      vender_balas: {
+        label: 'Sell peanut candy and mints between stopped cars',
+        outcome: 'Walking briskly between lanes, offering treats to drivers. Earned R$ 15.00 in coins before the light turned green (+R$ 15.00, +10 Ginga, -10% Stomach)!'
+      },
+      limpar_parabrisa: {
+        label: 'Spray squeegee and wipe windshields at the red light',
+        outcome: 'Quick soapy spray, smooth squeegee pull, and a grateful driver tipped you R$ 10.00! Honest street hustle (+R$ 10.00, +8 Ginga, -8% Stomach).'
+      },
+      sair_canteiro: {
+        label: 'Step back onto the pedestrian median and catch your breath',
+        outcome: 'Stepped out of the exhaust fumes and rested on the concrete curb (+5% Sanity).'
+      }
+    }
+  },
+
+  BAILE_LAJE: {
+    title: '🔊 ROOFTOP STREET PARTY ATOP THE HILL',
+    intro: (state) => `
+      Wall of massive sound systems booming bass, colored strobe lights over the brick terraces, and the whole neighborhood dancing.<br>
+      <em>"Welcome to the Pirituba Rooftop Funk! Leave your worries down the hill!"</em><br>
+      <small style="color:#ffcc00">Sanity: ${state.sanidade}% | Danger: ${state.perigo}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      copao_whisky: {
+        label: 'Grab a big plastic cup of cheap whiskey & energy drink (R$ 15.00)',
+        outcome: 'Ice cubes clinking, sweet buzz, and bass shaking your ribs. Urban stress evaporated (+35% Sanity, +15 Ginga, -15% Stomach).'
+      },
+      dancar_passinho: {
+        label: 'Show off your funk dance moves in the circle',
+        outcome: 'Synchronized footwork, crowd cheered and hyped you up! Instant neighborhood respect (+25 Ginga, +20% Sanity).'
+      },
+      desenrolo_crias: {
+        label: 'Talk with the local homies by the speaker wall',
+        outcome: 'Great friendly conversation about life, jobs, and dreams on the hill (+15% Sanity, -15% Danger).'
+      }
+    }
+  },
+
+  BLITZ_PM: {
+    title: '🚔 MILITARY POLICE CHECKPOINT ON PAULA FERREIRA',
+    intro: (state) => `
+      Red and blue lightbars flashing against the houses in the dead of night.<br>
+      Two police cruisers parked across the street with officers inspecting IDs:<br>
+      <em>"— HALT RIGHT THERE, CITIZEN! Hands where I can see them and step against the wall!"</em><br>
+      <strong style="color:#ff3333">HIGH DANGER SITUATION! CHOOSE YOUR ATTITUDE:</strong>
+    `,
+    options: {
+      apresentar_documento: {
+        label: 'Stay calm, keep hands visible, and present your ID',
+        costLabel: 'Cool Citizen',
+        outcome: (state, ptResult) => ptResult.includes('esculacho')
+          ? 'Because you were noticeably nervous, officers conducted a thorough pat-down: pockets emptied, shoes checked on the cold asphalt. Nothing illegal, but the humiliation stung deep (-30% Sanity).'
+          : 'The sergeant inspected your national ID and checked the radio: "— Clean record. Watch your hours around here, son. Move along." (-40% Danger, massive relief)!'
+      },
+      desenrolo_ginga: {
+        label: 'Speak respectfully as a local: "Good evening, sergeant! Born and raised in Pirituba!"',
+        costLabel: 'Smooth Talk (Requires Ginga 55)',
+        outcome: (state, ptResult) => ptResult.includes('tranquila')
+          ? 'Your calm demeanor and respectful tone broke the tension immediately. The officer smiled: "— Resident of the area? Go in peace, head straight home." (+20 Ginga, -50% Danger)!'
+          : 'Your voice trembled and you stuttered. The officer frowned: "— Shaking for what? Something to hide?!" Pushed you against the car for a stern lecture (-35% Sanity, +25% Danger).'
+      },
+      viela_atalho: {
+        label: 'Silently back away down the alley before being spotted',
+        costLabel: 'Stealth Escape',
+        outcome: (state, ptResult) => ptResult.includes('penumbra')
+          ? 'You took two quiet steps back and vanished into the shadows of the graffiti alley. The officers never even noticed (+15 Ginga, -20% Danger)!'
+          : 'A sharp whistle cut through the air: "— HALT RIGHT THERE! STOP NOW!" You had to sprint for your life, jumping puddles to lose the cruiser (+45% Danger, -30% Sanity).'
+      }
+    }
+  },
+
+  NPC_BALEIRO: {
+    title: '🍬 CLODOALDO THE CANDY VENDOR // EDGAR FACÓ',
+    intro: (state) => `
+      Clodoaldo walks steadily with his blue-and-white styrofoam cooler slung across his chest and a backwards cap.<br>
+      <em>"— Fresh candy! Peanut bars, strong mints, and ice-cold energy drinks! What\'ll it be today, warrior?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      comprar_pacoca: {
+        label: 'Buy Peanut Candy & Strong Mints Kit (Quick Energy)',
+        outcome: 'You chew the crumbly peanut sweet and pop a strong mint. Instant sugar rush (+25% Stomach, +5 Ginga).'
+      },
+      comprar_energetico: {
+        label: 'Buy an Ice-Cold 500ml Energy Drink (R$ 8.00)',
+        outcome: 'Chilled bubbly gulp! Taurine and carbonation grant an instant mental reboot (+30% Sanity).'
+      },
+      bico_fardo: {
+        label: (state) => (state.flags.bicoFardoCount || 0) >= 2
+          ? 'Help unload crates (Odd jobs finished for today)'
+          : 'Help Clodoaldo unload a heavy soda crate at the corner',
+        costLabel: '+R$ 10.00 | -8% Hunger',
+        outcome: 'Muscle work! In three minutes the crate is neatly stacked. Clodoaldo hands you a crumpled ten-real bill: "— Thanks partner, saved my day!" (+R$ 10.00, +8 Ginga, -8% Stomach).'
+      },
+      conversar_ambulante: {
+        label: 'Ask for the lowdown on street movement and traffic',
+        outcome: 'Clodoaldo gives sound advice: "— Keep your wits about you near the traffic light after six; motorbikes circle around. If you need solid food, find Dona Neide near the market!" (+10% Sanity).'
+      }
+    }
+  },
+
+  NPC_CARAMELO: {
+    title: '🐕 CARAMELO OF PIRITUBA // THE COMMUNITY DOG',
+    intro: (state) => `
+      The legendary yellow stray dog Caramelo trots up cheerfully along the sidewalk, ears perked and tail wagging like crazy.<br>
+      He lets out a friendly bark and leans his head against your leg, asking for affection.<br>
+      <small style="color:#00ff88">★ The Spiritual Guardian of Pirituba\'s Streets ★</small>
+    `,
+    options: {
+      carinho_caramelo: {
+        label: 'Give a hearty scratch behind the ears',
+        outcome: 'Caramelo closes his eyes, licks your hand, and wiggles with joy. Big city stress completely evaporates (+20% Sanity, -10% Danger)!'
+      },
+      alimentar_caramelo: {
+        label: (state) => state.flags.carameloCompanheiro
+          ? 'Caramelo is already your loyal street guardian!'
+          : 'Share a piece of street snack / pastry with Caramelo',
+        costLabel: 'R$ 4.00 (Buy coxinha treat)',
+        outcome: 'Caramelo devours the treat with legendary canine zeal and barks triumphantly! He is now your official Pirituba protector, reducing street danger (-20% Danger, +25% Sanity)!'
+      },
+      seguir_faro: {
+        label: (state) => state.flags.faroCaramelo
+          ? 'Follow dog\'s nose (Already found buried items today)'
+          : 'Follow Caramelo sniffing at the base of a sidewalk tree',
+        costLabel: 'Golden Sniffer',
+        outcome: 'Caramelo digs quickly into the soil and unearths a R$ 5 bill and a handful of dropped coins! (+R$ 8.50, +10% Sanity).'
+      }
+    }
+  },
+
+  NPC_BIKE: {
+    title: '🚲 JUNINHO ON HIS BICYCLE // WHEELIE MASTER',
+    intro: (state) => `
+      Juninho skids his red vintage bicycle up to the curb with a smooth flick of the handlebars.<br>
+      <em>"— What\'s good, bro! All good? If you need a ride on the bike peg or a quick errand run, just shout!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      carona_padaria: {
+        label: 'Ask for a ride on the bike peg to Estrela Bakery (R$ 3.00)',
+        outcome: 'You hopped onto the back peg and Juninho sped down Paula Ferreira, ringing his bell! Arrived at the bakery in the blink of an eye (+5 Ginga).'
+      },
+      carona_posto: {
+        label: 'Ask for a ride on the bike peg to Pirituba Gas Station (R$ 3.00)',
+        outcome: 'Wind in your face and rapid pedaling! Juninho wove through Edgar Facó traffic and dropped you right at the gas station door (+5 Ginga).'
+      },
+      bico_marmita: {
+        label: (state) => state.flags.correBike
+          ? 'Meal box delivery (Delivery already completed today)'
+          : 'Take an express meal box delivery to the bus stop',
+        costLabel: '+R$ 20.00 | -10% Hunger',
+        outcome: 'Grabbed the thermal bag and jogged to the bus stop. Delivery completed on time and payment in hand! (+R$ 20.00, +12 Ginga, -10% Stomach).'
+      },
+      desafio_grau: {
+        label: 'Learn the secret to pulling a 1-wheel bike wheelie (Chat)',
+        outcome: 'Juninho pops a flawless 1-wheel wheelie: "— Secret is rear brake control and hip balance, bro!" (+10 Ginga, +10% Sanity).'
+      }
+    }
+  },
+
+  NPC_DONA_NEIDE: {
+    title: '🥘 DONA NEIDE // THE MEAL BOX & MARKET AUNTIE',
+    intro: (state) => `
+      Dona Neide walks calmly up the sidewalk with a floral apron and market bags full of fresh herbs and plantains.<br>
+      <em>"— Oh my child! Good to see you. You look like you\'ve been running errands since dawn. Need some home-cooked food in your belly or a mother\'s blessing?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      comprar_marmita: {
+        label: (state) => state.fome <= 20
+          ? 'Accept home-cooked meal box (Dona Neide gives it free to anyone starving!)'
+          : 'Buy Dona Neide\'s Homemade Meal Box (Rice, beans, steak, and farofa)',
+        costLabel: (state) => state.fome <= 20 ? 'FREE (Solidarity)' : 'R$ 14.00',
+        outcome: (state) => state.fome <= 20
+          ? 'Dona Neide touches your shoulder warmly: "— Eat every bite, my child! Nobody walks this pavement on an empty stomach." Delicious home cooking restores your strength immediately (+50% Stomach, +25% Sanity, Free)!'
+          : 'Packed styrofoam meal box, fresh beans with homestyle garlic, and juicy steak. You eat seated on the curb like a king (+50% Stomach, +25% Sanity).'
+      },
+      ajudar_sacolas: {
+        label: (state) => state.flags.ajudouDonaNeide
+          ? 'Help carry bags (Already helped Dona Neide today)'
+          : 'Help carry heavy grocery bags up to the alleyway',
+        costLabel: '+R$ 10.00 Coffee Money | +Corn Cake',
+        outcome: 'You take both heavy bags and escort Dona Neide to the corner. She smiles gratefully, tucks a ten-real bill into your pocket, and hands you a warm slice of fresh corn cake (+R$ 10.00, +15% Stomach, +12 Ginga, +15% Sanity)!'
+      },
+      fofoca_bairro: {
+        label: 'Listen to motherly advice and neighborhood gossip',
+        outcome: 'Dona Neide shares her wisdom: "— Watch out, sweet child: afternoon storms hit hard, sky turns black! And don\'t flash cash on the avenue. Stay safe and God bless you!" (+20% Sanity, -15% Danger).'
+      }
+    }
+  },
+
+  BANCO_PIRITUBA: {
+    title: '🏧 BANCO PIRITUBA // 24H ATM NETWORK',
+    intro: (state) => {
+      const isNegative = state.grana < 0;
+      const statusText = isNegative
+        ? `<strong style="color:#ff3344">⚠️ ACCOUNT OVERDRAWN: ${state.formattedGrana} (LIMIT: -R$ 150.00) • SERASA DEADLINE: ${Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)))}s</strong>`
+        : `<span style="color:#00ff88">Available Balance: ${state.formattedGrana} • Credit Status: GOOD STANDING</span>`;
+      return `
+        The ATM screen emits a sterile blue glow in the semi-darkness.<br>
+        The rubber keypad is worn by thousands of neighborhood fingers.<br>
+        <em>"Banco Pirituba: Connecting you to your money (or your debts)."</em><br>
+        <small>${statusText}</small>
+      `;
+    },
+    options: {
+      saque_cheque_especial: {
+        label: (state) => state.grana <= -10000
+          ? 'Overdraft Blocked (Credit limit nearly exhausted)'
+          : 'Take Emergency Bank Overdraft (Immediate cash, brutal interest)',
+        costLabel: 'Overdraft (-R$ 50.00 on account)',
+        outcome: 'Banknotes dispense smoothly from the lower tray. Instant relief, but your balance is in the red! Settle the debt before 90 seconds or your national ID will be blacklisted and you\'ll lose the run!'
+      },
+      quitar_divida_banco: {
+        label: (state) => state.grana >= 0
+          ? 'Cash Deposit (Account is already in positive balance)'
+          : 'Deposit Cash to Settle Overdraft Debt',
+        costLabel: (state) => state.grana >= 0 ? 'Savings Deposit' : 'Pay Down Debt',
+        outcome: 'You insert the cash deposit envelope. The immediate clearance relieves your account and banishes the threat of bankruptcy (+15% Sanity)!'
+      },
+      consulta_extrato_serasa: {
+        label: 'Check Detailed Bank Statement & Credit Score',
+        costLabel: 'Free',
+        outcome: (state) => {
+          if (state.grana < 0) {
+            const timeLeft = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
+            return `URGENT NOTICE FROM BANCO PIRITUBA: Your balance is ${state.formattedGrana}. You have exactly ${timeLeft} seconds remaining before judicial asset forfeiture ends your journey!`;
+          }
+          return `ACCOUNT STATEMENT: Positive balance of ${state.formattedGrana}. Your credit score is favorable and there are no active liens against your name. Move forward (+5% Sanity).`;
+        }
+      }
+    }
+  },
+
+  NPC_POLICIA: {
+    title: '👮 SERGEANT ROCHA // MILITARY POLICE OF SÃO PAULO',
+    intro: (state) => {
+      const isHighDanger = state.perigo >= 45;
+      const statusNote = isHighDanger
+        ? `<strong style="color:#ff3344">⚠️ YOUR HEAT IS HIGH (${state.perigo}%)! THE SERGEANT HAS HIS HAND ON HIS HOLSTER!</strong>`
+        : `<span style="color:#00ff88">Heat Level: ${state.perigo}% • Routine Patrol in Pirituba</span>`;
+      return `
+        The gray uniform and marked cruiser on the curb command authority.<br>
+        Sergeant Rocha sizes you up from head to toe with seasoned eyes:<br>
+        <em>"— Anything new around here, citizen? The 49th Battalion does not tolerate disorder."</em><br>
+        <small>${statusNote}</small>
+      `;
+    },
+    options: {
+      cumprimentar_pm: {
+        label: (state) => state.perigo >= 45
+          ? 'Try friendly conversation (Your heat level is too high!)'
+          : 'Greet respectfully and wish a safe patrol',
+        costLabel: 'Model Citizen',
+        outcome: 'The Sergeant offers a crisp salute to his beret: "— Good afternoon, law-abiding citizen. If you spot any suspicious activity on Paula Ferreira, let the cruiser know." (+16% Sanity, -12% Danger).'
+      },
+      caguetar_malandro: {
+        label: (state) => state.flags.caguetouMalandro
+          ? 'Report local crime (You already tipped off the patrol today)'
+          : 'Snitch on the street runner and report the drug spot on Bento Bicudo',
+        costLabel: '+R$ 40.00 Reward | Snitch Tag',
+        outcome: 'The officer pulls out a notepad and writes down the exact alley location: "— Good job, partner. First-class intel. Take R$ 40.00 from our community fund." You walk away with cash, but feel the chill of becoming a known snitch...'
+      },
+      enquadro_suborno: {
+        label: (state) => state.perigo < 45
+          ? 'Pay "Cruiser Coffee" (Available only during high danger)'
+          : 'Pay "Cruiser Coffee" (R$ 35.00 bribe to avoid the paddy wagon)',
+        costLabel: 'Bribe R$ 35.00',
+        outcome: 'The sergeant discreetly pockets the bill into his duty belt: "— Walk away slowly and don\'t look back. If I catch you again today, you\'re going to the 33rd Precinct!" (-R$ 35.00, -35% Danger, -12% Sanity).'
+      },
+      enquadro_revista: {
+        label: 'Comply with police stop-and-frisk: "Hands on your head and spread your legs!"',
+        costLabel: 'Police Search',
+        outcome: 'The sergeant checks your pockets, runs your ID on the cruiser radio, and pats your shoulder: "— Clean record on COPOM. Go about your business, but stay sharp." Harsh street stop (-20% Sanity, -15% Danger).'
+      }
+    }
+  },
+
+  NPC_MALANDRO: {
+    title: '🧢 STREET RUNNER // PIRITUBA HUSTLER',
+    intro: (state) => {
+      if (state.flags.caguetouMalandro) {
+        return `
+          <strong style="color:#ff2233">🚨 THE RUNNER STARES AT YOU WITH PURE HATRED!</strong><br>
+          Word traveled fast on the street: you were seen chatting with the Police Sergeant!<br>
+          <em>"— Talked to the cops, huh snitch?! Snitches don\'t last on this turf!"</em><br>
+          <small style="color:#ffcc00">Danger: ${state.perigo}% | Balance: ${state.formattedGrana}</small>
+        `;
+      }
+      return `
+        Track shorts, chain, and flip-flops on the hot asphalt of Cel. Bento Bicudo.<br>
+        The Street Runner keeps watch on the corner while chewing gum:<br>
+        <em>"— What\'s up, partner! You on your toes or slipping around here?"</em><br>
+        <small style="color:#00ff88">Street Savvy: ${state.ginga}% | Balance: ${state.formattedGrana} | Danger: ${state.perigo}%</small>
+      `;
+    },
+    options: {
+      cobranca_pedagio: {
+        label: 'Pay snitch ransom toll (R$ 50.00)',
+        costLabel: 'R$ 50.00 Snitch Ransom',
+        outcome: 'The runner rips the bills from your hand: "— Mistake paid for. But if you open your mouth to the Sergeant again, you disappear!" Your wallet weeps (-R$ 50.00, -25% Sanity).'
+      },
+      cobranca_apanhar: {
+        label: 'Defy the hustler and take a beating in the alley',
+        costLabel: 'Street Violence',
+        outcome: 'Two accomplices emerge from the alley. You take a brutal beating, hitting the asphalt with torn clothes and bruised ribs (-30% Stomach, -35% Sanity, +20% Danger)!'
+      },
+      salve_quebrada: {
+        label: 'Give a respectful handshake and talk smoothly',
+        costLabel: 'Street Respect',
+        outcome: 'You do the traditional West Zone hand clasp: "— Much respect, bro. Humility goes a long way." (+14% Sanity, +10 Ginga).'
+      },
+      fazer_corre_crime: {
+        label: 'Do a "Street Runner Delivery" (Drop off mystery package on Emílio Lessore)',
+        costLabel: '+R$ 75.00 Fast Cash | +35% Danger',
+        outcome: 'You tuck the sealed package into your waistband and sprint up Emílio Lessore. Quick drop-off, and you return with R$ 75.00 in warm cash (+$$$$$), but your heat spiked (+35% Danger, +18 Ginga)!'
+      },
+      assalto_mao_armada: {
+        label: (state) => state.perigo < 45
+          ? 'Buy a single cigarette from the pack'
+          : 'Armed hold-up: "Hand over your wallet and phone now!"',
+        costLabel: (state) => state.perigo < 45 ? 'R$ 2.00' : 'Robbery (-R$ 25.00)',
+        outcome: (state) => state.perigo < 45
+          ? 'You puff a cigarette on the corner watching the cars pass on Edgar Facó (-R$ 2.00, +10% Sanity).'
+          : 'The kid flashes a chrome revolver handle under his shirt: "— Lost, clown! Hand over the cash!" He takes R$ 25.00 from your pocket (-R$ 25.00, -20% Sanity).'
+      }
+    }
+  }
+};
+
+/**
+ * Internationalization (i18n) Engine for Brazil Simulator // Sobrevivência BR
+ * Provides complete bilingual support: Portuguese (PT 🇧🇷) and English (EN 🇺🇸).
+ * Governs UI, roulette, survival HUD, interactables, NPCs, encounters, and run summaries.
+ */
+
+
+const I18N_STORAGE_KEY = 'pirituba_lang';
+
+const TRANSLATIONS = {
+  pt: {
+    lang_name: 'Português',
+    lang_flag: '🇧🇷',
+    lang_tag: 'PT',
+
+    ui: {
+      terminal_header: '[ PIRITUBA ENGINE // SP-011 ]',
+      terminal_location: '📍 RUA PRINCIPAL (PIRITUBA Z/O)',
+      btn_streetview: '<span>🌐 STREET VIEW</span><small style="opacity:0.7">[V]</small>',
+      btn_mode: '<span>🖥️ MODO:</span> <strong id="hud-mode">RETRO 3D (TEXTURAS)</strong> <small style="opacity:0.7">[M]</small>',
+      btn_visuals: '<span>🎨 VISUAL / ASCII</span><small style="opacity:0.7">[P]</small>',
+      btn_camera: '<span id="hud-camera-label">👤 VISÃO: 1ª PESSOA</span><small style="opacity:0.7">[B]</small>',
+      btn_camera_1p: '👤 VISÃO: 1ª PESSOA',
+      btn_camera_3p: '👤 VISÃO: 3ª PESSOA',
+      btn_tour: '<span>🎥 AUTO TOUR</span><small style="opacity:0.7">[U]</small>',
+      btn_empty_on: '<span>🚗 TRÂNSITO ATIVO</span><small style="opacity:0.7">[X]</small>',
+      btn_empty_off: '<span>🚫 CIDADE VAZIA</span><small style="opacity:0.7">[X]</small>',
+      btn_audio_on: '<span>🔊 SOM: LIGADO</span><small style="opacity:0.7">[O]</small>',
+      btn_audio_off: '<span>🔇 SOM: MUDO</span><small style="opacity:0.7">[O]</small>',
+      btn_radio: '<span>📻 RÁDIO:</span> <strong id="hud-radio">AUTO (ZONAS)</strong> <small style="opacity:0.7">[N]</small>',
+      btn_studio: '<span>👾 ESTÚDIO: game.md ↗</span>',
+      btn_lang: '<span id="hud-lang-label">🌐 🇧🇷 PT</span><small style="opacity:0.7">[L]</small>',
+
+      // Survival Bar
+      stat_time: '⏱️ RUN 15 MIN',
+      stat_money: '💵 GRANA',
+      stat_fome: '🍗 BUCHO',
+      stat_sanidade: '🧠 SANIDADE',
+      stat_perigo: '🚨 B.O. / PERIGO',
+      stat_debt_warning: '⚠️ DÉBITO BANCO: FALÊNCIA EM',
+      stat_tab: 'Fiado:',
+      objective_prefix: 'META DO DIA:',
+
+      // Mobile
+      orientation_banner: '📱 Gire o celular para o modo <strong>Paisagem (Horizontal)</strong> para melhor jogabilidade 🔄',
+      touch_menu: '⚙️ MENU',
+      touch_interact: 'INTERAGIR',
+      touch_jump: 'PULAR',
+      touch_crouch: 'AGACHA',
+      touch_cam: '3ªP',
+      drawer_title: '⚙️ MENU & AJUSTES',
+      drawer_touch_toggle: '📱 Controles Touch:',
+      drawer_lang_label: '🌐 Idioma: 🇧🇷 PT',
+      drawer_streetview: '🌐 Street View [V]',
+      drawer_mode: '🖥️ Modo Visual [M]',
+      drawer_visuals: '🎨 Shaders & Cores [P]',
+      drawer_camera: '👤 1ª / 3ª Pessoa [B]',
+      drawer_radio: '📻 Rádio Pirituba [N]',
+      drawer_audio: '🔊 Ligar/Desligar Som [O]',
+      drawer_tour: '🎥 Auto Tour [U]',
+      drawer_traffic: '🚗 Alternar Trânsito [X]',
+      drawer_studio: '👾 Estúdio game.md ↗',
+      drawer_on: 'LIGADO',
+      drawer_off: 'DESLIGADO',
+
+      // Dialog Modal
+      dialog_title_default: 'ENCONTRO BRASILEIRO',
+      dialog_close: '✕',
+      dialog_close_title: 'Fechar [Q]',
+
+      // Roulette Modal
+      roulette_title: '🇧🇷 SOBREVIVÊNCIA BR // ROLETA SOCIAL DE NASCIMENTO',
+      roulette_subtitle: 'Você tem exatamente 15 minutos reais (24h de um dia paulistano). Onde você nasceu?',
+      roulette_spin_btn: '🎲 GIRAR ROLETA SOCIAL ALEATÓRIA',
+      roulette_pill_de: '60% POPULAÇÃO',
+      roulette_pill_c: '30% POPULAÇÃO',
+      roulette_pill_ab: '10% POPULAÇÃO',
+      roulette_select_de: 'ESCOLHER QUEBRADA',
+      roulette_select_c: 'ESCOLHER SUBÚRBIO',
+      roulette_select_ab: 'ESCOLHER FARIA LIMER',
+
+      // End Screen
+      end_title_win: '🏆 VOCÊ SOBREVIVEU A 24 HORAS NO BRASIL!',
+      end_desc_win: 'Parabéns! Você completou os 15 minutos de run intacto(a) como <strong>{className}</strong>.<br>Sobreviveu ao trânsito da Edgar Facó, ao temporal de verão, aos boletos e à madrugada na quebrada!',
+      end_restart_btn: '🔄 JOGAR NOVA RUN DE 15 MINUTOS',
+      end_stat_class: 'Classe Social:',
+      end_stat_objective: 'Meta do Dia:',
+      end_stat_obj_success: '✅ CUMPRIDA COM SUCESSO!',
+      end_stat_obj_fail: '❌ NÃO CONCLUÍDA',
+      end_stat_grana: 'Saldo Final:',
+      end_stat_debt: 'Dívida / Fiado Pendente:',
+      end_stat_fome: 'Bucho / Fome Final:',
+      end_stat_sanidade: 'Sanidade Mental:',
+      end_stat_perigo: 'Nível de B.O. / Perigo:',
+      end_stat_ginga: 'Ginga / Jeitinho Score:',
+      end_moments_title: 'Momentos Marcantes do Dia:',
+      end_moments_empty: 'Dia tranquilo em Pirituba sem grandes incidentes',
+
+      // Click to Start Overlay
+      start_title: 'PIRITUBA // FAVELA SUBURBS',
+      start_subtitle: 'MOTOR DE 1ª & 3ª PESSOA EM ASCII & 3D',
+      start_prompt: 'CLIQUE AQUI PARA ENTRAR // CLICK TO PLAY',
+      start_hint_move: '⌨️ <strong>WASD / Setas</strong>: Mover',
+      start_hint_look: '👁️ <strong>Mouse</strong>: Olhar',
+      start_hint_cam: '👤 <strong>[B]</strong>: 1ª/3ª Pessoa',
+      start_hint_vis: '🎨 <strong>[P]</strong>: Ajustes Visuais',
+      start_hint_interact: '💬 <strong>[E]</strong>: Interagir',
+      start_hint_modes: '🖥️ <strong>[M]</strong>: Modos ASCII',
+      start_credits: 'Desenvolvido por <strong><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">game.md</a></strong> • Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>Explore os becos, o escadão, a laje com caixas d\'água Fortlev, o boteco e a vista para o Pico do Jaraguá.'
+    },
+
+    classes: {
+      CLASSE_DE: {
+        title: 'Muleque de Quebrada',
+        badge: 'FAVELA / PERIFERIA',
+        subtitle: 'Nascido no alto do morro em Pirituba. Ginga nas alturas, grana no limite.',
+        desc: 'Nascido no alto do morro em Pirituba. Ginga no talo, chinelo com prego, celular com tela trincada e Bilhete Único no negativo.',
+        meta: 'R$ 14,00 • Laje & Favela',
+        dailyObjective: 'Ganhar pelo menos R$ 40 em bicos ou conseguir cesta básica sem B.O.',
+        items: [
+          { id: 'bu', name: 'Bilhete Único (Negativo)', desc: 'Saldo: -R$ 5,00. Precisa de recarga urgente.' },
+          { id: 'chinelo', name: 'Havaianas com Prego', desc: 'Arrebentou a tira, mas foi consertada com arame.' },
+          { id: 'celular_trincado', name: 'Motorola Tela Trincada', desc: 'Bateria em 12%. Dá pra mandar WhatsApp.' },
+          { id: 'sacola_latinhas', name: 'Sacola com Latinhas de Alumínio', desc: 'Latinhas amassadas catadas na subida do morro. Dá pra vender na Adega do Zé.' }
+        ]
+      },
+      CLASSE_C: {
+        title: 'Tiozão CLT do Subúrbio',
+        badge: 'CLASSE MÉDIA / TRABALHADOR',
+        subtitle: 'Acorda às 05:30. Carnê das Casas Bahia na gaveta e boleto de luz vencendo.',
+        desc: 'Acorda às 05:30. Celta 2004 na reserva, boleto de luz vencendo hoje e carnê das Casas Bahia na gaveta.',
+        meta: 'R$ 180,00 • Subúrbio Raiz',
+        dailyObjective: 'Pagar a conta de luz e voltar pra casa com pão na chapa sem ter o carro riscado.',
+        items: [
+          { id: 'chave_carro', name: 'Chave do Celta 2004', desc: 'Está estacionado perto do posto, 2 portas na reserva.' },
+          { id: 'boleto_enel', name: 'Boleto Enel (Vence Hoje!)', desc: 'R$ 124,50. Se não pagar cortam a luz amanhã.' },
+          { id: 'carne', name: 'Carnê Casas Bahia (18/24)', desc: 'Smart TV parcelada. Não atrase.' }
+        ]
+      },
+      CLASSE_AB: {
+        title: 'Herdeiro da Faria Lima',
+        badge: 'ELITE / FARIA LIMER',
+        subtitle: 'Desceu em Pirituba por engano no Waze. Paranoia a 200 km/h, carteira cheia.',
+        desc: 'Desceu na Edgar Facó por engano no Waze. iPhone 16 Pro, copo Stanley, cartão black e pânico total de motoboy.',
+        meta: 'R$ 3.800,00 • Perdido na Quebrada',
+        dailyObjective: 'Sobreviver o dia na rua sem ter o celular levado e conseguir voltar pros Jardins são e salvo.',
+        items: [
+          { id: 'iphone', name: 'iPhone 16 Pro Max Titânio', desc: 'Cobiçado por 10 entre 10 motoboys.' },
+          { id: 'stanley', name: 'Copo Stanley com Matchá', desc: 'Mantém gelado por 18 horas.' },
+          { id: 'black_card', name: 'Cartão Black Sem Limite', desc: 'Inútil se o boteco só aceitar dinheiro ou Pix.' }
+        ]
+      }
+    },
+
+    interactables: {
+      padaria: { name: 'PADARIA ESTRELA DE PIRITUBA', prompt: 'ENTRAR NA PADOCA E PEDIR PÃO NA CHAPA' },
+      bar_sinuca: { name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)', prompt: 'JOGAR SINUCA OU PEDIR NO BALCÃO' },
+      adega: { name: 'ADEGA DO ZÉ (BEBIDAS & LITRÃO)', prompt: 'COMPRAR LITRÃO OU VENDER LATINHAS' },
+      flanelinha: { name: 'FLANELINHA NO CRUZAMENTO', prompt: 'CONVERSAR COM O FLANELINHA' },
+      posto: { name: 'POSTO PIRITUBA 24H', prompt: 'ABASTECER OU TOMAR ÁGUA NO BEBEDOURO' },
+      ponto_bus: { name: 'PONTO DE ÔNIBUS SPTRANS', prompt: 'EMBARCAR NA LINHA 8400-10 TERM. PIRITUBA' },
+      banca_jornal: { name: 'BANCA DE JORNAL DO SEU MÁRIO', prompt: 'LER JORNAL OU COMPRAR RASPADINHA DA SORTE' },
+      barraca_pastel: { name: 'BARRACA DE PASTEL DA DONA MARIA', prompt: 'PEDIR PASTEL DE FEIRA & CALDO DE CANA' },
+      baile_laje: { name: 'BAILE DA LAJE NO ALTO DO ESCADÃO', prompt: 'CURTIR BAILE NA QUEBRADA OU TOMAR COROTE' },
+      semaforo_bico: { name: 'SEMÁFORO DA EDGAR FACÓ', prompt: 'VENDER PAÇOCA OU LIMPAR PÁRA-BRISA NO SINAL' },
+      banco: { name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)', prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO' }
+    },
+
+    npcs: {
+      clodoaldo: { name: 'CLODOALDO DAS BALAS', prompt: 'CONVERSAR COM CLODOALDO (AMBULANTE)' },
+      caramelo: { name: 'CARAMELO (CÃO COMUNITÁRIO)', prompt: 'FAZER CARINHO NO CÃO CARAMELO' },
+      juninho: { name: 'JUNINHO DA MONARK', prompt: 'FALAR COM JUNINHO DA BIKE' },
+      dona_neide: { name: 'DONA NEIDE (TIA DA MARMITA)', prompt: 'FALAR COM DONA NEIDE DA FEIRA' },
+      sargento_rocha: { name: 'SARGENTO ROCHA (PMESP)', prompt: 'FALAR COM O SARGENTO ROCHA (PM)' },
+      menor_corre: { name: 'MENOR DO CORRE (QUEBRADA)', prompt: 'FALAR COM O MENOR DO CORRE' }
+    },
+
+    defeat: {
+      fome: {
+        cause: 'DESMAIO DE FOME',
+        desc: 'Sua fome zerou e você desmaiou de fraqueza no meio-fio. Uma viatura do SAMU te levou pro Hospital Geral de Vila Penteado.'
+      },
+      sanidade: {
+        cause: 'BURNOUT / SURTO URBANO',
+        desc: 'Sua sanidade zerou diante do caos de buzinas, boletos e calor. Você surtou, subiu no teto de um ônibus da SPTrans e foi contido.'
+      },
+      perigo: {
+        cause: 'XILINDRÓ / COBRANÇA DO AGIOTA',
+        desc: 'Seu medidor de B.O. chegou a 100%. A ROTA te levou detido pro 87º DP de Pirituba ou o agiota te pegou na esquina.'
+      },
+      falencia_limite: {
+        cause: 'FALÊNCIA & EXECUÇÃO DO CPF',
+        desc: 'Sua conta estourou o limite de cheque especial do Banco Pirituba (-R$ 150,00). O banco bloqueou seus bens e executou seu CPF no Serasa. Você faliu na quebrada!'
+      },
+      falencia_tempo: {
+        cause: 'FALÊNCIA & PRAZO ESGOTADO',
+        desc: 'Você passou mais de 90 segundos com a conta no vermelho sem quitar a dívida no Banco Pirituba. O oficial de justiça confiscou seus pertences!'
+      }
+    },
+
+    toasts: {
+      spawn_intro: '🌟 <strong>VOCÊ NASCEU COMO: {title}</strong><br>{subtitle}',
+      storm_start: '⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.',
+      storm_end: '🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.',
+      caramelo_bark: '🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!',
+      traffic_hit: '🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)'
+    }
+  },
+
+  en: {
+    lang_name: 'English',
+    lang_flag: '🇺🇸',
+    lang_tag: 'EN',
+
+    ui: {
+      terminal_header: '[ PIRITUBA ENGINE // SP-011 ]',
+      terminal_location: '📍 MAIN STREET (PIRITUBA WEST ZONE)',
+      btn_streetview: '<span>🌐 STREET VIEW</span><small style="opacity:0.7">[V]</small>',
+      btn_mode: '<span>🖥️ MODE:</span> <strong id="hud-mode">RETRO 3D (TEXTURES)</strong> <small style="opacity:0.7">[M]</small>',
+      btn_visuals: '<span>🎨 VISUAL / ASCII</span><small style="opacity:0.7">[P]</small>',
+      btn_camera: '<span id="hud-camera-label">👤 VIEW: 1ST PERSON</span><small style="opacity:0.7">[B]</small>',
+      btn_camera_1p: '👤 VIEW: 1ST PERSON',
+      btn_camera_3p: '👤 VIEW: 3RD PERSON',
+      btn_tour: '<span>🎥 AUTO TOUR</span><small style="opacity:0.7">[U]</small>',
+      btn_empty_on: '<span>🚗 TRAFFIC ACTIVE</span><small style="opacity:0.7">[X]</small>',
+      btn_empty_off: '<span>🚫 EMPTY CITY</span><small style="opacity:0.7">[X]</small>',
+      btn_audio_on: '<span>🔊 SOUND: ON</span><small style="opacity:0.7">[O]</small>',
+      btn_audio_off: '<span>🔇 SOUND: MUTED</span><small style="opacity:0.7">[O]</small>',
+      btn_radio: '<span>📻 RADIO:</span> <strong id="hud-radio">AUTO (ZONES)</strong> <small style="opacity:0.7">[N]</small>',
+      btn_studio: '<span>👾 STUDIO: game.md ↗</span>',
+      btn_lang: '<span id="hud-lang-label">🌐 🇺🇸 EN</span><small style="opacity:0.7">[L]</small>',
+
+      // Survival Bar
+      stat_time: '⏱️ 15 MIN RUN',
+      stat_money: '💵 CASH',
+      stat_fome: '🍗 HUNGER',
+      stat_sanidade: '🧠 SANITY',
+      stat_perigo: '🚨 HEAT / DANGER',
+      stat_debt_warning: '⚠️ BANK OVERDRAFT: BANKRUPT IN',
+      stat_tab: 'Tab:',
+      objective_prefix: 'DAILY GOAL:',
+
+      // Mobile
+      orientation_banner: '📱 Rotate device to <strong>Landscape (Horizontal)</strong> mode for optimal gameplay 🔄',
+      touch_menu: '⚙️ MENU',
+      touch_interact: 'INTERACT',
+      touch_jump: 'JUMP',
+      touch_crouch: 'CROUCH',
+      touch_cam: '3RDP',
+      drawer_title: '⚙️ SETTINGS & MENU',
+      drawer_touch_toggle: '📱 Touch Controls:',
+      drawer_lang_label: '🌐 Language: 🇺🇸 EN',
+      drawer_streetview: '🌐 Street View [V]',
+      drawer_mode: '🖥️ Visual Mode [M]',
+      drawer_visuals: '🎨 Shaders & Colors [P]',
+      drawer_camera: '👤 1st / 3rd Person [B]',
+      drawer_radio: '📻 Radio Pirituba [N]',
+      drawer_audio: '🔊 Toggle Sound [O]',
+      drawer_tour: '🎥 Auto Tour [U]',
+      drawer_traffic: '🚗 Toggle Traffic [X]',
+      drawer_studio: '👾 Studio game.md ↗',
+      drawer_on: 'ON',
+      drawer_off: 'OFF',
+
+      // Dialog Modal
+      dialog_title_default: 'BRAZILIAN ENCOUNTER',
+      dialog_close: '✕',
+      dialog_close_title: 'Close [Q]',
+
+      // Roulette Modal
+      roulette_title: '🇺🇸 BRAZIL SURVIVAL // SOCIAL SPAWN ROULETTE',
+      roulette_subtitle: 'You have exactly 15 real-world minutes (24h in São Paulo). Where were you born?',
+      roulette_spin_btn: '🎲 SPIN RANDOM SOCIAL ROULETTE',
+      roulette_pill_de: '60% POPULATION',
+      roulette_pill_c: '30% POPULATION',
+      roulette_pill_ab: '10% POPULATION',
+      roulette_select_de: 'CHOOSE FAVELA',
+      roulette_select_c: 'CHOOSE SUBURB',
+      roulette_select_ab: 'CHOOSE FARIA LIMER',
+
+      // End Screen
+      end_title_win: '🏆 YOU SURVIVED 24 HOURS IN BRAZIL!',
+      end_desc_win: 'Congratulations! You completed the 15-minute run intact as <strong>{className}</strong>.<br>You survived Edgar Facó traffic, the summer deluge, overdue bills, and the late-night streets!',
+      end_restart_btn: '🔄 PLAY NEW 15-MINUTE RUN',
+      end_stat_class: 'Social Class:',
+      end_stat_objective: 'Daily Goal:',
+      end_stat_obj_success: '✅ COMPLETED WITH SUCCESS!',
+      end_stat_obj_fail: '❌ NOT COMPLETED',
+      end_stat_grana: 'Final Balance:',
+      end_stat_debt: 'Pending Debt / Bar Tab:',
+      end_stat_fome: 'Final Hunger / Stomach:',
+      end_stat_sanidade: 'Mental Sanity:',
+      end_stat_perigo: 'Danger / Heat Level:',
+      end_stat_ginga: 'Street Savvy (Ginga) Score:',
+      end_moments_title: 'Memorable Moments of the Day:',
+      end_moments_empty: 'Quiet day in Pirituba without major incidents',
+
+      // Click to Start Overlay
+      start_title: 'PIRITUBA // FAVELA SUBURBS',
+      start_subtitle: '1ST & 3RD PERSON 3D & ASCII ENGINE',
+      start_prompt: 'CLICK HERE TO ENTER // PLAY',
+      start_hint_move: '⌨️ <strong>WASD / Arrows</strong>: Move',
+      start_hint_look: '👁️ <strong>Mouse</strong>: Look',
+      start_hint_cam: '👤 <strong>[B]</strong>: 1st/3rd Person',
+      start_hint_vis: '🎨 <strong>[P]</strong>: Visual Tuner',
+      start_hint_interact: '💬 <strong>[E]</strong>: Interact',
+      start_hint_modes: '🖥️ <strong>[M]</strong>: ASCII Modes',
+      start_credits: 'Developed by <strong><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">game.md</a></strong> • Inspired by viral project <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>Explore alleys, stairways, rooftop water tanks, corner bars, and the view of Jaraguá Peak.'
+    },
+
+    classes: {
+      CLASSE_DE: {
+        title: 'Favela Hustler',
+        badge: 'FAVELA / OUTSKIRTS',
+        subtitle: 'Born atop Pirituba\'s hillside. Maximum street savvy, money on the edge.',
+        desc: 'Raised on the hilltops of Pirituba. Maxed-out swagger, nail-fixed flip-flops, cracked phone screen, and a negative bus card balance.',
+        meta: 'R$ 14.00 • Rooftop & Slums',
+        dailyObjective: 'Earn at least R$ 40 doing odd jobs or get a food basket without trouble.',
+        items: [
+          { id: 'bu', name: 'Bus Pass Card (Negative Balance)', desc: 'Balance: -R$ 5.00. Needs urgent recharge.' },
+          { id: 'chinelo', name: 'Flip-Flops Fixed with a Nail', desc: 'Strap snapped, but patched up with wire.' },
+          { id: 'celular_trincado', name: 'Cracked-Screen Phone', desc: 'Battery at 12%. Still sends WhatsApp messages.' },
+          { id: 'sacola_latinhas', name: 'Bag of Crushed Aluminum Cans', desc: 'Scavenged on the way up the hill. Can be sold at Zé\'s Liquor Store.' }
+        ]
+      },
+      CLASSE_C: {
+        title: 'Working-Class Uncle',
+        badge: 'MIDDLE CLASS / BLUE COLLAR',
+        subtitle: 'Wakes at 05:30. Retail payment book in the drawer, power bill due today.',
+        desc: 'Wakes at 5:30 AM. 2004 hatchback on fuel reserve, power bill due today, and endless appliance installments.',
+        meta: 'R$ 180.00 • True Suburbs',
+        dailyObjective: 'Pay the electric bill and get home with toasted French bread without your car getting scratched.',
+        items: [
+          { id: 'chave_carro', name: 'Keys to 2004 Hatchback', desc: 'Parked near the gas station, 2 doors, running on fuel fumes.' },
+          { id: 'boleto_enel', name: 'Electric Bill (Due Today!)', desc: 'R$ 124.50. If unpaid, power cuts tomorrow.' },
+          { id: 'carne', name: 'Department Store Installment Book (18/24)', desc: 'Smart TV on monthly plan. Don\'t fall behind.' }
+        ]
+      },
+      CLASSE_AB: {
+        title: 'Faria Lima Heir',
+        badge: 'ELITE / FINANCIER',
+        subtitle: 'Ended up in Pirituba by mistake on Waze. 200 km/h paranoia, loaded wallet.',
+        desc: 'Took a wrong turn onto Edgar Facó via Waze. iPhone 16 Pro, Stanley tumbler, black credit card, and utter panic of motorcycle couriers.',
+        meta: 'R$ 3,800.00 • Lost in the Slums',
+        dailyObjective: 'Survive the day on the streets without having your phone snatched and make it safely back to the rich district.',
+        items: [
+          { id: 'iphone', name: 'iPhone 16 Pro Max Titanium', desc: 'Coveted by 10 out of 10 street hustlers.' },
+          { id: 'stanley', name: 'Stanley Tumbler with Matcha', desc: 'Keeps drinks icy cold for 18 hours.' },
+          { id: 'black_card', name: 'No-Limit Black Credit Card', desc: 'Useless if the corner bar only accepts cash or Pix.' }
+        ]
+      }
+    },
+
+    interactables: {
+      padaria: { name: 'ESTRELA BAKERY OF PIRITUBA', prompt: 'ENTER BAKERY & ORDER TOASTED FRENCH BREAD' },
+      bar_sinuca: { name: 'TIÃO\'S CORNER PUB (POOL TABLE & BAR)', prompt: 'PLAY POOL OR ORDER AT THE COUNTER' },
+      adega: { name: 'ZÉ\'S LIQUOR & BEVERAGE SHOP', prompt: 'BUY 1L BEER BOTTLE OR SELL CRUSHED CANS' },
+      flanelinha: { name: 'UNOFFICIAL PARKING VALET', prompt: 'TALK TO THE PARKING HUSTLER' },
+      posto: { name: 'PIRITUBA 24H GAS STATION', prompt: 'REFUEL OR DRINK FROM WATER FOUNTAIN' },
+      ponto_bus: { name: 'SPTRANS BUS STOP', prompt: 'BOARD BUS ROUTE 8400-10 PIRITUBA TERMINAL' },
+      banca_jornal: { name: 'MÁRIO\'S NEWSSTAND', prompt: 'READ NEWSPAPER OR BUY SCRATCH-OFF TICKET' },
+      barraca_pastel: { name: 'DONA MARIA\'S STREET FOOD STALL', prompt: 'ORDER CRISPY PASTEL & SUGARCANE JUICE' },
+      baile_laje: { name: 'ROOFTOP STREET PARTY ATOP STAIRWAY', prompt: 'ENJOY ROOFTOP PARTY OR SIP CHEAP COCKTAILS' },
+      semaforo_bico: { name: 'EDGAR FACÓ TRAFFIC LIGHT', prompt: 'SELL PEANUT CANDY OR WIPE WINDSHIELDS' },
+      banco: { name: 'BANCO PIRITUBA (BRANCH 0086 & 24H ATM)', prompt: 'ACCESS BANK 24H ATM TERMINAL' }
+    },
+
+    npcs: {
+      clodoaldo: { name: 'CLODOALDO THE CANDY VENDOR', prompt: 'TALK TO CLODOALDO (STREET VENDOR)' },
+      caramelo: { name: 'CARAMELO (COMMUNITY STRAY DOG)', prompt: 'PET THE CARAMELO STRAY DOG' },
+      juninho: { name: 'JUNINHO ON HIS BICYCLE', prompt: 'TALK TO JUNINHO (BIKE WHEELIE KID)' },
+      dona_neide: { name: 'DONA NEIDE (MEAL BOX LADY)', prompt: 'TALK TO DONA NEIDE FROM THE MARKET' },
+      sargento_rocha: { name: 'SERGEANT ROCHA (MILITARY POLICE)', prompt: 'TALK TO SERGEANT ROCHA (POLICE)' },
+      menor_corre: { name: 'STREET RUNNER (LOCAL HUSTLER)', prompt: 'TALK TO THE STREET RUNNER' }
+    },
+
+    defeat: {
+      fome: {
+        cause: 'STARVATION COLLAPSE',
+        desc: 'Your hunger hit zero and you collapsed from exhaustion on the curb. An ambulance rushed you to Vila Penteado General Hospital.'
+      },
+      sanidade: {
+        cause: 'BURNOUT / URBAN BREAKDOWN',
+        desc: 'Your sanity broke under the chaos of honking horns, overdue bills, and stifling heat. You had a breakdown and climbed atop a public bus.'
+      },
+      perigo: {
+        cause: 'ARREST / LOAN SHARK RETRIBUTION',
+        desc: 'Your danger heat level hit 100%. Police tactical units detained you at the 87th Precinct, or local loan sharks caught you at the corner.'
+      },
+      falencia_limite: {
+        cause: 'BANKRUPTCY & ASSET FORFEITURE',
+        desc: 'Your bank overdraft exceeded the credit limit at Banco Pirituba (-R$ 150.00). The bank froze your assets and blacklisted your national ID!'
+      },
+      falencia_tempo: {
+        cause: 'BANKRUPTCY & TIME EXPIRED',
+        desc: 'You spent over 90 consecutive seconds in negative balance without settling your Banco Pirituba debt. Court bailiffs repossessed your belongings!'
+      }
+    },
+
+    toasts: {
+      spawn_intro: '🌟 <strong>YOU WERE BORN AS: {title}</strong><br>{subtitle}',
+      storm_start: '⛈️ <strong>SÃO PAULO SUMMER DELUGE!</strong><br>Torrential rain and crawling traffic on Edgar Facó.',
+      storm_end: '🌤️ <strong>THE STORM HAS PASSED!</strong> São Paulo\'s skies have cleared up once again.',
+      caramelo_bark: '🐕 <strong>CARAMELO BARKED!</strong> Watch out for the speeding vehicle!',
+      traffic_hit: '🚨 <strong>WATCH OUT!</strong> You were almost hit by oncoming traffic! Look both ways! (-25% Sanity, +20% Heat)'
+    }
+  }
+};
+
+TRANSLATIONS.en.encounters = typeof EN_ENCOUNTER_TEXTS !== 'undefined' ? EN_ENCOUNTER_TEXTS : {};
+
+let currentLang = 'pt';
+const listeners = [];
+
+/**
+ * Initialize language from localStorage or default to 'pt'
+ */
+function initLanguage() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const saved = window.localStorage.getItem(I18N_STORAGE_KEY);
+      if (saved === 'pt' || saved === 'en') {
+        currentLang = saved;
+      }
+    } catch (e) {
+      currentLang = 'pt';
+    }
+  }
+  return currentLang;
+}
+
+/**
+ * Get active language code ('pt' | 'en')
+ */
+function getLanguage() {
+  return currentLang;
+}
+
+/**
+ * Subscribe to language change events
+ */
+function onLanguageChange(cb) {
+  listeners.push(cb);
+  return () => {
+    const idx = listeners.indexOf(cb);
+    if (idx !== -1) listeners.splice(idx, 1);
+  };
+}
+
+/**
+ * Set active language ('pt' or 'en') and trigger reactive DOM updates
+ */
+function setLanguage(lang, app = null) {
+  if (lang !== 'pt' && lang !== 'en') return;
+  currentLang = lang;
+
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(I18N_STORAGE_KEY, lang);
+    } catch (e) {}
+  }
+
+  // Update DOM elements tagged with data-i18n
+  updateDomTranslations();
+
+  // Notify registered callbacks
+  for (const cb of listeners) {
+    try {
+      cb(lang, app);
+    } catch (e) {
+      console.warn('[i18n] Listener error:', e);
+    }
+  }
+
+  // Refresh HUD and GameState if active
+  if (app && app.game && app.game.state) {
+    const cls = getLocalizedClass(app.game.state.classId, lang);
+    if (cls) {
+      app.game.state.className = cls.title;
+      app.game.state.badge = cls.badge;
+      app.game.state.dailyObjective = cls.dailyObjective;
+    }
+    if (app.game.hud) {
+      app.game.hud.update(app.game.clock, app.game.state);
+    }
+  }
+}
+
+/**
+ * Toggle between 'pt' and 'en'
+ */
+function toggleLanguage(app = null) {
+  const next = currentLang === 'pt' ? 'en' : 'pt';
+  setLanguage(next, app);
+  return next;
+}
+
+/**
+ * Get translation value with fallback
+ */
+function t(path, fallback = '') {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.pt;
+  const parts = path.split('.');
+  let curr = dict;
+  for (const p of parts) {
+    if (curr && typeof curr === 'object' && p in curr) {
+      curr = curr[p];
+    } else {
+      return fallback || path;
+    }
+  }
+  return typeof curr === 'string' ? curr : fallback;
+}
+
+/**
+ * Get localized class archetype
+ */
+function getLocalizedClass(classId, lang = null) {
+  const l = lang || currentLang;
+  const dict = TRANSLATIONS[l] || TRANSLATIONS.pt;
+  return dict.classes[classId] || TRANSLATIONS.pt.classes[classId] || null;
+}
+
+/**
+ * Get localized interactable anchor info
+ */
+function getLocalizedInteractable(anchorId, lang = null) {
+  const l = lang || currentLang;
+  const dict = TRANSLATIONS[l] || TRANSLATIONS.pt;
+  return dict.interactables[anchorId] || TRANSLATIONS.pt.interactables[anchorId] || null;
+}
+
+/**
+ * Get localized NPC prompt and name
+ */
+function getLocalizedNpc(npcId, lang = null) {
+  const l = lang || currentLang;
+  const dict = TRANSLATIONS[l] || TRANSLATIONS.pt;
+  return dict.npcs[npcId] || TRANSLATIONS.pt.npcs[npcId] || null;
+}
+
+/**
+ * Get localized defeat cause & desc
+ */
+function getLocalizedDefeat(defeatKey, lang = null) {
+  const l = lang || currentLang;
+  const dict = TRANSLATIONS[l] || TRANSLATIONS.pt;
+  return dict.defeat[defeatKey] || TRANSLATIONS.pt.defeat[defeatKey] || null;
+}
+
+/**
+ * Get localized encounter dialogue content
+ */
+function getLocalizedEncounter(encounterId, lang = null) {
+  const l = lang || currentLang;
+  if (l === 'en' && typeof EN_ENCOUNTER_TEXTS !== 'undefined' && EN_ENCOUNTER_TEXTS[encounterId]) {
+    return EN_ENCOUNTER_TEXTS[encounterId];
+  }
+  return null;
+}
+
+/**
+ * Update all DOM elements bearing data-i18n attributes
+ */
+function updateDomTranslations() {
+  if (typeof document === 'undefined') return;
+
+  const elements = document.querySelectorAll('[data-i18n]');
+  elements.forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const trans = t(key);
+    if (trans) {
+      el.innerHTML = trans;
+    }
+  });
+
+  // Update language switcher indicators
+  const hudLangLabel = document.getElementById('hud-lang-label');
+  if (hudLangLabel) {
+    hudLangLabel.textContent = currentLang === 'pt' ? '🌐 🇧🇷 PT' : '🌐 🇺🇸 EN';
+  }
+
+  const mobileBtnLang = document.getElementById('mobile-btn-lang');
+  if (mobileBtnLang) {
+    mobileBtnLang.textContent = currentLang === 'pt' ? '🌐 Idioma: 🇧🇷 PT' : '🌐 Language: 🇺🇸 EN';
+  }
+
+  // Update roulette segmented buttons active class
+  const langBtns = document.querySelectorAll('.lang-btn');
+  langBtns.forEach(btn => {
+    const bLang = btn.getAttribute('data-lang');
+    if (bLang === currentLang) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Update html tag lang attribute
+  if (document.documentElement) {
+    document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+  }
+}
+
+/**
  * Social Classes / Character Archetypes for Brazil Simulator
  * Defines starting wealth (centavos), stats (0-100), inventory, and daily objectives.
  */
+
 
 const SOCIAL_CLASSES = {
   CLASSE_DE: {
@@ -11120,6 +12401,20 @@ const SOCIAL_CLASSES = {
     targetWealthGain: 0
   }
 };
+
+function getActiveClassConfig(classId, lang = null) {
+  const base = SOCIAL_CLASSES[classId] || SOCIAL_CLASSES.CLASSE_DE;
+  const loc = typeof getLocalizedClass === 'function' ? getLocalizedClass(classId, lang || (typeof getLanguage === 'function' ? getLanguage() : 'pt')) : null;
+  if (!loc) return base;
+  return {
+    ...base,
+    title: loc.title || base.title,
+    badge: loc.badge || base.badge,
+    subtitle: loc.subtitle || base.subtitle,
+    dailyObjective: loc.dailyObjective || base.dailyObjective,
+    inventory: loc.items ? loc.items.map((it, idx) => ({ ...base.inventory[idx], ...it })) : base.inventory
+  };
+}
 
 /**
  * RunClock: 15-Minute Roguelite Day Cycle
@@ -11236,11 +12531,6 @@ class RunClock {
   }
 }
 
-/**
- * GameState: Single Source of Truth for Character & Run State
- * Invariant I4: Stats are ints clamped 0..100. Grana is integer centavos.
- * Mutation only occurs via apply(deltas, reason).
- */
 
 class GameState {
   constructor(classConfig, rng, seed = null) {
@@ -11298,10 +12588,12 @@ class GameState {
     }
   }
 
-  // Format centavos to Brazilian Reais (e.g. R$ 14,50)
+  // Format centavos to Brazilian Reais (e.g. R$ 14,50 in PT, R$14.00 in EN)
   static formatBRL(centavos) {
     const val = (centavos || 0) / 100;
-    return new Intl.NumberFormat('pt-BR', {
+    const lang = typeof getLanguage === 'function' ? getLanguage() : 'pt';
+    const locale = lang === 'en' ? 'en-US' : 'pt-BR';
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: 'BRL'
     }).format(val);
@@ -11428,38 +12720,43 @@ class GameState {
   // Check Game Over conditions
   checkDefeat() {
     if (this.fome <= 0) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('fome') : null;
       return {
         isDead: true,
-        cause: 'DESMAIO DE FOME',
-        desc: 'Sua fome zerou e você desmaiou de fraqueza no meio-fio. Uma viatura do SAMU te levou pro Hospital Geral de Vila Penteado.'
+        cause: def ? def.cause : 'DESMAIO DE FOME',
+        desc: def ? def.desc : 'Sua fome zerou e você desmaiou de fraqueza no meio-fio. Uma viatura do SAMU te levou pro Hospital Geral de Vila Penteado.'
       };
     }
     if (this.sanidade <= 0) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('sanidade') : null;
       return {
         isDead: true,
-        cause: 'BURNOUT / SURTO URBANO',
-        desc: 'Sua sanidade zerou diante do caos de buzinas, boletos e calor. Você surtou, subiu no teto de um ônibus da SPTrans e foi contido.'
+        cause: def ? def.cause : 'BURNOUT / SURTO URBANO',
+        desc: def ? def.desc : 'Sua sanidade zerou diante do caos de buzinas, boletos e calor. Você surtou, subiu no teto de um ônibus da SPTrans e foi contido.'
       };
     }
     if (this.perigo >= 100) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('perigo') : null;
       return {
         isDead: true,
-        cause: 'XILINDRÓ / COBRANÇA DO AGIOTA',
-        desc: 'Seu medidor de B.O. chegou a 100%. A ROTA te levou detido pro 87º DP de Pirituba ou o agiota te pegou na esquina.'
+        cause: def ? def.cause : 'XILINDRÓ / COBRANÇA DO AGIOTA',
+        desc: def ? def.desc : 'Seu medidor de B.O. chegou a 100%. A ROTA te levou detido pro 87º DP de Pirituba ou o agiota te pegou na esquina.'
       };
     }
     if (this.grana <= -15000) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('falencia_limite') : null;
       return {
         isDead: true,
-        cause: 'FALÊNCIA & EXECUÇÃO DO CPF',
-        desc: 'Sua conta estourou o limite de cheque especial do Banco Pirituba (-R$ 150,00). O banco bloqueou seus bens e executou seu CPF no Serasa. Você faliu na quebrada!'
+        cause: def ? def.cause : 'FALÊNCIA & EXECUÇÃO DO CPF',
+        desc: def ? def.desc : 'Sua conta estourou o limite de cheque especial do Banco Pirituba (-R$ 150,00). O banco bloqueou seus bens e executou seu CPF no Serasa. Você faliu na quebrada!'
       };
     }
     if (this.bankruptTimer >= 90) {
+      const def = typeof getLocalizedDefeat === 'function' ? getLocalizedDefeat('falencia_tempo') : null;
       return {
         isDead: true,
-        cause: 'FALÊNCIA & PRAZO ESGOTADO',
-        desc: 'Você passou mais de 90 segundos com a conta no vermelho sem quitar a dívida no Banco Pirituba. O oficial de justiça confiscou seus pertences!'
+        cause: def ? def.cause : 'FALÊNCIA & PRAZO ESGOTADO',
+        desc: def ? def.desc : 'Você passou mais de 90 segundos com a conta no vermelho sem quitar a dívida no Banco Pirituba. O oficial de justiça confiscou seus pertences!'
       };
     }
     return null;
@@ -11640,6 +12937,7 @@ class GameProps {
  * Keys [1], [2], [3], [4] select options; [Q] / [Esc] cancels.
  */
 
+
 class DialogSystem {
   constructor(controls) {
     this.controls = controls;
@@ -11686,7 +12984,51 @@ class DialogSystem {
     });
   }
 
-  open(dialogData, onChoice) {
+  localizeData(dialogData) {
+    if (typeof getLanguage !== 'function' || getLanguage() !== 'en' || !dialogData) return dialogData;
+    const encId = dialogData.encounterId || dialogData.id;
+    if (!encId) return dialogData;
+
+    const loc = getLocalizedEncounter(encId, 'en');
+    if (!loc) return dialogData;
+
+    const st = dialogData._state || (typeof window !== 'undefined' && window.app?.game?.state ? window.app.game.state : {});
+
+    const locOptions = (dialogData.options || []).map(opt => {
+      const optTrans = loc.options && loc.options[opt.id];
+      if (!optTrans) return opt;
+      const newLabel = typeof optTrans.label === 'function' ? optTrans.label(st) : optTrans.label;
+      const newCostLabel = typeof optTrans.costLabel === 'function' ? optTrans.costLabel(st) : (optTrans.costLabel || opt.costLabel);
+
+      return {
+        ...opt,
+        label: newLabel || opt.label,
+        costLabel: newCostLabel || opt.costLabel,
+        execute: (state, sound) => {
+          const ptResult = opt.execute(state, sound);
+          if (optTrans.outcome) {
+            if (typeof optTrans.outcome === 'function') {
+              return optTrans.outcome(state, ptResult || '');
+            }
+            return optTrans.outcome;
+          }
+          return ptResult;
+        }
+      };
+    });
+
+    const newIntro = typeof loc.intro === 'function' ? loc.intro(st) : (loc.intro || dialogData.text);
+
+    return {
+      ...dialogData,
+      title: loc.title || dialogData.title,
+      text: newIntro || dialogData.text,
+      options: locOptions
+    };
+  }
+
+  open(rawDialogData, onChoice) {
+    const dialogData = this.localizeData(rawDialogData);
     this.isOpen = true;
     this.currentEncounter = dialogData;
     this.onChoiceCallback = onChoice;
@@ -14098,27 +15440,34 @@ class InteractableSystem {
     this.currentTarget = closestTarget;
 
     if (closestTarget) {
+      const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
+      const loc = closestTarget.anchor.isNpc
+        ? getLocalizedNpc(closestTarget.anchor.id)
+        : getLocalizedInteractable(closestTarget.anchor.id);
+
       if (closestTarget.isOpen) {
-        this.showPrompt(`[E] ${closestTarget.anchor.prompt}`);
+        const promptStr = loc ? loc.prompt : closestTarget.anchor.prompt;
+        this.showPrompt(`[E] ${promptStr}`);
       } else {
         const zone = WORLD_ZONES.find(z => z.id === closestTarget.anchor.zoneId);
+        const anchorName = loc ? loc.name : closestTarget.anchor.name;
         if (closestTarget.anchor.id === 'semaforo_bico') {
           const isDuringOperatingHours = ZoneManager.isZoneOpen(zone, inGameHour);
           if (isDuringOperatingHours) {
-            this.showPrompt(`[AGUARDE O SINAL VERMELHO DOS CARROS] ${closestTarget.anchor.name}`);
+            this.showPrompt(isEn ? `[WAIT FOR RED TRAFFIC LIGHT] ${anchorName}` : `[AGUARDE O SINAL VERMELHO DOS CARROS] ${anchorName}`);
           } else {
             const rawHour = zone?.openHour || 7;
             const hh = Math.floor(rawHour);
             const mm = Math.round((rawHour - hh) * 60);
             const timeStr = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
-            this.showPrompt(`[HORÁRIO DE PICO ENCERRADO] ${closestTarget.anchor.name} (RETORNA ÀS ${timeStr})`);
+            this.showPrompt(isEn ? `[RUSH HOUR OVER] ${anchorName} (RETURNS AT ${timeStr})` : `[HORÁRIO DE PICO ENCERRADO] ${anchorName} (RETORNA ÀS ${timeStr})`);
           }
         } else {
           const rawHour = zone?.openHour || 0;
           const hh = Math.floor(rawHour);
           const mm = Math.round((rawHour - hh) * 60);
           const timeStr = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
-          this.showPrompt(`[FECHADO] ${closestTarget.anchor.name} (ABRE ÀS ${timeStr})`);
+          this.showPrompt(isEn ? `[CLOSED] ${anchorName} (OPENS AT ${timeStr})` : `[FECHADO] ${anchorName} (ABRE ÀS ${timeStr})`);
         }
       }
     } else {
@@ -14146,6 +15495,9 @@ class InteractableSystem {
     if (!encounter) return;
 
     const dialogData = {
+      id: encId,
+      encounterId: encId,
+      _state: gameState,
       title: encounter.title,
       text: encounter.getIntroText(gameState),
       options: encounter.getOptions(gameState)
@@ -14155,11 +15507,12 @@ class InteractableSystem {
       const outcomeText = chosenOption.execute(gameState, this.sound);
       // Optional follow-up feedback toast/dialog
       if (outcomeText) {
+        const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
         this.dialog.open({
-          title: 'DESFECHO DO ENCONTRO',
+          title: isEn ? 'ENCOUNTER OUTCOME' : 'DESFECHO DO ENCONTRO',
           text: `<p>${outcomeText}</p>`,
           options: [
-            { label: 'Continuar o dia', execute: () => {} }
+            { label: isEn ? 'Continue the day' : 'Continuar o dia', execute: () => {} }
           ]
         }, () => {});
       }
@@ -14171,6 +15524,7 @@ class InteractableSystem {
  * In-Game Survival HUD Controller
  * Invariant I11: DOM only, pt-BR, R$ formatted via Intl.
  */
+
 
 class HudGame {
   constructor() {
@@ -14205,11 +15559,13 @@ class HudGame {
     if (this.debtElem) {
       if (state.grana < 0) {
         const remainingSec = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
-        this.debtElem.textContent = `[⚠️ DÉBITO BANCO: FALÊNCIA EM ${remainingSec}s]`;
+        const warnPrefix = t('ui.stat_debt_warning', '⚠️ DÉBITO BANCO: FALÊNCIA EM');
+        this.debtElem.textContent = `[${warnPrefix} ${remainingSec}s]`;
         this.debtElem.style.color = '#ff3344';
         this.debtElem.style.display = 'inline';
       } else if (state.debt > 0) {
-        this.debtElem.textContent = `(Fiado: ${state.formattedDebt})`;
+        const tabPrefix = t('ui.stat_tab', 'Fiado:');
+        this.debtElem.textContent = `(${tabPrefix} ${state.formattedDebt})`;
         this.debtElem.style.color = '';
         this.debtElem.style.display = 'inline';
       } else {
@@ -14231,7 +15587,8 @@ class HudGame {
     if (this.perigoText) this.perigoText.textContent = `${perigoInt}%`;
 
     if (this.classBadge) this.classBadge.textContent = state.badge;
-    if (this.objectiveElem) this.objectiveElem.textContent = `META DO DIA: ${state.dailyObjective}`;
+    const objPrefix = t('ui.objective_prefix', 'META DO DIA:');
+    if (this.objectiveElem) this.objectiveElem.textContent = `${objPrefix} ${state.dailyObjective}`;
   }
 
   showToast(message, duration = 3500) {
@@ -14315,7 +15672,7 @@ class GameManager {
       const roll = this.rng.random();
       chosenKey = roll < 0.60 ? 'CLASSE_DE' : (roll < 0.90 ? 'CLASSE_C' : 'CLASSE_AB');
     }
-    const classConfig = SOCIAL_CLASSES[chosenKey] || SOCIAL_CLASSES.CLASSE_DE;
+    const classConfig = getActiveClassConfig(chosenKey);
 
     this.state = new GameState(classConfig, this.rng, this.seed);
     this.isRunActive = true;
@@ -14331,7 +15688,8 @@ class GameManager {
       this.sound.playCoin();
     }
 
-    this.hud.showToast(`🌟 <strong>VOCÊ NASCEU COMO: ${classConfig.title.toUpperCase()}</strong><br>${classConfig.subtitle}`, 5000);
+    const toastTpl = t('toasts.spawn_intro', '🌟 <strong>VOCÊ NASCEU COMO: {title}</strong><br>{subtitle}');
+    this.hud.showToast(toastTpl.replace('{title}', classConfig.title.toUpperCase()).replace('{subtitle}', classConfig.subtitle), 5000);
 
     // Run end callback
     this.clock.onRunEnd = () => this.handleRunEnd(true);
@@ -14370,7 +15728,7 @@ class GameManager {
         this.sound.playRain(true);
         this.sound.playThunder();
       }
-      this.hud.showToast('⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.', 6000);
+      this.hud.showToast(t('toasts.storm_start', '⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.'), 6000);
     } else if (!inStormWindow && this.isStorming) {
       this.isStorming = false;
       this.dayCycle.setWeather('CLEAR');
@@ -14378,7 +15736,7 @@ class GameManager {
       if (this.sound) {
         this.sound.playRain(false);
       }
-      this.hud.showToast('🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.', 4000);
+      this.hud.showToast(t('toasts.storm_end', '🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.'), 4000);
     }
 
     if (this.isStorming && this.sound) {
@@ -14496,7 +15854,7 @@ class GameManager {
           if (!this.lastCarameloWarning || this.clock.elapsed - this.lastCarameloWarning > 4.0) {
             this.lastCarameloWarning = this.clock.elapsed;
             if (this.sound && this.sound.playDogBark) this.sound.playDogBark();
-            this.hud.showToast('🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!', 2500);
+            this.hud.showToast(t('toasts.caramelo_bark', '🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!'), 2500);
           }
         }
 
@@ -14510,7 +15868,7 @@ class GameManager {
 
           // Push player back to nearest sidewalk
           playerPos.z = playerPos.z < (minZ + maxZ) / 2 ? minZ - 2.0 : maxZ + 2.0;
-          this.hud.showToast('🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)', 4000);
+          this.hud.showToast(t('toasts.traffic_hit', '🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)'), 4000);
           break;
         }
       }
@@ -14537,6 +15895,9 @@ class GameManager {
 
     const enc = BRAZILIAN_ENCOUNTERS.DOIS_CARAS_MOTO;
     this.dialog.open({
+      id: 'DOIS_CARAS_MOTO',
+      encounterId: 'DOIS_CARAS_MOTO',
+      _state: this.state,
       title: enc.title,
       text: enc.getIntroText(this.state),
       options: enc.getOptions(this.state)
@@ -14556,6 +15917,9 @@ class GameManager {
 
     const enc = BRAZILIAN_ENCOUNTERS.BLITZ_PM;
     this.dialog.open({
+      id: 'BLITZ_PM',
+      encounterId: 'BLITZ_PM',
+      _state: this.state,
       title: enc.title,
       text: enc.getIntroText(this.state),
       options: enc.getOptions(this.state)
@@ -14588,12 +15952,10 @@ class GameManager {
     }
 
     if (won) {
-      if (this.endTitleElem) this.endTitleElem.innerHTML = '🏆 VOCÊ SOBREVIVEU A 24 HORAS NO BRASIL!';
+      if (this.endTitleElem) this.endTitleElem.innerHTML = t('ui.end_title_win', '🏆 VOCÊ SOBREVIVEU A 24 HORAS NO BRASIL!');
       if (this.endDescElem) {
-        this.endDescElem.innerHTML = `
-          Parabéns! Você completou os 15 minutos de run intacto(a) como <strong>${this.state.className}</strong>.<br>
-          Sobreviveu ao trânsito da Edgar Facó, ao temporal de verão, aos boletos e à madrugada na quebrada!
-        `;
+        const winTpl = t('ui.end_desc_win', 'Parabéns! Você completou os 15 minutos de run intacto(a) como <strong>{className}</strong>.<br>Sobreviveu ao trânsito da Edgar Facó, ao temporal de verão, aos boletos e à madrugada na quebrada!');
+        this.endDescElem.innerHTML = winTpl.replace('{className}', this.state.className);
       }
     } else {
       if (this.endTitleElem) this.endTitleElem.innerHTML = `💀 GAME OVER // ${defeatData.cause}`;
@@ -14616,21 +15978,33 @@ class GameManager {
         .filter(h => !h.isDecay && h.reason !== 'Desgaste biológico/urbano contínuo' && !h.reason?.includes('Desgaste'))
         .slice(-3);
 
+      const emptyMoment = t('ui.end_moments_empty', 'Dia tranquilo em Pirituba sem grandes incidentes');
       const recentHistory = notableEvents.length > 0
         ? notableEvents.map(h => `<li><span style="color:#888">${h.hour || h.time}</span>: ${h.desc || h.reason}</li>`).join('')
-        : '<li>Dia tranquilo em Pirituba sem grandes incidentes</li>';
+        : `<li>${emptyMoment}</li>`;
+
+      const lblClass = t('ui.end_stat_class', 'Classe Social:');
+      const lblObj = t('ui.end_stat_objective', 'Meta do Dia:');
+      const objMsg = objCompleted ? t('ui.end_stat_obj_success', '✅ CUMPRIDA COM SUCESSO!') : t('ui.end_stat_obj_fail', '❌ NÃO CONCLUÍDA');
+      const lblGrana = t('ui.end_stat_grana', 'Saldo Final:');
+      const lblDebt = t('ui.end_stat_debt', 'Dívida / Fiado Pendente:');
+      const lblFome = t('ui.end_stat_fome', 'Bucho / Fome Final:');
+      const lblSanidade = t('ui.end_stat_sanidade', 'Sanidade Mental:');
+      const lblPerigo = t('ui.end_stat_perigo', 'Nível de B.O. / Perigo:');
+      const lblGinga = t('ui.end_stat_ginga', 'Ginga / Jeitinho Score:');
+      const lblMoments = t('ui.end_moments_title', 'Momentos Marcantes do Dia:');
 
       this.endStatsElem.innerHTML = `
-        <div class="end-stat-row"><span>Classe Social:</span> <strong>${this.state.className}</strong></div>
-        <div class="end-stat-row"><span>Meta do Dia:</span> <strong style="color:${objCompleted ? '#00ff66' : '#ffaa33'}">${objCompleted ? '✅ CUMPRIDA COM SUCESSO!' : '❌ NÃO CONCLUÍDA'}</strong></div>
-        <div class="end-stat-row"><span>Saldo Final:</span> <strong>${this.state.formattedGrana}</strong></div>
-        <div class="end-stat-row"><span>Dívida / Fiado Pendente:</span> <strong>${this.state.formattedDebt}</strong></div>
-        <div class="end-stat-row"><span>Bucho / Fome Final:</span> <strong>${Math.round(this.state.fome)}%</strong></div>
-        <div class="end-stat-row"><span>Sanidade Mental:</span> <strong>${Math.round(this.state.sanidade)}%</strong></div>
-        <div class="end-stat-row"><span>Nível de B.O. / Perigo:</span> <strong>${Math.round(this.state.perigo)}%</strong></div>
-        <div class="end-stat-row"><span>Ginga / Jeitinho Score:</span> <strong>${Math.round(this.state.ginga)} pts</strong></div>
+        <div class="end-stat-row"><span>${lblClass}</span> <strong>${this.state.className}</strong></div>
+        <div class="end-stat-row"><span>${lblObj}</span> <strong style="color:${objCompleted ? '#00ff66' : '#ffaa33'}">${objMsg}</strong></div>
+        <div class="end-stat-row"><span>${lblGrana}</span> <strong>${this.state.formattedGrana}</strong></div>
+        <div class="end-stat-row"><span>${lblDebt}</span> <strong>${this.state.formattedDebt}</strong></div>
+        <div class="end-stat-row"><span>${lblFome}</span> <strong>${Math.round(this.state.fome)}%</strong></div>
+        <div class="end-stat-row"><span>${lblSanidade}</span> <strong>${Math.round(this.state.sanidade)}%</strong></div>
+        <div class="end-stat-row"><span>${lblPerigo}</span> <strong>${Math.round(this.state.perigo)}%</strong></div>
+        <div class="end-stat-row"><span>${lblGinga}</span> <strong>${Math.round(this.state.ginga)} pts</strong></div>
         <div style="margin-top:12px;text-align:left;background:#151515;padding:8px 12px;border:1px solid #333;border-radius:4px;font-size:12px;">
-          <strong style="color:#00ffcc">Momentos Marcantes do Dia:</strong>
+          <strong style="color:#00ffcc">${lblMoments}</strong>
           <ul style="margin:4px 0 0 16px;padding:0;color:#bbb;">${recentHistory}</ul>
         </div>
       `;
@@ -14727,6 +16101,8 @@ class GameApp {
     this.visualsBtn = document.getElementById('btn-visuals');
     this.cameraBtn = document.getElementById('btn-camera');
     this.cameraLabel = document.getElementById('hud-camera-label');
+    this.langBtn = document.getElementById('btn-lang');
+    this.mobileLangBtn = document.getElementById('mobile-btn-lang');
 
     // Google Street View Modal Elements
     this.streetViewModal = document.getElementById('street-view-modal');
@@ -14739,8 +16115,10 @@ class GameApp {
     this.visualsModal = document.getElementById('visuals-modal');
     this.isVisualsModalOpen = false;
 
+    initLanguage();
     this.initUI();
     this.initRoulette();
+    updateDomTranslations();
     window.app = this;
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
@@ -14788,6 +16166,15 @@ class GameApp {
         e.stopPropagation();
         const classKey = btn.getAttribute('data-class');
         startWithClass(classKey);
+      });
+    });
+
+    const rouletteLangBtns = document.querySelectorAll('#roulette-lang-group .lang-btn');
+    rouletteLangBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = btn.getAttribute('data-lang');
+        setLanguage(lang, this);
       });
     });
   }
@@ -15470,6 +16857,14 @@ class GameApp {
       });
     }
 
+    // Language Toggle Button [L]
+    if (this.langBtn) {
+      this.langBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleLanguage(this);
+      });
+    }
+
     // Wire Mobile Menu Drawer Buttons
     const closeMobileDrawer = () => {
       const drawer = document.getElementById('mobile-menu-drawer');
@@ -15477,6 +16872,14 @@ class GameApp {
       if (drawer) drawer.classList.add('modal-hidden');
       if (btnMenu) btnMenu.classList.remove('active');
     };
+
+    const mBtnLang = document.getElementById('mobile-btn-lang');
+    if (mBtnLang) {
+      mBtnLang.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleLanguage(this);
+      });
+    }
 
     const mBtnStreetview = document.getElementById('mobile-btn-streetview');
     if (mBtnStreetview) {
@@ -15559,7 +16962,9 @@ class GameApp {
 
       const isRouletteOpen = typeof document !== 'undefined' && document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
 
-      if (e.code === 'KeyV' || e.key === 'v' || e.key === 'V') {
+      if (e.code === 'KeyL' || e.key === 'l' || e.key === 'L') {
+        toggleLanguage(this);
+      } else if (e.code === 'KeyV' || e.key === 'v' || e.key === 'V') {
         this.toggleStreetView();
       } else if (e.code === 'KeyP' || e.key === 'p' || e.key === 'P') {
         if (isRouletteOpen) return;

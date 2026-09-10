@@ -30,6 +30,10 @@
 
   <!-- Top-Right HUD: Interactive Buttons -->
   <div class="hud-layer" id="hud-top-right">
+    <button class="hud-btn" id="btn-lang" title="Alternar Idioma / Switch Language [L]">
+      <span id="hud-lang-label">🌐 🇧🇷 PT</span>
+      <small style="opacity:0.7">[L]</small>
+    </button>
     <button class="hud-btn" id="btn-streetview">
       <span>🌐 STREET VIEW</span>
       <small style="opacity:0.7">[V]</small>
@@ -86,23 +90,23 @@
   <!-- Top Center: Survival HUD Status Dashboard -->
   <div class="hud-layer" id="hud-survival-bar">
     <div class="survival-stat-box" id="stat-time">
-      <div class="stat-label">⏱️ RUN 15 MIN</div>
+      <div class="stat-label" data-i18n="ui.stat_time">⏱️ RUN 15 MIN</div>
       <div class="stat-value"><span id="hud-run-clock">15:00</span> <small id="hud-ingame-clock">06:00</small></div>
     </div>
     <div class="survival-stat-box" id="stat-money">
-      <div class="stat-label">💵 GRANA</div>
+      <div class="stat-label" data-i18n="ui.stat_money">💵 GRANA</div>
       <div class="stat-value"><span id="hud-grana">R$ 14,00</span> <small id="hud-debt" style="display:none; color:#ff5555;"></small></div>
     </div>
     <div class="survival-stat-box" id="stat-fome">
-      <div class="stat-label">🍗 BUCHO <span id="hud-fome-text">70%</span></div>
+      <div class="stat-label"><span data-i18n="ui.stat_fome">🍗 BUCHO</span> <span id="hud-fome-text">70%</span></div>
       <div class="stat-bar-container"><div class="stat-bar-fill" id="hud-fome-bar" style="width:70%;"></div></div>
     </div>
     <div class="survival-stat-box" id="stat-sanidade">
-      <div class="stat-label">🧠 SANIDADE <span id="hud-sanidade-text">80%</span></div>
+      <div class="stat-label"><span data-i18n="ui.stat_sanidade">🧠 SANIDADE</span> <span id="hud-sanidade-text">80%</span></div>
       <div class="stat-bar-container"><div class="stat-bar-fill" id="hud-sanidade-bar" style="width:80%;"></div></div>
     </div>
     <div class="survival-stat-box" id="stat-perigo">
-      <div class="stat-label">🚨 B.O. / PERIGO <span id="hud-perigo-text">10%</span></div>
+      <div class="stat-label"><span data-i18n="ui.stat_perigo">🚨 B.O. / PERIGO</span> <span id="hud-perigo-text">10%</span></div>
       <div class="stat-bar-container"><div class="stat-bar-fill danger" id="hud-perigo-bar" style="width:10%;"></div></div>
     </div>
   </div>
@@ -141,34 +145,40 @@
     <div class="modal-backdrop"></div>
     <div class="roulette-window">
       <div class="roulette-header">
-        <div class="roulette-title">🇧🇷 SOBREVIVÊNCIA BR // ROLETA SOCIAL DE NASCIMENTO</div>
-        <div class="roulette-subtitle">Você tem exatamente 15 minutos reais (24h de um dia paulistano). Onde você nasceu?</div>
+        <div class="roulette-top-row">
+          <div class="roulette-title" data-i18n="ui.roulette_title">🇧🇷 SOBREVIVÊNCIA BR // ROLETA SOCIAL DE NASCIMENTO</div>
+          <div class="lang-selector-group" id="roulette-lang-group">
+            <button type="button" class="lang-btn active" data-lang="pt" title="Português">🇧🇷 PT</button>
+            <button type="button" class="lang-btn" data-lang="en" title="English">🇺🇸 EN</button>
+          </div>
+        </div>
+        <div class="roulette-subtitle" data-i18n="ui.roulette_subtitle">Você tem exatamente 15 minutos reais (24h de um dia paulistano). Onde você nasceu?</div>
       </div>
       <div class="roulette-grid">
         <div class="class-card" id="card-classe-de">
-          <div class="class-badge-pill">60% POPULAÇÃO</div>
-          <div class="class-name">Muleque de Quebrada</div>
-          <div class="class-meta">R$ 14,00 • Laje & Favela</div>
-          <div class="class-desc">Nascido no alto do morro em Pirituba. Ginga no talo, chinelo com prego, celular com tela trincada e Bilhete Único no negativo.</div>
-          <button class="class-select-btn" data-class="CLASSE_DE">ESCOLHER QUEBRADA</button>
+          <div class="class-badge-pill" data-i18n="ui.roulette_pill_de">60% POPULAÇÃO</div>
+          <div class="class-name" data-i18n="classes.CLASSE_DE.title">Muleque de Quebrada</div>
+          <div class="class-meta" data-i18n="classes.CLASSE_DE.meta">R$ 14,00 • Laje & Favela</div>
+          <div class="class-desc" data-i18n="classes.CLASSE_DE.desc">Nascido no alto do morro em Pirituba. Ginga no talo, chinelo com prego, celular com tela trincada e Bilhete Único no negativo.</div>
+          <button class="class-select-btn" data-class="CLASSE_DE" data-i18n="ui.roulette_select_de">ESCOLHER QUEBRADA</button>
         </div>
         <div class="class-card featured" id="card-classe-c">
-          <div class="class-badge-pill">30% POPULAÇÃO</div>
-          <div class="class-name">Tiozão CLT do Subúrbio</div>
-          <div class="class-meta">R$ 180,00 • Subúrbio Raiz</div>
-          <div class="class-desc">Acorda às 05:30. Celta 2004 na reserva, boleto de luz vencendo hoje e carnê das Casas Bahia na gaveta.</div>
-          <button class="class-select-btn" data-class="CLASSE_C">ESCOLHER SUBÚRBIO</button>
+          <div class="class-badge-pill" data-i18n="ui.roulette_pill_c">30% POPULAÇÃO</div>
+          <div class="class-name" data-i18n="classes.CLASSE_C.title">Tiozão CLT do Subúrbio</div>
+          <div class="class-meta" data-i18n="classes.CLASSE_C.meta">R$ 180,00 • Subúrbio Raiz</div>
+          <div class="class-desc" data-i18n="classes.CLASSE_C.desc">Acorda às 05:30. Celta 2004 na reserva, boleto de luz vencendo hoje e carnê das Casas Bahia na gaveta.</div>
+          <button class="class-select-btn" data-class="CLASSE_C" data-i18n="ui.roulette_select_c">ESCOLHER SUBÚRBIO</button>
         </div>
         <div class="class-card" id="card-classe-ab">
-          <div class="class-badge-pill">10% POPULAÇÃO</div>
-          <div class="class-name">Herdeiro da Faria Lima</div>
-          <div class="class-meta">R$ 3.800,00 • Perdido na Quebrada</div>
-          <div class="class-desc">Desceu na Edgar Facó por engano no Waze. iPhone 16 Pro, copo Stanley, cartão black e pânico total de motoboy.</div>
-          <button class="class-select-btn" data-class="CLASSE_AB">ESCOLHER FARIA LIMER</button>
+          <div class="class-badge-pill" data-i18n="ui.roulette_pill_ab">10% POPULAÇÃO</div>
+          <div class="class-name" data-i18n="classes.CLASSE_AB.title">Herdeiro da Faria Lima</div>
+          <div class="class-meta" data-i18n="classes.CLASSE_AB.meta">R$ 3.800,00 • Perdido na Quebrada</div>
+          <div class="class-desc" data-i18n="classes.CLASSE_AB.desc">Desceu na Edgar Facó por engano no Waze. iPhone 16 Pro, copo Stanley, cartão black e pânico total de motoboy.</div>
+          <button class="class-select-btn" data-class="CLASSE_AB" data-i18n="ui.roulette_select_ab">ESCOLHER FARIA LIMER</button>
         </div>
       </div>
       <div class="roulette-footer">
-        <button id="btn-spin-roulette" class="roulette-spin-btn">🎲 GIRAR ROLETA SOCIAL ALEATÓRIA</button>
+        <button id="btn-spin-roulette" class="roulette-spin-btn" data-i18n="ui.roulette_spin_btn">🎲 GIRAR ROLETA SOCIAL ALEATÓRIA</button>
       </div>
     </div>
   </div>
@@ -450,20 +460,21 @@
   <div id="mobile-menu-drawer" class="modal-hidden">
     <div class="mobile-drawer-content">
       <div class="drawer-header">
-        <span class="drawer-title">⚙️ MENU & AJUSTES</span>
+        <span class="drawer-title" data-i18n="ui.drawer_title">⚙️ MENU & AJUSTES</span>
         <button id="btn-close-mobile-menu" class="dialog-close-btn" title="Fechar Menu">✕</button>
       </div>
       <div class="drawer-buttons">
+        <button class="mobile-drawer-btn" id="mobile-btn-lang" data-i18n="ui.drawer_lang_label">🌐 Idioma: 🇧🇷 PT</button>
         <button class="mobile-drawer-btn" id="mobile-btn-toggle-touch">📱 Controles Touch: LIGADO</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-streetview">🌐 Street View [V]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-mode">🖥️ Modo Visual [M]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-visuals">🎨 Shaders & Cores [P]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-camera">👤 1ª / 3ª Pessoa [B]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-radio">📻 Rádio Pirituba [N]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-audio">🔊 Ligar/Desligar Som [O]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-tour">🎥 Auto Tour [U]</button>
-        <button class="mobile-drawer-btn" id="mobile-btn-traffic">🚗 Alternar Trânsito [X]</button>
-        <a class="mobile-drawer-btn" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">👾 Estúdio game.md ↗</a>
+        <button class="mobile-drawer-btn" id="mobile-btn-streetview" data-i18n="ui.drawer_streetview">🌐 Street View [V]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-mode" data-i18n="ui.drawer_mode">🖥️ Modo Visual [M]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-visuals" data-i18n="ui.drawer_visuals">🎨 Shaders & Cores [P]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-camera" data-i18n="ui.drawer_camera">👤 1ª / 3ª Pessoa [B]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-radio" data-i18n="ui.drawer_radio">📻 Rádio Pirituba [N]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-audio" data-i18n="ui.drawer_audio">🔊 Ligar/Desligar Som [O]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-tour" data-i18n="ui.drawer_tour">🎥 Auto Tour [U]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-traffic" data-i18n="ui.drawer_traffic">🚗 Alternar Trânsito [X]</button>
+        <a class="mobile-drawer-btn" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;" data-i18n="ui.drawer_studio">👾 Estúdio game.md ↗</a>
       </div>
     </div>
   </div>

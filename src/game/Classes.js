@@ -3,6 +3,8 @@
  * Defines starting wealth (centavos), stats (0-100), inventory, and daily objectives.
  */
 
+import { getLanguage, getLocalizedClass } from './i18n.js';
+
 export const SOCIAL_CLASSES = {
   CLASSE_DE: {
     id: 'CLASSE_DE',
@@ -68,3 +70,17 @@ export const SOCIAL_CLASSES = {
     targetWealthGain: 0
   }
 };
+
+export function getActiveClassConfig(classId, lang = null) {
+  const base = SOCIAL_CLASSES[classId] || SOCIAL_CLASSES.CLASSE_DE;
+  const loc = typeof getLocalizedClass === 'function' ? getLocalizedClass(classId, lang || (typeof getLanguage === 'function' ? getLanguage() : 'pt')) : null;
+  if (!loc) return base;
+  return {
+    ...base,
+    title: loc.title || base.title,
+    badge: loc.badge || base.badge,
+    subtitle: loc.subtitle || base.subtitle,
+    dailyObjective: loc.dailyObjective || base.dailyObjective,
+    inventory: loc.items ? loc.items.map((it, idx) => ({ ...base.inventory[idx], ...it })) : base.inventory
+  };
+}

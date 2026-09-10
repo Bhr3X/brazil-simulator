@@ -5,6 +5,7 @@
 
 import { BRAZILIAN_ENCOUNTERS } from './Encounters.js';
 import { ZoneManager, WORLD_ZONES } from '../world/Zones.js';
+import { getLanguage, getLocalizedInteractable, getLocalizedNpc } from './i18n.js';
 
 export class InteractableSystem {
   constructor(scene, camera, dialogSystem, soundEngine, trafficSystem = null, npcSystem = null) {
@@ -188,27 +189,34 @@ export class InteractableSystem {
     this.currentTarget = closestTarget;
 
     if (closestTarget) {
+      const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
+      const loc = closestTarget.anchor.isNpc
+        ? getLocalizedNpc(closestTarget.anchor.id)
+        : getLocalizedInteractable(closestTarget.anchor.id);
+
       if (closestTarget.isOpen) {
-        this.showPrompt(`[E] ${closestTarget.anchor.prompt}`);
+        const promptStr = loc ? loc.prompt : closestTarget.anchor.prompt;
+        this.showPrompt(`[E] ${promptStr}`);
       } else {
         const zone = WORLD_ZONES.find(z => z.id === closestTarget.anchor.zoneId);
+        const anchorName = loc ? loc.name : closestTarget.anchor.name;
         if (closestTarget.anchor.id === 'semaforo_bico') {
           const isDuringOperatingHours = ZoneManager.isZoneOpen(zone, inGameHour);
           if (isDuringOperatingHours) {
-            this.showPrompt(`[AGUARDE O SINAL VERMELHO DOS CARROS] ${closestTarget.anchor.name}`);
+            this.showPrompt(isEn ? `[WAIT FOR RED TRAFFIC LIGHT] ${anchorName}` : `[AGUARDE O SINAL VERMELHO DOS CARROS] ${anchorName}`);
           } else {
             const rawHour = zone?.openHour || 7;
             const hh = Math.floor(rawHour);
             const mm = Math.round((rawHour - hh) * 60);
             const timeStr = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
-            this.showPrompt(`[HORÁRIO DE PICO ENCERRADO] ${closestTarget.anchor.name} (RETORNA ÀS ${timeStr})`);
+            this.showPrompt(isEn ? `[RUSH HOUR OVER] ${anchorName} (RETURNS AT ${timeStr})` : `[HORÁRIO DE PICO ENCERRADO] ${anchorName} (RETORNA ÀS ${timeStr})`);
           }
         } else {
           const rawHour = zone?.openHour || 0;
           const hh = Math.floor(rawHour);
           const mm = Math.round((rawHour - hh) * 60);
           const timeStr = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
-          this.showPrompt(`[FECHADO] ${closestTarget.anchor.name} (ABRE ÀS ${timeStr})`);
+          this.showPrompt(isEn ? `[CLOSED] ${anchorName} (OPENS AT ${timeStr})` : `[FECHADO] ${anchorName} (ABRE ÀS ${timeStr})`);
         }
       }
     } else {
@@ -236,6 +244,9 @@ export class InteractableSystem {
     if (!encounter) return;
 
     const dialogData = {
+      id: encId,
+      encounterId: encId,
+      _state: gameState,
       title: encounter.title,
       text: encounter.getIntroText(gameState),
       options: encounter.getOptions(gameState)
@@ -245,11 +256,12 @@ export class InteractableSystem {
       const outcomeText = chosenOption.execute(gameState, this.sound);
       // Optional follow-up feedback toast/dialog
       if (outcomeText) {
+        const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
         this.dialog.open({
-          title: 'DESFECHO DO ENCONTRO',
+          title: isEn ? 'ENCOUNTER OUTCOME' : 'DESFECHO DO ENCONTRO',
           text: `<p>${outcomeText}</p>`,
           options: [
-            { label: 'Continuar o dia', execute: () => {} }
+            { label: isEn ? 'Continue the day' : 'Continuar o dia', execute: () => {} }
           ]
         }, () => {});
       }

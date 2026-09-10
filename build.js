@@ -38,6 +38,8 @@ function bundle() {
   const city = cleanModule(read('src/world/CityBuilder.js'));
 
   // 3. Game State & Roguelite Logic
+  const encounterTrans = cleanModule(read('src/game/EncounterTranslations.js'));
+  const i18n = cleanModule(read('src/game/i18n.js'));
   const classes = cleanModule(read('src/game/Classes.js'));
   const clock = cleanModule(read('src/game/RunClock.js'));
   const state = cleanModule(read('src/game/GameState.js'));
@@ -89,6 +91,8 @@ ${touch}
 ${renderer}
 ${traffic}
 ${city}
+${encounterTrans}
+${i18n}
 ${classes}
 ${clock}
 ${state}
