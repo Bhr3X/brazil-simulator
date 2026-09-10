@@ -205,6 +205,13 @@ class GameApp {
 
     if (this.isVisualsModalOpen) {
       if (document.exitPointerLock) document.exitPointerLock();
+      const visualWindow = document.querySelector('.visual-modal-window');
+      const btnMinimize = document.getElementById('btn-minimize-visuals');
+      if (visualWindow) visualWindow.classList.remove('minimized');
+      if (btnMinimize) {
+        btnMinimize.textContent = '—';
+        btnMinimize.title = 'Minimizar Painel';
+      }
       this.syncVisualControlsUI();
     } else {
       if (this.game) this.game.collisionImmunityTimer = 2.5;
@@ -357,6 +364,46 @@ class GameApp {
     const visualsBackdrop = document.querySelector('#visuals-modal .modal-backdrop');
     if (visualsBackdrop) {
       visualsBackdrop.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    // Visual Tabs navigation
+    const tabButtons = document.querySelectorAll('.visual-tab-btn');
+    const tabPanes = {
+      'tab-presets': document.getElementById('visual-pane-presets'),
+      'tab-camera': document.getElementById('visual-pane-camera'),
+      'tab-ascii': document.getElementById('visual-pane-ascii')
+    };
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const targetTab = btn.getAttribute('data-tab');
+
+        if (targetTab === 'tab-all') {
+          Object.values(tabPanes).forEach(pane => {
+            if (pane) pane.classList.remove('pane-hidden');
+          });
+        } else {
+          Object.entries(tabPanes).forEach(([tabKey, pane]) => {
+            if (pane) {
+              pane.classList.toggle('pane-hidden', tabKey !== targetTab);
+            }
+          });
+        }
+      });
+    });
+
+    // Minimize / Expand button
+    const btnMinimize = document.getElementById('btn-minimize-visuals');
+    const visualWindow = document.querySelector('.visual-modal-window');
+    if (btnMinimize && visualWindow) {
+      btnMinimize.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isMin = visualWindow.classList.toggle('minimized');
+        btnMinimize.textContent = isMin ? '□' : '—';
+        btnMinimize.title = isMin ? 'Expandir Painel' : 'Minimizar Painel';
+      });
     }
 
     // Live sliders

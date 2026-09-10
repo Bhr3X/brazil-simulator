@@ -987,7 +987,7 @@ html, body {
 }
 
 /* ==========================================================================
-   Visual Parameters & ASCII Readability Modal
+   Visual Parameters & ASCII Readability In-Game HUD Dock
    ========================================================================== */
 #visuals-modal {
   position: fixed;
@@ -997,93 +997,177 @@ html, body {
   height: 100vh;
   z-index: 150;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+#visuals-modal.modal-hidden {
+  display: none !important;
+}
+
+#visuals-modal .modal-backdrop {
+  display: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none !important;
 }
 
 .visual-modal-window {
-  width: 90vw;
-  max-width: 860px;
-  max-height: 88vh;
-  background: rgba(7, 14, 10, 0.94);
-  border: 2px solid #00f0ff;
-  box-shadow: 0 0 35px rgba(0, 240, 255, 0.35), inset 0 0 20px rgba(0, 240, 255, 0.08);
+  position: fixed;
+  top: 48px;
+  right: 18px;
+  bottom: 18px;
+  width: 400px;
+  max-width: calc(100vw - 36px);
+  max-height: calc(100vh - 66px);
+  background: rgba(6, 14, 10, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #00f0ff;
+  box-shadow: -4px 0 25px rgba(0, 240, 255, 0.25), 0 0 15px rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  z-index: 151;
+  overflow: hidden;
+  animation: slideInRight 0.2s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.visual-modal-window.minimized {
+  bottom: auto;
+  max-height: 44px;
+  height: 44px;
+}
+.visual-modal-window.minimized .visual-tabs-bar,
+.visual-modal-window.minimized .visual-modal-body,
+.visual-modal-window.minimized .visual-modal-footer {
+  display: none !important;
 }
 
 .visual-modal-window .modal-header {
   background: rgba(0, 240, 255, 0.12);
-  border-bottom: 1px solid #00f0ff;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.35);
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
 }
 
 .visual-modal-window .modal-title {
   color: #00f0ff;
   text-shadow: 0 0 8px #00f0ff;
-}
-
-.visual-modal-body {
-  padding: 16px 20px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.visual-section-title {
-  font-size: 11px;
-  letter-spacing: 1.5px;
+  font-size: 12px;
+  letter-spacing: 1px;
   font-weight: bold;
-  color: #00f0ff;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-
-.visual-presets-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  display: flex;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
 }
 
-.preset-btn {
-  background: rgba(0, 240, 255, 0.06);
+.visual-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-minimize-btn,
+.visual-modal-window .modal-close-btn {
+  background: rgba(0, 240, 255, 0.1);
   border: 1px solid rgba(0, 240, 255, 0.4);
-  color: #a0f0ff;
-  padding: 8px 10px;
-  font-size: 11px;
-  font-family: inherit;
+  color: #00f0ff;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
   font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-align: center;
 }
 
-.preset-btn:hover {
-  background: rgba(0, 240, 255, 0.18);
-  border-color: #00f0ff;
+.modal-minimize-btn:hover,
+.visual-modal-window .modal-close-btn:hover {
+  background: rgba(0, 240, 255, 0.3);
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 8px #00f0ff;
 }
 
-.preset-btn.active {
-  background: #00f0ff;
-  color: #050608;
+/* Tabs Bar */
+.visual-tabs-bar {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+  padding: 4px 6px;
+  gap: 4px;
+  user-select: none;
+}
+
+.visual-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #88c099;
+  padding: 6px 4px;
+  font-size: 10.5px;
+  font-family: inherit;
+  font-weight: bold;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.visual-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(0, 240, 255, 0.1);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
+.visual-tab-btn.active {
+  background: rgba(0, 240, 255, 0.2);
+  color: #00f0ff;
   border-color: #00f0ff;
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
 }
 
-.visual-controls-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+.visual-modal-body {
+  padding: 12px 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
 }
 
-@media (max-width: 680px) {
-  .visual-controls-columns {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
+.visual-tab-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
+.visual-tab-pane.pane-hidden {
+  display: none !important;
+}
+
+
 
 .visual-col {
   display: flex;
@@ -1218,31 +1302,51 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .visual-modal-footer {
-  background: rgba(0, 0, 0, 0.4);
-  border-top: 1px solid rgba(0, 240, 255, 0.3);
-  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.45);
+  border-top: 1px solid rgba(0, 240, 255, 0.25);
+  padding: 8px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
-.modal-confirm-btn {
-  background: #00f0ff;
-  color: #050608;
-  border: none;
-  padding: 8px 18px;
-  font-size: 12px;
+.visual-modal-footer .modal-action-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #cccccc;
+  padding: 6px 12px;
+  font-size: 11px;
   font-family: inherit;
   font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+  transition: all 0.2s;
+}
+
+.visual-modal-footer .modal-action-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.visual-modal-footer .modal-confirm-btn {
+  background: #00f0ff;
+  color: #050608;
+  border: none;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
   transition: all 0.2s ease;
 }
 
-.modal-confirm-btn:hover {
+.visual-modal-footer .modal-confirm-btn:hover {
   background: #ffffff;
-  box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
 }
 
 /* =========================================================
@@ -1598,6 +1702,16 @@ body.mobile-touch-active #canvas-container {
     overflow-y: auto !important;
   }
 
+  .visual-modal-window {
+    top: 42px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    width: 320px !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 50px) !important;
+    background: rgba(6, 14, 10, 0.92) !important;
+  }
+
   .class-cards-grid {
     grid-template-columns: 1fr !important;
     gap: 10px !important;
@@ -1844,20 +1958,31 @@ body.mobile-touch-active #canvas-container {
     </div>
   </div>
 
-  <!-- Visual Parameters & ASCII Readability Modal -->
+  <!-- Visual Parameters & ASCII Readability In-Game HUD Dock -->
   <div id="visuals-modal" class="modal-hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-window visual-modal-window">
-      <div class="modal-header">
+      <div class="modal-header visual-modal-header">
         <div class="modal-title">
           <span class="pulse-indicator"></span>
-          🎨 PARÂMETROS VISUAIS & NITIDEZ ASCII // PIRITUBA ENGINE
+          🎨 VISUAL TUNER // AO VIVO
         </div>
-        <button id="btn-close-visuals" class="modal-close-btn" title="Fechar Ajustes [P / ESC]">✕</button>
+        <div class="visual-header-actions">
+          <button id="btn-minimize-visuals" class="modal-minimize-btn" title="Minimizar / Expandir Painel [—]">—</button>
+          <button id="btn-close-visuals" class="modal-close-btn" title="Fechar Ajustes [P / ESC]">✕</button>
+        </div>
       </div>
+
+      <div class="visual-tabs-bar">
+        <button type="button" class="visual-tab-btn active" data-tab="tab-presets">⚡ PRESETS</button>
+        <button type="button" class="visual-tab-btn" data-tab="tab-camera">🎥 CÂMERA</button>
+        <button type="button" class="visual-tab-btn" data-tab="tab-ascii">🔤 ASCII / COR</button>
+        <button type="button" class="visual-tab-btn" data-tab="tab-all">📋 TODOS</button>
+      </div>
+
       <div class="modal-body visual-modal-body">
-        <!-- Quick Presets -->
-        <div class="visual-section">
+        <!-- Tab Pane 1: Presets & Shaders -->
+        <div id="visual-pane-presets" class="visual-tab-pane">
           <div class="visual-section-title">⚡ PRESETS RÁPIDOS DE VISUALIZAÇÃO</div>
           <div class="visual-presets-grid">
             <button class="preset-btn" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
@@ -1875,160 +2000,163 @@ body.mobile-touch-active #canvas-container {
             <button class="preset-btn" id="preset-3d">🖥️ 3D REAL</button>
             <button class="preset-btn active" id="preset-default">🔄 PADRÃO</button>
           </div>
+
+          <div class="select-group" style="margin-top: 10px;">
+            <label for="select-render-mode">🖥️ Modo de Renderização / Shader [M]</label>
+            <select id="select-render-mode" class="visual-select">
+              <option value="ASCII_COLOR">FAVELA ASCII (True Color RGB)</option>
+              <option value="ASCII_MATRIX">CYBER MATRIX (Verde Fósforo)</option>
+              <option value="ASCII_AMBER">TERMINAL ÂMBAR (CRT 1980)</option>
+              <option value="ASCII_CYBER">CYBER NEON (Ciano / Rosa)</option>
+              <option value="ASCII_BRAILLE">⠸ BRAILLE SUB-PIXEL (Resolução 8x)</option>
+              <option value="SHADER_THERMAL">🔥 VISÃO TÉRMICA (Infravermelho FLIR)</option>
+              <option value="SHADER_DITHER">🕹️ 1-BIT BAYER DITHER (Obra Dinn / Mac)</option>
+              <option value="SHADER_COMIC">🗯️ HQ / MANGÁ (Cel-Shaded Comic)</option>
+              <option value="SHADER_WIREFRAME">📐 WIREFRAME VETORIAL (Vectrex / Tron)</option>
+              <option value="SHADER_VHS">📼 FITA VHS PIRATA (Glitch CRT / Camcorder)</option>
+              <option value="RETRO_3D">🖥️ MODO 3D REAL (Texturas Three.js)</option>
+            </select>
+          </div>
         </div>
 
-        <div class="select-group" style="margin-bottom: 2px;">
-          <label for="select-render-mode">🖥️ Modo de Renderização / Shader [M]</label>
-          <select id="select-render-mode" class="visual-select">
-            <option value="ASCII_COLOR">FAVELA ASCII (True Color RGB)</option>
-            <option value="ASCII_MATRIX">CYBER MATRIX (Verde Fósforo)</option>
-            <option value="ASCII_AMBER">TERMINAL ÂMBAR (CRT 1980)</option>
-            <option value="ASCII_CYBER">CYBER NEON (Ciano / Rosa)</option>
-            <option value="ASCII_BRAILLE">⠸ BRAILLE SUB-PIXEL (Resolução 8x)</option>
-            <option value="SHADER_THERMAL">🔥 VISÃO TÉRMICA (Infravermelho FLIR)</option>
-            <option value="SHADER_DITHER">🕹️ 1-BIT BAYER DITHER (Obra Dinn / Mac)</option>
-            <option value="SHADER_COMIC">🗯️ HQ / MANGÁ (Cel-Shaded Comic)</option>
-            <option value="SHADER_WIREFRAME">📐 WIREFRAME VETORIAL (Vectrex / Tron)</option>
-            <option value="SHADER_VHS">📼 FITA VHS PIRATA (Glitch CRT / Camcorder)</option>
-            <option value="RETRO_3D">🖥️ MODO 3D REAL (Texturas Three.js)</option>
-          </select>
-        </div>
-
-        <div class="visual-controls-columns">
-          <!-- Left Column: Density, Lighting, Contrast, FOV, Bloom -->
-          <div class="visual-col">
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-density">🔤 Densidade / Resolução de Caracteres</label>
-                <span class="slider-val" id="val-density">1.0x (8px)</span>
-              </div>
-              <input type="range" id="slider-density" min="0.6" max="2.4" step="0.1" value="1.0">
-              <div class="slider-hint">Menor = Retrô e blocos grandes | Maior = Micro-ASCII ultra nítido</div>
+        <!-- Tab Pane 2: Camera, Light & Atmosphere -->
+        <div id="visual-pane-camera" class="visual-tab-pane pane-hidden">
+          <div class="visual-section-title">🎥 CÂMERA, LUZ & ATMOSFERA</div>
+          
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-fov">🎥 Campo de Visão (FOV)</label>
+              <span class="slider-val" id="val-fov">70°</span>
             </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-brightness">☀️ Brilho / Luminância</label>
-                <span class="slider-val" id="val-brightness">1.00x</span>
-              </div>
-              <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.0">
-              <div class="slider-hint">Aumenta a luz geral para enxergar à noite ou sob sol forte</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-contrast">🌓 Contraste Dinâmico</label>
-                <span class="slider-val" id="val-contrast">1.00x</span>
-              </div>
-              <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.0">
-              <div class="slider-hint">Diferencia prédios, calçadas e o asfalto com mais definição</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-gamma">💡 Clarear Sombras (Gamma)</label>
-                <span class="slider-val" id="val-gamma">1.00x</span>
-              </div>
-              <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.0">
-              <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-fov">🎥 Campo de Visão (FOV)</label>
-                <span class="slider-val" id="val-fov">70°</span>
-              </div>
-              <input type="range" id="slider-fov" min="50" max="110" step="1" value="70">
-              <div class="slider-hint">50° = Foco cinematográfico | 110° = Grande angular fish-eye</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-bloom">✨ Brilho Neon / Bloom</label>
-                <span class="slider-val" id="val-bloom">0.0x</span>
-              </div>
-              <input type="range" id="slider-bloom" min="0.0" max="2.0" step="0.1" value="0.0">
-              <div class="slider-hint">Emite halo de luz radiante em postes, placas e faróis</div>
-            </div>
+            <input type="range" id="slider-fov" min="50" max="110" step="1" value="70">
+            <div class="slider-hint">50° = Foco cinematográfico | 110° = Grande angular fish-eye</div>
           </div>
 
-          <!-- Right Column: Saturation, Depth, Fog, Palette, Edges, Ramps, CRT -->
-          <div class="visual-col">
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-saturation">🎨 Saturação de Cores</label>
-                <span class="slider-val" id="val-saturation">1.00x</span>
-              </div>
-              <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.0">
-              <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-bloom">✨ Brilho Neon / Bloom</label>
+              <span class="slider-val" id="val-bloom">0.0x</span>
             </div>
+            <input type="range" id="slider-bloom" min="0.0" max="2.0" step="0.1" value="0.0">
+            <div class="slider-hint">Emite halo de luz radiante em postes, placas e faróis</div>
+          </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-depth">🔭 Profundidade 3D (Tamanho com Distância)</label>
-                <span class="slider-val" id="val-depth">1.0x</span>
-              </div>
-              <input type="range" id="slider-depth" min="0.0" max="2.0" step="0.1" value="1.0">
-              <div class="slider-hint">Reduz o tamanho dos caracteres mais distantes, criando perspectiva e profundidade real</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-fog">🌫️ Neblina & Garoa (Fog)</label>
+              <span class="slider-val" id="val-fog">0.8x</span>
             </div>
+            <input type="range" id="slider-fog" min="0.0" max="2.5" step="0.1" value="0.8">
+            <div class="slider-hint">0.0 = Ar limpo cristalino | 2.5 = Garoa densa paulistana</div>
+          </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-fog">🌫️ Neblina & Garoa (Fog)</label>
-                <span class="slider-val" id="val-fog">0.8x</span>
-              </div>
-              <input type="range" id="slider-fog" min="0.0" max="2.5" step="0.1" value="0.8">
-              <div class="slider-hint">0.0 = Ar limpo cristalino | 2.5 = Garoa densa paulistana</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-depth">🔭 Profundidade 3D (Tamanho com Distância)</label>
+              <span class="slider-val" id="val-depth">1.0x</span>
             </div>
+            <input type="range" id="slider-depth" min="0.0" max="2.0" step="0.1" value="1.0">
+            <div class="slider-hint">Reduz tamanho dos caracteres distantes para profundidade real</div>
+          </div>
 
-            <div class="select-group">
-              <label for="select-palette">🎨 Paleta de Cores & Tonalidade</label>
-              <select id="select-palette" class="visual-select">
-                <option value="DEFAULT">PADRÃO (Cores Reais RGB)</option>
-                <option value="SEPIA">SÉPIA (Foto Antiga 1970)</option>
-                <option value="GAMEBOY">GAME BOY (Monocromático LCD Verde)</option>
-                <option value="VAPORWAVE">VAPORWAVE (Rosa Choque & Ciano Neon)</option>
-                <option value="CYBERPUNK">CYBERPUNK (Amarelo Solar & Azul Elétrico)</option>
-                <option value="NOIR">NOIR POLICIAL (Preto e Branco Puro)</option>
-              </select>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-brightness">☀️ Brilho / Luminância</label>
+              <span class="slider-val" id="val-brightness">1.00x</span>
             </div>
+            <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.0">
+            <div class="slider-hint">Aumenta a luz geral para enxergar à noite ou sob sol forte</div>
+          </div>
 
-            <div class="toggle-group">
-              <label class="toggle-label">
-                <input type="checkbox" id="chk-edges" checked>
-                <span>📐 Realce de Bordas & Silhuetas (Edge Contour)</span>
-              </label>
-              <div class="slider-hint">Detecta e traça os contornos de paredes, postes e carros</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-gamma">💡 Clarear Sombras (Gamma)</label>
+              <span class="slider-val" id="val-gamma">1.00x</span>
             </div>
+            <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.0">
+            <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
+          </div>
+        </div>
 
-            <div class="select-group">
-              <label for="select-ramp">🔣 Estilo / Conjunto de Caracteres</label>
-              <select id="select-ramp" class="visual-select">
-                <option value="DETAILED">COMPLETO (70 caracteres graduais)</option>
-                <option value="BLOCKS">BLOCOS ISOMÉTRICOS (░▒▓█)</option>
-                <option value="CONTRAST">ALTO CONTRASTE (.:-=+*#%@)</option>
-                <option value="MINIMAL">MINIMALISTA (.:*#@)</option>
-                <option value="MATRIX">CYBER MATRIX (0123456789...)</option>
-                <option value="SHARPLINE">LINHAS & PONTOS (.·-—~=+*#%@)</option>
-              </select>
-            </div>
+        <!-- Tab Pane 3: ASCII, Color & Effects -->
+        <div id="visual-pane-ascii" class="visual-tab-pane pane-hidden">
+          <div class="visual-section-title">🔤 NITIDEZ ASCII, CORES & EFEITOS</div>
 
-            <div class="toggle-group">
-              <label class="toggle-label">
-                <input type="checkbox" id="chk-scanlines">
-                <span>📺 Linhas de Varredura CRT (Scanlines Retrô)</span>
-              </label>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-density">🔤 Densidade / Resolução de Caracteres</label>
+              <span class="slider-val" id="val-density">1.0x (8px)</span>
             </div>
+            <input type="range" id="slider-density" min="0.6" max="2.4" step="0.1" value="1.0">
+            <div class="slider-hint">Menor = Retrô e blocos grandes | Maior = Micro-ASCII ultra nítido</div>
+          </div>
 
-            <div class="hotkey-tip-box">
-              ⌨️ <strong>Atalhos Rápidos:</strong> <code>[B]</code> 3ª Pessoa &nbsp;|&nbsp; <code>[P]</code> Ajustes Visuais &nbsp;|&nbsp; <code>[</code> / <code>]</code> Densidade &nbsp;|&nbsp; <code>-</code> / <code>+</code> Brilho &nbsp;|&nbsp; <code>[M]</code> Modos
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-contrast">🌓 Contraste Dinâmico</label>
+              <span class="slider-val" id="val-contrast">1.00x</span>
             </div>
+            <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.0">
+            <div class="slider-hint">Diferencia prédios, calçadas e asfalto com mais nitidez</div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-saturation">🎨 Saturação de Cores</label>
+              <span class="slider-val" id="val-saturation">1.00x</span>
+            </div>
+            <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.0">
+            <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
+          </div>
+
+          <div class="select-group">
+            <label for="select-palette">🎨 Paleta de Cores & Tonalidade</label>
+            <select id="select-palette" class="visual-select">
+              <option value="DEFAULT">PADRÃO (Cores Reais RGB)</option>
+              <option value="SEPIA">SÉPIA (Foto Antiga 1970)</option>
+              <option value="GAMEBOY">GAME BOY (Monocromático LCD Verde)</option>
+              <option value="VAPORWAVE">VAPORWAVE (Rosa Choque & Ciano Neon)</option>
+              <option value="CYBERPUNK">CYBERPUNK (Amarelo Solar & Azul Elétrico)</option>
+              <option value="NOIR">NOIR POLICIAL (Preto e Branco Puro)</option>
+            </select>
+          </div>
+
+          <div class="toggle-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="chk-edges" checked>
+              <span>📐 Realce de Bordas & Silhuetas (Edge Contour)</span>
+            </label>
+            <div class="slider-hint">Detecta e traça os contornos de paredes, postes e carros</div>
+          </div>
+
+          <div class="select-group">
+            <label for="select-ramp">🔣 Estilo / Conjunto de Caracteres</label>
+            <select id="select-ramp" class="visual-select">
+              <option value="DETAILED">COMPLETO (70 caracteres graduais)</option>
+              <option value="BLOCKS">BLOCOS ISOMÉTRICOS (░▒▓█)</option>
+              <option value="CONTRAST">ALTO CONTRASTE (.:-=+*#%@)</option>
+              <option value="MINIMAL">MINIMALISTA (.:*#@)</option>
+              <option value="MATRIX">CYBER MATRIX (0123456789...)</option>
+              <option value="SHARPLINE">LINHAS & PONTOS (.·-—~=+*#%@)</option>
+            </select>
+          </div>
+
+          <div class="toggle-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="chk-scanlines">
+              <span>📺 Linhas de Varredura CRT (Scanlines Retrô)</span>
+            </label>
+          </div>
+
+          <div class="hotkey-tip-box">
+            ⌨️ <strong>Atalhos:</strong> <code>[B]</code> 3ª Pessoa &nbsp;|&nbsp; <code>[P]</code> Ajustes &nbsp;|&nbsp; <code>[</code> / <code>]</code> Densidade &nbsp;|&nbsp; <code>-</code> / <code>+</code> Brilho &nbsp;|&nbsp; <code>[M]</code> Modos
           </div>
         </div>
       </div>
+
       <div class="modal-footer visual-modal-footer">
-        <button id="btn-reset-visuals" class="modal-action-btn">🔄 RESTAURAR PADRÕES</button>
-        <button id="btn-done-visuals" class="modal-confirm-btn">✓ APLICAR & FECHAR [ESC / P]</button>
+        <button id="btn-reset-visuals" class="modal-action-btn">🔄 RESTAURAR</button>
+        <button id="btn-done-visuals" class="modal-confirm-btn">✓ FECHAR [ESC / P]</button>
       </div>
     </div>
   </div>
@@ -13169,6 +13297,13 @@ class GameApp {
 
     if (this.isVisualsModalOpen) {
       if (document.exitPointerLock) document.exitPointerLock();
+      const visualWindow = document.querySelector('.visual-modal-window');
+      const btnMinimize = document.getElementById('btn-minimize-visuals');
+      if (visualWindow) visualWindow.classList.remove('minimized');
+      if (btnMinimize) {
+        btnMinimize.textContent = '—';
+        btnMinimize.title = 'Minimizar Painel';
+      }
       this.syncVisualControlsUI();
     } else {
       if (this.game) this.game.collisionImmunityTimer = 2.5;
@@ -13321,6 +13456,46 @@ class GameApp {
     const visualsBackdrop = document.querySelector('#visuals-modal .modal-backdrop');
     if (visualsBackdrop) {
       visualsBackdrop.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    // Visual Tabs navigation
+    const tabButtons = document.querySelectorAll('.visual-tab-btn');
+    const tabPanes = {
+      'tab-presets': document.getElementById('visual-pane-presets'),
+      'tab-camera': document.getElementById('visual-pane-camera'),
+      'tab-ascii': document.getElementById('visual-pane-ascii')
+    };
+
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const targetTab = btn.getAttribute('data-tab');
+
+        if (targetTab === 'tab-all') {
+          Object.values(tabPanes).forEach(pane => {
+            if (pane) pane.classList.remove('pane-hidden');
+          });
+        } else {
+          Object.entries(tabPanes).forEach(([tabKey, pane]) => {
+            if (pane) {
+              pane.classList.toggle('pane-hidden', tabKey !== targetTab);
+            }
+          });
+        }
+      });
+    });
+
+    // Minimize / Expand button
+    const btnMinimize = document.getElementById('btn-minimize-visuals');
+    const visualWindow = document.querySelector('.visual-modal-window');
+    if (btnMinimize && visualWindow) {
+      btnMinimize.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isMin = visualWindow.classList.toggle('minimized');
+        btnMinimize.textContent = isMin ? '□' : '—';
+        btnMinimize.title = isMin ? 'Expandir Painel' : 'Minimizar Painel';
+      });
     }
 
     // Live sliders

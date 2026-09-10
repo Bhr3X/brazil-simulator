@@ -223,20 +223,31 @@
     </div>
   </div>
 
-  <!-- Visual Parameters & ASCII Readability Modal -->
+  <!-- Visual Parameters & ASCII Readability In-Game HUD Dock -->
   <div id="visuals-modal" class="modal-hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-window visual-modal-window">
-      <div class="modal-header">
+      <div class="modal-header visual-modal-header">
         <div class="modal-title">
           <span class="pulse-indicator"></span>
-          🎨 PARÂMETROS VISUAIS & NITIDEZ ASCII // PIRITUBA ENGINE
+          🎨 VISUAL TUNER // AO VIVO
         </div>
-        <button id="btn-close-visuals" class="modal-close-btn" title="Fechar Ajustes [P / ESC]">✕</button>
+        <div class="visual-header-actions">
+          <button id="btn-minimize-visuals" class="modal-minimize-btn" title="Minimizar / Expandir Painel [—]">—</button>
+          <button id="btn-close-visuals" class="modal-close-btn" title="Fechar Ajustes [P / ESC]">✕</button>
+        </div>
       </div>
+
+      <div class="visual-tabs-bar">
+        <button type="button" class="visual-tab-btn active" data-tab="tab-presets">⚡ PRESETS</button>
+        <button type="button" class="visual-tab-btn" data-tab="tab-camera">🎥 CÂMERA</button>
+        <button type="button" class="visual-tab-btn" data-tab="tab-ascii">🔤 ASCII / COR</button>
+        <button type="button" class="visual-tab-btn" data-tab="tab-all">📋 TODOS</button>
+      </div>
+
       <div class="modal-body visual-modal-body">
-        <!-- Quick Presets -->
-        <div class="visual-section">
+        <!-- Tab Pane 1: Presets & Shaders -->
+        <div id="visual-pane-presets" class="visual-tab-pane">
           <div class="visual-section-title">⚡ PRESETS RÁPIDOS DE VISUALIZAÇÃO</div>
           <div class="visual-presets-grid">
             <button class="preset-btn" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
@@ -254,160 +265,163 @@
             <button class="preset-btn" id="preset-3d">🖥️ 3D REAL</button>
             <button class="preset-btn active" id="preset-default">🔄 PADRÃO</button>
           </div>
+
+          <div class="select-group" style="margin-top: 10px;">
+            <label for="select-render-mode">🖥️ Modo de Renderização / Shader [M]</label>
+            <select id="select-render-mode" class="visual-select">
+              <option value="ASCII_COLOR">FAVELA ASCII (True Color RGB)</option>
+              <option value="ASCII_MATRIX">CYBER MATRIX (Verde Fósforo)</option>
+              <option value="ASCII_AMBER">TERMINAL ÂMBAR (CRT 1980)</option>
+              <option value="ASCII_CYBER">CYBER NEON (Ciano / Rosa)</option>
+              <option value="ASCII_BRAILLE">⠸ BRAILLE SUB-PIXEL (Resolução 8x)</option>
+              <option value="SHADER_THERMAL">🔥 VISÃO TÉRMICA (Infravermelho FLIR)</option>
+              <option value="SHADER_DITHER">🕹️ 1-BIT BAYER DITHER (Obra Dinn / Mac)</option>
+              <option value="SHADER_COMIC">🗯️ HQ / MANGÁ (Cel-Shaded Comic)</option>
+              <option value="SHADER_WIREFRAME">📐 WIREFRAME VETORIAL (Vectrex / Tron)</option>
+              <option value="SHADER_VHS">📼 FITA VHS PIRATA (Glitch CRT / Camcorder)</option>
+              <option value="RETRO_3D">🖥️ MODO 3D REAL (Texturas Three.js)</option>
+            </select>
+          </div>
         </div>
 
-        <div class="select-group" style="margin-bottom: 2px;">
-          <label for="select-render-mode">🖥️ Modo de Renderização / Shader [M]</label>
-          <select id="select-render-mode" class="visual-select">
-            <option value="ASCII_COLOR">FAVELA ASCII (True Color RGB)</option>
-            <option value="ASCII_MATRIX">CYBER MATRIX (Verde Fósforo)</option>
-            <option value="ASCII_AMBER">TERMINAL ÂMBAR (CRT 1980)</option>
-            <option value="ASCII_CYBER">CYBER NEON (Ciano / Rosa)</option>
-            <option value="ASCII_BRAILLE">⠸ BRAILLE SUB-PIXEL (Resolução 8x)</option>
-            <option value="SHADER_THERMAL">🔥 VISÃO TÉRMICA (Infravermelho FLIR)</option>
-            <option value="SHADER_DITHER">🕹️ 1-BIT BAYER DITHER (Obra Dinn / Mac)</option>
-            <option value="SHADER_COMIC">🗯️ HQ / MANGÁ (Cel-Shaded Comic)</option>
-            <option value="SHADER_WIREFRAME">📐 WIREFRAME VETORIAL (Vectrex / Tron)</option>
-            <option value="SHADER_VHS">📼 FITA VHS PIRATA (Glitch CRT / Camcorder)</option>
-            <option value="RETRO_3D">🖥️ MODO 3D REAL (Texturas Three.js)</option>
-          </select>
-        </div>
-
-        <div class="visual-controls-columns">
-          <!-- Left Column: Density, Lighting, Contrast, FOV, Bloom -->
-          <div class="visual-col">
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-density">🔤 Densidade / Resolução de Caracteres</label>
-                <span class="slider-val" id="val-density">1.0x (8px)</span>
-              </div>
-              <input type="range" id="slider-density" min="0.6" max="2.4" step="0.1" value="1.0">
-              <div class="slider-hint">Menor = Retrô e blocos grandes | Maior = Micro-ASCII ultra nítido</div>
+        <!-- Tab Pane 2: Camera, Light & Atmosphere -->
+        <div id="visual-pane-camera" class="visual-tab-pane pane-hidden">
+          <div class="visual-section-title">🎥 CÂMERA, LUZ & ATMOSFERA</div>
+          
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-fov">🎥 Campo de Visão (FOV)</label>
+              <span class="slider-val" id="val-fov">70°</span>
             </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-brightness">☀️ Brilho / Luminância</label>
-                <span class="slider-val" id="val-brightness">1.00x</span>
-              </div>
-              <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.0">
-              <div class="slider-hint">Aumenta a luz geral para enxergar à noite ou sob sol forte</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-contrast">🌓 Contraste Dinâmico</label>
-                <span class="slider-val" id="val-contrast">1.00x</span>
-              </div>
-              <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.0">
-              <div class="slider-hint">Diferencia prédios, calçadas e o asfalto com mais definição</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-gamma">💡 Clarear Sombras (Gamma)</label>
-                <span class="slider-val" id="val-gamma">1.00x</span>
-              </div>
-              <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.0">
-              <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-fov">🎥 Campo de Visão (FOV)</label>
-                <span class="slider-val" id="val-fov">70°</span>
-              </div>
-              <input type="range" id="slider-fov" min="50" max="110" step="1" value="70">
-              <div class="slider-hint">50° = Foco cinematográfico | 110° = Grande angular fish-eye</div>
-            </div>
-
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-bloom">✨ Brilho Neon / Bloom</label>
-                <span class="slider-val" id="val-bloom">0.0x</span>
-              </div>
-              <input type="range" id="slider-bloom" min="0.0" max="2.0" step="0.1" value="0.0">
-              <div class="slider-hint">Emite halo de luz radiante em postes, placas e faróis</div>
-            </div>
+            <input type="range" id="slider-fov" min="50" max="110" step="1" value="70">
+            <div class="slider-hint">50° = Foco cinematográfico | 110° = Grande angular fish-eye</div>
           </div>
 
-          <!-- Right Column: Saturation, Depth, Fog, Palette, Edges, Ramps, CRT -->
-          <div class="visual-col">
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-saturation">🎨 Saturação de Cores</label>
-                <span class="slider-val" id="val-saturation">1.00x</span>
-              </div>
-              <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.0">
-              <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-bloom">✨ Brilho Neon / Bloom</label>
+              <span class="slider-val" id="val-bloom">0.0x</span>
             </div>
+            <input type="range" id="slider-bloom" min="0.0" max="2.0" step="0.1" value="0.0">
+            <div class="slider-hint">Emite halo de luz radiante em postes, placas e faróis</div>
+          </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-depth">🔭 Profundidade 3D (Tamanho com Distância)</label>
-                <span class="slider-val" id="val-depth">1.0x</span>
-              </div>
-              <input type="range" id="slider-depth" min="0.0" max="2.0" step="0.1" value="1.0">
-              <div class="slider-hint">Reduz o tamanho dos caracteres mais distantes, criando perspectiva e profundidade real</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-fog">🌫️ Neblina & Garoa (Fog)</label>
+              <span class="slider-val" id="val-fog">0.8x</span>
             </div>
+            <input type="range" id="slider-fog" min="0.0" max="2.5" step="0.1" value="0.8">
+            <div class="slider-hint">0.0 = Ar limpo cristalino | 2.5 = Garoa densa paulistana</div>
+          </div>
 
-            <div class="slider-group">
-              <div class="slider-header">
-                <label for="slider-fog">🌫️ Neblina & Garoa (Fog)</label>
-                <span class="slider-val" id="val-fog">0.8x</span>
-              </div>
-              <input type="range" id="slider-fog" min="0.0" max="2.5" step="0.1" value="0.8">
-              <div class="slider-hint">0.0 = Ar limpo cristalino | 2.5 = Garoa densa paulistana</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-depth">🔭 Profundidade 3D (Tamanho com Distância)</label>
+              <span class="slider-val" id="val-depth">1.0x</span>
             </div>
+            <input type="range" id="slider-depth" min="0.0" max="2.0" step="0.1" value="1.0">
+            <div class="slider-hint">Reduz tamanho dos caracteres distantes para profundidade real</div>
+          </div>
 
-            <div class="select-group">
-              <label for="select-palette">🎨 Paleta de Cores & Tonalidade</label>
-              <select id="select-palette" class="visual-select">
-                <option value="DEFAULT">PADRÃO (Cores Reais RGB)</option>
-                <option value="SEPIA">SÉPIA (Foto Antiga 1970)</option>
-                <option value="GAMEBOY">GAME BOY (Monocromático LCD Verde)</option>
-                <option value="VAPORWAVE">VAPORWAVE (Rosa Choque & Ciano Neon)</option>
-                <option value="CYBERPUNK">CYBERPUNK (Amarelo Solar & Azul Elétrico)</option>
-                <option value="NOIR">NOIR POLICIAL (Preto e Branco Puro)</option>
-              </select>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-brightness">☀️ Brilho / Luminância</label>
+              <span class="slider-val" id="val-brightness">1.00x</span>
             </div>
+            <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.0">
+            <div class="slider-hint">Aumenta a luz geral para enxergar à noite ou sob sol forte</div>
+          </div>
 
-            <div class="toggle-group">
-              <label class="toggle-label">
-                <input type="checkbox" id="chk-edges" checked>
-                <span>📐 Realce de Bordas & Silhuetas (Edge Contour)</span>
-              </label>
-              <div class="slider-hint">Detecta e traça os contornos de paredes, postes e carros</div>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-gamma">💡 Clarear Sombras (Gamma)</label>
+              <span class="slider-val" id="val-gamma">1.00x</span>
             </div>
+            <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.0">
+            <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
+          </div>
+        </div>
 
-            <div class="select-group">
-              <label for="select-ramp">🔣 Estilo / Conjunto de Caracteres</label>
-              <select id="select-ramp" class="visual-select">
-                <option value="DETAILED">COMPLETO (70 caracteres graduais)</option>
-                <option value="BLOCKS">BLOCOS ISOMÉTRICOS (░▒▓█)</option>
-                <option value="CONTRAST">ALTO CONTRASTE (.:-=+*#%@)</option>
-                <option value="MINIMAL">MINIMALISTA (.:*#@)</option>
-                <option value="MATRIX">CYBER MATRIX (0123456789...)</option>
-                <option value="SHARPLINE">LINHAS & PONTOS (.·-—~=+*#%@)</option>
-              </select>
-            </div>
+        <!-- Tab Pane 3: ASCII, Color & Effects -->
+        <div id="visual-pane-ascii" class="visual-tab-pane pane-hidden">
+          <div class="visual-section-title">🔤 NITIDEZ ASCII, CORES & EFEITOS</div>
 
-            <div class="toggle-group">
-              <label class="toggle-label">
-                <input type="checkbox" id="chk-scanlines">
-                <span>📺 Linhas de Varredura CRT (Scanlines Retrô)</span>
-              </label>
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-density">🔤 Densidade / Resolução de Caracteres</label>
+              <span class="slider-val" id="val-density">1.0x (8px)</span>
             </div>
+            <input type="range" id="slider-density" min="0.6" max="2.4" step="0.1" value="1.0">
+            <div class="slider-hint">Menor = Retrô e blocos grandes | Maior = Micro-ASCII ultra nítido</div>
+          </div>
 
-            <div class="hotkey-tip-box">
-              ⌨️ <strong>Atalhos Rápidos:</strong> <code>[B]</code> 3ª Pessoa &nbsp;|&nbsp; <code>[P]</code> Ajustes Visuais &nbsp;|&nbsp; <code>[</code> / <code>]</code> Densidade &nbsp;|&nbsp; <code>-</code> / <code>+</code> Brilho &nbsp;|&nbsp; <code>[M]</code> Modos
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-contrast">🌓 Contraste Dinâmico</label>
+              <span class="slider-val" id="val-contrast">1.00x</span>
             </div>
+            <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.0">
+            <div class="slider-hint">Diferencia prédios, calçadas e asfalto com mais nitidez</div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <label for="slider-saturation">🎨 Saturação de Cores</label>
+              <span class="slider-val" id="val-saturation">1.00x</span>
+            </div>
+            <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.0">
+            <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
+          </div>
+
+          <div class="select-group">
+            <label for="select-palette">🎨 Paleta de Cores & Tonalidade</label>
+            <select id="select-palette" class="visual-select">
+              <option value="DEFAULT">PADRÃO (Cores Reais RGB)</option>
+              <option value="SEPIA">SÉPIA (Foto Antiga 1970)</option>
+              <option value="GAMEBOY">GAME BOY (Monocromático LCD Verde)</option>
+              <option value="VAPORWAVE">VAPORWAVE (Rosa Choque & Ciano Neon)</option>
+              <option value="CYBERPUNK">CYBERPUNK (Amarelo Solar & Azul Elétrico)</option>
+              <option value="NOIR">NOIR POLICIAL (Preto e Branco Puro)</option>
+            </select>
+          </div>
+
+          <div class="toggle-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="chk-edges" checked>
+              <span>📐 Realce de Bordas & Silhuetas (Edge Contour)</span>
+            </label>
+            <div class="slider-hint">Detecta e traça os contornos de paredes, postes e carros</div>
+          </div>
+
+          <div class="select-group">
+            <label for="select-ramp">🔣 Estilo / Conjunto de Caracteres</label>
+            <select id="select-ramp" class="visual-select">
+              <option value="DETAILED">COMPLETO (70 caracteres graduais)</option>
+              <option value="BLOCKS">BLOCOS ISOMÉTRICOS (░▒▓█)</option>
+              <option value="CONTRAST">ALTO CONTRASTE (.:-=+*#%@)</option>
+              <option value="MINIMAL">MINIMALISTA (.:*#@)</option>
+              <option value="MATRIX">CYBER MATRIX (0123456789...)</option>
+              <option value="SHARPLINE">LINHAS & PONTOS (.·-—~=+*#%@)</option>
+            </select>
+          </div>
+
+          <div class="toggle-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="chk-scanlines">
+              <span>📺 Linhas de Varredura CRT (Scanlines Retrô)</span>
+            </label>
+          </div>
+
+          <div class="hotkey-tip-box">
+            ⌨️ <strong>Atalhos:</strong> <code>[B]</code> 3ª Pessoa &nbsp;|&nbsp; <code>[P]</code> Ajustes &nbsp;|&nbsp; <code>[</code> / <code>]</code> Densidade &nbsp;|&nbsp; <code>-</code> / <code>+</code> Brilho &nbsp;|&nbsp; <code>[M]</code> Modos
           </div>
         </div>
       </div>
+
       <div class="modal-footer visual-modal-footer">
-        <button id="btn-reset-visuals" class="modal-action-btn">🔄 RESTAURAR PADRÕES</button>
-        <button id="btn-done-visuals" class="modal-confirm-btn">✓ APLICAR & FECHAR [ESC / P]</button>
+        <button id="btn-reset-visuals" class="modal-action-btn">🔄 RESTAURAR</button>
+        <button id="btn-done-visuals" class="modal-confirm-btn">✓ FECHAR [ESC / P]</button>
       </div>
     </div>
   </div>
