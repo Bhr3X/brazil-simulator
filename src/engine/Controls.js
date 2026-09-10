@@ -1,7 +1,57 @@
 /**
- * First-Person Controller with Pointer Lock, Head Bobbing,
- * Sprint, Jump, Crouch, and Step Climbing.
+ * Fast ray/segment-AABB intersection via slab method for 3rd person camera spring-arm
  */
+function intersectSegmentAABB(p1, p2, min, max) {
+  let tmin = 0.0;
+  let tmax = 1.0;
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const dz = p2.z - p1.z;
+
+  // X slab
+  if (Math.abs(dx) < 1e-6) {
+    if (p1.x < min.x || p1.x > max.x) return null;
+  } else {
+    const invD = 1.0 / dx;
+    let t1 = (min.x - p1.x) * invD;
+    let t2 = (max.x - p1.x) * invD;
+    if (t1 > t2) { const tmp = t1; t1 = t2; t2 = tmp; }
+    tmin = Math.max(tmin, t1);
+    tmax = Math.min(tmax, t2);
+    if (tmin > tmax) return null;
+  }
+
+  // Y slab
+  if (Math.abs(dy) < 1e-6) {
+    if (p1.y < min.y || p1.y > max.y) return null;
+  } else {
+    const invD = 1.0 / dy;
+    let t1 = (min.y - p1.y) * invD;
+    let t2 = (max.y - p1.y) * invD;
+    if (t1 > t2) { const tmp = t1; t1 = t2; t2 = tmp; }
+    tmin = Math.max(tmin, t1);
+    tmax = Math.min(tmax, t2);
+    if (tmin > tmax) return null;
+  }
+
+  // Z slab
+  if (Math.abs(dz) < 1e-6) {
+    if (p1.z < min.z || p1.z > max.z) return null;
+  } else {
+    const invD = 1.0 / dz;
+    let t1 = (min.z - p1.z) * invD;
+    let t2 = (max.z - p1.z) * invD;
+    if (t1 > t2) { const tmp = t1; t1 = t2; t2 = tmp; }
+    tmin = Math.max(tmin, t1);
+    tmax = Math.min(tmax, t2);
+    if (tmin > tmax) return null;
+  }
+
+  if (tmin >= 0.0 && tmin <= 1.0) {
+    return tmin * Math.sqrt(dx * dx + dy * dy + dz * dz);
+  }
+  return null;
+}
 
 export class FirstPersonControls {
   constructor(camera, domElement, physics, soundEngine, scene = null) {
@@ -527,11 +577,19 @@ export class FirstPersonControls {
     this.isThirdPerson = typeof forceState === 'boolean' ? forceState : !this.isThirdPerson;
     if (this.avatarMesh) {
       this.avatarMesh.visible = this.isThirdPerson;
+      if (this.isThirdPerson) this.setAvatarOpacity(1.0);
     }
     if (typeof this.onPerspectiveChange === 'function') {
       this.onPerspectiveChange(this.isThirdPerson);
     }
     return this.isThirdPerson;
+  }
+
+  setAvatarOpacity(opacity) {
+    if (!this.avatarMaterials) return;
+    for (let i = 0; i < this.avatarMaterials.length; i++) {
+      this.avatarMaterials[i].opacity = opacity;
+    }
   }
 
   createPlayerAvatar() {
@@ -540,22 +598,22 @@ export class FirstPersonControls {
     const avatar = new THREE.Group();
     avatar.name = 'player_avatar';
 
-    // Materials
+    // Materials (with alpha transparency support for proximity fading)
     // Skin tone
-    const skinMat = new THREE.MeshLambertMaterial({ color: 0xba7d56 });
+    const skinMat = new THREE.MeshLambertMaterial({ color: 0xba7d56, transparent: true, opacity: 1.0 });
     // Brazilian Soccer Jersey: Canarinho yellow with green trim
-    const jerseyMat = new THREE.MeshLambertMaterial({ color: 0xffdf00 });
-    const greenTrimMat = new THREE.MeshLambertMaterial({ color: 0x009b3a });
+    const jerseyMat = new THREE.MeshLambertMaterial({ color: 0xffdf00, transparent: true, opacity: 1.0 });
+    const greenTrimMat = new THREE.MeshLambertMaterial({ color: 0x009b3a, transparent: true, opacity: 1.0 });
     // Bermuda Tactel: Navy blue / Dark cyan
-    const shortsMat = new THREE.MeshLambertMaterial({ color: 0x1d3557 });
+    const shortsMat = new THREE.MeshLambertMaterial({ color: 0x1d3557, transparent: true, opacity: 1.0 });
     // Cap: Royal blue with green/yellow visor
-    const capMat = new THREE.MeshLambertMaterial({ color: 0x0d47a1 });
-    const capVisorMat = new THREE.MeshLambertMaterial({ color: 0xffcc00 });
+    const capMat = new THREE.MeshLambertMaterial({ color: 0x0d47a1, transparent: true, opacity: 1.0 });
+    const capVisorMat = new THREE.MeshLambertMaterial({ color: 0xffcc00, transparent: true, opacity: 1.0 });
     // Sunglasses (Juliet): Metallic chrome with gold/iridescent tint
-    const glassesMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+    const glassesMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 1.0 });
     // Flip-Flops (Havaianas): White rubber sole with blue straps
-    const soleMat = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
-    const strapMat = new THREE.MeshBasicMaterial({ color: 0x1565c0 });
+    const soleMat = new THREE.MeshLambertMaterial({ color: 0xeeeeee, transparent: true, opacity: 1.0 });
+    const strapMat = new THREE.MeshBasicMaterial({ color: 0x1565c0, transparent: true, opacity: 1.0 });
 
     // 1. Torso
     const torsoGroup = new THREE.Group();
@@ -669,6 +727,7 @@ export class FirstPersonControls {
       this.scene.add(avatar);
     }
     this.avatarMesh = avatar;
+    this.avatarMaterials = [skinMat, jerseyMat, greenTrimMat, shortsMat, capMat, capVisorMat, glassesMat, soleMat, strapMat];
     return avatar;
   }
 
@@ -726,14 +785,11 @@ export class FirstPersonControls {
       return;
     }
 
-    // 3rd Person Active: make avatar visible
-    if (this.avatarMesh) this.avatarMesh.visible = true;
-
     // Focal target is around player upper chest / head
     const focusY = this.position.y + this.eyeHeight * 0.85;
     const focusPoint = new THREE.Vector3(this.position.x, focusY, this.position.z);
 
-    // Calculate camera offset vectors from current view orientation
+    // Current view angles
     const yaw = this.euler.y;
     const pitch = this.euler.x;
 
@@ -741,6 +797,13 @@ export class FirstPersonControls {
     const sinPitch = Math.sin(pitch);
     const sinYaw = Math.sin(yaw);
     const cosYaw = Math.cos(yaw);
+
+    // Forward aim direction
+    const forwardDir = new THREE.Vector3(
+      -sinYaw * cosPitch,
+      sinPitch,
+      -cosYaw * cosPitch
+    ).normalize();
 
     // Backward vector (away from where player looks)
     const backDir = new THREE.Vector3(
@@ -754,29 +817,40 @@ export class FirstPersonControls {
 
     let targetDist = this.thirdPersonDistance;
 
+    // Dynamic pitch-based height offset:
+    // When looking down (pitch < 0), lift camera slightly up so head doesn't occlude reticle
+    // When looking up (pitch > 0), raise camera smoothly so it doesn't sink into thighs
+    const heightOffset = this.thirdPersonHeight - Math.min(0, sinPitch) * 0.35;
+
     // Calculate preliminary camera position
     let camPos = focusPoint.clone()
       .addScaledVector(backDir, targetDist)
       .addScaledVector(rightDir, this.thirdPersonShoulderOffset)
-      .add(new THREE.Vector3(0, this.thirdPersonHeight, 0));
+      .add(new THREE.Vector3(0, heightOffset, 0));
 
-    // Spring-arm collision avoidance: raycast against world colliders
+    // Spring-arm collision avoidance: segment raycast against world colliders
     if (this.physics && this.physics.colliders) {
-      for (const col of this.physics.colliders) {
-        if (col.isStep || col.isStair) continue;
-        if (camPos.x >= col.min.x - 0.2 && camPos.x <= col.max.x + 0.2 &&
-            camPos.y >= col.min.y - 0.2 && camPos.y <= col.max.y + 0.2 &&
-            camPos.z >= col.min.z - 0.2 && camPos.z <= col.max.z + 0.2) {
-          // Camera would be inside wall; shorten distance
-          targetDist = Math.max(0.9, targetDist * 0.5);
-          camPos = focusPoint.clone()
-            .addScaledVector(backDir, targetDist)
-            .addScaledVector(rightDir, this.thirdPersonShoulderOffset * (targetDist / this.thirdPersonDistance))
-            .add(new THREE.Vector3(0, this.thirdPersonHeight, 0));
-          break;
+      const rayLen = camPos.distanceTo(focusPoint);
+      if (rayLen > 0.01) {
+        for (const col of this.physics.colliders) {
+          if (col.isStep || col.isStair) continue;
+          const hitDist = intersectSegmentAABB(focusPoint, camPos, col.min, col.max);
+          if (hitDist !== null && hitDist < targetDist) {
+            const safeDist = Math.max(0.4, hitDist - 0.25);
+            if (safeDist < targetDist) {
+              targetDist = safeDist;
+            }
+          }
         }
       }
     }
+
+    // Recompute camPos with adjusted targetDist
+    const distFactor = Math.min(1.0, targetDist / this.thirdPersonDistance);
+    camPos = focusPoint.clone()
+      .addScaledVector(backDir, targetDist)
+      .addScaledVector(rightDir, this.thirdPersonShoulderOffset * distFactor)
+      .add(new THREE.Vector3(0, heightOffset * distFactor, 0));
 
     // Ensure camera does not go below ground
     const groundY = this.physics ? this.physics.getGroundHeight(camPos.x, camPos.z) : 0;
@@ -784,7 +858,29 @@ export class FirstPersonControls {
       camPos.y = groundY + 0.35;
     }
 
+    // Avatar Proximity & Occlusion Guard:
+    // Calculate distance from camera to player's head and focal center
+    const headPos = new THREE.Vector3(this.position.x, this.position.y + 1.48, this.position.z);
+    const distToHead = camPos.distanceTo(headPos);
+    const distToFocus = camPos.distanceTo(focusPoint);
+    const effectiveDist = Math.min(distToHead, distToFocus);
+
+    if (this.avatarMesh) {
+      if (effectiveDist < 1.0) {
+        // Occlusion safety: hide avatar when camera is too close
+        this.avatarMesh.visible = false;
+      } else {
+        this.avatarMesh.visible = true;
+        // Smooth proximity fade between 1.0m and 1.5m
+        const fade = Math.max(0.25, Math.min(1.0, (effectiveDist - 0.95) / 0.55));
+        this.setAvatarOpacity(fade);
+      }
+    }
+
     this.camera.position.copy(camPos);
-    this.camera.quaternion.setFromEuler(this.euler);
+
+    // Aim convergence: point towards target 25m ahead along player's forward aim vector
+    const aimTarget = focusPoint.clone().addScaledVector(forwardDir, 25.0);
+    this.camera.lookAt(aimTarget);
   }
 }

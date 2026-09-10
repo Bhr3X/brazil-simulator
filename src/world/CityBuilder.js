@@ -54,10 +54,14 @@ export class CityBuilder {
 
   // 2. Sky and Distant Backdrop
   buildSkyAndHorizon() {
-    // Sky hemisphere dome
+    // Sky hemisphere dome with atmospheric gradient & celestial dither
     const skyGeo = new THREE.SphereGeometry(400, 24, 16);
+    const skyTex = this.textures && typeof this.textures.createSkyAtmosphereTexture === 'function'
+      ? this.textures.createSkyAtmosphereTexture()
+      : null;
     const skyMat = new THREE.MeshBasicMaterial({
       color: 0x6bb5ff,
+      map: skyTex,
       side: THREE.BackSide
     });
     this.skyMesh = new THREE.Mesh(skyGeo, skyMat);

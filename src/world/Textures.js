@@ -1303,5 +1303,48 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 48. Atmospheric Sky Dome Gradient Texture with Subtle Stipple Dithering
+  createSkyAtmosphereTexture() {
+    const key = 'sky_atmosphere';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 256);
+
+    // Vertical linear gradient: zenith (darker/deeper sky) down to horizon (luminous atmospheric haze)
+    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0.0, '#708cb2'); // Zenith / high sky tone
+    grad.addColorStop(0.35, '#8daed6'); // Mid-sky
+    grad.addColorStop(0.70, '#bed4ec'); // Low atmosphere
+    grad.addColorStop(1.0, '#edf4fc'); // Horizon luminous haze
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 128, 256);
+
+    // Subtle Bayer/stipple dither to break up flat ASCII luminance quantization
+    const imgData = ctx.getImageData(0, 0, 128, 256);
+    const data = imgData.data;
+    for (let y = 0; y < 256; y++) {
+      for (let x = 0; x < 128; x++) {
+        const idx = (y * 128 + x) * 4;
+        const bayer = ((x & 3) ^ ((y & 3) * 2)) * 1.5;
+        const noise = (Math.sin(x * 12.9898 + y * 78.233) * 43758.5453 % 1) * 6 - 3;
+        const offset = (bayer - 6) + noise;
+        data[idx] = Math.max(0, Math.min(255, data[idx] + offset));
+        data[idx + 1] = Math.max(0, Math.min(255, data[idx + 1] + offset));
+        data[idx + 2] = Math.max(0, Math.min(255, data[idx + 2] + offset));
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.magFilter = THREE.LinearFilter;
+    texture.minFilter = THREE.LinearFilter;
+
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 
