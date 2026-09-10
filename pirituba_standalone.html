@@ -268,6 +268,25 @@ html, body {
   100% { transform: scale(1.04); box-shadow: 0 0 35px rgba(0, 255, 102, 0.5); }
 }
 
+.start-controls-hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: #a3e635;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(163, 230, 53, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.start-controls-hints span {
+  white-space: nowrap;
+}
+
 .credits-footer {
   margin-top: 36px;
   font-size: 12px;
@@ -1574,6 +1593,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
     <div class="start-title">PIRITUBA // FAVELA SUBURBS</div>
     <div class="start-subtitle">MOTOR DE 1ª & 3ª PESSOA EM ASCII & 3D</div>
     <div class="start-prompt">CLIQUE AQUI PARA ENTRAR // CLICK TO PLAY</div>
+    <div class="start-controls-hints">
+      <span>⌨️ <strong>WASD / Setas</strong>: Mover</span>
+      <span>👁️ <strong>Mouse</strong>: Olhar</span>
+      <span>👤 <strong>[B]</strong>: 1ª/3ª Pessoa</span>
+      <span>🎨 <strong>[P]</strong>: Ajustes Visuais</span>
+      <span>💬 <strong>[E]</strong>: Interagir</span>
+      <span>🖥️ <strong>[M]</strong>: Modos ASCII</span>
+    </div>
     <div class="credits-footer">
       Desenvolvido por <strong><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">game.md</a></strong> • Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
       Explore os becos, o escadão, a laje com caixas d'água Fortlev, o boteco e a vista para o Pico do Jaraguá.
