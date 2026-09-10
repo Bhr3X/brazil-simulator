@@ -75,6 +75,8 @@ class GameApp {
     this.modeElem = document.getElementById('hud-mode');
     this.timeElem = document.getElementById('hud-time');
     this.audioBtn = document.getElementById('btn-audio');
+    this.radioBtn = document.getElementById('btn-radio');
+    this.radioLabel = document.getElementById('hud-radio');
     this.tourBtn = document.getElementById('btn-tour');
     this.emptyBtn = document.getElementById('btn-empty');
     this.streetViewBtn = document.getElementById('btn-streetview');
@@ -216,6 +218,19 @@ class GameApp {
       });
     }
 
+    // Radio station toggle button & hotkey [N]
+    const handleRadioCycle = () => {
+      const station = this.sound.cycleRadioStation();
+      this.updateRadioLabel();
+      if (this.game && this.game.hud && this.game.hud.showToast) {
+        this.game.hud.showToast(`📻 <strong>RÁDIO PIRITUBA FM</strong><br>${station.icon} <strong>${station.name}</strong>: ${station.desc}`, 4000);
+      }
+    };
+
+    if (this.radioBtn) {
+      this.radioBtn.addEventListener('click', () => handleRadioCycle());
+    }
+
     // Auto Tour toggle button (Version 2)
     if (this.tourBtn) {
       this.tourBtn.addEventListener('click', () => {
@@ -251,6 +266,8 @@ class GameApp {
         if (this.audioBtn) {
           this.audioBtn.textContent = muted ? '🔇 SOM: DESLIGADO' : '🔊 SOM: LIGADO';
         }
+      } else if (e.code === 'KeyN') {
+        handleRadioCycle();
       } else if (e.code === 'KeyU') {
         if (!this.controls.freeze) {
           const active = this.controls.toggleAutoTour();
@@ -345,6 +362,25 @@ class GameApp {
 
     if (this.locationElem) {
       this.locationElem.textContent = `📍 ${loc}`;
+    }
+
+    // 4. Dynamic Brazilian Music Context
+    const inGameHour = this.game && this.game.clock ? this.game.clock.inGameHour : 12.0;
+    if (this.sound && this.sound.updateMusicContext) {
+      this.sound.updateMusicContext(zone.id, inGameHour);
+    }
+    this.updateRadioLabel();
+  }
+
+  updateRadioLabel() {
+    if (!this.radioLabel || !this.sound) return;
+    const station = this.sound.getRadioStation();
+    const effectiveGenre = this.sound.getEffectiveGenre ? this.sound.getEffectiveGenre() : 'MPB';
+    if (station === 'AUTO') {
+      const genreLabels = { MPB: 'MPB', PAGODE: 'PAGODE', FUNK: 'FUNK', OFF: 'OFF' };
+      this.radioLabel.textContent = `AUTO (${genreLabels[effectiveGenre] || 'ZONAS'})`;
+    } else {
+      this.radioLabel.textContent = station;
     }
   }
 

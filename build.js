@@ -26,6 +26,7 @@ function bundle() {
   const rng = cleanModule(read('src/game/Rng.js'));
   const textures = cleanModule(read('src/world/Textures.js'));
   const physics = cleanModule(read('src/engine/Physics.js'));
+  const music = cleanModule(read('src/audio/BrazilianMusic.js'));
   const audio = cleanModule(read('src/audio/SoundEngine.js'));
   const zones = cleanModule(read('src/world/Zones.js'));
 
@@ -78,6 +79,7 @@ ${bodyMarkup}
 ${rng}
 ${textures}
 ${physics}
+${music}
 ${audio}
 ${zones}
 ${controls}

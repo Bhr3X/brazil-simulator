@@ -1,3 +1,5 @@
+import { BrazilianMusicEngine, RADIO_STATIONS } from './BrazilianMusic.js';
+
 /**
  * Procedural Web Audio Engine
  * Generates all suburban Brazilian soundscapes, distant beats, footsteps,
@@ -12,6 +14,7 @@ export class SoundEngine {
     this.masterGain = null;
     this.musicGain = null;
     this.ambientGain = null;
+    this.musicEngine = null;
 
     this.isDay = true;
     this.nextBeatTime = 0;
@@ -48,9 +51,12 @@ export class SoundEngine {
       this.musicGain.connect(this.musicFilter);
       this.musicFilter.connect(this.masterGain);
 
+      // Initialize Procedural Brazilian Music Engine (MPB, Pagode, Baile Funk)
+      this.musicEngine = new BrazilianMusicEngine(this.ctx, this.masterGain);
+      this.musicEngine.start();
+
       this.isInitialized = true;
       this.startAmbience();
-      this.startMusicLoop();
     } catch (e) {
       console.warn('Web Audio could not be initialized:', e);
     }
@@ -69,6 +75,36 @@ export class SoundEngine {
       this.playRain(true);
     }
     return this.isMuted;
+  }
+
+  // Radio Station Controls (MPB, Pagode, Baile Funk, Auto, Off)
+  setRadioStation(stationId) {
+    if (!this.isInitialized) this.init();
+    if (this.musicEngine) {
+      this.musicEngine.setStation(stationId);
+    }
+  }
+
+  cycleRadioStation() {
+    if (!this.isInitialized) this.init();
+    if (this.musicEngine) {
+      return this.musicEngine.cycleStation();
+    }
+    return RADIO_STATIONS.AUTO;
+  }
+
+  updateMusicContext(zoneId, inGameHour) {
+    if (this.musicEngine) {
+      this.musicEngine.updateContext(zoneId, inGameHour);
+    }
+  }
+
+  getRadioStation() {
+    return this.musicEngine?.activeStation || 'AUTO';
+  }
+
+  getEffectiveGenre() {
+    return this.musicEngine?.effectiveGenre || 'MPB';
   }
 
   // 1. Procedural Footstep (surface aware)

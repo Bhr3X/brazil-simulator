@@ -165,6 +165,78 @@ async function runTestSuite(url) {
       throw new Error(`TEST 2b FAILED: Arrow keys rotation check failed: ${JSON.stringify(arrowRotResult)}`);
     }
 
+    // TEST 2c: Brazilian Music System & Rádio Pirituba FM (MPB, Pagode, Funk)
+    const musicTest = await evaluate(`
+      (() => {
+        const sound = window.app.sound;
+        if (!sound.isInitialized) sound.init();
+
+        const engine = sound.musicEngine;
+        if (!engine) return { error: 'musicEngine missing' };
+
+        // 1. Initial state
+        const initialStation = sound.getRadioStation();
+
+        // 2. Cycle stations: AUTO -> MPB -> PAGODE -> FUNK -> OFF -> AUTO
+        const cycled = [];
+        for (let i = 0; i < 5; i++) {
+          const s = sound.cycleRadioStation();
+          cycled.push({ station: s.id, effectiveGenre: sound.getEffectiveGenre() });
+        }
+
+        // 3. Test AUTO mode context switching:
+        sound.setRadioStation('AUTO');
+        sound.updateMusicContext('BAR_DO_TIAO', 14.0);
+        const tiaoGenre = sound.getEffectiveGenre();
+
+        sound.updateMusicContext('BAILE_LAJE', 14.0);
+        const lajeGenre = sound.getEffectiveGenre();
+
+        sound.updateMusicContext('PADARIA_ESTRELA', 10.0);
+        const morningGenre = sound.getEffectiveGenre();
+
+        sound.updateMusicContext('POSTO_PIRITUBA', 19.0);
+        const eveningGenre = sound.getEffectiveGenre();
+
+        sound.updateMusicContext('POSTO_PIRITUBA', 23.5);
+        const nightGenre = sound.getEffectiveGenre();
+
+        // 4. Test KeyN hotkey event
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyN', bubbles: true }));
+        const postKeyNStation = sound.getRadioStation();
+
+        // 5. Check HUD label
+        const radioText = document.getElementById('hud-radio')?.textContent;
+
+        // Reset to AUTO
+        sound.setRadioStation('AUTO');
+
+        return {
+          ok: true,
+          initialStation,
+          cycled,
+          tiaoGenre,
+          lajeGenre,
+          morningGenre,
+          eveningGenre,
+          nightGenre,
+          postKeyNStation,
+          radioText
+        };
+      })()
+    `);
+    console.log('[TEST 2c] Brazilian Music Engine & Radio Station Tuning:', musicTest);
+    if (
+      !musicTest.ok ||
+      musicTest.tiaoGenre !== 'PAGODE' ||
+      musicTest.lajeGenre !== 'FUNK' ||
+      musicTest.morningGenre !== 'MPB' ||
+      musicTest.eveningGenre !== 'PAGODE' ||
+      musicTest.nightGenre !== 'FUNK'
+    ) {
+      throw new Error(`TEST 2c FAILED: Music engine test failed: ${JSON.stringify(musicTest)}`);
+    }
+
     // TEST 3: Clock advancement & Exploit Prevention
     // 3a. Forward-only RunClock monotonicity
     await evaluate(`
