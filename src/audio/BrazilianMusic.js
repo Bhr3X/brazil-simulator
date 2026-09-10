@@ -2,7 +2,7 @@
  * Brazilian Style Procedural Music Engine
  * Generates authentic MPB / Bossa Nova, Pagode Raiz / Samba de Roda,
  * and Baile Funk / Tamborzão Mandelão using the Web Audio API.
- * Invariant I1: 100% procedural, zero external audio assets.
+ * 100% procedural Web Audio synthesis, zero external audio assets.
  */
 
 export const RADIO_STATIONS = {
@@ -59,6 +59,15 @@ export class BrazilianMusicEngine {
 
     // Shared white noise buffer for shakers, pandeiros, and snares
     this.noiseBuffer = this.createNoiseBuffer(2.0);
+
+    // Synchronize scheduler timing upon returning from hidden / background tab
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && this.ctx) {
+          this.nextNoteTime = this.ctx.currentTime + 0.05;
+        }
+      });
+    }
   }
 
   createNoiseBuffer(durationSeconds = 2.0) {
@@ -144,6 +153,9 @@ export class BrazilianMusicEngine {
 
     for (const [genre, gainNode] of Object.entries(this.genreGains)) {
       gainNode.gain.cancelScheduledValues(t);
+      // Anchor current gain value at time t before scheduling ramp
+      gainNode.gain.setValueAtTime(gainNode.gain.value, t);
+
       if (targetGenre === 'OFF') {
         gainNode.gain.linearRampToValueAtTime(0.0001, t + fadeDuration);
       } else if (genre === targetGenre) {
@@ -160,11 +172,17 @@ export class BrazilianMusicEngine {
   scheduler() {
     if (!this.ctx || !this.isPlaying) return;
 
+    // If audio clock has advanced past nextNoteTime (tab throttle/hidden), skip ahead cleanly
+    if (this.nextNoteTime < this.ctx.currentTime) {
+      this.nextNoteTime = this.ctx.currentTime + 0.05;
+    }
+
     const lookahead = 0.15; // Schedule 150ms into the future
     const currentBpm = this.tempos[this.effectiveGenre] || 100;
     const stepDuration = 60 / currentBpm / 4; // 16th note step duration
 
-    while (this.nextNoteTime < this.ctx.currentTime + lookahead) {
+    let stepsScheduled = 0;
+    while (this.nextNoteTime < this.ctx.currentTime + lookahead && stepsScheduled < 8) {
       const step = this.stepIndex % 16;
       const measure = Math.floor(this.stepIndex / 16) % 4;
 
@@ -178,6 +196,7 @@ export class BrazilianMusicEngine {
 
       this.nextNoteTime += stepDuration;
       this.stepIndex++;
+      stepsScheduled++;
     }
   }
 
