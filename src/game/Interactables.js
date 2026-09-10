@@ -97,7 +97,7 @@ export class InteractableSystem {
         id: 'baile_laje',
         name: 'BAILE DA LAJE NO ALTO DO ESCADÃO',
         prompt: 'CURTIR BAILE NA QUEBRADA OU TOMAR COROTE',
-        position: new THREE.Vector3(0.0, 8.4, -40.0),
+        position: new THREE.Vector3(0.0, 8.4, -66.0),
         maxDist: 4.5,
         encounterId: 'BAILE_LAJE',
         zoneId: 'BAILE_LAJE'

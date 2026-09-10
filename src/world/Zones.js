@@ -97,8 +97,8 @@ export const WORLD_ZONES = [
   {
     id: 'LAJE_MIRANTE',
     name: 'LAJE DO MIRANTE (VISTA PICO DO JARAGUÁ)',
-    min: { x: -15.0, y: 6.5, z: -52.0 },
-    max: { x: 15.0, y: 15.0, z: -40.0 },
+    min: { x: -15.0, y: 6.5, z: -78.0 },
+    max: { x: 15.0, y: 18.0, z: -65.0 },
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Rooftop com vista panorâmica para a favela, caixas d água Fortlev e antenas do Jaraguá.'
@@ -106,8 +106,8 @@ export const WORLD_ZONES = [
   {
     id: 'ESCADAO_CENTRAL',
     name: 'ESCADÃO CENTRAL DA PAZ',
-    min: { x: -1.0, y: 0.0, z: -43.0 },
-    max: { x: 5.0, y: 9.0, z: 4.0 },
+    min: { x: -1.0, y: 0.0, z: -70.0 },
+    max: { x: 5.0, y: 10.0, z: -25.0 },
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Escadaria de concreto com corrimão de ferro subindo o morro.'
@@ -115,8 +115,8 @@ export const WORLD_ZONES = [
   {
     id: 'BECO_DO_SOSSEGO',
     name: 'BECO DO SOSSEGO (VIELA BAIXA)',
-    min: { x: -40.0, y: 0.0, z: -25.0 },
-    max: { x: -2.0, y: 5.0, z: 4.0 },
+    min: { x: -40.0, y: 0.0, z: -55.0 },
+    max: { x: -2.0, y: 8.0, z: -25.0 },
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Viela estreita entre as casas de alvenaria e muros com pixação.'
@@ -142,8 +142,8 @@ export const WORLD_ZONES = [
   {
     id: 'BAILE_LAJE',
     name: 'BAILE DA LAJE (ALTO DO ESCADÃO)',
-    min: { x: -10.0, y: 6.0, z: -48.0 },
-    max: { x: 10.0, y: 15.0, z: -35.0 },
+    min: { x: -10.0, y: 6.0, z: -74.0 },
+    max: { x: 10.0, y: 15.0, z: -60.0 },
     openHour: 1.5,
     closeHour: 5.5, // Madrugada quebrada
     description: 'Festa na laje da comunidade. Iluminação neon, som ecoando e ponto de encontro da madrugada.'
@@ -178,8 +178,8 @@ export const WORLD_ZONES = [
   {
     id: 'RUA_BENTO_BICUDO',
     name: 'RUA CORONEL BENTO BICUDO (1ª PARALELA)',
-    min: { x: -35.0, y: 0.0, z: 52.0 },
-    max: { x: 55.0, y: 8.0, z: 66.0 },
+    min: { x: -35.0, y: 0.0, z: -11.5 },
+    max: { x: 55.0, y: 8.0, z: 3.5 },
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Rua residencial com sobrados paulistanos, oficinas mecânicas, lombadas e fiação elétrica densa.'
@@ -187,8 +187,8 @@ export const WORLD_ZONES = [
   {
     id: 'RUA_EMILIO_LESSORE',
     name: 'RUA EMÍLIO LESSORE (2ª PARALELA - ALTO)',
-    min: { x: -35.0, y: 0.0, z: 80.0 },
-    max: { x: 55.0, y: 8.0, z: 98.0 },
+    min: { x: -35.0, y: 0.0, z: -27.5 },
+    max: { x: 55.0, y: 8.0, z: -12.5 },
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Rua elevada paralela no topo da encosta. Vielas estreitas, calçadas de mosaico e vista dos morros.'
@@ -196,8 +196,8 @@ export const WORLD_ZONES = [
   {
     id: 'AUTO_MECANICA_BETO',
     name: 'AUTO MECÂNICA DO BETO (CORONEL BENTO BICUDO)',
-    min: { x: 18.0, y: 0.0, z: 53.0 },
-    max: { x: 32.0, y: 6.0, z: 63.0 },
+    min: { x: 18.0, y: 0.0, z: -16.0 },
+    max: { x: 32.0, y: 6.0, z: -8.0 },
     openHour: 7.5,
     closeHour: 19.5,
     description: 'Oficina mecânica tradicional de bairro. Peças usadas, troca de pneus, cheiro de graxa e rádio de pilha ligado.'

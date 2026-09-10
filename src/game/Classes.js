@@ -17,7 +17,7 @@ export const SOCIAL_CLASSES = {
     perigo: 10,
     ginga: 90,
     decay: { fomePerHour: 4.5, sanidadePerHour: 2.0 },
-    spawn: { x: 1.0, y: 8.5, z: -46.0 }, // Mirante da Laje
+    spawn: { x: 1.0, y: 8.5, z: -70.0 }, // Mirante da Laje
     inventory: [
       { id: 'bu', name: 'Bilhete Único (Negativo)', desc: 'Saldo: -R$ 5,00. Precisa de recarga urgente.' },
       { id: 'chinelo', name: 'Havaianas com Prego', desc: 'Arrebentou a tira, mas foi consertada com arame.' },

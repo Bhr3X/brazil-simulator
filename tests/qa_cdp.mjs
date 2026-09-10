@@ -881,12 +881,13 @@ async function runTestSuite(url) {
         // Test time-gating logic:
         // Baile da Laje open at 03:00 (Madrugada), closed at 12:00
         const baileAnchor = anchors.find(a => a.id === 'baile_laje');
+        const testPos = new THREE.Vector3(baileAnchor.position.x, baileAnchor.position.y, baileAnchor.position.z + 1.0);
         window.app.game.clock.elapsed = (3.0 - 6.0 + 24) % 24 * (900 / 24); // 03:00
-        window.app.game.interactables.update(new THREE.Vector3(0, 8.4, -39.0), new THREE.Vector3(0, 0, -1), window.app.game.clock, window.app.game.state);
+        window.app.game.interactables.update(testPos, new THREE.Vector3(0, 0, -1), window.app.game.clock, window.app.game.state);
         const openAt3 = window.app.game.interactables.currentTarget?.isOpen;
 
         window.app.game.clock.elapsed = (12.0 - 6.0) * (900 / 24); // 12:00
-        window.app.game.interactables.update(new THREE.Vector3(0, 8.4, -39.0), new THREE.Vector3(0, 0, -1), window.app.game.clock, window.app.game.state);
+        window.app.game.interactables.update(testPos, new THREE.Vector3(0, 0, -1), window.app.game.clock, window.app.game.state);
         const closedAt12 = !window.app.game.interactables.currentTarget?.isOpen;
 
         return allPresent && openAt3 === true && closedAt12 === true;

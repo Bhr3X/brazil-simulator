@@ -157,18 +157,18 @@ export class CityBuilder {
     curbSouth.position.set(0, 0.15, 31.9);
     this.scene.add(curbSouth);
 
-    // Favela Hillside Base Ground (rising towards -Z)
+    // Favela Hillside Base Ground (rising towards -Z behind Rua Emílio Lessore)
     const hillBaseGeo = new THREE.PlaneGeometry(120, 65);
     const hillBaseMat = new THREE.MeshLambertMaterial({
       map: this.textures.createReboco('#706b63', 10, 8)
     });
     const hillBase = new THREE.Mesh(hillBaseGeo, hillBaseMat);
     hillBase.rotation.x = -Math.PI / 2 + 0.16;
-    hillBase.position.set(0, 4.5, -25);
+    hillBase.position.set(0, 4.5, -51);
     this.scene.add(hillBase);
 
     // Slope collider
-    this.physics.addSlope(-60, 60, -55, 2, 9.5, 0.25);
+    this.physics.addSlope(-60, 60, -81, -24, 9.5, 0.25);
   }
 
   // 4. Main Street Fronts & Walkable Interiors (Version 2 Update)
@@ -221,41 +221,41 @@ export class CityBuilder {
   // 5. Favela Hillside Houses (Tiered, stacked brick architecture)
   buildFavelaHillside() {
     const houseConfigs = [
-      // Row 1 (Lower hill, along north sidewalk Z = -1 to -8)
-      { x: -28, z: -2, w: 8, h: 5.5, d: 7, baseElevation: 0.25, floors: 2, wallType: 'tijolo', laje: true, tank: true, pixacao: true },
-      { x: -18, z: -3, w: 7, h: 7.0, d: 8, baseElevation: 0.45, floors: 3, wallType: 'painted', color: '#68b5c2', laje: true, tank: true },
-      { x: -9,  z: -2, w: 6, h: 5.0, d: 7, baseElevation: 0.50, floors: 2, wallType: 'reboco', laje: true, clothes: true },
+      // Row 1 (Lower hill, along north sidewalk of Emílio Lessore Z = -28 to -35)
+      { x: -28, z: -28, w: 8, h: 5.5, d: 7, baseElevation: 0.25, floors: 2, wallType: 'tijolo', laje: true, tank: true, pixacao: true },
+      { x: -18, z: -29, w: 7, h: 7.0, d: 8, baseElevation: 0.45, floors: 3, wallType: 'painted', color: '#68b5c2', laje: true, tank: true },
+      { x: -9,  z: -28, w: 6, h: 5.0, d: 7, baseElevation: 0.50, floors: 2, wallType: 'reboco', laje: true, clothes: true },
 
       // Escadão corridor is at X = 0 to 4 (stairs rise between houses)
 
-      { x: 10,  z: -2, w: 7, h: 6.2, d: 8, baseElevation: 0.40, floors: 2, wallType: 'tijolo', laje: true, tank: true },
-      { x: 19,  z: -3, w: 8, h: 5.5, d: 7, baseElevation: 0.55, floors: 2, wallType: 'painted', color: '#e8a27d', laje: true, clothes: true },
-      { x: 29,  z: -2, w: 8, h: 7.5, d: 8, baseElevation: 0.35, floors: 3, wallType: 'tijolo', laje: true, tank: true, pixacao: true },
+      { x: 10,  z: -28, w: 7, h: 6.2, d: 8, baseElevation: 0.40, floors: 2, wallType: 'tijolo', laje: true, tank: true },
+      { x: 19,  z: -29, w: 8, h: 5.5, d: 7, baseElevation: 0.55, floors: 2, wallType: 'painted', color: '#e8a27d', laje: true, clothes: true },
+      { x: 29,  z: -28, w: 8, h: 7.5, d: 8, baseElevation: 0.35, floors: 3, wallType: 'tijolo', laje: true, tank: true, pixacao: true },
 
-      // Row 2 (Mid hill, Z = -12 to -22)
-      { x: -32, z: -15, w: 8, h: 6.0, d: 7, baseElevation: 2.2, floors: 2, wallType: 'painted', color: '#90b87d', laje: true },
-      { x: -21, z: -16, w: 9, h: 7.5, d: 8, baseElevation: 2.5, floors: 3, wallType: 'tijolo', laje: true, tank: true, clothes: true },
-      { x: -10, z: -15, w: 7, h: 6.5, d: 7, baseElevation: 2.8, floors: 2, wallType: 'reboco', laje: true, tank: true },
+      // Row 2 (Mid hill, Z = -38 to -48)
+      { x: -32, z: -41, w: 8, h: 6.0, d: 7, baseElevation: 2.2, floors: 2, wallType: 'painted', color: '#90b87d', laje: true },
+      { x: -21, z: -42, w: 9, h: 7.5, d: 8, baseElevation: 2.5, floors: 3, wallType: 'tijolo', laje: true, tank: true, clothes: true },
+      { x: -10, z: -41, w: 7, h: 6.5, d: 7, baseElevation: 2.8, floors: 2, wallType: 'reboco', laje: true, tank: true },
 
-      { x: 11,  z: -16, w: 8, h: 8.0, d: 8, baseElevation: 2.7, floors: 3, wallType: 'tijolo', laje: true, tank: true, pixacao: true },
-      { x: 22,  z: -15, w: 7, h: 5.8, d: 7, baseElevation: 2.5, floors: 2, wallType: 'painted', color: '#d97bc2', laje: true },
-      { x: 32,  z: -16, w: 8, h: 7.0, d: 8, baseElevation: 2.3, floors: 3, wallType: 'reboco', laje: true, tank: true, clothes: true },
+      { x: 11,  z: -42, w: 8, h: 8.0, d: 8, baseElevation: 2.7, floors: 3, wallType: 'tijolo', laje: true, tank: true, pixacao: true },
+      { x: 22,  z: -41, w: 7, h: 5.8, d: 7, baseElevation: 2.5, floors: 2, wallType: 'painted', color: '#d97bc2', laje: true },
+      { x: 32,  z: -42, w: 8, h: 7.0, d: 8, baseElevation: 2.3, floors: 3, wallType: 'reboco', laje: true, tank: true, clothes: true },
 
-      // Row 3 (High hill, Z = -26 to -38)
-      { x: -28, z: -30, w: 9, h: 6.5, d: 8, baseElevation: 5.0, floors: 2, wallType: 'tijolo', laje: true, tank: true },
-      { x: -16, z: -31, w: 8, h: 7.8, d: 8, baseElevation: 5.3, floors: 3, wallType: 'painted', color: '#eed07a', laje: true, clothes: true },
-      { x: -7,  z: -29, w: 6, h: 5.5, d: 7, baseElevation: 5.5, floors: 2, wallType: 'tijolo', laje: true, tank: true },
+      // Row 3 (High hill, Z = -52 to -64)
+      { x: -28, z: -56, w: 9, h: 6.5, d: 8, baseElevation: 5.0, floors: 2, wallType: 'tijolo', laje: true, tank: true },
+      { x: -16, z: -57, w: 8, h: 7.8, d: 8, baseElevation: 5.3, floors: 3, wallType: 'painted', color: '#eed07a', laje: true, clothes: true },
+      { x: -7,  z: -55, w: 6, h: 5.5, d: 7, baseElevation: 5.5, floors: 2, wallType: 'tijolo', laje: true, tank: true },
 
-      { x: 9,   z: -29, w: 7, h: 7.2, d: 7, baseElevation: 5.4, floors: 3, wallType: 'reboco', laje: true, tank: true },
-      { x: 19,  z: -31, w: 9, h: 6.8, d: 8, baseElevation: 5.2, floors: 2, wallType: 'painted', color: '#5eb3b1', laje: true, pixacao: true },
-      { x: 30,  z: -30, w: 8, h: 7.5, d: 8, baseElevation: 4.8, floors: 3, wallType: 'tijolo', laje: true, tank: true },
+      { x: 9,   z: -55, w: 7, h: 7.2, d: 7, baseElevation: 5.4, floors: 3, wallType: 'reboco', laje: true, tank: true },
+      { x: 19,  z: -57, w: 9, h: 6.8, d: 8, baseElevation: 5.2, floors: 2, wallType: 'painted', color: '#5eb3b1', laje: true, pixacao: true },
+      { x: 30,  z: -56, w: 8, h: 7.5, d: 8, baseElevation: 4.8, floors: 3, wallType: 'tijolo', laje: true, tank: true },
 
-      // Row 4 (Top Crest / Mirante, Z = -42 to -52)
-      { x: -22, z: -45, w: 10, h: 6.0, d: 8, baseElevation: 7.5, floors: 2, wallType: 'tijolo', laje: true, tank: true },
-      { x: -10, z: -46, w: 8,  h: 7.0, d: 8, baseElevation: 7.8, floors: 3, wallType: 'painted', color: '#e06e6e', laje: true, clothes: true },
-      { x: 1,   z: -47, w: 10, h: 7.5, d: 9, baseElevation: 8.0, floors: 3, wallType: 'tijolo', laje: true, tank: true, isMirante: true },
-      { x: 14,  z: -45, w: 9,  h: 6.5, d: 8, baseElevation: 7.6, floors: 2, wallType: 'reboco', laje: true, tank: true },
-      { x: 26,  z: -46, w: 9,  h: 7.2, d: 8, baseElevation: 7.4, floors: 3, wallType: 'tijolo', laje: true }
+      // Row 4 (Top Crest / Mirante, Z = -68 to -78)
+      { x: -22, z: -71, w: 10, h: 6.0, d: 8, baseElevation: 7.5, floors: 2, wallType: 'tijolo', laje: true, tank: true },
+      { x: -10, z: -72, w: 8,  h: 7.0, d: 8, baseElevation: 7.8, floors: 3, wallType: 'painted', color: '#e06e6e', laje: true, clothes: true },
+      { x: 1,   z: -73, w: 10, h: 7.5, d: 9, baseElevation: 8.0, floors: 3, wallType: 'tijolo', laje: true, tank: true, isMirante: true },
+      { x: 14,  z: -71, w: 9,  h: 6.5, d: 8, baseElevation: 7.6, floors: 2, wallType: 'reboco', laje: true, tank: true },
+      { x: 26,  z: -72, w: 9,  h: 7.2, d: 8, baseElevation: 7.4, floors: 3, wallType: 'tijolo', laje: true }
     ];
 
     houseConfigs.forEach(cfg => this.buildFavelaHouse(cfg));
@@ -394,12 +394,12 @@ export class CityBuilder {
   }
 
   // 6. The Famous Concrete Stairs (O Escadão Central)
-  // Connects the lower street at Z = 5 to the upper hilltop at Z = -45
+  // Connects Rua Emílio Lessore at Z = -26 to the upper hilltop mirante at Z = -68
   buildEscadaoStairs() {
     const stairX = 2.0; // Central alley
     const stairW = 2.8;
-    const startZ = 4.5;
-    const endZ = -44;
+    const startZ = -26.0;
+    const endZ = -68.0;
     const totalSteps = 48;
     const stepDepth = Math.abs(endZ - startZ) / totalSteps;
     const totalRise = 8.2;
@@ -461,8 +461,8 @@ export class CityBuilder {
       { x: 14,  y: 0.25, z: 8.5 },
       { x: 38,  y: 0.25, z: 8.5 },
       // Hillside poles
-      { x: -4,  y: 2.5,  z: -14 },
-      { x: 5,   y: 5.2,  z: -30 }
+      { x: -4,  y: 3.5,  z: -40 },
+      { x: 5,   y: 6.5,  z: -56 }
     ];
 
     const poleMeshes = [];
@@ -1928,12 +1928,12 @@ export class CityBuilder {
     for (let row = 0; row < 2; row++) {
       for (let col = 0; col < 3; col++) {
         const spkBox = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.6), speakerMat);
-        spkBox.position.set(-0.8 + col * 0.8, 8.4 + row * 0.8, -41.6);
+        spkBox.position.set(-0.8 + col * 0.8, 8.4 + row * 0.8, -67.6);
         group.add(spkBox);
 
         const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.15, 0.05, 12), coneMat);
         cone.rotation.x = Math.PI / 2;
-        cone.position.set(-0.8 + col * 0.8, 8.4 + row * 0.8, -41.28);
+        cone.position.set(-0.8 + col * 0.8, 8.4 + row * 0.8, -67.28);
         group.add(cone);
       }
     }
@@ -1944,12 +1944,12 @@ export class CityBuilder {
       map: this.textures.createBaileLajeSign()
     });
     const sign = new THREE.Mesh(signGeo, signMat);
-    sign.position.set(0.0, 10.4, -41.5);
+    sign.position.set(0.0, 10.4, -67.5);
     group.add(sign);
 
     // Blacklight Purple/Neon Point Light
     const uvLight = new THREE.PointLight(0x9d4edd, 2.5, 14);
-    uvLight.position.set(0.0, 10.0, -39.5);
+    uvLight.position.set(0.0, 10.0, -65.5);
     group.add(uvLight);
 
     this.scene.add(group);
@@ -2051,89 +2051,89 @@ export class CityBuilder {
     const curbMat = new THREE.MeshLambertMaterial({ color: 0xdedede });
 
     // -------------------------------------------------------------
-    // A. Rua Paula Ferreira Extension (Ascending from Z = 35 to Z = 96)
+    // A. Rua Paula Ferreira Extension (Connecting Edgar Facó to Lessore & Escadão)
     // -------------------------------------------------------------
-    const paulaExtGeo = new THREE.PlaneGeometry(10, 62);
+    const paulaExtGeo = new THREE.PlaneGeometry(10, 34);
     const paulaExt = new THREE.Mesh(paulaExtGeo, asfaltoMat);
     paulaExt.rotation.x = -Math.PI / 2;
-    paulaExt.position.set(1.5, 0.012, 65.5);
+    paulaExt.position.set(1.5, 0.012, -9.0);
     this.scene.add(paulaExt);
 
     // West Sidewalk of Paula Ferreira
-    const pfWestWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 62), calcadaMat);
-    pfWestWalk.position.set(-5.0, 0.125, 65.5);
+    const pfWestWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 34), calcadaMat);
+    pfWestWalk.position.set(-5.0, 0.125, -9.0);
     this.scene.add(pfWestWalk);
     this.physics.addBoxCollider(
-      new THREE.Vector3(-6.5, 0, 35),
-      new THREE.Vector3(-3.5, 0.25, 96),
+      new THREE.Vector3(-6.5, 0, -26.0),
+      new THREE.Vector3(-3.5, 0.25, 8.0),
       'curb'
     );
 
     // East Sidewalk of Paula Ferreira
-    const pfEastWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 62), calcadaMat);
-    pfEastWalk.position.set(8.0, 0.125, 65.5);
+    const pfEastWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 34), calcadaMat);
+    pfEastWalk.position.set(8.0, 0.125, -9.0);
     this.scene.add(pfEastWalk);
     this.physics.addBoxCollider(
-      new THREE.Vector3(6.5, 0, 35),
-      new THREE.Vector3(9.5, 0.25, 96),
+      new THREE.Vector3(6.5, 0, -26.0),
+      new THREE.Vector3(9.5, 0.25, 8.0),
       'curb'
     );
 
     // -------------------------------------------------------------
-    // B. Rua Coronel Bento Bicudo (1ª Paralela crossing at Z = 58)
+    // B. Rua Coronel Bento Bicudo (1ª Paralela crossing at Z = -4.0)
     // -------------------------------------------------------------
     const bentoRoadGeo = new THREE.PlaneGeometry(88, 9);
     const bentoRoad = new THREE.Mesh(bentoRoadGeo, asfaltoMat);
     bentoRoad.rotation.x = -Math.PI / 2;
-    bentoRoad.position.set(10.0, 0.016, 58.0);
+    bentoRoad.position.set(10.0, 0.016, -4.0);
     this.scene.add(bentoRoad);
 
     // North Sidewalk of Bento Bicudo
     const bentoNorthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
-    bentoNorthWalk.position.set(10.0, 0.125, 52.0);
+    bentoNorthWalk.position.set(10.0, 0.125, -10.0);
     this.scene.add(bentoNorthWalk);
     this.physics.addBoxCollider(
-      new THREE.Vector3(-34, 0, 50.5),
-      new THREE.Vector3(54, 0.25, 53.5),
+      new THREE.Vector3(-34, 0, -11.5),
+      new THREE.Vector3(54, 0.25, -8.5),
       'curb'
     );
 
     // South Sidewalk of Bento Bicudo
     const bentoSouthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
-    bentoSouthWalk.position.set(10.0, 0.125, 64.0);
+    bentoSouthWalk.position.set(10.0, 0.125, 2.0);
     this.scene.add(bentoSouthWalk);
     this.physics.addBoxCollider(
-      new THREE.Vector3(-34, 0, 62.5),
-      new THREE.Vector3(54, 0.25, 65.5),
+      new THREE.Vector3(-34, 0, 0.5),
+      new THREE.Vector3(54, 0.25, 3.5),
       'curb'
     );
 
     // -------------------------------------------------------------
-    // C. Rua Emílio Lessore (2ª Paralela crossing at Z = 88)
+    // C. Rua Emílio Lessore (2ª Paralela crossing at Z = -20.0)
     // -------------------------------------------------------------
     const lessoreRoadGeo = new THREE.PlaneGeometry(88, 9);
     const lessoreRoad = new THREE.Mesh(lessoreRoadGeo, asfaltoMat);
     lessoreRoad.rotation.x = -Math.PI / 2;
-    lessoreRoad.position.set(10.0, 0.016, 88.0);
+    lessoreRoad.position.set(10.0, 0.016, -20.0);
     this.scene.add(lessoreRoad);
-
-    // North Sidewalk of Emílio Lessore
-    const lessoreNorthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
-    lessoreNorthWalk.position.set(10.0, 0.125, 82.0);
-    this.scene.add(lessoreNorthWalk);
-    this.physics.addBoxCollider(
-      new THREE.Vector3(-34, 0, 80.5),
-      new THREE.Vector3(54, 0.25, 83.5),
-      'curb'
-    );
 
     // South Sidewalk of Emílio Lessore
     const lessoreSouthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
-    lessoreSouthWalk.position.set(10.0, 0.125, 94.0);
+    lessoreSouthWalk.position.set(10.0, 0.125, -14.0);
     this.scene.add(lessoreSouthWalk);
     this.physics.addBoxCollider(
-      new THREE.Vector3(-34, 0, 92.5),
-      new THREE.Vector3(54, 0.25, 95.5),
+      new THREE.Vector3(-34, 0, -15.5),
+      new THREE.Vector3(54, 0.25, -12.5),
+      'curb'
+    );
+
+    // North Sidewalk of Emílio Lessore (Foot of O Escadão da Favela)
+    const lessoreNorthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    lessoreNorthWalk.position.set(10.0, 0.125, -26.0);
+    this.scene.add(lessoreNorthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, -27.5),
+      new THREE.Vector3(54, 0.25, -24.5),
       'curb'
     );
 
@@ -2153,12 +2153,15 @@ export class CityBuilder {
     };
 
     // On Bento Bicudo
-    addLombada(-14.0, 58.0, 8.6, 0);
-    addLombada(26.0, 58.0, 8.6, 0);
+    addLombada(-14.0, -4.0, 8.6, 0);
+    addLombada(26.0, -4.0, 8.6, 0);
+
+    // On Emílio Lessore
+    addLombada(-14.0, -20.0, 8.6, 0);
+    addLombada(26.0, -20.0, 8.6, 0);
 
     // On Paula Ferreira
-    addLombada(1.5, 47.0, 9.6, Math.PI / 2);
-    addLombada(1.5, 74.0, 9.6, Math.PI / 2);
+    addLombada(1.5, -12.0, 9.6, Math.PI / 2);
 
     // -------------------------------------------------------------
     // E. Storm Drains (Bueiros / Bocas de Lobo) along curbs
@@ -2175,11 +2178,11 @@ export class CityBuilder {
       this.scene.add(bMesh);
     };
 
-    addBueiro(4.8, 32.5, 0);
-    addBueiro(-3.4, 53.6, Math.PI / 2);
-    addBueiro(6.4, 53.6, Math.PI / 2);
-    addBueiro(-3.4, 83.6, Math.PI / 2);
-    addBueiro(6.4, 83.6, Math.PI / 2);
+    addBueiro(4.8, 8.5, 0);
+    addBueiro(-3.4, -4.0, Math.PI / 2);
+    addBueiro(6.4, -4.0, Math.PI / 2);
+    addBueiro(-3.4, -20.0, Math.PI / 2);
+    addBueiro(6.4, -20.0, Math.PI / 2);
 
     // -------------------------------------------------------------
     // F. CET Street Name Signs (Placas Azuis Padrão CET São Paulo)
@@ -2208,33 +2211,33 @@ export class CityBuilder {
     };
 
     // 1. Edgar Facó x Paula Ferreira
-    addStreetSign(5.2, 32.0, 'Av. Gen. Edgar Facó', '0 - 1500 • Pirituba', 0);
-    addStreetSign(4.5, 32.8, 'R. Paula Ferreira', 'Subida Piqueri', Math.PI / 2);
+    addStreetSign(5.2, 7.8, 'Av. Gen. Edgar Facó', '0 - 1500 • Pirituba', 0);
+    addStreetSign(4.5, 7.8, 'R. Paula Ferreira', 'Descida Piqueri', Math.PI / 2);
 
     // 2. Paula Ferreira x Cel. Bento Bicudo
-    addStreetSign(6.6, 52.2, 'R. Cel. Bento Bicudo', '1 - 450 • Piqueri', 0);
-    addStreetSign(-5.2, 52.2, 'R. Paula Ferreira', '200 - 800 • Pirituba', Math.PI / 2);
+    addStreetSign(6.6, -4.0, 'R. Cel. Bento Bicudo', '1 - 450 • Piqueri', 0);
+    addStreetSign(-5.2, -4.0, 'R. Paula Ferreira', '200 - 800 • Pirituba', Math.PI / 2);
 
     // 3. Paula Ferreira x Emílio Lessore
-    addStreetSign(6.6, 82.2, 'R. Emílio Lessore', '1 - 220 • Alto Pirituba', 0);
-    addStreetSign(-5.2, 82.2, 'R. Emílio Lessore', 'Viela da Paz', 0);
+    addStreetSign(6.6, -20.0, 'R. Emílio Lessore', '1 - 220 • Alto Pirituba', 0);
+    addStreetSign(-5.2, -20.0, 'R. Emílio Lessore', 'Acesso Escadão da Paz', 0);
 
     // -------------------------------------------------------------
-    // G. Auto Mecânica do Beto (Oficina on Bento Bicudo at X = 25, Z = 48)
+    // G. Auto Mecânica do Beto (Oficina on Bento Bicudo at X = 25, Z = -12)
     // -------------------------------------------------------------
-    const ofiGeo = new THREE.BoxGeometry(10.0, 4.5, 7.0);
+    const ofiGeo = new THREE.BoxGeometry(10.0, 4.5, 6.0);
     const ofiMat = new THREE.MeshLambertMaterial({ color: 0x4a4f56 });
     const ofiBuilding = new THREE.Mesh(ofiGeo, ofiMat);
-    ofiBuilding.position.set(25.0, 2.25, 48.0);
+    ofiBuilding.position.set(25.0, 2.25, -12.0);
     this.scene.add(ofiBuilding);
 
-    // Oficina Signboard
+    // Oficina Signboard (Facing south towards Bento Bicudo)
     const ofiSignGeo = new THREE.PlaneGeometry(8.5, 1.8);
     const ofiSignMat = new THREE.MeshBasicMaterial({
       map: this.textures.createOficinaSignTexture()
     });
     const ofiSign = new THREE.Mesh(ofiSignGeo, ofiSignMat);
-    ofiSign.position.set(25.0, 3.8, 51.52);
+    ofiSign.position.set(25.0, 3.8, -8.98);
     this.scene.add(ofiSign);
 
     // Rollup metal shutter
@@ -2243,17 +2246,17 @@ export class CityBuilder {
       map: this.textures.createPortaAco('#c05020')
     });
     const ofiDoor = new THREE.Mesh(ofiDoorGeo, ofiDoorMat);
-    ofiDoor.position.set(25.0, 1.4, 51.52);
+    ofiDoor.position.set(25.0, 1.4, -8.98);
     this.scene.add(ofiDoor);
 
     this.physics.addBoxCollider(
-      new THREE.Vector3(20.0, 0, 44.5),
-      new THREE.Vector3(30.0, 4.5, 51.5),
+      new THREE.Vector3(20.0, 0, -15.0),
+      new THREE.Vector3(30.0, 4.5, -9.0),
       'solid'
     );
 
     // Tire stack outside oficina
-    this.buildTireStack(20.5, 0.25, 52.2, 4);
+    this.buildTireStack(20.5, 0.25, -8.2, 4);
 
     // -------------------------------------------------------------
     // H. Residential Sobrado Houses along Bento Bicudo and Emílio Lessore
@@ -2284,24 +2287,15 @@ export class CityBuilder {
       );
     };
 
-    // Bento Bicudo North side
-    addSobrado(-20.0, 47.5, 9.0, 5.5, 7.0, 'painted', '#4682b4');
-    addSobrado(-8.0, 47.5, 8.5, 6.0, 7.0, 'tijolo');
+    // Block between Bento Bicudo and Emílio Lessore (Z = -12.0)
+    addSobrado(-20.0, -12.0, 9.0, 5.5, 6.0, 'painted', '#4682b4');
+    addSobrado(-8.0, -12.0, 8.5, 6.0, 6.0, 'tijolo');
+    addSobrado(38.0, -12.0, 8.5, 5.5, 6.0, 'reboco');
 
-    // Bento Bicudo South side
-    addSobrado(-20.0, 69.0, 9.0, 5.8, 7.0, 'tijolo');
-    addSobrado(-7.0, 69.0, 8.0, 5.2, 7.0, 'reboco');
-    addSobrado(18.0, 69.0, 8.5, 6.0, 7.0, 'painted', '#c47d4e');
-    addSobrado(32.0, 69.0, 9.0, 5.5, 7.0, 'tijolo');
-
-    // Emílio Lessore North side
-    addSobrado(-18.0, 77.0, 9.0, 5.8, 7.0, 'reboco');
-    addSobrado(22.0, 77.0, 8.5, 6.2, 7.0, 'painted', '#5e9482');
-
-    // Emílio Lessore South side
-    addSobrado(-20.0, 99.0, 9.0, 6.0, 7.0, 'tijolo');
-    addSobrado(1.5, 100.0, 10.0, 6.5, 7.0, 'painted', '#9c6f9e');
-    addSobrado(25.0, 99.0, 9.0, 5.8, 7.0, 'reboco');
+    // South of Bento Bicudo (Z = 4.5)
+    addSobrado(-20.0, 4.5, 9.0, 5.8, 4.5, 'tijolo');
+    addSobrado(22.0, 4.5, 8.5, 6.0, 4.5, 'painted', '#c47d4e');
+    addSobrado(34.0, 4.5, 8.5, 5.5, 4.5, 'reboco');
 
     // -------------------------------------------------------------
     // I. Concrete Utility Poles with Street Lamps along Bento & Lessore
@@ -2327,29 +2321,38 @@ export class CityBuilder {
       this.scene.add(light);
     };
 
-    addLightPole(-15.0, 53.0);
-    addLightPole(12.0, 53.0);
-    addLightPole(38.0, 53.0);
-    addLightPole(-15.0, 83.0);
-    addLightPole(12.0, 83.0);
-    addLightPole(38.0, 83.0);
+    addLightPole(-15.0, -9.5);
+    addLightPole(12.0, -9.5);
+    addLightPole(38.0, -9.5);
+    addLightPole(-15.0, -25.5);
+    addLightPole(12.0, -25.5);
+    addLightPole(38.0, -25.5);
 
     // -------------------------------------------------------------
     // J. Boundary Colliders (Keep player inside urban map)
     // -------------------------------------------------------------
+    // West Boundary
     this.physics.addBoxCollider(
-      new THREE.Vector3(-38.0, 0, 34.0),
-      new THREE.Vector3(-34.0, 10, 105.0),
+      new THREE.Vector3(-38.0, 0, -78.0),
+      new THREE.Vector3(-34.0, 10, 52.0),
       'solid'
     );
+    // East Boundary
     this.physics.addBoxCollider(
-      new THREE.Vector3(53.5, 0, 34.0),
-      new THREE.Vector3(58.0, 10, 105.0),
+      new THREE.Vector3(53.5, 0, -78.0),
+      new THREE.Vector3(58.0, 10, 52.0),
       'solid'
     );
+    // North Crest Boundary (behind Favela Mirante)
     this.physics.addBoxCollider(
-      new THREE.Vector3(-38.0, 0, 103.0),
-      new THREE.Vector3(58.0, 10, 108.0),
+      new THREE.Vector3(-38.0, 0, -84.0),
+      new THREE.Vector3(58.0, 15, -78.0),
+      'solid'
+    );
+    // South Urban Boundary (behind Edgar Facó commercial strip)
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-38.0, 0, 47.0),
+      new THREE.Vector3(58.0, 10, 52.0),
       'solid'
     );
   }

@@ -131,9 +131,9 @@ export class FirstPersonControls {
       { pos: new THREE.Vector3(26, 1.8, 17.5), look: new THREE.Vector3(-15, 2.0, 17.5) },
       { pos: new THREE.Vector3(12, 1.8, 33), look: new THREE.Vector3(12, 1.8, 42) },
       { pos: new THREE.Vector3(10.5, 1.8, 40), look: new THREE.Vector3(12, 1.2, 42) },
-      { pos: new THREE.Vector3(2.0, 1.8, 8), look: new THREE.Vector3(2.0, 2.5, -8) },
-      { pos: new THREE.Vector3(2.0, 4.8, -20), look: new THREE.Vector3(2.0, 6.5, -36) },
-      { pos: new THREE.Vector3(1.0, 9.8, -44), look: new THREE.Vector3(28, 45, -190) }
+      { pos: new THREE.Vector3(1.5, 1.8, -12), look: new THREE.Vector3(1.5, 2.5, -26) },
+      { pos: new THREE.Vector3(2.0, 5.0, -45), look: new THREE.Vector3(2.0, 8.0, -68) },
+      { pos: new THREE.Vector3(1.0, 9.8, -70), look: new THREE.Vector3(28, 45, -190) }
     ];
 
     if (this.scene) {

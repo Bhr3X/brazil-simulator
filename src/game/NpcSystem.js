@@ -119,12 +119,12 @@ export class NpcSystem {
       hasPoliceBelt: true,
       speed: 1.2,
       waypoints: [
-        { x: 1.5, z: 22.0 },
-        { x: 4.5, z: 34.0 },
-        { x: 4.5, z: 54.0 },
-        { x: -3.5, z: 54.0 },
-        { x: -3.5, z: 34.0 },
-        { x: 1.5, z: 22.0 }
+        { x: 1.5, z: 8.0 },
+        { x: 4.5, z: -4.0 },
+        { x: 20.0, z: -4.0 },
+        { x: -15.0, z: -4.0 },
+        { x: -3.5, z: -4.0 },
+        { x: 1.5, z: 8.0 }
       ]
     });
     this.npcs.push(sargentoRocha);
@@ -143,12 +143,12 @@ export class NpcSystem {
       hasShoulderBag: true,
       speed: 1.5,
       waypoints: [
-        { x: -16.0, z: 58.0 },
-        { x: 14.0, z: 58.0 },
-        { x: 1.5, z: 72.0 },
-        { x: 22.0, z: 88.0 },
-        { x: -14.0, z: 88.0 },
-        { x: 1.5, z: 66.0 }
+        { x: -16.0, z: -4.0 },
+        { x: 14.0, z: -4.0 },
+        { x: 1.5, z: -12.0 },
+        { x: 20.0, z: -20.0 },
+        { x: -14.0, z: -20.0 },
+        { x: 1.5, z: -12.0 }
       ]
     });
     this.npcs.push(menorCorre);
