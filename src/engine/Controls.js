@@ -19,6 +19,13 @@ export class FirstPersonControls {
     this.isCrouching = false;
     this.canJump = false;
 
+    // Arrow keys rotation state (look up, down, left, right)
+    this.lookUp = false;
+    this.lookDown = false;
+    this.lookLeft = false;
+    this.lookRight = false;
+    this.keyRotateSpeed = 2.4; // radians/sec (~137.5 deg/sec for smooth, responsive look)
+
     // Speeds & physics parameters
     this.walkSpeed = 4.8;
     this.sprintSpeed = 9.2;
@@ -173,25 +180,37 @@ export class FirstPersonControls {
       this.moveRight = false;
       this.isSprinting = false;
       this.isCrouching = false;
+      this.lookUp = false;
+      this.lookDown = false;
+      this.lookLeft = false;
+      this.lookRight = false;
       return;
     }
 
     switch (e.code) {
       case 'KeyW':
-      case 'ArrowUp':
         this.moveForward = true;
         break;
       case 'KeyS':
-      case 'ArrowDown':
         this.moveBackward = true;
         break;
       case 'KeyA':
-      case 'ArrowLeft':
         this.moveLeft = true;
         break;
       case 'KeyD':
-      case 'ArrowRight':
         this.moveRight = true;
+        break;
+      case 'ArrowUp':
+        this.lookUp = true;
+        break;
+      case 'ArrowDown':
+        this.lookDown = true;
+        break;
+      case 'ArrowLeft':
+        this.lookLeft = true;
+        break;
+      case 'ArrowRight':
+        this.lookRight = true;
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
@@ -237,20 +256,28 @@ export class FirstPersonControls {
   onKeyUp(e) {
     switch (e.code) {
       case 'KeyW':
-      case 'ArrowUp':
         this.moveForward = false;
         break;
       case 'KeyS':
-      case 'ArrowDown':
         this.moveBackward = false;
         break;
       case 'KeyA':
-      case 'ArrowLeft':
         this.moveLeft = false;
         break;
       case 'KeyD':
-      case 'ArrowRight':
         this.moveRight = false;
+        break;
+      case 'ArrowUp':
+        this.lookUp = false;
+        break;
+      case 'ArrowDown':
+        this.lookDown = false;
+        break;
+      case 'ArrowLeft':
+        this.lookLeft = false;
+        break;
+      case 'ArrowRight':
+        this.lookRight = false;
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
@@ -266,6 +293,14 @@ export class FirstPersonControls {
   setFreeze(source, isFrozen) {
     if (isFrozen) {
       this.freezeSources.add(source);
+      this.moveForward = false;
+      this.moveBackward = false;
+      this.moveLeft = false;
+      this.moveRight = false;
+      this.lookUp = false;
+      this.lookDown = false;
+      this.lookLeft = false;
+      this.lookRight = false;
     } else {
       this.freezeSources.delete(source);
     }
@@ -283,6 +318,16 @@ export class FirstPersonControls {
       if (isSV) this.freezeSources.add('streetView'); else this.freezeSources.delete('streetView');
       if (isRoulette) this.freezeSources.add('roulette'); else this.freezeSources.delete('roulette');
       if (isEnd) this.freezeSources.add('endModal'); else this.freezeSources.delete('endModal');
+    }
+    if (this.freeze) {
+      this.moveForward = false;
+      this.moveBackward = false;
+      this.moveLeft = false;
+      this.moveRight = false;
+      this.lookUp = false;
+      this.lookDown = false;
+      this.lookLeft = false;
+      this.lookRight = false;
     }
     return this.freeze;
   }
@@ -331,6 +376,25 @@ export class FirstPersonControls {
       this.position.copy(currentPos);
       this.position.y -= this.eyeHeight;
       return;
+    }
+
+    // 0. Arrow Keys Rotation (Look Up, Down, Left, Right)
+    let rotX = 0;
+    let rotY = 0;
+    if (this.lookUp) rotX += this.keyRotateSpeed * delta;
+    if (this.lookDown) rotX -= this.keyRotateSpeed * delta;
+    if (this.lookLeft) rotY += this.keyRotateSpeed * delta;
+    if (this.lookRight) rotY -= this.keyRotateSpeed * delta;
+
+    if (rotX !== 0 || rotY !== 0) {
+      this.euler.x += rotX;
+      this.euler.y += rotY;
+
+      // Clamp vertical pitch (-85 deg to +85 deg)
+      const maxPitch = Math.PI / 2 - 0.05;
+      this.euler.x = Math.max(-maxPitch, Math.min(maxPitch, this.euler.x));
+
+      this.camera.quaternion.setFromEuler(this.euler);
     }
 
     // 1. Calculate horizontal movement direction relative to camera yaw

@@ -117,6 +117,54 @@ async function runTestSuite(url) {
       throw new Error(`TEST 2 FAILED: Roulette should be closed, freeze should be false, run should be active.`);
     }
 
+    // TEST 2b: Keyboard Arrow Keys Full Rotation (Look Up, Down, Left, Right)
+    const arrowRotResult = await evaluate(`
+      (() => {
+        const ctrl = window.app.controls;
+        const initialEulerX = ctrl.euler.x;
+        const initialEulerY = ctrl.euler.y;
+
+        // 1. Look Left (Yaw left / increase euler.y)
+        ctrl.onKeyDown({ code: 'ArrowLeft' });
+        ctrl.update(0.1);
+        ctrl.onKeyUp({ code: 'ArrowLeft' });
+        const leftEulerY = ctrl.euler.y;
+
+        // 2. Look Right (Yaw right / decrease euler.y)
+        ctrl.onKeyDown({ code: 'ArrowRight' });
+        ctrl.update(0.2);
+        ctrl.onKeyUp({ code: 'ArrowRight' });
+        const rightEulerY = ctrl.euler.y;
+
+        // 3. Look Up (Pitch up / increase euler.x)
+        ctrl.onKeyDown({ code: 'ArrowUp' });
+        ctrl.update(0.1);
+        ctrl.onKeyUp({ code: 'ArrowUp' });
+        const upEulerX = ctrl.euler.x;
+
+        // 4. Look Down (Pitch down / decrease euler.x)
+        ctrl.onKeyDown({ code: 'ArrowDown' });
+        ctrl.update(0.2);
+        ctrl.onKeyUp({ code: 'ArrowDown' });
+        const downEulerX = ctrl.euler.x;
+
+        // Reset euler to clean orientation
+        ctrl.euler.set(0, 0, 0, 'YXZ');
+        ctrl.camera.quaternion.setFromEuler(ctrl.euler);
+
+        return {
+          leftTurned: leftEulerY > initialEulerY,
+          rightTurned: rightEulerY < leftEulerY,
+          pitchedUp: upEulerX > initialEulerX,
+          pitchedDown: downEulerX < upEulerX
+        };
+      })()
+    `);
+    console.log('[TEST 2b] Keyboard Arrow Keys Rotation:', arrowRotResult);
+    if (!arrowRotResult.leftTurned || !arrowRotResult.rightTurned || !arrowRotResult.pitchedUp || !arrowRotResult.pitchedDown) {
+      throw new Error(`TEST 2b FAILED: Arrow keys rotation check failed: ${JSON.stringify(arrowRotResult)}`);
+    }
+
     // TEST 3: Clock advancement & Exploit Prevention
     // 3a. Forward-only RunClock monotonicity
     await evaluate(`
@@ -214,13 +262,19 @@ async function runTestSuite(url) {
       throw new Error(`TEST 6 FAILED: Defeat should open end modal, freeze controls, and stop run. Got open=${endModalOpen}, freeze=${controlsFreezeOnDefeat}, active=${runActiveOnDefeat}`);
     }
 
-    // TEST 7: Verify WASD ignored when frozen on End Screen
+    // TEST 7: Verify WASD and Arrow Keys ignored when frozen on End Screen
     await evaluate(`
       window.app.controls.onKeyDown({ code: 'KeyW' });
+      window.app.controls.onKeyDown({ code: 'ArrowUp' });
+      window.app.controls.onKeyDown({ code: 'ArrowLeft' });
     `);
     const moveForward = await evaluate(`window.app.controls.moveForward`);
-    console.log(`[TEST 7] KeyW pressed during End Screen: moveForward=${moveForward}`);
-    if (moveForward === true) throw new Error('TEST 7 FAILED: moveForward was true despite frozen controls');
+    const lookUp = await evaluate(`window.app.controls.lookUp`);
+    const lookLeft = await evaluate(`window.app.controls.lookLeft`);
+    console.log(`[TEST 7] KeyW & Arrows pressed during End Screen: moveForward=${moveForward}, lookUp=${lookUp}, lookLeft=${lookLeft}`);
+    if (moveForward === true || lookUp === true || lookLeft === true) {
+      throw new Error('TEST 7 FAILED: Movement/Rotation was true despite frozen controls');
+    }
 
     // TEST 8: Mouse drag on open End Modal does NOT rotate camera quaternion (Invariant I6 non-vacuous test)
     const initialQuat = await evaluate(`
