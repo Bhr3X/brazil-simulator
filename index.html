@@ -454,6 +454,7 @@
         <button id="btn-close-mobile-menu" class="dialog-close-btn" title="Fechar Menu">✕</button>
       </div>
       <div class="drawer-buttons">
+        <button class="mobile-drawer-btn" id="mobile-btn-toggle-touch">📱 Controles Touch: LIGADO</button>
         <button class="mobile-drawer-btn" id="mobile-btn-streetview">🌐 Street View [V]</button>
         <button class="mobile-drawer-btn" id="mobile-btn-mode">🖥️ Modo Visual [M]</button>
         <button class="mobile-drawer-btn" id="mobile-btn-visuals">🎨 Shaders & Cores [P]</button>
@@ -469,10 +470,16 @@
 
   <!-- Mobile Touch Controls Layer -->
   <div id="touch-controls-container" class="touch-hidden">
-    <!-- Virtual Floating Thumbstick (Left Zone) -->
-    <div id="touch-joystick-base" style="display:none;">
+    <!-- Virtual Thumbstick (Stick to Walk) -->
+    <div id="touch-joystick-base">
       <div id="touch-joystick-ring"></div>
-      <div id="touch-joystick-knob"></div>
+      <div class="stick-tick tick-up" id="stick-tick-up">▲</div>
+      <div class="stick-tick tick-down" id="stick-tick-down">▼</div>
+      <div class="stick-tick tick-left" id="stick-tick-left">◄</div>
+      <div class="stick-tick tick-right" id="stick-tick-right">►</div>
+      <div id="touch-joystick-knob">
+        <div class="knob-inner-pip"></div>
+      </div>
     </div>
 
     <!-- Action Buttons Cluster (Right Zone) -->

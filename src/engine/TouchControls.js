@@ -1,9 +1,9 @@
 /**
  * TouchControls.js — Mobile Touch Controller for Brazil Simulator // Sobrevivência BR
- * Provides a dual-zone touch interface:
- * - Left Zone: Floating Virtual Thumbstick (360° analog movement + auto-sprint)
- * - Right Zone: Touch Drag-to-Look Orbit Camera (Yaw + Pitch)
- * - Action Buttons: [E] Interagir, [Pular / Chute], [Agachar], [1ª/3ª Pessoa], [Menu]
+ * Provides an ergonomic mobile touch interface:
+ * - Left Zone: Visible Virtual Thumbstick ("Stick to Walk") with 360° analog control + auto-sprint
+ * - Right Zone: Touch Drag-to-Look Camera Orbit (Yaw + Pitch)
+ * - Action Buttons: [⚡ INTERAGIR], [🦘 PULAR], [🦵 AGACHA], [👤 1ª/3ª Pessoa], [⚙️ MENU]
  */
 
 export class TouchController {
@@ -18,7 +18,8 @@ export class TouchController {
 
     // Joystick coordinates
     this.joystickOrigin = { x: 0, y: 0 };
-    this.maxRadius = 50; // Max displacement in pixels
+    this.maxRadius = 48; // Max displacement in pixels
+    this.isFloating = false;
 
     // Look tracking
     this.lastLookX = 0;
@@ -29,6 +30,10 @@ export class TouchController {
     this.container = null;
     this.joystickBase = null;
     this.joystickKnob = null;
+    this.tickUp = null;
+    this.tickDown = null;
+    this.tickLeft = null;
+    this.tickRight = null;
     this.btnInteract = null;
     this.btnJump = null;
     this.btnCrouch = null;
@@ -42,7 +47,10 @@ export class TouchController {
   isTouchDevice() {
     return (
       'ontouchstart' in window ||
-      (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0)
+      (typeof navigator !== 'undefined' && (navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0)) ||
+      (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+      (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 1024px)').matches && (navigator.maxTouchPoints > 0 || 'ontouchstart' in window)) ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent || '')
     );
   }
 
@@ -50,6 +58,10 @@ export class TouchController {
     this.container = document.getElementById('touch-controls-container');
     this.joystickBase = document.getElementById('touch-joystick-base');
     this.joystickKnob = document.getElementById('touch-joystick-knob');
+    this.tickUp = document.getElementById('stick-tick-up');
+    this.tickDown = document.getElementById('stick-tick-down');
+    this.tickLeft = document.getElementById('stick-tick-left');
+    this.tickRight = document.getElementById('stick-tick-right');
     this.btnInteract = document.getElementById('touch-btn-interact');
     this.btnJump = document.getElementById('touch-btn-jump');
     this.btnCrouch = document.getElementById('touch-btn-crouch');
@@ -69,6 +81,9 @@ export class TouchController {
     if (this.container) {
       this.container.classList.remove('touch-hidden');
     }
+    if (this.joystickBase) {
+      this.joystickBase.style.display = 'block';
+    }
     if (this.btnMenu) {
       this.btnMenu.classList.remove('touch-hidden');
     }
@@ -80,6 +95,9 @@ export class TouchController {
     if (this.container) {
       this.container.classList.add('touch-hidden');
     }
+    if (this.joystickBase) {
+      this.joystickBase.style.display = 'none';
+    }
     if (this.btnMenu) {
       this.btnMenu.classList.add('touch-hidden');
     }
@@ -88,9 +106,25 @@ export class TouchController {
     this.resetLook();
   }
 
+  toggle() {
+    if (this.isEnabled) {
+      this.disable();
+    } else {
+      this.enable();
+    }
+    return this.isEnabled;
+  }
+
   bindEvents() {
     // 1. Fullscreen / Canvas Touch Routing
-    window.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+    window.addEventListener('touchstart', (e) => {
+      // Auto-enable on very first touch gesture if not already active
+      if (!this.isEnabled) {
+        this.enable();
+      }
+      this.handleTouchStart(e);
+    }, { passive: false });
+
     window.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
     window.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
     window.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
@@ -189,47 +223,78 @@ export class TouchController {
         }
       });
     }
+
+    // Mobile Menu Drawer Toggle Touch Controls Button
+    const mobileBtnToggleTouch = document.getElementById('mobile-btn-toggle-touch');
+    if (mobileBtnToggleTouch) {
+      mobileBtnToggleTouch.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const enabled = this.toggle();
+        mobileBtnToggleTouch.textContent = enabled ? '📱 Controles Touch: LIGADO' : '📱 Controles Touch: DESLIGADO';
+      });
+    }
   }
 
   isInteractiveElement(target) {
     if (!target) return false;
     return !!target.closest(
-      'button, a, input, select, .touch-btn, #mobile-menu-drawer, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, .hud-btn'
+      'button, a, input, select, .touch-action-btn, #mobile-menu-drawer, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, .hud-btn'
     );
   }
 
+  getStickAnchorCenter() {
+    if (!this.joystickBase) return { x: 80, y: window.innerHeight - 80 };
+    const rect = this.joystickBase.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    };
+  }
+
   handleTouchStart(e) {
-    // If not enabled or modal frozen, ignore movement
     if (!this.isEnabled) return;
     if (this.controls && this.controls.freeze) return;
 
     const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
       const target = touch.target;
 
-      // Ignore touches on HUD buttons or modals
+      // Ignore touches on HUD buttons, active modals or action buttons
       if (this.isInteractiveElement(target)) continue;
 
-      // Left Half: Virtual Joystick (Movement)
-      if (touch.clientX < screenWidth * 0.48 && this.moveTouchId === null) {
+      // Left Zone: Virtual Thumbstick ("Stick to Walk")
+      // Left 46% of screen and lower 70% of screen height
+      const isLeftZone = touch.clientX < Math.max(220, screenWidth * 0.46) && touch.clientY > screenHeight * 0.28;
+
+      if (isLeftZone && this.moveTouchId === null) {
         e.preventDefault();
         this.moveTouchId = touch.identifier;
-        this.joystickOrigin.x = touch.clientX;
-        this.joystickOrigin.y = touch.clientY;
 
-        if (this.joystickBase) {
-          this.joystickBase.style.left = `${touch.clientX}px`;
-          this.joystickBase.style.top = `${touch.clientY}px`;
-          this.joystickBase.style.display = 'block';
+        const anchor = this.getStickAnchorCenter();
+        const distFromAnchor = Math.hypot(touch.clientX - anchor.x, touch.clientY - anchor.y);
+
+        // If touched directly on or near the stick (<= 90px), keep fixed anchor
+        if (distFromAnchor <= 90) {
+          this.joystickOrigin = { x: anchor.x, y: anchor.y };
+          this.isFloating = false;
+        } else {
+          // If touched further out in the movement zone, float stick to thumb
+          this.joystickOrigin = { x: touch.clientX, y: touch.clientY };
+          this.isFloating = true;
+          if (this.joystickBase) {
+            this.joystickBase.style.left = `${touch.clientX}px`;
+            this.joystickBase.style.top = `${touch.clientY}px`;
+            this.joystickBase.classList.add('floating');
+          }
         }
-        if (this.joystickKnob) {
-          this.joystickKnob.style.transform = 'translate(-50%, -50%)';
-        }
+
+        this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
       }
-      // Right Half: Camera Drag Look
-      else if (touch.clientX >= screenWidth * 0.48 && this.lookTouchId === null) {
+      // Right Zone: Camera Orbit Drag-to-Look
+      else if (touch.clientX >= screenWidth * 0.46 && this.lookTouchId === null) {
         e.preventDefault();
         this.lookTouchId = touch.identifier;
         this.lastLookX = touch.clientX;
@@ -242,40 +307,36 @@ export class TouchController {
     if (!this.isEnabled) return;
     if (this.controls && this.controls.freeze) return;
 
+    // Multi-touch sanity check: verify active touches still present
+    if (this.moveTouchId !== null && e.touches) {
+      let moveFound = false;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === this.moveTouchId) {
+          moveFound = true;
+          break;
+        }
+      }
+      if (!moveFound) this.resetMove();
+    }
+
+    if (this.lookTouchId !== null && e.touches) {
+      let lookFound = false;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === this.lookTouchId) {
+          lookFound = true;
+          break;
+        }
+      }
+      if (!lookFound) this.resetLook();
+    }
+
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
 
-      // Handle Movement Joystick
+      // Handle Virtual Stick Movement
       if (touch.identifier === this.moveTouchId) {
         e.preventDefault();
-        const dx = touch.clientX - this.joystickOrigin.x;
-        const dy = touch.clientY - this.joystickOrigin.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        const clampedDist = Math.min(dist, this.maxRadius);
-        const angle = Math.atan2(dy, dx);
-        const clampedX = Math.cos(angle) * clampedDist;
-        const clampedY = Math.sin(angle) * clampedDist;
-
-        if (this.joystickKnob) {
-          this.joystickKnob.style.transform = `translate(calc(-50% + ${clampedX}px), calc(-50% + ${clampedY}px))`;
-        }
-
-        // Normalize movement vector between -1.0 and 1.0
-        let vx = clampedX / this.maxRadius;
-        let vy = clampedY / this.maxRadius;
-
-        // Deadzone threshold (0.12)
-        if (Math.hypot(vx, vy) < 0.12) {
-          vx = 0;
-          vy = 0;
-        }
-
-        // Auto-sprint when pulling beyond 82% radius
-        if (this.controls) {
-          this.controls.isSprinting = (dist > this.maxRadius * 0.82);
-          this.controls.setTouchMovement(vx, vy);
-        }
+        this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
       }
       // Handle Camera Drag Look
       else if (touch.identifier === this.lookTouchId) {
@@ -296,6 +357,48 @@ export class TouchController {
     }
   }
 
+  updateStickKnobAndMovement(clientX, clientY) {
+    const dx = clientX - this.joystickOrigin.x;
+    const dy = clientY - this.joystickOrigin.y;
+    const dist = Math.hypot(dx, dy);
+
+    const clampedDist = Math.min(dist, this.maxRadius);
+    const angle = Math.atan2(dy, dx);
+    const clampedX = Math.cos(angle) * clampedDist;
+    const clampedY = Math.sin(angle) * clampedDist;
+
+    if (this.joystickKnob) {
+      this.joystickKnob.style.transform = `translate(calc(-50% + ${clampedX.toFixed(1)}px), calc(-50% + ${clampedY.toFixed(1)}px))`;
+    }
+
+    // Normalize movement vector between -1.0 and 1.0
+    let vx = clampedX / this.maxRadius;
+    let vy = clampedY / this.maxRadius;
+
+    // Deadzone threshold (0.08) to prevent micro-jitter
+    if (Math.hypot(vx, vy) < 0.08) {
+      vx = 0;
+      vy = 0;
+    }
+
+    // Update directional indicator tick highlights
+    if (this.tickUp) this.tickUp.classList.toggle('active', vy < -0.32);
+    if (this.tickDown) this.tickDown.classList.toggle('active', vy > 0.32);
+    if (this.tickLeft) this.tickLeft.classList.toggle('active', vx < -0.32);
+    if (this.tickRight) this.tickRight.classList.toggle('active', vx > 0.32);
+
+    // Auto-sprint when pulled beyond 82% radius
+    const isSprinting = dist >= this.maxRadius * 0.82;
+    if (this.joystickBase) {
+      this.joystickBase.classList.toggle('sprinting', isSprinting);
+    }
+
+    if (this.controls) {
+      this.controls.isSprinting = isSprinting;
+      this.controls.setTouchMovement(vx, vy);
+    }
+  }
+
   handleTouchEnd(e) {
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
@@ -309,12 +412,25 @@ export class TouchController {
 
   resetMove() {
     this.moveTouchId = null;
+    this.isFloating = false;
+
     if (this.joystickBase) {
-      this.joystickBase.style.display = 'none';
+      // Clear floating coordinate overrides to smoothly return to home anchor
+      this.joystickBase.style.left = '';
+      this.joystickBase.style.top = '';
+      this.joystickBase.classList.remove('floating', 'sprinting');
     }
+
     if (this.joystickKnob) {
       this.joystickKnob.style.transform = 'translate(-50%, -50%)';
     }
+
+    // Deactivate all directional pips
+    if (this.tickUp) this.tickUp.classList.remove('active');
+    if (this.tickDown) this.tickDown.classList.remove('active');
+    if (this.tickLeft) this.tickLeft.classList.remove('active');
+    if (this.tickRight) this.tickRight.classList.remove('active');
+
     if (this.controls) {
       this.controls.setTouchMovement(0, 0);
       this.controls.isSprinting = false;

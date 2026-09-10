@@ -1466,41 +1466,147 @@ body.mobile-touch-active #canvas-container {
   overflow: hidden;
 }
 
-/* Floating Thumbstick Base (Left Zone) */
+/* Dedicated Touch Joystick Zone (Bottom-Left) */
+#touch-joystick-zone {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 240px;
+  height: 240px;
+  pointer-events: none;
+  z-index: 55;
+}
+
+/* Visible Virtual Thumbstick ("Stick to Walk") */
 #touch-joystick-base {
   position: absolute;
-  width: 110px;
-  height: 110px;
-  transform: translate(-50%, -50%);
+  bottom: 28px;
+  left: 28px;
+  width: 124px;
+  height: 124px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 255, 102, 0.20) 0%, rgba(0, 255, 102, 0.05) 70%, transparent 100%);
-  border: 2px solid rgba(0, 255, 102, 0.5);
+  background: radial-gradient(circle, rgba(0, 255, 102, 0.22) 0%, rgba(5, 12, 8, 0.75) 75%);
+  border: 2px solid rgba(0, 255, 102, 0.65);
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.3), inset 0 0 15px rgba(0, 255, 102, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   pointer-events: none;
-  box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
-  transition: opacity 0.15s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform, left, top;
+}
+
+#touch-joystick-base.floating {
+  position: absolute;
+  bottom: auto;
+  left: auto;
+  transform: translate(-50%, -50%);
+}
+
+#touch-joystick-base.sprinting {
+  border-color: #ffaa00;
+  box-shadow: 0 0 25px rgba(255, 170, 0, 0.6), inset 0 0 20px rgba(255, 170, 0, 0.25);
 }
 
 #touch-joystick-ring {
   position: absolute;
   inset: 18px;
   border-radius: 50%;
-  border: 1px dashed rgba(0, 255, 102, 0.35);
+  border: 1px dashed rgba(0, 255, 102, 0.4);
   pointer-events: none;
+}
+
+#touch-joystick-base.sprinting #touch-joystick-ring {
+  border-color: rgba(255, 170, 0, 0.5);
+}
+
+.stick-tick {
+  position: absolute;
+  font-size: 11px;
+  line-height: 1;
+  color: rgba(0, 255, 102, 0.45);
+  font-weight: bold;
+  pointer-events: none;
+  transition: color 0.1s ease, text-shadow 0.1s ease, transform 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stick-tick.tick-up,
+#stick-tick-up {
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.stick-tick.tick-down,
+#stick-tick-down {
+  bottom: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.stick-tick.tick-left,
+#stick-tick-left {
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.stick-tick.tick-right,
+#stick-tick-right {
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.stick-tick.active {
+  color: #ffffff;
+  text-shadow: 0 0 10px #00ff66, 0 0 15px #00ff66;
+}
+
+.stick-tick.tick-up.active,
+#stick-tick-up.active,
+.stick-tick.tick-down.active,
+#stick-tick-down.active {
+  transform: translateX(-50%) scale(1.35);
+}
+
+.stick-tick.tick-left.active,
+#stick-tick-left.active,
+.stick-tick.tick-right.active,
+#stick-tick-right.active {
+  transform: translateY(-50%) scale(1.35);
 }
 
 #touch-joystick-knob {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #00ff66, #00993a);
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 12px #00ff66;
+  background: radial-gradient(circle at 35% 35%, #55ff99, #00bb44 60%, #006622 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 16px rgba(0, 255, 102, 0.7), inset 0 0 8px rgba(255, 255, 255, 0.6);
   transform: translate(-50%, -50%);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   will-change: transform;
+}
+
+#touch-joystick-base.sprinting #touch-joystick-knob {
+  background: radial-gradient(circle at 35% 35%, #ffdd66, #ff9900 60%, #cc5500 100%);
+  box-shadow: 0 0 20px rgba(255, 170, 0, 0.8), inset 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.knob-inner-pip {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 /* Action Buttons Cluster (Right Zone) */
@@ -1710,11 +1816,70 @@ body.mobile-touch-active #canvas-container {
   pointer-events: none;
 }
 
+/* Clean mobile layout overrides whenever touch controls are active */
+body.mobile-touch-active #hud-top-right {
+  display: none !important;
+}
+
+body.mobile-touch-active #touch-btn-menu {
+  display: block !important;
+}
+
+body.mobile-touch-active #hud-top-left {
+  top: 8px;
+  left: 8px;
+  padding: 5px 10px;
+  max-width: 220px;
+  pointer-events: none;
+}
+
+body.mobile-touch-active #hud-top-left .terminal-meta {
+  display: none;
+}
+
+body.mobile-touch-active #hud-survival-bar {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 5px;
+  padding: 3px 8px;
+  pointer-events: none;
+}
+
+body.mobile-touch-active .survival-stat-box {
+  min-width: 78px;
+  padding: 3px 6px;
+}
+
+body.mobile-touch-active .stat-label {
+  font-size: 8.5px;
+}
+
+body.mobile-touch-active .stat-value {
+  font-size: 11.5px;
+}
+
+body.mobile-touch-active .stat-bar-container {
+  height: 4px;
+}
+
+body.mobile-touch-active #hud-objective-bar {
+  top: auto !important;
+  bottom: 12px !important;
+  height: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  max-width: min(520px, 50vw);
+  font-size: 10.5px;
+  padding: 4px 12px;
+  pointer-events: none;
+}
+
 /* =========================================================
    RESPONSIVE MEDIA QUERIES
    ========================================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 500px), (pointer: coarse) {
   /* Hide desktop right sidebar buttons on mobile screen */
   #hud-top-right {
     display: none !important;
@@ -1729,7 +1894,8 @@ body.mobile-touch-active #canvas-container {
   #hud-top-left {
     top: 8px;
     left: 8px;
-    max-width: 50vw;
+    max-width: 44vw;
+    pointer-events: none;
   }
 
   .terminal-header {
@@ -1753,6 +1919,7 @@ body.mobile-touch-active #canvas-container {
     padding: 3px 6px;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 4px;
+    pointer-events: none;
   }
 
   .survival-stat-box {
@@ -1772,13 +1939,20 @@ body.mobile-touch-active #canvas-container {
     height: 4px;
   }
 
-  /* Objective Bar */
+  /* Objective Bar on Mobile: Centered at bottom in landscape */
   #hud-objective-bar {
-    bottom: 8px;
-    left: 8px;
+    top: auto;
+    bottom: 12px;
+    height: auto;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 10px;
-    padding: 4px 8px;
-    max-width: 60vw;
+    padding: 3px 10px;
+    max-width: min(520px, 50vw);
+    pointer-events: none;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   /* Modals on Mobile */
@@ -1812,8 +1986,13 @@ body.mobile-touch-active #canvas-container {
   }
 }
 
-/* Show orientation banner only in portrait on narrow screens */
+/* Show orientation banner and adjust objective bar in portrait */
 @media (orientation: portrait) and (max-width: 768px) {
+  #hud-objective-bar {
+    top: 48px !important;
+    bottom: auto !important;
+    max-width: 92vw !important;
+  }
   #orientation-banner:not(.modal-hidden) {
     display: block;
   }

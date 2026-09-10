@@ -178,7 +178,8 @@ export class FirstPersonControls {
     // Pointer lock request on canvas / body
     document.addEventListener('click', (e) => {
       // Don't re-lock if clicking buttons, links, active modals or mobile touch controls
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select, .touch-btn, #touch-controls-container, #mobile-menu-drawer')) return;
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select, .touch-btn, .touch-action-btn, #touch-controls-container, #mobile-menu-drawer')) return;
+      if (window.app && window.app.touch && window.app.touch.isEnabled) return;
       if (this.freeze) return;
       if (!this.hasStarted) return;
       if (!this.isLocked) {
@@ -200,7 +201,9 @@ export class FirstPersonControls {
 
     document.addEventListener('mousedown', (e) => {
       if (this.freeze) return;
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select')) return;
+      // On touch devices / mobile mode, ignore synthetic mousedown to prevent camera fighting
+      if (window.app && window.app.touch && window.app.touch.isEnabled) return;
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select, .touch-btn, .touch-action-btn, #touch-controls-container, #mobile-menu-drawer')) return;
       this.isMouseDown = true;
       this.lastMouseX = e.clientX;
       this.lastMouseY = e.clientY;
@@ -236,6 +239,8 @@ export class FirstPersonControls {
     // Mouse movement: works with Pointer Lock OR Drag-to-look fallback
     document.addEventListener('mousemove', (e) => {
       if (!this.hasStarted || this.freeze) return;
+      // On touch devices / mobile mode, do not process synthetic mouse movement unless in true desktop pointer lock
+      if (window.app && window.app.touch && window.app.touch.isEnabled && !this.isLocked) return;
 
       let movementX = 0;
       let movementY = 0;

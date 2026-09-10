@@ -1533,9 +1533,9 @@ async function runTestSuite(url) {
         simulateTouch('handleTouchMove', 101, 120, 210);
         const hasMoveVector = controls.touchMoveVector && controls.touchMoveVector.y < -0.5;
 
-        // Release thumbstick
+        // Release thumbstick: vector resets to 0 and moveTouchId clears while base remains visible
         simulateTouch('handleTouchEnd', 101, 120, 210);
-        const moveReset = controls.touchMoveVector.y === 0 && touch.joystickBase.style.display === 'none';
+        const moveReset = controls.touchMoveVector.y === 0 && touch.moveTouchId === null;
 
         // 2. Test Swipe-to-Look Simulation (Right Zone)
         const initialPitch = controls.euler.x;
@@ -1568,12 +1568,18 @@ async function runTestSuite(url) {
         document.getElementById('btn-close-mobile-menu').click();
         const drawerClosed = touch.menuDrawer.classList.contains('modal-hidden');
 
+        // Check stick ticks & base elements
+        const hasTicks = !!document.getElementById('stick-tick-up') && !!document.getElementById('stick-tick-down');
+        const hasBase = !!document.getElementById('touch-joystick-base');
+
         // Restore state
         touch.disable();
+        const disabledDisplayNone = touch.joystickBase.style.display === 'none';
 
         return {
           ok: isEnabled && containerVisible && bodyClass && baseDisplayed && hasMoveVector && moveReset &&
-              yawChanged && pitchChanged && jumpTriggered && crouchToggled && camToggled && drawerOpen && drawerClosed,
+              yawChanged && pitchChanged && jumpTriggered && crouchToggled && camToggled && drawerOpen && drawerClosed &&
+              hasTicks && hasBase && disabledDisplayNone,
           isEnabled,
           containerVisible,
           bodyClass,
@@ -1586,7 +1592,10 @@ async function runTestSuite(url) {
           crouchToggled,
           camToggled,
           drawerOpen,
-          drawerClosed
+          drawerClosed,
+          hasTicks,
+          hasBase,
+          disabledDisplayNone
         };
       })()
     `);
