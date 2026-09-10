@@ -106,7 +106,7 @@ export class FirstPersonControls {
     // Pointer lock request on canvas / body
     document.addEventListener('click', (e) => {
       // Don't re-lock if clicking buttons, links, or active modals
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, button, a')) return;
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select')) return;
       if (this.freeze) return;
       if (!this.hasStarted) return;
       if (!this.isLocked) {

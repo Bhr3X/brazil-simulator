@@ -251,10 +251,21 @@ export class GameManager {
     }
   }
 
+  isAnyModalActive() {
+    if (this.dialog && this.dialog.isOpen) return true;
+    if (this.controls && this.controls.freeze) return true;
+    if (typeof document !== 'undefined') {
+      const modalIds = ['dialogue-modal', 'street-view-modal', 'visuals-modal', 'roulette-modal', 'end-run-modal'];
+      for (const id of modalIds) {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains('modal-hidden')) return true;
+      }
+    }
+    return false;
+  }
+
   triggerDoisCarasMoto() {
-    if (this.dialog && this.dialog.isOpen) return; // Do not interrupt active dialog
-    const isSV = typeof document !== 'undefined' && document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
-    if (isSV) return; // Do not interrupt active Street View panorama
+    if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.hasMotoTriggered = true;
     if (this.sound) this.sound.playMotorcycleRev();
 
@@ -272,7 +283,7 @@ export class GameManager {
   }
 
   triggerBlitzPM() {
-    if (this.dialog && this.dialog.isOpen) return;
+    if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.blitzCount++;
     this.lastBlitzHour = this.clock.inGameHour;
     if (this.sound) this.sound.playSiren();

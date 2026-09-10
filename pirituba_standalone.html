@@ -1431,12 +1431,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
         <div class="visual-section">
           <div class="visual-section-title">⚡ PRESETS RÁPIDOS DE VISUALIZAÇÃO</div>
           <div class="visual-presets-grid">
-            <button class="preset-btn active" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
+            <button class="preset-btn" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
             <button class="preset-btn" id="preset-blocks">🧱 BLOCOS 3D</button>
             <button class="preset-btn" id="preset-favela">🌈 FAVELA VIBRANTE</button>
             <button class="preset-btn" id="preset-matrix">🟢 CYBER MATRIX</button>
             <button class="preset-btn" id="preset-3d">🖥️ MODO 3D REAL</button>
-            <button class="preset-btn" id="preset-default">🔄 PADRÃO</button>
+            <button class="preset-btn active" id="preset-default">🔄 PADRÃO</button>
           </div>
         </div>
 
@@ -1455,27 +1455,27 @@ input[type="range"]::-webkit-slider-thumb:hover {
             <div class="slider-group">
               <div class="slider-header">
                 <label for="slider-brightness">☀️ Brilho / Luminância</label>
-                <span class="slider-val" id="val-brightness">1.25x</span>
+                <span class="slider-val" id="val-brightness">1.00x</span>
               </div>
-              <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.25">
+              <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.0">
               <div class="slider-hint">Aumenta a luz geral para enxergar à noite ou sob sol forte</div>
             </div>
 
             <div class="slider-group">
               <div class="slider-header">
                 <label for="slider-contrast">🌓 Contraste Dinâmico</label>
-                <span class="slider-val" id="val-contrast">1.20x</span>
+                <span class="slider-val" id="val-contrast">1.00x</span>
               </div>
-              <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.20">
+              <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.0">
               <div class="slider-hint">Diferencia prédios, calçadas e o asfalto com mais definição</div>
             </div>
 
             <div class="slider-group">
               <div class="slider-header">
                 <label for="slider-gamma">💡 Clarear Sombras (Gamma)</label>
-                <span class="slider-val" id="val-gamma">1.25x</span>
+                <span class="slider-val" id="val-gamma">1.00x</span>
               </div>
-              <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.25">
+              <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.0">
               <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
             </div>
           </div>
@@ -1485,9 +1485,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
             <div class="slider-group">
               <div class="slider-header">
                 <label for="slider-saturation">🎨 Saturação de Cores</label>
-                <span class="slider-val" id="val-saturation">1.25x</span>
+                <span class="slider-val" id="val-saturation">1.00x</span>
               </div>
-              <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.25">
+              <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.0">
               <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
             </div>
 
@@ -4671,7 +4671,7 @@ class FirstPersonControls {
     // Pointer lock request on canvas / body
     document.addEventListener('click', (e) => {
       // Don't re-lock if clicking buttons, links, or active modals
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, button, a')) return;
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select')) return;
       if (this.freeze) return;
       if (!this.hasStarted) return;
       if (!this.isLocked) {
@@ -5064,10 +5064,10 @@ const ASCII_RAMPS = {
 
 const DEFAULT_VISUAL_PARAMS = {
   density: 1.0,           // 0.6 to 2.4 (scales character grid & font size)
-  brightness: 1.25,       // 0.5 to 2.5 (luminance multiplier)
-  contrast: 1.2,          // 0.5 to 2.5 (contrast expansion)
-  gamma: 1.25,            // 0.6 to 2.2 (shadow lift)
-  saturation: 1.25,       // 0.0 to 2.5 (color vibrancy)
+  brightness: 1.0,        // 0.5 to 2.5 (luminance multiplier)
+  contrast: 1.0,          // 0.5 to 2.5 (contrast expansion)
+  gamma: 1.0,             // 0.6 to 2.2 (shadow lift)
+  saturation: 1.0,        // 0.0 to 2.5 (color vibrancy)
   edgeEnhance: true,      // 2D spatial gradient edge outline detection
   edgeThreshold: 0.10,    // sensitivity
   edgeStrength: 1.2,      // outline brightness boost
@@ -5084,7 +5084,8 @@ class CityRenderer {
       ASCII_COLOR: 'ASCII_COLOR',         // True color ASCII (favela vibrant)
       ASCII_MATRIX: 'ASCII_MATRIX',       // Matrix green phosphor
       ASCII_AMBER: 'ASCII_AMBER',         // 1980s Amber terminal
-      ASCII_CYBERPUNK: 'ASCII_CYBER',     // Neon cyan/magenta
+      ASCII_CYBER: 'ASCII_CYBER',         // Neon cyan/magenta
+      ASCII_CYBERPUNK: 'ASCII_CYBER',     // Alias for backwards compatibility
       RETRO_3D: 'RETRO_3D'                // Low-poly textured 3D view
     };
 
@@ -5180,7 +5181,38 @@ class CityRenderer {
         const saved = localStorage.getItem('brazil_sim_visual_params');
         if (saved) {
           const parsed = JSON.parse(saved);
-          Object.assign(this.params, parsed);
+          if (parsed && typeof parsed === 'object') {
+            if (typeof parsed.density === 'number' && !isNaN(parsed.density)) {
+              this.params.density = Math.max(0.6, Math.min(2.4, parsed.density));
+            }
+            if (typeof parsed.brightness === 'number' && !isNaN(parsed.brightness)) {
+              this.params.brightness = Math.max(0.5, Math.min(2.5, parsed.brightness));
+            }
+            if (typeof parsed.contrast === 'number' && !isNaN(parsed.contrast)) {
+              this.params.contrast = Math.max(0.5, Math.min(2.5, parsed.contrast));
+            }
+            if (typeof parsed.gamma === 'number' && !isNaN(parsed.gamma)) {
+              this.params.gamma = Math.max(0.6, Math.min(2.2, parsed.gamma));
+            }
+            if (typeof parsed.saturation === 'number' && !isNaN(parsed.saturation)) {
+              this.params.saturation = Math.max(0.0, Math.min(2.5, parsed.saturation));
+            }
+            if (typeof parsed.edgeEnhance === 'boolean') {
+              this.params.edgeEnhance = parsed.edgeEnhance;
+            }
+            if (typeof parsed.edgeThreshold === 'number' && !isNaN(parsed.edgeThreshold)) {
+              this.params.edgeThreshold = Math.max(0.02, Math.min(0.5, parsed.edgeThreshold));
+            }
+            if (typeof parsed.edgeStrength === 'number' && !isNaN(parsed.edgeStrength)) {
+              this.params.edgeStrength = Math.max(0.1, Math.min(3.0, parsed.edgeStrength));
+            }
+            if (parsed.rampType && ASCII_RAMPS[parsed.rampType]) {
+              this.params.rampType = parsed.rampType;
+            }
+            if (typeof parsed.scanlines === 'boolean') {
+              this.params.scanlines = parsed.scanlines;
+            }
+          }
         }
       }
     } catch (e) {}
@@ -5251,6 +5283,8 @@ class CityRenderer {
   setRenderMode(modeName) {
     if (this.MODES[modeName]) {
       this.currentMode = this.MODES[modeName];
+    } else if (Object.values(this.MODES).includes(modeName)) {
+      this.currentMode = modeName;
     }
     if (this.currentMode === this.MODES.RETRO_3D) {
       this.webglCanvas.style.display = 'block';
@@ -5262,7 +5296,7 @@ class CityRenderer {
   }
 
   cycleRenderMode() {
-    const modes = Object.values(this.MODES);
+    const modes = ['ASCII_COLOR', 'ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'RETRO_3D'];
     const currentIndex = modes.indexOf(this.currentMode);
     const nextIndex = (currentIndex + 1) % modes.length;
     this.setRenderMode(modes[nextIndex]);
@@ -5315,7 +5349,7 @@ class CityRenderer {
     const isColor = this.currentMode === this.MODES.ASCII_COLOR;
     const isMatrix = this.currentMode === this.MODES.ASCII_MATRIX;
     const isAmber = this.currentMode === this.MODES.ASCII_AMBER;
-    const isCyber = this.currentMode === this.MODES.ASCII_CYBERPUNK;
+    const isCyber = this.currentMode === this.MODES.ASCII_CYBER || this.currentMode === this.MODES.ASCII_CYBERPUNK;
 
     if (isMatrix) ctx.fillStyle = '#00ff66';
     if (isAmber) ctx.fillStyle = '#ffb300';
@@ -5343,26 +5377,26 @@ class CityRenderer {
           }
         }
 
-        // 3. Dynamic contrast expansion around 0.5 midpoint
-        if (contrast !== 1.0) {
-          lum = (lum - 0.5) * contrast + 0.5;
-          lum = Math.max(0, Math.min(1, lum));
+        // 3. Non-linear gamma / shadow lift FIRST (lifts shadows before contrast/brightness)
+        if (gamma !== 1.0 && lum > 0.0001) {
+          lum = Math.pow(lum, 1.0 / gamma);
         }
 
-        // 4. Brightness scaling
+        // 4. Brightness scaling SECOND
         if (brightness !== 1.0) {
           lum = lum * brightness;
-          lum = Math.max(0, Math.min(1, lum));
         }
 
-        // 5. Non-linear gamma / shadow lift
-        if (gamma !== 1.0 && lum > 0.001) {
-          lum = Math.pow(lum, 1.0 / gamma);
-          lum = Math.max(0, Math.min(1, lum));
+        // 5. Soft S-curve contrast expansion THIRD (centered at 0.35 to preserve dark ambient floor)
+        if (contrast !== 1.0) {
+          lum = lum < 0.35
+            ? 0.35 * Math.pow(lum / 0.35, contrast)
+            : 1.0 - 0.65 * Math.pow(Math.max(0, 1.0 - lum) / 0.65, contrast);
         }
+        lum = Math.max(0, Math.min(1, lum));
 
-        // Skip dark floor pixels for contrast and speed
-        if (lum < 0.035) continue;
+        // Skip dark floor pixels for contrast and speed (0.015 protects night ambient floor ~0.057)
+        if (lum < 0.015) continue;
 
         // 6. Character selection from active ramp
         const rampIdx = Math.min(rampLen - 1, Math.floor(lum * rampLen));
@@ -8652,6 +8686,11 @@ class DialogSystem {
       if (!this.isOpen) return;
 
       if (e.code === 'KeyQ' || e.code === 'Escape') {
+        const isOverlayOpen = typeof document !== 'undefined' && (
+          (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
+          (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden'))
+        );
+        if (isOverlayOpen) return;
         this.close();
       } else if (e.code === 'Digit1' || e.code === 'Numpad1') {
         this.selectOption(0);
@@ -9721,7 +9760,16 @@ class InteractableSystem {
   }
 
   update(playerPos, cameraForward, runClock, gameState) {
-    if (this.dialog && this.dialog.isOpen) {
+    const isAnyModalOpen = (this.dialog && this.dialog.isOpen) ||
+      (typeof document !== 'undefined' && (
+        (document.getElementById('dialogue-modal') && !document.getElementById('dialogue-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('end-run-modal') && !document.getElementById('end-run-modal').classList.contains('modal-hidden'))
+      ));
+
+    if (isAnyModalOpen) {
       this.currentTarget = null;
       this.hidePrompt();
       return;
@@ -10149,10 +10197,21 @@ class GameManager {
     }
   }
 
+  isAnyModalActive() {
+    if (this.dialog && this.dialog.isOpen) return true;
+    if (this.controls && this.controls.freeze) return true;
+    if (typeof document !== 'undefined') {
+      const modalIds = ['dialogue-modal', 'street-view-modal', 'visuals-modal', 'roulette-modal', 'end-run-modal'];
+      for (const id of modalIds) {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains('modal-hidden')) return true;
+      }
+    }
+    return false;
+  }
+
   triggerDoisCarasMoto() {
-    if (this.dialog && this.dialog.isOpen) return; // Do not interrupt active dialog
-    const isSV = typeof document !== 'undefined' && document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
-    if (isSV) return; // Do not interrupt active Street View panorama
+    if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.hasMotoTriggered = true;
     if (this.sound) this.sound.playMotorcycleRev();
 
@@ -10170,7 +10229,7 @@ class GameManager {
   }
 
   triggerBlitzPM() {
-    if (this.dialog && this.dialog.isOpen) return;
+    if (this.isAnyModalActive()) return; // Do not interrupt active dialog, modals, or frozen state
     this.blitzCount++;
     this.lastBlitzHour = this.clock.inGameHour;
     if (this.sound) this.sound.playSiren();
@@ -10442,6 +10501,8 @@ class GameApp {
     if (this.isVisualsModalOpen) {
       if (document.exitPointerLock) document.exitPointerLock();
       this.syncVisualControlsUI();
+    } else {
+      if (this.game) this.game.collisionImmunityTimer = 2.5;
     }
   }
 
@@ -10481,6 +10542,19 @@ class GameApp {
     if (valContrast) valContrast.textContent = `${Number(params.contrast).toFixed(2)}x`;
     if (valGamma) valGamma.textContent = `${Number(params.gamma).toFixed(2)}x`;
     if (valSaturation) valSaturation.textContent = `${Number(params.saturation).toFixed(2)}x`;
+
+    // Keep slider thumbs synchronized when modified via hotkeys or presets
+    const sliderDensity = document.getElementById('slider-density');
+    const sliderBrightness = document.getElementById('slider-brightness');
+    const sliderContrast = document.getElementById('slider-contrast');
+    const sliderGamma = document.getElementById('slider-gamma');
+    const sliderSaturation = document.getElementById('slider-saturation');
+
+    if (sliderDensity && document.activeElement !== sliderDensity) sliderDensity.value = params.density;
+    if (sliderBrightness && document.activeElement !== sliderBrightness) sliderBrightness.value = params.brightness;
+    if (sliderContrast && document.activeElement !== sliderContrast) sliderContrast.value = params.contrast;
+    if (sliderGamma && document.activeElement !== sliderGamma) sliderGamma.value = params.gamma;
+    if (sliderSaturation && document.activeElement !== sliderSaturation) sliderSaturation.value = params.saturation;
   }
 
   initUI() {
@@ -10764,71 +10838,77 @@ class GameApp {
 
     // Hotkeys
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'KeyV') {
+      // Ignore modified combinations so browser shortcuts (e.g. Cmd+P, Ctrl+P, Cmd+-, Cmd++) work normally
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      const isRouletteOpen = typeof document !== 'undefined' && document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
+
+      if (e.code === 'KeyV' || e.key === 'v' || e.key === 'V') {
         this.toggleStreetView();
-      } else if (e.code === 'KeyP') {
+      } else if (e.code === 'KeyP' || e.key === 'p' || e.key === 'P') {
+        if (isRouletteOpen) return;
         this.toggleVisualsModal();
-      } else if (e.code === 'Escape') {
+      } else if (e.code === 'Escape' || e.key === 'Escape') {
         if (this.isStreetViewOpen) {
           this.toggleStreetView(false);
         } else if (this.isVisualsModalOpen) {
           this.toggleVisualsModal(false);
         }
-      } else if (e.code === 'BracketLeft') {
+      } else if (e.code === 'BracketLeft' || e.key === '[') {
         const newD = Math.max(0.6, +(this.renderer.params.density - 0.1).toFixed(1));
         this.renderer.setVisualParams({ density: newD });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
         }
-      } else if (e.code === 'BracketRight') {
+      } else if (e.code === 'BracketRight' || e.key === ']') {
         const newD = Math.min(2.4, +(this.renderer.params.density + 0.1).toFixed(1));
         this.renderer.setVisualParams({ density: newD });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
         }
-      } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+      } else if (e.code === 'Minus' || e.code === 'NumpadSubtract' || e.key === '-') {
         const newB = Math.max(0.5, +(this.renderer.params.brightness - 0.05).toFixed(2));
         this.renderer.setVisualParams({ brightness: newB });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
         }
-      } else if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+      } else if (e.code === 'Equal' || e.code === 'NumpadAdd' || e.key === '=' || e.key === '+') {
         const newB = Math.min(2.5, +(this.renderer.params.brightness + 0.05).toFixed(2));
         this.renderer.setVisualParams({ brightness: newB });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
         }
-      } else if (e.code === 'KeyM') {
+      } else if (e.code === 'KeyM' || e.key === 'm' || e.key === 'M') {
         const nextMode = this.renderer.cycleRenderMode();
         this.updateModeLabel(nextMode);
-      } else if (e.code === 'KeyT') {
+      } else if (e.code === 'KeyT' || e.key === 't' || e.key === 'T') {
         if (!this.controls.freeze) {
           this.cycleTimeOfDay();
         }
-      } else if (e.code === 'KeyO') {
+      } else if (e.code === 'KeyO' || e.key === 'o' || e.key === 'O') {
         const muted = this.sound.toggleMute();
         if (this.audioBtn) {
           this.audioBtn.textContent = muted ? '🔇 SOM: DESLIGADO' : '🔊 SOM: LIGADO';
         }
-      } else if (e.code === 'KeyN') {
+      } else if (e.code === 'KeyN' || e.key === 'n' || e.key === 'N') {
         handleRadioCycle();
-      } else if (e.code === 'KeyU') {
+      } else if (e.code === 'KeyU' || e.key === 'u' || e.key === 'U') {
         if (!this.controls.freeze) {
           const active = this.controls.toggleAutoTour();
           if (this.tourBtn) {
             this.tourBtn.textContent = active ? '🎥 TOUR: ATIVO [U]' : '🎥 AUTO TOUR [U]';
           }
         }
-      } else if (e.code === 'KeyX') {
+      } else if (e.code === 'KeyX' || e.key === 'x' || e.key === 'X') {
         const isEmpty = this.traffic.toggleEmptyCity();
         if (this.emptyBtn) {
           this.emptyBtn.textContent = isEmpty ? '🏙️ CIDADE VAZIA [X]' : '🚗 TRÂNSITO ATIVO [X]';
         }
-      } else if (e.code === 'KeyE') {
+      } else if (e.code === 'KeyE' || e.key === 'e' || e.key === 'E') {
         if (!this.controls.freeze) {
           this.game.handleInteract();
         }

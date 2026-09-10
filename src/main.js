@@ -190,6 +190,8 @@ class GameApp {
     if (this.isVisualsModalOpen) {
       if (document.exitPointerLock) document.exitPointerLock();
       this.syncVisualControlsUI();
+    } else {
+      if (this.game) this.game.collisionImmunityTimer = 2.5;
     }
   }
 
@@ -229,6 +231,19 @@ class GameApp {
     if (valContrast) valContrast.textContent = `${Number(params.contrast).toFixed(2)}x`;
     if (valGamma) valGamma.textContent = `${Number(params.gamma).toFixed(2)}x`;
     if (valSaturation) valSaturation.textContent = `${Number(params.saturation).toFixed(2)}x`;
+
+    // Keep slider thumbs synchronized when modified via hotkeys or presets
+    const sliderDensity = document.getElementById('slider-density');
+    const sliderBrightness = document.getElementById('slider-brightness');
+    const sliderContrast = document.getElementById('slider-contrast');
+    const sliderGamma = document.getElementById('slider-gamma');
+    const sliderSaturation = document.getElementById('slider-saturation');
+
+    if (sliderDensity && document.activeElement !== sliderDensity) sliderDensity.value = params.density;
+    if (sliderBrightness && document.activeElement !== sliderBrightness) sliderBrightness.value = params.brightness;
+    if (sliderContrast && document.activeElement !== sliderContrast) sliderContrast.value = params.contrast;
+    if (sliderGamma && document.activeElement !== sliderGamma) sliderGamma.value = params.gamma;
+    if (sliderSaturation && document.activeElement !== sliderSaturation) sliderSaturation.value = params.saturation;
   }
 
   initUI() {
@@ -512,71 +527,77 @@ class GameApp {
 
     // Hotkeys
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'KeyV') {
+      // Ignore modified combinations so browser shortcuts (e.g. Cmd+P, Ctrl+P, Cmd+-, Cmd++) work normally
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      const isRouletteOpen = typeof document !== 'undefined' && document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
+
+      if (e.code === 'KeyV' || e.key === 'v' || e.key === 'V') {
         this.toggleStreetView();
-      } else if (e.code === 'KeyP') {
+      } else if (e.code === 'KeyP' || e.key === 'p' || e.key === 'P') {
+        if (isRouletteOpen) return;
         this.toggleVisualsModal();
-      } else if (e.code === 'Escape') {
+      } else if (e.code === 'Escape' || e.key === 'Escape') {
         if (this.isStreetViewOpen) {
           this.toggleStreetView(false);
         } else if (this.isVisualsModalOpen) {
           this.toggleVisualsModal(false);
         }
-      } else if (e.code === 'BracketLeft') {
+      } else if (e.code === 'BracketLeft' || e.key === '[') {
         const newD = Math.max(0.6, +(this.renderer.params.density - 0.1).toFixed(1));
         this.renderer.setVisualParams({ density: newD });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
         }
-      } else if (e.code === 'BracketRight') {
+      } else if (e.code === 'BracketRight' || e.key === ']') {
         const newD = Math.min(2.4, +(this.renderer.params.density + 0.1).toFixed(1));
         this.renderer.setVisualParams({ density: newD });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
         }
-      } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+      } else if (e.code === 'Minus' || e.code === 'NumpadSubtract' || e.key === '-') {
         const newB = Math.max(0.5, +(this.renderer.params.brightness - 0.05).toFixed(2));
         this.renderer.setVisualParams({ brightness: newB });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
         }
-      } else if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+      } else if (e.code === 'Equal' || e.code === 'NumpadAdd' || e.key === '=' || e.key === '+') {
         const newB = Math.min(2.5, +(this.renderer.params.brightness + 0.05).toFixed(2));
         this.renderer.setVisualParams({ brightness: newB });
         this.updateVisualReadouts();
         if (this.game && this.game.hud && this.game.hud.showToast) {
           this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
         }
-      } else if (e.code === 'KeyM') {
+      } else if (e.code === 'KeyM' || e.key === 'm' || e.key === 'M') {
         const nextMode = this.renderer.cycleRenderMode();
         this.updateModeLabel(nextMode);
-      } else if (e.code === 'KeyT') {
+      } else if (e.code === 'KeyT' || e.key === 't' || e.key === 'T') {
         if (!this.controls.freeze) {
           this.cycleTimeOfDay();
         }
-      } else if (e.code === 'KeyO') {
+      } else if (e.code === 'KeyO' || e.key === 'o' || e.key === 'O') {
         const muted = this.sound.toggleMute();
         if (this.audioBtn) {
           this.audioBtn.textContent = muted ? '🔇 SOM: DESLIGADO' : '🔊 SOM: LIGADO';
         }
-      } else if (e.code === 'KeyN') {
+      } else if (e.code === 'KeyN' || e.key === 'n' || e.key === 'N') {
         handleRadioCycle();
-      } else if (e.code === 'KeyU') {
+      } else if (e.code === 'KeyU' || e.key === 'u' || e.key === 'U') {
         if (!this.controls.freeze) {
           const active = this.controls.toggleAutoTour();
           if (this.tourBtn) {
             this.tourBtn.textContent = active ? '🎥 TOUR: ATIVO [U]' : '🎥 AUTO TOUR [U]';
           }
         }
-      } else if (e.code === 'KeyX') {
+      } else if (e.code === 'KeyX' || e.key === 'x' || e.key === 'X') {
         const isEmpty = this.traffic.toggleEmptyCity();
         if (this.emptyBtn) {
           this.emptyBtn.textContent = isEmpty ? '🏙️ CIDADE VAZIA [X]' : '🚗 TRÂNSITO ATIVO [X]';
         }
-      } else if (e.code === 'KeyE') {
+      } else if (e.code === 'KeyE' || e.key === 'e' || e.key === 'E') {
         if (!this.controls.freeze) {
           this.game.handleInteract();
         }

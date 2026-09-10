@@ -113,7 +113,16 @@ export class InteractableSystem {
   }
 
   update(playerPos, cameraForward, runClock, gameState) {
-    if (this.dialog && this.dialog.isOpen) {
+    const isAnyModalOpen = (this.dialog && this.dialog.isOpen) ||
+      (typeof document !== 'undefined' && (
+        (document.getElementById('dialogue-modal') && !document.getElementById('dialogue-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('end-run-modal') && !document.getElementById('end-run-modal').classList.contains('modal-hidden'))
+      ));
+
+    if (isAnyModalOpen) {
       this.currentTarget = null;
       this.hidePrompt();
       return;

@@ -29,6 +29,11 @@ export class DialogSystem {
       if (!this.isOpen) return;
 
       if (e.code === 'KeyQ' || e.code === 'Escape') {
+        const isOverlayOpen = typeof document !== 'undefined' && (
+          (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
+          (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden'))
+        );
+        if (isOverlayOpen) return;
         this.close();
       } else if (e.code === 'Digit1' || e.code === 'Numpad1') {
         this.selectOption(0);

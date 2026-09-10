@@ -15,10 +15,10 @@ export const ASCII_RAMPS = {
 
 export const DEFAULT_VISUAL_PARAMS = {
   density: 1.0,           // 0.6 to 2.4 (scales character grid & font size)
-  brightness: 1.25,       // 0.5 to 2.5 (luminance multiplier)
-  contrast: 1.2,          // 0.5 to 2.5 (contrast expansion)
-  gamma: 1.25,            // 0.6 to 2.2 (shadow lift)
-  saturation: 1.25,       // 0.0 to 2.5 (color vibrancy)
+  brightness: 1.0,        // 0.5 to 2.5 (luminance multiplier)
+  contrast: 1.0,          // 0.5 to 2.5 (contrast expansion)
+  gamma: 1.0,             // 0.6 to 2.2 (shadow lift)
+  saturation: 1.0,        // 0.0 to 2.5 (color vibrancy)
   edgeEnhance: true,      // 2D spatial gradient edge outline detection
   edgeThreshold: 0.10,    // sensitivity
   edgeStrength: 1.2,      // outline brightness boost
@@ -35,7 +35,8 @@ export class CityRenderer {
       ASCII_COLOR: 'ASCII_COLOR',         // True color ASCII (favela vibrant)
       ASCII_MATRIX: 'ASCII_MATRIX',       // Matrix green phosphor
       ASCII_AMBER: 'ASCII_AMBER',         // 1980s Amber terminal
-      ASCII_CYBERPUNK: 'ASCII_CYBER',     // Neon cyan/magenta
+      ASCII_CYBER: 'ASCII_CYBER',         // Neon cyan/magenta
+      ASCII_CYBERPUNK: 'ASCII_CYBER',     // Alias for backwards compatibility
       RETRO_3D: 'RETRO_3D'                // Low-poly textured 3D view
     };
 
@@ -131,7 +132,38 @@ export class CityRenderer {
         const saved = localStorage.getItem('brazil_sim_visual_params');
         if (saved) {
           const parsed = JSON.parse(saved);
-          Object.assign(this.params, parsed);
+          if (parsed && typeof parsed === 'object') {
+            if (typeof parsed.density === 'number' && !isNaN(parsed.density)) {
+              this.params.density = Math.max(0.6, Math.min(2.4, parsed.density));
+            }
+            if (typeof parsed.brightness === 'number' && !isNaN(parsed.brightness)) {
+              this.params.brightness = Math.max(0.5, Math.min(2.5, parsed.brightness));
+            }
+            if (typeof parsed.contrast === 'number' && !isNaN(parsed.contrast)) {
+              this.params.contrast = Math.max(0.5, Math.min(2.5, parsed.contrast));
+            }
+            if (typeof parsed.gamma === 'number' && !isNaN(parsed.gamma)) {
+              this.params.gamma = Math.max(0.6, Math.min(2.2, parsed.gamma));
+            }
+            if (typeof parsed.saturation === 'number' && !isNaN(parsed.saturation)) {
+              this.params.saturation = Math.max(0.0, Math.min(2.5, parsed.saturation));
+            }
+            if (typeof parsed.edgeEnhance === 'boolean') {
+              this.params.edgeEnhance = parsed.edgeEnhance;
+            }
+            if (typeof parsed.edgeThreshold === 'number' && !isNaN(parsed.edgeThreshold)) {
+              this.params.edgeThreshold = Math.max(0.02, Math.min(0.5, parsed.edgeThreshold));
+            }
+            if (typeof parsed.edgeStrength === 'number' && !isNaN(parsed.edgeStrength)) {
+              this.params.edgeStrength = Math.max(0.1, Math.min(3.0, parsed.edgeStrength));
+            }
+            if (parsed.rampType && ASCII_RAMPS[parsed.rampType]) {
+              this.params.rampType = parsed.rampType;
+            }
+            if (typeof parsed.scanlines === 'boolean') {
+              this.params.scanlines = parsed.scanlines;
+            }
+          }
         }
       }
     } catch (e) {}
@@ -202,6 +234,8 @@ export class CityRenderer {
   setRenderMode(modeName) {
     if (this.MODES[modeName]) {
       this.currentMode = this.MODES[modeName];
+    } else if (Object.values(this.MODES).includes(modeName)) {
+      this.currentMode = modeName;
     }
     if (this.currentMode === this.MODES.RETRO_3D) {
       this.webglCanvas.style.display = 'block';
@@ -213,7 +247,7 @@ export class CityRenderer {
   }
 
   cycleRenderMode() {
-    const modes = Object.values(this.MODES);
+    const modes = ['ASCII_COLOR', 'ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'RETRO_3D'];
     const currentIndex = modes.indexOf(this.currentMode);
     const nextIndex = (currentIndex + 1) % modes.length;
     this.setRenderMode(modes[nextIndex]);
@@ -266,7 +300,7 @@ export class CityRenderer {
     const isColor = this.currentMode === this.MODES.ASCII_COLOR;
     const isMatrix = this.currentMode === this.MODES.ASCII_MATRIX;
     const isAmber = this.currentMode === this.MODES.ASCII_AMBER;
-    const isCyber = this.currentMode === this.MODES.ASCII_CYBERPUNK;
+    const isCyber = this.currentMode === this.MODES.ASCII_CYBER || this.currentMode === this.MODES.ASCII_CYBERPUNK;
 
     if (isMatrix) ctx.fillStyle = '#00ff66';
     if (isAmber) ctx.fillStyle = '#ffb300';
@@ -294,26 +328,26 @@ export class CityRenderer {
           }
         }
 
-        // 3. Dynamic contrast expansion around 0.5 midpoint
-        if (contrast !== 1.0) {
-          lum = (lum - 0.5) * contrast + 0.5;
-          lum = Math.max(0, Math.min(1, lum));
+        // 3. Non-linear gamma / shadow lift FIRST (lifts shadows before contrast/brightness)
+        if (gamma !== 1.0 && lum > 0.0001) {
+          lum = Math.pow(lum, 1.0 / gamma);
         }
 
-        // 4. Brightness scaling
+        // 4. Brightness scaling SECOND
         if (brightness !== 1.0) {
           lum = lum * brightness;
-          lum = Math.max(0, Math.min(1, lum));
         }
 
-        // 5. Non-linear gamma / shadow lift
-        if (gamma !== 1.0 && lum > 0.001) {
-          lum = Math.pow(lum, 1.0 / gamma);
-          lum = Math.max(0, Math.min(1, lum));
+        // 5. Soft S-curve contrast expansion THIRD (centered at 0.35 to preserve dark ambient floor)
+        if (contrast !== 1.0) {
+          lum = lum < 0.35
+            ? 0.35 * Math.pow(lum / 0.35, contrast)
+            : 1.0 - 0.65 * Math.pow(Math.max(0, 1.0 - lum) / 0.65, contrast);
         }
+        lum = Math.max(0, Math.min(1, lum));
 
-        // Skip dark floor pixels for contrast and speed
-        if (lum < 0.035) continue;
+        // Skip dark floor pixels for contrast and speed (0.015 protects night ambient floor ~0.057)
+        if (lum < 0.015) continue;
 
         // 6. Character selection from active ramp
         const rampIdx = Math.min(rampLen - 1, Math.floor(lum * rampLen));

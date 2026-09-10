@@ -269,26 +269,51 @@ async function runTestSuite(url) {
         const modalOpen = !document.getElementById('visuals-modal').classList.contains('modal-hidden');
         const postPFreeze = app.controls.freeze;
 
+        // Verify moto trigger is gated while visuals modal is open
+        const motoPreActive = app.game.isAnyModalActive();
+        app.game.triggerDoisCarasMoto();
+        const dialogOpenUnderModal = app.game.dialog.isOpen;
+
         // 4. Test hotkey [Escape] to close
         window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', bubbles: true }));
         const modalClosed = document.getElementById('visuals-modal').classList.contains('modal-hidden');
         const postCloseFreeze = app.controls.freeze;
+        const immunityTimerSet = app.game.collisionImmunityTimer >= 2.0;
 
-        // 5. Test hotkey [ and ] density stepping
+        // 5. Test hotkey [ and ] density stepping & slider sync
         window.dispatchEvent(new KeyboardEvent('keydown', { code: 'BracketRight', bubbles: true }));
         const steppedUpDensity = renderer.params.density;
+        const sliderDensityUp = Number(document.getElementById('slider-density').value);
 
-        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'BracketLeft', bubbles: true }));
+        // Test ABNT2 layout using key property
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: '[', bubbles: true }));
         const steppedDownDensity = renderer.params.density;
+        const sliderDensityDown = Number(document.getElementById('slider-density').value);
 
         // 6. Test hotkey - and = brightness stepping
         const preBright = renderer.params.brightness;
         window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Equal', bubbles: true }));
         const postBrightUp = renderer.params.brightness;
+        const sliderBrightUp = Number(document.getElementById('slider-brightness').value);
 
-        // 7. Reset to defaults
+        // Test modifier guard: Ctrl+BracketRight should NOT alter density
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'BracketRight', ctrlKey: true, bubbles: true }));
+        const guardProtectedDensity = renderer.params.density;
+
+        // 7. Test render mode cycling through all modes
+        renderer.setRenderMode('ASCII_COLOR');
+        const m1 = renderer.cycleRenderMode(); // ASCII_MATRIX
+        const m2 = renderer.cycleRenderMode(); // ASCII_AMBER
+        const m3 = renderer.cycleRenderMode(); // ASCII_CYBER
+        const m4 = renderer.cycleRenderMode(); // RETRO_3D
+        const m5 = renderer.cycleRenderMode(); // ASCII_COLOR
+
+        // 8. Reset to defaults
         renderer.resetVisualParams();
         const resetDensity = renderer.params.density;
+        const resetBrightness = renderer.params.brightness;
+        const resetContrast = renderer.params.contrast;
+        const resetGamma = renderer.params.gamma;
 
         return {
           ok: true,
@@ -303,13 +328,24 @@ async function runTestSuite(url) {
           prePFreeze,
           modalOpen,
           postPFreeze,
+          motoPreActive,
+          dialogOpenUnderModal,
           modalClosed,
           postCloseFreeze,
+          immunityTimerSet,
           steppedUpDensity,
+          sliderDensityUp,
           steppedDownDensity,
+          sliderDensityDown,
           preBright,
           postBrightUp,
-          resetDensity
+          sliderBrightUp,
+          guardProtectedDensity,
+          modeCycle: [m1, m2, m3, m4, m5],
+          resetDensity,
+          resetBrightness,
+          resetContrast,
+          resetGamma
         };
       })()
     `);
@@ -320,10 +356,20 @@ async function runTestSuite(url) {
       !visualTest.charWShrunk ||
       !visualTest.modalOpen ||
       visualTest.postPFreeze !== true ||
+      !visualTest.motoPreActive ||
+      visualTest.dialogOpenUnderModal ||
       !visualTest.modalClosed ||
       visualTest.postCloseFreeze !== false ||
+      !visualTest.immunityTimerSet ||
       visualTest.postBrightUp <= visualTest.preBright ||
-      visualTest.resetDensity !== 1.0
+      Math.abs(visualTest.sliderDensityUp - visualTest.steppedUpDensity) > 0.05 ||
+      Math.abs(visualTest.sliderDensityDown - visualTest.steppedDownDensity) > 0.05 ||
+      visualTest.guardProtectedDensity !== visualTest.steppedDownDensity ||
+      JSON.stringify(visualTest.modeCycle) !== JSON.stringify(['ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'RETRO_3D', 'ASCII_COLOR']) ||
+      visualTest.resetDensity !== 1.0 ||
+      visualTest.resetBrightness !== 1.0 ||
+      visualTest.resetContrast !== 1.0 ||
+      visualTest.resetGamma !== 1.0
     ) {
       throw new Error(`TEST 2d FAILED: Visual parameters test failed: ${JSON.stringify(visualTest)}`);
     }
