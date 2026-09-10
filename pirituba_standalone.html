@@ -8685,12 +8685,15 @@ class DialogSystem {
     window.addEventListener('keydown', (e) => {
       if (!this.isOpen) return;
 
+      const isOverlayOpen = typeof document !== 'undefined' && (
+        (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('end-run-modal') && !document.getElementById('end-run-modal').classList.contains('modal-hidden'))
+      );
+      if (isOverlayOpen) return;
+
       if (e.code === 'KeyQ' || e.code === 'Escape') {
-        const isOverlayOpen = typeof document !== 'undefined' && (
-          (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
-          (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden'))
-        );
-        if (isOverlayOpen) return;
         this.close();
       } else if (e.code === 'Digit1' || e.code === 'Numpad1') {
         this.selectOption(0);
@@ -10838,8 +10841,17 @@ class GameApp {
 
     // Hotkeys
     window.addEventListener('keydown', (e) => {
-      // Ignore modified combinations so browser shortcuts (e.g. Cmd+P, Ctrl+P, Cmd+-, Cmd++) work normally
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      // Guard browser-level commands: ignore Meta (Cmd) and Alt combos
+      if (e.metaKey || e.altKey) return;
+
+      // When Ctrl is held (e.g. crouching with ControlLeft), protect browser shortcuts like Print (Ctrl+P) or Zoom (Ctrl+/Ctrl+)
+      // without swallowing game hotkeys like [E] interact, [M] mode, [T] time, [N] radio, etc.
+      if (e.ctrlKey) {
+        if (e.code === 'KeyP' || e.key === 'p' || e.key === 'P' ||
+            e.code === 'Minus' || e.code === 'Equal' || e.key === '-' || e.key === '=' || e.key === '+') {
+          return;
+        }
+      }
 
       const isRouletteOpen = typeof document !== 'undefined' && document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
 

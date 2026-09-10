@@ -527,8 +527,17 @@ class GameApp {
 
     // Hotkeys
     window.addEventListener('keydown', (e) => {
-      // Ignore modified combinations so browser shortcuts (e.g. Cmd+P, Ctrl+P, Cmd+-, Cmd++) work normally
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      // Guard browser-level commands: ignore Meta (Cmd) and Alt combos
+      if (e.metaKey || e.altKey) return;
+
+      // When Ctrl is held (e.g. crouching with ControlLeft), protect browser shortcuts like Print (Ctrl+P) or Zoom (Ctrl+/Ctrl+)
+      // without swallowing game hotkeys like [E] interact, [M] mode, [T] time, [N] radio, etc.
+      if (e.ctrlKey) {
+        if (e.code === 'KeyP' || e.key === 'p' || e.key === 'P' ||
+            e.code === 'Minus' || e.code === 'Equal' || e.key === '-' || e.key === '=' || e.key === '+') {
+          return;
+        }
+      }
 
       const isRouletteOpen = typeof document !== 'undefined' && document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
 

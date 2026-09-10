@@ -28,12 +28,15 @@ export class DialogSystem {
     window.addEventListener('keydown', (e) => {
       if (!this.isOpen) return;
 
+      const isOverlayOpen = typeof document !== 'undefined' && (
+        (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden')) ||
+        (document.getElementById('end-run-modal') && !document.getElementById('end-run-modal').classList.contains('modal-hidden'))
+      );
+      if (isOverlayOpen) return;
+
       if (e.code === 'KeyQ' || e.code === 'Escape') {
-        const isOverlayOpen = typeof document !== 'undefined' && (
-          (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
-          (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden'))
-        );
-        if (isOverlayOpen) return;
         this.close();
       } else if (e.code === 'Digit1' || e.code === 'Numpad1') {
         this.selectOption(0);

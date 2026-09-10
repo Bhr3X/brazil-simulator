@@ -280,6 +280,15 @@ async function runTestSuite(url) {
         const postCloseFreeze = app.controls.freeze;
         const immunityTimerSet = app.game.collisionImmunityTimer >= 2.0;
 
+        // 4b. Test Digit keys do NOT leak to Dialog when Visuals overlay is open
+        app.game.dialog.open({ title: 'Test', text: 'LeakTest', options: [{ label: 'Option 1', execute: () => {} }] }, () => {});
+        const dialogOpenBefore = app.game.dialog.isOpen;
+        app.toggleVisualsModal(true);
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Digit1', bubbles: true }));
+        const dialogStillOpenUnderOverlay = app.game.dialog.isOpen;
+        app.toggleVisualsModal(false);
+        app.game.dialog.close();
+
         // 5. Test hotkey [ and ] density stepping & slider sync
         window.dispatchEvent(new KeyboardEvent('keydown', { code: 'BracketRight', bubbles: true }));
         const steppedUpDensity = renderer.params.density;
@@ -296,9 +305,18 @@ async function runTestSuite(url) {
         const postBrightUp = renderer.params.brightness;
         const sliderBrightUp = Number(document.getElementById('slider-brightness').value);
 
-        // Test modifier guard: Ctrl+BracketRight should NOT alter density
-        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'BracketRight', ctrlKey: true, bubbles: true }));
-        const guardProtectedDensity = renderer.params.density;
+        // Test modifier guard: Ctrl+Equal should NOT alter brightness (protects Zoom)
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Equal', ctrlKey: true, bubbles: true }));
+        const guardProtectedBright = renderer.params.brightness;
+
+        // Test Ctrl+P does NOT toggle visuals (protects Print)
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyP', ctrlKey: true, bubbles: true }));
+        const ctrlPProtected = document.getElementById('visuals-modal').classList.contains('modal-hidden');
+
+        // Test Ctrl-crouch does NOT swallow game hotkeys: [M] should cycle render mode even when ctrlKey is true
+        renderer.setRenderMode('ASCII_COLOR');
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM', ctrlKey: true, bubbles: true }));
+        const ctrlCrouchKeyMSuccess = renderer.currentMode === 'ASCII_MATRIX';
 
         // 7. Test render mode cycling through all modes
         renderer.setRenderMode('ASCII_COLOR');
@@ -333,6 +351,8 @@ async function runTestSuite(url) {
           modalClosed,
           postCloseFreeze,
           immunityTimerSet,
+          dialogOpenBefore,
+          dialogStillOpenUnderOverlay,
           steppedUpDensity,
           sliderDensityUp,
           steppedDownDensity,
@@ -340,7 +360,9 @@ async function runTestSuite(url) {
           preBright,
           postBrightUp,
           sliderBrightUp,
-          guardProtectedDensity,
+          guardProtectedBright,
+          ctrlPProtected,
+          ctrlCrouchKeyMSuccess,
           modeCycle: [m1, m2, m3, m4, m5],
           resetDensity,
           resetBrightness,
@@ -361,10 +383,14 @@ async function runTestSuite(url) {
       !visualTest.modalClosed ||
       visualTest.postCloseFreeze !== false ||
       !visualTest.immunityTimerSet ||
+      visualTest.dialogOpenBefore !== true ||
+      visualTest.dialogStillOpenUnderOverlay !== true ||
       visualTest.postBrightUp <= visualTest.preBright ||
       Math.abs(visualTest.sliderDensityUp - visualTest.steppedUpDensity) > 0.05 ||
       Math.abs(visualTest.sliderDensityDown - visualTest.steppedDownDensity) > 0.05 ||
-      visualTest.guardProtectedDensity !== visualTest.steppedDownDensity ||
+      visualTest.guardProtectedBright !== visualTest.postBrightUp ||
+      visualTest.ctrlPProtected !== true ||
+      visualTest.ctrlCrouchKeyMSuccess !== true ||
       JSON.stringify(visualTest.modeCycle) !== JSON.stringify(['ASCII_MATRIX', 'ASCII_AMBER', 'ASCII_CYBER', 'RETRO_3D', 'ASCII_COLOR']) ||
       visualTest.resetDensity !== 1.0 ||
       visualTest.resetBrightness !== 1.0 ||
