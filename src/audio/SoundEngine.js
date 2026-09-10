@@ -18,6 +18,7 @@ export class SoundEngine {
     this.beatIndex = 0;
     this.isPlayingMusic = true;
     this.timerId = null;
+    this.isRaining = false;
   }
 
   // Initialize Web Audio context upon user interaction (browser policy)
@@ -33,7 +34,7 @@ export class SoundEngine {
 
       // Ambient channel
       this.ambientGain = this.ctx.createGain();
-      this.ambientGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+      this.ambientGain.gain.setValueAtTime(0.32, this.ctx.currentTime);
       this.ambientGain.connect(this.masterGain);
 
       // Distant music channel (low-passed to sound muffled through walls/hills)
@@ -63,6 +64,9 @@ export class SoundEngine {
     this.isMuted = !this.isMuted;
     if (this.masterGain) {
       this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : 0.4, this.ctx.currentTime);
+    }
+    if (!this.isMuted && this.isRaining) {
+      this.playRain(true);
     }
     return this.isMuted;
   }
@@ -450,6 +454,27 @@ export class SoundEngine {
     osc.stop(t + 0.12);
   }
 
+  // 11b. Gulp / Drinking Sound (Caldo de cana / Litrão / Copão de Whisky)
+  playGulp() {
+    if (!this.isInitialized || this.isMuted) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(320, t);
+    osc.frequency.exponentialRampToValueAtTime(140, t + 0.12);
+
+    gain.gain.setValueAtTime(0.25, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.18);
+  }
+
   // 12. End-of-Run Fanfare (Vitória ou Derrota)
   playFanfare(won = true) {
     if (!this.isInitialized || this.isMuted) return;
@@ -474,8 +499,126 @@ export class SoundEngine {
     });
   }
 
+  // 13. Procedural São Paulo Summer Rain Loop
+  playRain(enable) {
+    this.isRaining = !!enable;
+    if (!enable) {
+      if (this.rainGain && this.rainSource && this.ctx) {
+        try {
+          const t = this.ctx.currentTime;
+          this.rainGain.gain.linearRampToValueAtTime(0.001, t + 0.8);
+          const oldSrc = this.rainSource;
+          setTimeout(() => {
+            try { oldSrc.stop(); oldSrc.disconnect(); } catch (e) {}
+          }, 850);
+        } catch (e) {}
+        this.rainSource = null;
+        this.rainGain = null;
+      }
+      return;
+    }
+
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    if (this.rainSource) return;
+    const bufSize = this.ctx.sampleRate * 2;
+    const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.5;
+    }
+    this.rainSource = this.ctx.createBufferSource();
+    this.rainSource.buffer = buf;
+    this.rainSource.loop = true;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1100, t);
+
+    this.rainGain = this.ctx.createGain();
+    this.rainGain.gain.setValueAtTime(0.001, t);
+    this.rainGain.gain.linearRampToValueAtTime(0.22, t + 2.0);
+
+    this.rainSource.connect(filter);
+    filter.connect(this.rainGain);
+    this.rainGain.connect(this.masterGain);
+    this.rainSource.start(t);
+  }
+
+  // 14. Deep Summer Thunder Rumble
+  playThunder() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(75, t);
+    osc.frequency.exponentialRampToValueAtTime(25, t + 1.8);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(140, t);
+    filter.frequency.exponentialRampToValueAtTime(45, t + 2.0);
+
+    gain.gain.setValueAtTime(0.35, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 2.2);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(t);
+    osc.stop(t + 2.3);
+  }
+
+  // 15. Pastel Oil Frying Sizzle
+  playSizzle() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const bufSize = Math.floor(this.ctx.sampleRate * 0.8);
+    const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.6));
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buf;
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.2, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(3200, t);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+    noise.start(t);
+  }
+
+  // 16. Brazilian Traffic Horn (Buzinaço)
+  playTrafficHonk() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    [420, 525].forEach(freq => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.38);
+    });
+  }
+
   setTimeOfDay(isDay) {
     this.isDay = isDay;
+    if (this.ambientGain && this.ctx) {
+      this.ambientGain.gain.setValueAtTime(isDay ? 0.32 : 0.18, this.ctx.currentTime);
+    }
   }
 }
 

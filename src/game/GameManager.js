@@ -1,6 +1,6 @@
 /**
  * GameManager: Central Roguelite Orchestrator
- * Governs 10-minute day cycle, character roulette, defeat/victory conditions, and sub-systems.
+ * Governs 15-minute day cycle, character roulette, defeat/victory conditions, and sub-systems.
  */
 
 import { Rng } from './Rng.js';
@@ -29,17 +29,27 @@ export class GameManager {
     // Seeded PRNG (Invariant I2)
     this.seed = typeof initialSeed === 'number' ? initialSeed : (Date.now() ^ Math.floor(Math.random() * 0x100000000));
     this.rng = new Rng(this.seed);
-    this.clock = new RunClock(600, 6.0); // 600 seconds = 24 hours starting at 06:00
+    this.clock = new RunClock(900, 6.0); // 900 seconds = 15 minutes (24 in-game hours, 37.5s/hour)
     this.state = null;
     this.dayCycle = new DayCycle(this.city);
     this.dialog = new DialogSystem(this.controls);
-    this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound);
+    this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound, this.traffic);
     this.hud = new HudGame();
     this.props = new GameProps(this.scene, this.physics, this.textures, this.sound);
+    this.encounters = BRAZILIAN_ENCOUNTERS;
+    this.socialClasses = SOCIAL_CLASSES;
 
     this.isRunActive = false;
     this.hasMotoTriggered = false;
     this.motoCheckTimer = 0;
+    this.isStorming = false;
+    this.lastThunderTime = 0;
+    this.blitzCount = 0;
+    this.lastBlitzHour = -99;
+    this.collisionImmunityTimer = 2.0;
+    this.dialog.onClose = () => {
+      this.collisionImmunityTimer = 2.5;
+    };
 
     this.endModalElem = document.getElementById('end-run-modal');
     this.endTitleElem = document.getElementById('end-run-title');
@@ -91,14 +101,55 @@ export class GameManager {
 
     // 1. Advance sim clock
     this.clock.update(delta);
+    if (this.state) {
+      this.state.currentHour = this.clock.inGameHour;
+      this.state.currentHourFormatted = this.clock.formatInGameTime();
+      this.state.elapsedSeconds = this.clock.elapsed;
+    }
+    if (this.collisionImmunityTimer > 0) {
+      this.collisionImmunityTimer -= delta;
+    }
 
     // 2. Passive hourly decay (delta in sim-seconds converted to sim-hours)
-    // 600s = 24 hours => 1 sim-second = 24/600 = 0.04 hours
-    const deltaHours = delta * 0.04;
+    // 24 hours across full duration (900s => 24/900 = 0.02667 h/s)
+    const deltaHours = delta * (24.0 / this.clock.duration);
     this.state.applyPassiveDecay(deltaHours);
 
     // 3. Continuous 24h solar lighting
     this.dayCycle.update(this.clock.inGameHour);
+
+    // 3b. Dynamic São Paulo Summer Storm (16:00 - 17:15)
+    const hour = this.clock.inGameHour;
+    const inStormWindow = hour >= 16.0 && hour <= 17.25;
+    if (inStormWindow && !this.isStorming) {
+      this.isStorming = true;
+      this.dayCycle.setWeather('STORM');
+      if (this.traffic) this.traffic.setWeather('STORM');
+      if (this.sound) {
+        this.sound.playRain(true);
+        this.sound.playThunder();
+      }
+      this.hud.showToast('⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.', 6000);
+    } else if (!inStormWindow && this.isStorming) {
+      this.isStorming = false;
+      this.dayCycle.setWeather('CLEAR');
+      if (this.traffic) this.traffic.setWeather('CLEAR');
+      if (this.sound) {
+        this.sound.playRain(false);
+      }
+      this.hud.showToast('🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.', 4000);
+    }
+
+    if (this.isStorming && this.sound) {
+      this.lastThunderTime += delta;
+      if (this.lastThunderTime > 18.0) {
+        this.lastThunderTime = 0;
+        // Invariant I2 hygiene: use Math.random for cosmetic audio rumble
+        if (Math.random() < 0.4) {
+          this.sound.playThunder();
+        }
+      }
+    }
 
     // 4. Update dynamic physics bodies (soccer ball, cans)
     this.physics.updateDynamicBodies(delta);
@@ -125,13 +176,30 @@ export class GameManager {
     // 7. Traffic collision hit-test (atropelamento)
     this.checkTrafficCollision(playerPos);
 
-    // 8. Random evening event: "Dois Caras numa Moto" (sim-time gated every 10 sim-seconds)
+    // 8. Marquee evening event: "Dois Caras numa Moto" (guaranteed between 18:30 and 21:30)
     if (!this.hasMotoTriggered && this.clock.inGameHour >= 18.5 && this.clock.inGameHour <= 22.0) {
       this.motoCheckTimer += delta;
-      if (this.motoCheckTimer >= 10.0) {
+      if (this.motoCheckTimer >= 8.0) {
         this.motoCheckTimer = 0;
-        if (this.rng.chance(0.06)) {
+        const forceTrigger = this.clock.inGameHour >= 21.0;
+        if (this.rng.chance(0.12) || forceTrigger) {
           this.triggerDoisCarasMoto();
+        }
+      }
+    }
+
+    // 8b. Marquee madrugada event: "Blitz da PM" (guaranteed between 02:00 and 04:30)
+    if (
+      this.blitzCount === 0 &&
+      this.clock.inGameHour >= 2.0 &&
+      this.clock.inGameHour <= 4.5 &&
+      (!this.dialog || !this.dialog.isOpen)
+    ) {
+      const isLateMadrugada = this.clock.inGameHour >= 3.0;
+      if (this.state.perigo >= 35 || isLateMadrugada) {
+        const isSV = typeof document !== 'undefined' && document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
+        if (!isSV) {
+          this.triggerBlitzPM();
         }
       }
     }
@@ -155,6 +223,9 @@ export class GameManager {
   // Check if player gets hit by speeding car or bus on Edgar Facó (Data-Driven via WORLD_ZONES)
   checkTrafficCollision(playerPos) {
     if (!this.traffic || this.traffic.isEmptyCity) return;
+    if (this.dialog && this.dialog.isOpen) return; // Invariant: player cannot be hit during active modal dialog
+    if (this.controls && this.controls.freeze) return;
+    if (this.collisionImmunityTimer && this.collisionImmunityTimer > 0) return;
 
     const avZone = WORLD_ZONES.find(z => z.id === 'AV_EDGAR_FACCO');
     const minZ = avZone ? avZone.min.z + 0.5 : 8.5;
@@ -201,11 +272,33 @@ export class GameManager {
     });
   }
 
+  triggerBlitzPM() {
+    if (this.dialog && this.dialog.isOpen) return;
+    this.blitzCount++;
+    this.lastBlitzHour = this.clock.inGameHour;
+    if (this.sound) this.sound.playSiren();
+
+    const enc = BRAZILIAN_ENCOUNTERS.BLITZ_PM;
+    this.dialog.open({
+      title: enc.title,
+      text: enc.getIntroText(this.state),
+      options: enc.getOptions(this.state)
+    }, (opt) => {
+      const outcome = opt.execute(this.state, this.sound);
+      if (outcome) {
+        this.hud.showToast(`🚔 ${outcome}`, 6000);
+      }
+    });
+  }
+
   handleRunEnd(won, defeatData = null) {
     this.isRunActive = false;
     if (this.clock) this.clock.hasEnded = true;
     if (this.interactables) this.interactables.hidePrompt();
-    if (this.sound) this.sound.playFanfare(won);
+    if (this.sound) {
+      this.sound.playRain(false);
+      this.sound.playFanfare(won);
+    }
 
     // Release pointer lock
     if (this.controls) this.controls.isLocked = false;
@@ -222,8 +315,8 @@ export class GameManager {
       if (this.endTitleElem) this.endTitleElem.innerHTML = '🏆 VOCÊ SOBREVIVEU A 24 HORAS NO BRASIL!';
       if (this.endDescElem) {
         this.endDescElem.innerHTML = `
-          Parabéns! Você completou os 10 minutos de run intacto(a) como <strong>${this.state.className}</strong>.<br>
-          Sobreviveu ao trânsito da Edgar Facó, ao calor, aos boletos e ao flanelinha!
+          Parabéns! Você completou os 15 minutos de run intacto(a) como <strong>${this.state.className}</strong>.<br>
+          Sobreviveu ao trânsito da Edgar Facó, ao temporal de verão, aos boletos e à madrugada na quebrada!
         `;
       }
     } else {
@@ -236,12 +329,20 @@ export class GameManager {
     if (this.endStatsElem && this.state) {
       let objCompleted = false;
       if (this.state.classId === 'CLASSE_DE') {
-        objCompleted = !!(this.state.flags.cestaBasica || (this.state.grana - SOCIAL_CLASSES.CLASSE_DE.grana >= 4000));
+        objCompleted = !!(this.state.flags.cestaBasica || (this.state.flags.totalBicoGain >= 4000) || (this.state.grana - SOCIAL_CLASSES.CLASSE_DE.grana >= 4000));
       } else if (this.state.classId === 'CLASSE_C') {
         objCompleted = !!(this.state.flags.boletoPago && !this.state.flags.carroRiscado);
       } else if (this.state.classId === 'CLASSE_AB') {
         objCompleted = won && !defeatData;
       }
+
+      const notableEvents = (this.state.history || [])
+        .filter(h => !h.isDecay && h.reason !== 'Desgaste biológico/urbano contínuo' && !h.reason?.includes('Desgaste'))
+        .slice(-3);
+
+      const recentHistory = notableEvents.length > 0
+        ? notableEvents.map(h => `<li><span style="color:#888">${h.hour || h.time}</span>: ${h.desc || h.reason}</li>`).join('')
+        : '<li>Dia tranquilo em Pirituba sem grandes incidentes</li>';
 
       this.endStatsElem.innerHTML = `
         <div class="end-stat-row"><span>Classe Social:</span> <strong>${this.state.className}</strong></div>
@@ -252,6 +353,10 @@ export class GameManager {
         <div class="end-stat-row"><span>Sanidade Mental:</span> <strong>${Math.round(this.state.sanidade)}%</strong></div>
         <div class="end-stat-row"><span>Nível de B.O. / Perigo:</span> <strong>${Math.round(this.state.perigo)}%</strong></div>
         <div class="end-stat-row"><span>Ginga / Jeitinho Score:</span> <strong>${Math.round(this.state.ginga)} pts</strong></div>
+        <div style="margin-top:12px;text-align:left;background:#151515;padding:8px 12px;border:1px solid #333;border-radius:4px;font-size:12px;">
+          <strong style="color:#00ffcc">Momentos Marcantes do Dia:</strong>
+          <ul style="margin:4px 0 0 16px;padding:0;color:#bbb;">${recentHistory}</ul>
+        </div>
       `;
     }
   }

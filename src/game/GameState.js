@@ -34,6 +34,9 @@ export class GameState {
 
     // Action log for run summary
     this.history = [];
+    this.currentHour = 6.0;
+    this.currentHourFormatted = '06:00';
+    this.elapsedSeconds = 0;
 
     // Change listener
     this.listeners = [];
@@ -79,7 +82,7 @@ export class GameState {
   }
 
   // Atomic state mutation
-  apply(deltas = {}, reason = '') {
+  apply(deltas = {}, reason = '', isDecay = false) {
     const oldState = {
       grana: this.grana,
       debt: this.debt,
@@ -133,8 +136,11 @@ export class GameState {
 
     if (reason) {
       this.history.push({
-        time: Date.now(),
+        time: this.currentHourFormatted || '06:00',
+        hour: this.currentHourFormatted || '06:00',
         reason,
+        desc: reason,
+        isDecay: Boolean(isDecay || deltas.isDecay),
         deltas,
         diff: {
           grana: this.grana - oldState.grana,
@@ -172,8 +178,9 @@ export class GameState {
     if (fomePoints !== 0 || sanidadePoints !== 0) {
       this.apply({
         fome: fomePoints,
-        sanidade: sanidadePoints
-      }, 'Desgaste biológico/urbano contínuo');
+        sanidade: sanidadePoints,
+        isDecay: true
+      }, 'Desgaste biológico/urbano contínuo', true);
     }
   }
 

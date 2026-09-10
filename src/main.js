@@ -163,6 +163,7 @@ class GameApp {
       if (this.streetViewModal) this.streetViewModal.classList.add('modal-hidden');
       if (this.streetViewBtn) this.streetViewBtn.classList.remove('active');
       if (this.controls && this.controls.refreshFreeze) this.controls.refreshFreeze();
+      if (this.game) this.game.collisionImmunityTimer = 2.5;
     }
   }
 

@@ -161,6 +161,18 @@ export class PhysicsEngine {
     });
   }
 
+  // Register a static box by center and dimensions
+  addStaticBox(cx, cy, cz, sizeX, sizeY, sizeZ, type = 'solid') {
+    const halfX = sizeX / 2;
+    const halfY = sizeY / 2;
+    const halfZ = sizeZ / 2;
+    this.addBoxCollider(
+      new THREE.Vector3(cx - halfX, cy - halfY, cz - halfZ),
+      new THREE.Vector3(cx + halfX, cy + halfY, cz + halfZ),
+      type
+    );
+  }
+
   // Register a sloped ramp
   addSlope(minX, maxX, minZ, maxZ, startY, endY) {
     this.slopes.push({

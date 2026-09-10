@@ -119,5 +119,9 @@ export class DialogSystem {
         this.controls.freeze = false;
       }
     }
+
+    if (this.onClose) {
+      this.onClose();
+    }
   }
 }

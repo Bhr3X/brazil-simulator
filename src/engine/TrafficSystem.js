@@ -12,6 +12,7 @@ export class TrafficSystem {
     this.textures = textures;
 
     this.isEmptyCity = false;
+    this.weather = 'CLEAR'; // 'CLEAR' | 'STORM'
     this.trafficGroup = new THREE.Group();
     this.scene.add(this.trafficGroup);
 
@@ -22,6 +23,10 @@ export class TrafficSystem {
     this.initTrafficLight();
     this.initVehicles();
     this.initAirplane();
+  }
+
+  setWeather(mode) {
+    this.weather = mode;
   }
 
   // 1. Functional Traffic Light (Semáforo de Trânsito)
@@ -634,7 +639,7 @@ export class TrafficSystem {
     const isRedOrYellow = tl && (tl.state === 'RED' || tl.state === 'YELLOW');
 
     this.vehicles.forEach(v => {
-      let targetSpeed = v.speed;
+      let targetSpeed = this.weather === 'STORM' ? v.speed * 0.55 : v.speed;
       let braking = false;
 
       // Traffic light check for westbound & bus corridor traffic approaching intersection

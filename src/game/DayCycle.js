@@ -17,6 +17,11 @@ export class DayCycle {
       { hour: 23.5, sunCol: 0x223355, sunInt: 0.10, ambCol: 0x223355, ambInt: 0.30, skyCol: 0x060914, lights: true },
       { hour: 29.0, sunCol: 0x664433, sunInt: 0.15, ambCol: 0x223344, ambInt: 0.28, skyCol: 0x0c1424, lights: true } // wraps
     ];
+    this.weather = 'CLEAR'; // 'CLEAR' | 'STORM'
+  }
+
+  setWeather(mode) {
+    this.weather = mode;
   }
 
   update(inGameHour) {
@@ -40,25 +45,34 @@ export class DayCycle {
     const t = (h - k1.hour) / (k2.hour - k1.hour || 1.0);
 
     // Lerp colors & intensities
-    const sunColor = new THREE.Color(k1.sunCol).lerp(new THREE.Color(k2.sunCol), t);
-    const ambColor = new THREE.Color(k1.ambCol).lerp(new THREE.Color(k2.ambCol), t);
-    const skyColor = new THREE.Color(k1.skyCol).lerp(new THREE.Color(k2.skyCol), t);
+    let sunColor = new THREE.Color(k1.sunCol).lerp(new THREE.Color(k2.sunCol), t);
+    let ambColor = new THREE.Color(k1.ambCol).lerp(new THREE.Color(k2.ambCol), t);
+    let skyColor = new THREE.Color(k1.skyCol).lerp(new THREE.Color(k2.skyCol), t);
 
-    const sunIntensity = k1.sunInt + (k2.sunInt - k1.sunInt) * t;
-    const ambIntensity = k1.ambInt + (k2.ambInt - k1.ambInt) * t;
+    let sunIntensity = k1.sunInt + (k2.sunInt - k1.sunInt) * t;
+    let ambIntensity = k1.ambInt + (k2.ambInt - k1.ambInt) * t;
+
+    // Apply São Paulo summer storm modifier
+    if (this.weather === 'STORM') {
+      sunColor = new THREE.Color(0x556677);
+      sunIntensity *= 0.25;
+      ambColor = new THREE.Color(0x3a4858);
+      ambIntensity = Math.max(0.28, ambIntensity * 0.75); // Strictly enforce 0.28 ambient floor (I10)
+      skyColor = new THREE.Color(0x202630); // Dark heavy storm cloud
+    }
 
     this.city.sunLight.color.copy(sunColor);
     this.city.sunLight.intensity = sunIntensity;
 
     this.city.ambientLight.color.copy(ambColor);
-    this.city.ambientLight.intensity = Math.max(0.28, ambIntensity); // Enforce night floor for ASCII readability
+    this.city.ambientLight.intensity = Math.max(0.28, ambIntensity); // Enforce night floor for ASCII readability (I10)
 
     if (this.city.skyMesh && this.city.skyMesh.material) {
       this.city.skyMesh.material.color.copy(skyColor);
     }
 
-    // Streetlights on/off
-    const lightsOn = (h >= 18.5 || h < 6.0);
+    // Streetlights on/off (also softly on during storm)
+    const lightsOn = (h >= 18.5 || h < 6.0 || this.weather === 'STORM');
     this.city.streetLights.forEach(sl => {
       sl.light.intensity = lightsOn ? 2.2 : 0;
       sl.bulbMat.color.setHex(lightsOn ? 0xffaa22 : 0x443322);

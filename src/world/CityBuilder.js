@@ -34,6 +34,9 @@ export class CityBuilder {
     this.buildEdgarFaccoCrossing();
     this.buildPicoDoJaragua();
     this.buildStrayDog();
+    this.buildBancaDeJornal();
+    this.buildBarracaDePastel();
+    this.buildBaileDaLaje();
   }
 
   // 1. Scene Lighting & Atmospherics
@@ -1820,5 +1823,127 @@ export class CityBuilder {
     this.beaconLights.forEach(b => {
       b.visible = beaconOn;
     });
+  }
+
+  // 21. Authentic São Paulo Newsstand (Banca de Jornal do Seu Mário)
+  buildBancaDeJornal() {
+    const group = new THREE.Group();
+    const kioskMat = new THREE.MeshLambertMaterial({ color: 0x0f386b }); // Blue kiosk metal
+    const metalMat = new THREE.MeshLambertMaterial({ color: 0x4a5568 });
+    const awningMat = new THREE.MeshLambertMaterial({ color: 0x1d4ed8 });
+
+    // Main Kiosk Body
+    const bodyGeo = new THREE.BoxGeometry(2.4, 2.2, 1.8);
+    const body = new THREE.Mesh(bodyGeo, kioskMat);
+    body.position.set(7.5, 1.2, 35.8);
+    group.add(body);
+
+    // Awning Canopy overhang
+    const awningGeo = new THREE.BoxGeometry(2.6, 0.1, 1.2);
+    const awning = new THREE.Mesh(awningGeo, awningMat);
+    awning.rotation.x = 0.25;
+    awning.position.set(7.5, 2.35, 36.4);
+    group.add(awning);
+
+    // Front sign board with newspapers and magazines texture
+    const signGeo = new THREE.PlaneGeometry(2.0, 1.0);
+    const signMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createBancaJornalTexture()
+    });
+    const sign = new THREE.Mesh(signGeo, signMat);
+    sign.position.set(7.5, 1.4, 36.72);
+    group.add(sign);
+
+    this.scene.add(group);
+    if (this.physics) {
+      this.physics.addStaticBox(7.5, 1.2, 35.8, 2.6, 2.4, 2.0, 'solid');
+    }
+  }
+
+  // 22. Street Food Stall: Barraca de Pastel & Caldo de Cana da Dona Maria
+  buildBarracaDePastel() {
+    const group = new THREE.Group();
+    const counterMat = new THREE.MeshLambertMaterial({ color: 0xc4c7cc }); // Inox stainless steel
+    const awningMat = new THREE.MeshLambertMaterial({ color: 0xffcc00 }); // Yellow canvas
+    const redMat = new THREE.MeshLambertMaterial({ color: 0xd90429 });
+
+    // Counter table
+    const tableGeo = new THREE.BoxGeometry(2.2, 0.9, 1.2);
+    const table = new THREE.Mesh(tableGeo, counterMat);
+    table.position.set(-3.5, 0.55, 35.8);
+    group.add(table);
+
+    // Striped Canvas Awning Top
+    const roofGeo = new THREE.BoxGeometry(2.5, 0.08, 1.5);
+    const roof = new THREE.Mesh(roofGeo, awningMat);
+    roof.rotation.x = 0.18;
+    roof.position.set(-3.5, 2.3, 35.9);
+    group.add(roof);
+
+    // Four metal support poles
+    const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.8, 8);
+    const poleMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+    [[-4.5, 35.2], [-4.5, 36.4], [-2.5, 35.2], [-2.5, 36.4]].forEach(([px, pz]) => {
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(px, 1.3, pz);
+      group.add(pole);
+    });
+
+    // Big Oil Fryer Cauldron
+    const fryerGeo = new THREE.CylinderGeometry(0.35, 0.3, 0.35, 12);
+    const fryer = new THREE.Mesh(fryerGeo, counterMat);
+    fryer.position.set(-4.0, 1.15, 35.8);
+    group.add(fryer);
+
+    // Front sign banner
+    const signGeo = new THREE.PlaneGeometry(1.8, 0.85);
+    const signMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPastelSignTexture()
+    });
+    const sign = new THREE.Mesh(signGeo, signMat);
+    sign.position.set(-3.5, 0.55, 36.42);
+    group.add(sign);
+
+    this.scene.add(group);
+    if (this.physics) {
+      this.physics.addStaticBox(-3.5, 1.0, 35.8, 2.4, 2.2, 1.4, 'solid');
+    }
+  }
+
+  // 23. Baile da Laje no Alto do Escadão (Paredão de Som & Luz Neon)
+  buildBaileDaLaje() {
+    const group = new THREE.Group();
+    const speakerMat = new THREE.MeshLambertMaterial({ color: 0x111115 });
+    const coneMat = new THREE.MeshBasicMaterial({ color: 0x00f5d4 });
+
+    // Sound Speaker Wall (Paredão de som) in front of crest house facing the escadão
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 3; col++) {
+        const spkBox = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.6), speakerMat);
+        spkBox.position.set(-0.8 + col * 0.8, 8.4 + row * 0.8, -41.6);
+        group.add(spkBox);
+
+        const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.15, 0.05, 12), coneMat);
+        cone.rotation.x = Math.PI / 2;
+        cone.position.set(-0.8 + col * 0.8, 8.4 + row * 0.8, -41.28);
+        group.add(cone);
+      }
+    }
+
+    // Neon banner above the speaker wall
+    const signGeo = new THREE.PlaneGeometry(2.4, 1.1);
+    const signMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createBaileLajeSign()
+    });
+    const sign = new THREE.Mesh(signGeo, signMat);
+    sign.position.set(0.0, 10.4, -41.5);
+    group.add(sign);
+
+    // Blacklight Purple/Neon Point Light
+    const uvLight = new THREE.PointLight(0x9d4edd, 2.5, 14);
+    uvLight.position.set(0.0, 10.0, -39.5);
+    group.add(uvLight);
+
+    this.scene.add(group);
   }
 }

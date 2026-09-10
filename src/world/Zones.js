@@ -27,7 +27,7 @@ export const WORLD_ZONES = [
     name: 'PADARIA ESTRELA DE PIRITUBA',
     min: { x: 26.0, y: 0.0, z: 36.5 },
     max: { x: 38.0, y: 6.0, z: 47.0 },
-    openHour: 6.0,
+    openHour: 5.0,
     closeHour: 20.0,
     description: 'Café pingado no copo americano, pão na chapa com crosta de manteiga e sonho de creme.'
   },
@@ -120,6 +120,42 @@ export const WORLD_ZONES = [
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Viela estreita entre as casas de alvenaria e muros com pixação.'
+  },
+  {
+    id: 'BANCA_JORNAL',
+    name: 'BANCA DE JORNAL DO SEU MÁRIO',
+    min: { x: 5.0, y: 0.0, z: 33.5 },
+    max: { x: 10.0, y: 5.0, z: 38.5 },
+    openHour: 6.0,
+    closeHour: 20.0,
+    description: 'Banca clássica de esquina. Jornais pendurados, revistinhas da Mônica e raspadinha premiada.'
+  },
+  {
+    id: 'BARRACA_PASTEL',
+    name: 'BARRACA DE PASTEL DA DONA MARIA (FEIRA LIVRE)',
+    min: { x: -6.0, y: 0.0, z: 33.5 },
+    max: { x: -1.0, y: 5.0, z: 38.5 },
+    openHour: 6.5,
+    closeHour: 14.0, // Feira matutina
+    description: 'Pastel frito na hora estalando, garapa gelada com limão e pote de vinagrete farto.'
+  },
+  {
+    id: 'BAILE_LAJE',
+    name: 'BAILE DA LAJE (ALTO DO ESCADÃO)',
+    min: { x: -10.0, y: 6.0, z: -48.0 },
+    max: { x: 10.0, y: 15.0, z: -35.0 },
+    openHour: 1.5,
+    closeHour: 5.5, // Madrugada quebrada
+    description: 'Festa na laje da comunidade. Iluminação neon, som ecoando e ponto de encontro da madrugada.'
+  },
+  {
+    id: 'SEMAFORO_BICO',
+    name: 'SEMÁFORO DA EDGAR FACÓ (ESQUINA & FAIXA DE PEDESTRES)',
+    min: { x: -2.0, y: 0.0, z: 6.0 },
+    max: { x: 5.0, y: 4.0, z: 12.0 },
+    openHour: 7.0,
+    closeHour: 22.0,
+    description: 'Esquina arterial no semáforo da Edgar Facó. Ponto de venda de paçoca e malabares no sinal fechado.'
   }
 ];
 

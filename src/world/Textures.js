@@ -1197,5 +1197,111 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 17. Banca de Jornal do Seu Mário Texture
+  createBancaJornalTexture() {
+    const key = `banca_jornal`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+    // Dark blue / royal blue kiosk body
+    ctx.fillStyle = '#0f386b';
+    ctx.fillRect(0, 0, 256, 128);
+
+    // Header sign
+    ctx.fillStyle = '#f5f5f5';
+    ctx.fillRect(8, 8, 240, 36);
+
+    ctx.fillStyle = '#0f386b';
+    ctx.font = 'bold 16px "Arial Black", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BANCA PIRITUBA // SEU MÁRIO', 128, 32);
+
+    // Magazine covers on rack
+    const magColors = ['#e63946', '#2a9d8f', '#e76f51', '#f4a261', '#457b9d'];
+    magColors.forEach((col, i) => {
+      ctx.fillStyle = col;
+      ctx.fillRect(16 + i * 46, 52, 38, 54);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(20 + i * 46, 56, 30, 8);
+      ctx.fillStyle = '#111';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.fillText(i === 0 ? 'NOTÍCIA' : (i === 1 ? 'MÔNICA' : (i === 2 ? 'RASPE' : 'CRUZADA')), 35 + i * 46, 75);
+    });
+
+    // Yellow stickers: "RASPADINHA"
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(16, 110, 224, 12);
+    ctx.fillStyle = '#111';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.fillText('⭐ RASPADINHA DA SORTE • RECARGA BILHETE ÚNICO ⭐', 128, 120);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 18. Barraca de Pastel da Feira Texture
+  createPastelSignTexture() {
+    const key = `pastel_sign`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+    // Red and yellow feira aesthetic
+    ctx.fillStyle = '#d90429';
+    ctx.fillRect(0, 0, 256, 128);
+
+    ctx.fillStyle = '#ffdd00';
+    ctx.fillRect(8, 8, 240, 112);
+
+    ctx.fillStyle = '#d90429';
+    ctx.font = 'bold 20px "Arial Black", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PASTEL DA DONA MARIA', 128, 40);
+
+    ctx.fillStyle = '#111';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText('FRITO NA HORA • CROCANTE • VINAGRETE', 128, 68);
+
+    ctx.fillStyle = '#0b6623';
+    ctx.font = 'bold 15px "Arial Black", sans-serif';
+    ctx.fillText('🥤 CALDO DE CANA GELADO C/ LIMÃO', 128, 98);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 19. Baile da Laje Neon Sign Texture
+  createBaileLajeSign() {
+    const key = `baile_laje_sign`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+    ctx.fillStyle = '#0a0a14';
+    ctx.fillRect(0, 0, 256, 128);
+
+    // Neon borders
+    ctx.strokeStyle = '#00f5d4';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, 244, 116);
+
+    ctx.fillStyle = '#f72585';
+    ctx.font = 'bold 22px "Arial Black", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BAILE DA LAJE', 128, 45);
+
+    ctx.fillStyle = '#7209b7';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText('PIRITUBA ZONA OESTE // 100% QUEBRADA', 128, 75);
+
+    ctx.fillStyle = '#4cc9f0';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('SOM PESADO • COROTE • RIMA LIVRE', 128, 102);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 

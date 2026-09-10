@@ -1,12 +1,12 @@
 /**
- * RunClock: 10-Minute Roguelite Day Cycle
- * 600 sim-seconds = 24 in-game hours from 06:00 to 06:00.
- * Exactly 1 in-game hour = 25 sim-seconds.
+ * RunClock: 15-Minute Roguelite Day Cycle
+ * 900 sim-seconds = 24 in-game hours from 06:00 to 06:00.
+ * Exactly 1 in-game hour = 37.5 sim-seconds.
  */
 
 export class RunClock {
-  constructor(durationSeconds = 600, startHour = 6.0) {
-    this.duration = durationSeconds; // 600s
+  constructor(durationSeconds = 900, startHour = 6.0) {
+    this.duration = durationSeconds; // 900s (15 minutes)
     this.startHour = startHour;       // 06:00
     this.elapsed = 0;                 // sim-seconds elapsed
     this.isPaused = false;
@@ -96,6 +96,10 @@ export class RunClock {
   formatInGameTime() {
     const { hour, minute } = this.inGameTime;
     return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+  }
+
+  get formattedTime() {
+    return this.formatInGameTime();
   }
 
   // Time-of-day phases for visuals and encounter logic

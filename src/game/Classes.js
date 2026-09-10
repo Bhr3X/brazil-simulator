@@ -19,7 +19,8 @@ export const SOCIAL_CLASSES = {
     inventory: [
       { id: 'bu', name: 'Bilhete Único (Negativo)', desc: 'Saldo: -R$ 5,00. Precisa de recarga urgente.' },
       { id: 'chinelo', name: 'Havaianas com Prego', desc: 'Arrebentou a tira, mas foi consertada com arame.' },
-      { id: 'celular_trincado', name: 'Motorola Tela Trincada', desc: 'Bateria em 12%. Dá pra mandar WhatsApp.' }
+      { id: 'celular_trincado', name: 'Motorola Tela Trincada', desc: 'Bateria em 12%. Dá pra mandar WhatsApp.' },
+      { id: 'sacola_latinhas', name: 'Sacola com Latinhas de Alumínio', desc: 'Latinhas amassadas catadas na subida do morro. Dá pra vender na Adega do Zé.' }
     ],
     dailyObjective: 'Ganhar pelo menos R$ 40 em bicos ou conseguir cesta básica sem B.O.',
     targetWealthGain: 4000 // R$ 40,00
