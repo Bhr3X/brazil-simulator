@@ -24,7 +24,18 @@ export class DialogSystem {
 
   initEvents() {
     if (this.btnClose) {
-      this.btnClose.addEventListener('click', () => this.close());
+      this.btnClose.addEventListener('click', () => {
+        this.close();
+        this.reacquirePointerLock();
+      });
+    }
+
+    const backdrop = this.modalElem ? this.modalElem.querySelector('.modal-backdrop') : null;
+    if (backdrop) {
+      backdrop.addEventListener('click', () => {
+        this.close();
+        this.reacquirePointerLock();
+      });
     }
 
     window.addEventListener('keydown', (e) => {
@@ -40,6 +51,7 @@ export class DialogSystem {
 
       if (e.code === 'KeyQ' || e.code === 'Escape') {
         this.close();
+        this.reacquirePointerLock();
       } else if (e.code === 'Digit1' || e.code === 'Numpad1') {
         this.selectOption(0);
       } else if (e.code === 'Digit2' || e.code === 'Numpad2') {
@@ -48,6 +60,12 @@ export class DialogSystem {
         this.selectOption(2);
       } else if (e.code === 'Digit4' || e.code === 'Numpad4') {
         this.selectOption(3);
+      } else if (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyE') {
+        const opts = this.currentEncounter ? (this.currentEncounter.options || []) : [];
+        if (opts.length === 1 && !opts[0].disabled) {
+          e.preventDefault();
+          this.selectOption(0);
+        }
       }
     });
   }
@@ -228,6 +246,33 @@ export class DialogSystem {
     this.close();
     if (cb) {
       cb(opt, index);
+    }
+    // If interaction sequence finished and no follow-up modal opened, restore pointer lock
+    if (!this.isOpen) {
+      this.reacquirePointerLock();
+    }
+  }
+
+  reacquirePointerLock() {
+    if (typeof window !== 'undefined' && window.app && window.app.touch && window.app.touch.isEnabled) return;
+    if (this.isOpen) return;
+
+    const isAnyModalActive = typeof document !== 'undefined' && (
+      (document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden')) ||
+      (document.getElementById('end-run-modal') && !document.getElementById('end-run-modal').classList.contains('modal-hidden')) ||
+      (document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden')) ||
+      (document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden'))
+    );
+    if (isAnyModalActive) return;
+    if (typeof window !== 'undefined' && window.app && window.app.game && !window.app.game.isRunActive) return;
+
+    if (this.controls && typeof this.controls.requestPointerLock === 'function') {
+      this.controls.requestPointerLock();
+    } else if (typeof document !== 'undefined' && document.body && document.body.requestPointerLock) {
+      try {
+        const p = document.body.requestPointerLock();
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) {}
     }
   }
 

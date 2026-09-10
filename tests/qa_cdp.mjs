@@ -1776,6 +1776,113 @@ async function runTestSuite(url) {
       throw new Error(`TEST 23 FAILED: Bilingual language switcher test failed: ${JSON.stringify(langTest)}`);
     }
 
+    // TEST 24: Post-Interaction Pointer Lock Reacquisition & Mouse Look Continuity
+    const pointerLockTest = await evaluate(`
+      (() => {
+        // Ensure active run state and hidden end-run modal for test
+        const prevActive = window.app.game.isRunActive;
+        window.app.game.isRunActive = true;
+        const endModal = document.getElementById('end-run-modal');
+        const prevEndHidden = endModal ? endModal.classList.contains('modal-hidden') : true;
+        if (endModal) endModal.classList.add('modal-hidden');
+
+        let lockRequestedCount = 0;
+        const origRequest = window.app.controls.requestPointerLock;
+        window.app.controls.requestPointerLock = function() {
+          lockRequestedCount++;
+          if (origRequest) origRequest.apply(this, arguments);
+        };
+
+        // 1. Single-step dialog (no outcome dialog)
+        window.app.game.dialog.open({
+          id: 'TEST_ENCOUNTER_1',
+          title: 'Teste 1',
+          text: 'Teste de Opção Direta',
+          options: [
+            { label: 'Opção Direta', execute: () => null }
+          ]
+        }, (opt) => {
+          if (opt && opt.execute) opt.execute();
+        });
+
+        const openFrozen = window.app.controls.freeze === true;
+        const openIsOpen = window.app.game.dialog.isOpen === true;
+
+        // Select option 0 -> should close dialog, unfreeze controls, and re-request pointer lock
+        window.app.game.dialog.selectOption(0);
+
+        const afterSelectClosed = window.app.game.dialog.isOpen === false;
+        const afterSelectUnfrozen = window.app.controls.freeze === false;
+        const afterSelectLockedCount = lockRequestedCount;
+
+        // 2. Multi-step dialog (with outcome confirmation)
+        window.app.game.dialog.open({
+          id: 'TEST_ENCOUNTER_2',
+          title: 'Teste 2',
+          text: 'Teste com Desfecho',
+          options: [
+            { label: 'Ação com Desfecho', execute: () => 'Ação realizada com sucesso.' }
+          ]
+        }, (opt) => {
+          const outcome = opt.execute();
+          if (outcome) {
+            window.app.game.dialog.open({
+              title: 'DESFECHO DO ENCONTRO',
+              text: outcome,
+              options: [{ label: 'Continuar o dia', execute: () => {} }]
+            }, () => {});
+          }
+        });
+
+        // Select option on first dialog -> triggers outcome modal
+        window.app.game.dialog.selectOption(0);
+
+        const outcomeModalOpen = window.app.game.dialog.isOpen === true;
+        const countBeforeOutcomeDismiss = lockRequestedCount;
+
+        // Select option on outcome modal ("Continuar o dia")
+        window.app.game.dialog.selectOption(0);
+
+        const outcomeClosed = window.app.game.dialog.isOpen === false;
+        const outcomeUnfrozen = window.app.controls.freeze === false;
+        const countAfterOutcomeDismiss = lockRequestedCount;
+
+        // Restore original state
+        window.app.controls.requestPointerLock = origRequest;
+        window.app.game.isRunActive = prevActive;
+        if (endModal && !prevEndHidden) endModal.classList.remove('modal-hidden');
+
+        const ok = openFrozen &&
+          openIsOpen &&
+          afterSelectClosed &&
+          afterSelectUnfrozen &&
+          afterSelectLockedCount === 1 &&
+          outcomeModalOpen &&
+          countBeforeOutcomeDismiss === 1 &&
+          outcomeClosed &&
+          outcomeUnfrozen &&
+          countAfterOutcomeDismiss === 2;
+
+        return {
+          ok,
+          openFrozen,
+          openIsOpen,
+          afterSelectClosed,
+          afterSelectUnfrozen,
+          afterSelectLockedCount,
+          outcomeModalOpen,
+          countBeforeOutcomeDismiss,
+          outcomeClosed,
+          outcomeUnfrozen,
+          countAfterOutcomeDismiss
+        };
+      })()
+    `);
+    console.log(`[TEST 24] Post-Interaction Pointer Lock Reacquisition:`, pointerLockTest);
+    if (!pointerLockTest.ok) {
+      throw new Error(`TEST 24 FAILED: Pointer lock reacquisition failed: ${JSON.stringify(pointerLockTest)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

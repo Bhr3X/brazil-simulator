@@ -201,6 +201,9 @@ class GameApp {
       if (this.streetViewBtn) this.streetViewBtn.classList.remove('active');
       if (this.controls && this.controls.refreshFreeze) this.controls.refreshFreeze();
       if (this.game) this.game.collisionImmunityTimer = 2.5;
+      if (this.controls && typeof this.controls.requestPointerLock === 'function') {
+        this.controls.requestPointerLock();
+      }
     }
   }
 
@@ -229,6 +232,9 @@ class GameApp {
       this.syncVisualControlsUI();
     } else {
       if (this.game) this.game.collisionImmunityTimer = 2.5;
+      if (this.controls && typeof this.controls.requestPointerLock === 'function') {
+        this.controls.requestPointerLock();
+      }
     }
   }
 

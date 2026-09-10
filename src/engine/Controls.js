@@ -159,13 +159,7 @@ export class FirstPersonControls {
       if (this.refreshFreeze) this.refreshFreeze();
 
       // Attempt pointer lock gracefully
-      try {
-        const target = document.body;
-        const p = target.requestPointerLock ? target.requestPointerLock() : null;
-        if (p && p.catch) p.catch(() => {});
-      } catch (err) {
-        // Fallback to drag-to-look
-      }
+      this.requestPointerLock();
     };
 
     if (overlay) {
@@ -183,11 +177,7 @@ export class FirstPersonControls {
       if (this.freeze) return;
       if (!this.hasStarted) return;
       if (!this.isLocked) {
-        try {
-          const target = document.body;
-          const p = target.requestPointerLock ? target.requestPointerLock() : null;
-          if (p && p.catch) p.catch(() => {});
-        } catch (err) {}
+        this.requestPointerLock();
       }
     });
 
@@ -245,7 +235,7 @@ export class FirstPersonControls {
       let movementX = 0;
       let movementY = 0;
 
-      if (this.isLocked) {
+      if (this.isLocked || (typeof document !== 'undefined' && !!document.pointerLockElement)) {
         movementX = e.movementX || 0;
         movementY = e.movementY || 0;
       } else if (this.isMouseDown) {
@@ -389,6 +379,17 @@ export class FirstPersonControls {
         this.isCrouching = false;
         break;
     }
+  }
+
+  requestPointerLock() {
+    if (typeof window !== 'undefined' && window.app && window.app.touch && window.app.touch.isEnabled) return;
+    if (this.freeze) return;
+    if (!this.hasStarted) return;
+    try {
+      const target = document.body;
+      const p = target.requestPointerLock ? target.requestPointerLock() : null;
+      if (p && p.catch) p.catch(() => {});
+    } catch (err) {}
   }
 
   setFreeze(source, isFrozen) {
