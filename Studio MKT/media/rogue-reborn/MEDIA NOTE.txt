@@ -1,0 +1,3 @@
+Existing listing media reused. These videos show earlier real Wilds gameplay, not a new recording of the Act II evolution patch.
+Three covers preserve the empty top-left area. Videos: silent H.264, 15.9 seconds each, landscape 1920x1080 and portrait 1080x1620.
+Current specifications checked: https://docs.crazygames.com/requirements/game-covers/

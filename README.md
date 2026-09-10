@@ -1,8 +1,9 @@
 # Brazil Simulator // Sobrevivência BR (Pirituba, SP)
 
 > **Um simulador de sobrevivência imersivo 3D / ASCII na quebrada paulistana.**  
-> Ambientado no clássico cruzamento da **Avenida General Edgar Facó com a Rua Paula Ferreira** em Pirituba, São Paulo.
+> Desenvolvido pelo estúdio **[game.md](https://bhr3x.github.io/game.md/)** • Ambientado no clássico cruzamento da **Avenida General Edgar Facó com a Rua Paula Ferreira** em Pirituba, São Paulo.
 
+[![Studio game.md](https://img.shields.io/badge/👾_ESTÚDIO-game.md-38bdf8?style=for-the-badge)](https://bhr3x.github.io/game.md/)
 [![Play Online](https://img.shields.io/badge/🎮_JOGAR_ONLINE-GitHub_Pages-brightgreen?style=for-the-badge)](https://bhr3x.github.io/brazil-simulator/)
 [![Standalone Bundle](https://img.shields.io/badge/📦_VERSÃO_STANDALONE-Single_File_HTML-blue?style=for-the-badge)](https://bhr3x.github.io/brazil-simulator/pirituba_standalone.html)
 
@@ -46,6 +47,7 @@ Zero arquivos de áudio externos. Síntese procedural em tempo real:
 ## 🎨 Ajustes Visuais & Parâmetros em Tempo Real
 Pressione `[P]` a qualquer momento para abrir o painel de nitidez:
 * **Densidade de Caracteres (`[` / `]`)**: De retrô blocudo (0.6x) até micro-ASCII ultra nítido estilo pixel art (2.4x).
+* **Profundidade 3D (Tamanho com Distância)**: Reduz o tamanho dos caracteres mais distantes (de 1.30x em primeiro plano até 0.35x no horizonte), gerando profundidade óptica real.
 * **Brilho (`-` / `+`) & Contraste Dinâmico**: Curva S suave que preserva o piso de leitura noturna.
 * **Clareamento de Sombras (Gamma)**: Enxergue becos escuros sem estourar as luzes.
 * **Realce de Bordas (Edge Detection)**: Detecção de gradiente 2D destacando silhuetas de prédios, carros e postes.

@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Studio MKT // itch.io Individual Game Page Custom Stylesheet
+   ========================================================================== */
+
+:root {
+  --game-bg: #090b10;
+  --panel-surface: #12161f;
+  --border-line: #222938;
+  --accent-neon: #38bdf8;
+  --text-bright: #ffffff;
+  --text-soft: #94a3b8;
+}
+
+body {
+  background: var(--game-bg) !important;
+  color: var(--text-bright) !important;
+}
+
+/* HTML5 Game Viewport Frame */
+#html_embed_widget {
+  background: #000000 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid var(--border-line) !important;
+  overflow: hidden !important;
+  margin-bottom: 24px !important;
+}
+
+/* Play/Launch Button */
+.load_iframe_btn {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 1.1rem !important;
+  padding: 16px 36px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4) !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.load_iframe_btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 25px rgba(2, 132, 199, 0.6) !important;
+}
+
+/* Description & Content Typography */
+.formatted_description {
+  font-size: 1.05rem !important;
+  line-height: 1.75 !important;
+  color: #cbd5e1 !important;
+}
+
+.formatted_description h3 {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid var(--border-line) !important;
+  padding-bottom: 8px !important;
+  margin-top: 24px !important;
+}
+
+.formatted_description h4 {
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  color: var(--accent-neon) !important;
+  margin-top: 18px !important;
+}
+
+.formatted_description ul {
+  padding-left: 20px !important;
+}
+
+.formatted_description li {
+  margin-bottom: 6px !important;
+}
+
+.formatted_description code {
+  background: #1e293b !important;
+  color: #38bdf8 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 0.9em !important;
+}

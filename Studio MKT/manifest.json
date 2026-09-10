@@ -1,0 +1,127 @@
+{
+  "studio": {
+    "name": "game.md",
+    "handle": "gamemd",
+    "url": "https://gamemd.itch.io",
+    "website": "https://bhr3x.github.io/game.md/",
+    "tagline": "Experimental browser-native engines, roguelites, and procedural worlds."
+  },
+  "games": [
+    {
+      "id": "game-md",
+      "slug": "game-md",
+      "title": "game.md",
+      "tagline": "You are an LLM agent trapped in an unfinished platformer. Fix the world to survive.",
+      "genre": "Platformer",
+      "tags": ["2d", "minimalist", "procedural", "roguelite", "singleplayer", "pixel-art", "experimental"],
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "responsive": true,
+        "fullscreen": true,
+        "orientation": "default"
+      },
+      "bundle": "bundles/game-md.zip",
+      "version": "1.11.2",
+      "itch_id": 4991790,
+      "itch_url": "https://gamemd.itch.io/game-md",
+      "status": "ready_to_push"
+    },
+    {
+      "id": "brazil-simulator",
+      "slug": "brazil-simulator",
+      "title": "Brazil Simulator // Sobrevivência BR",
+      "tagline": "Immersive 3D/ASCII survival simulator set in Pirituba, São Paulo. Survive the day, deliver the bread, dodge the flanelinha.",
+      "genre": "Simulation",
+      "tags": ["3d", "ascii", "survival", "first-person", "third-person", "retro", "brazil", "open-world"],
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "responsive": true,
+        "fullscreen": true,
+        "orientation": "landscape"
+      },
+      "bundle": "bundles/brazil-simulator.zip",
+      "version": "1.0.0",
+      "itch_url": "https://gamemd.itch.io/brazil-simulator",
+      "status": "ready_to_push"
+    },
+    {
+      "id": "rogue-chronicles",
+      "slug": "rogue-chronicles",
+      "title": "Rogue Chronicles: The Becoming",
+      "tagline": "Fast-paced 10-minute dark fantasy roguelite gauntlet. Master mutations, purge the depths, break the cycle.",
+      "genre": "Action Roguelike",
+      "tags": ["roguelike", "dark-fantasy", "action", "pixel-art", "fast-paced", "permadeath", "dungeon-crawler"],
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "responsive": true,
+        "fullscreen": true,
+        "orientation": "landscape"
+      },
+      "bundle": "bundles/rogue-reborn.zip",
+      "version": "0.3.0",
+      "itch_id": 4751716,
+      "itch_url": "https://gamemd.itch.io/rogue-chronicles",
+      "status": "ready_to_push"
+    },
+    {
+      "id": "vegan-t-rex",
+      "slug": "vegan-t-rex",
+      "title": "Vegan T-Rex: A Matter of Principle",
+      "tagline": "High-octane comedic 2D arcade fighter. Pick your fighter, unleash ferocious veggie combos, and prove your principles.",
+      "genre": "Fighting",
+      "tags": ["fighting", "arcade", "comedy", "2d-fighter", "dinosaurs", "pixel-art", "local-multiplayer"],
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "responsive": true,
+        "fullscreen": true,
+        "orientation": "landscape"
+      },
+      "bundle": "bundles/vegan-t-rex.zip",
+      "version": "0.5.0",
+      "itch_url": "https://gamemd.itch.io/vegan-t-rex",
+      "status": "ready_to_push"
+    },
+    {
+      "id": "mythocondria",
+      "slug": "mythocondria",
+      "title": "Mythocondria",
+      "tagline": "A lineage under a dark-field microscope. Ten minutes from an ancient spark to the emergence of the mitochondrion.",
+      "genre": "Strategy",
+      "tags": ["microscopic", "cellular", "evolution", "ambient", "minimalist", "science", "simulation"],
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "responsive": true,
+        "fullscreen": true,
+        "orientation": "landscape"
+      },
+      "bundle": "bundles/mythocondria.zip",
+      "version": "0.1.0",
+      "itch_url": "https://gamemd.itch.io/mythocondria",
+      "status": "ready_to_push"
+    },
+    {
+      "id": "1894",
+      "slug": "1894-airstrip-one",
+      "title": "1894: Airstrip One",
+      "tagline": "First-person retro visual novel under total surveillance. Every word is monitored.",
+      "genre": "Visual Novel",
+      "tags": ["dystopian", "narrative", "first-person", "retro", "psychological", "cyberpunk"],
+      "viewport": {
+        "width": 1280,
+        "height": 720,
+        "responsive": true,
+        "fullscreen": true,
+        "orientation": "landscape"
+      },
+      "bundle": "bundles/1894.zip",
+      "version": "1.0.0",
+      "itch_url": "https://gamemd.itch.io/1894-airstrip-one",
+      "status": "ready_to_push"
+    }
+  ]
+}

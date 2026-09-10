@@ -207,6 +207,27 @@ html, body {
   backdrop-filter: blur(6px);
 }
 
+.studio-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.studio-badge a {
+  color: #38bdf8;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.studio-badge a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 18px #38bdf8;
+}
+
 .start-title {
   font-family: 'VT323', monospace;
   font-size: 56px;

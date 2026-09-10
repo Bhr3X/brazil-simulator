@@ -214,6 +214,27 @@ html, body {
   backdrop-filter: blur(6px);
 }
 
+.studio-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: #38bdf8;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.studio-badge a {
+  color: #38bdf8;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.studio-badge a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 18px #38bdf8;
+}
+
 .start-title {
   font-family: 'VT323', monospace;
   font-size: 56px;
@@ -1277,6 +1298,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
       <strong id="hud-radio">AUTO (ZONAS)</strong>
       <small style="opacity:0.7">[N]</small>
     </button>
+    <a class="hud-btn" id="btn-studio" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="text-decoration:none; border-color:#38bdf8; color:#38bdf8;" title="Visitar estúdio game.md">
+      <span>👾 ESTÚDIO: game.md ↗</span>
+    </a>
   </div>
 
   <!-- Top Center: Survival HUD Status Dashboard -->
@@ -1495,6 +1519,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
               <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
             </div>
 
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-depth">🔭 Profundidade 3D (Tamanho com Distância)</label>
+                <span class="slider-val" id="val-depth">1.0x</span>
+              </div>
+              <input type="range" id="slider-depth" min="0.0" max="2.0" step="0.1" value="1.0">
+              <div class="slider-hint">Reduz o tamanho dos caracteres mais distantes, criando perspectiva e profundidade real</div>
+            </div>
+
             <div class="toggle-group">
               <label class="toggle-label">
                 <input type="checkbox" id="chk-edges" checked>
@@ -1537,11 +1570,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
   <!-- Click to Start / Resume Overlay -->
   <div id="click-overlay">
+    <div class="studio-badge"><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer">★ game.md PRESENTS ★</a></div>
     <div class="start-title">PIRITUBA // FAVELA SUBURBS</div>
-    <div class="start-subtitle">MOTOR DE PRIMEIRA PESSOA EM ASCII & 3D</div>
+    <div class="start-subtitle">MOTOR DE 1ª & 3ª PESSOA EM ASCII & 3D</div>
     <div class="start-prompt">CLIQUE AQUI PARA ENTRAR // CLICK TO PLAY</div>
     <div class="credits-footer">
-      Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
+      Desenvolvido por <strong><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">game.md</a></strong> • Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
       Explore os becos, o escadão, a laje com caixas d'água Fortlev, o boteco e a vista para o Pico do Jaraguá.
     </div>
   </div>
@@ -5379,6 +5413,7 @@ const DEFAULT_VISUAL_PARAMS = {
   contrast: 1.0,          // 0.5 to 2.5 (contrast expansion)
   gamma: 1.0,             // 0.6 to 2.2 (shadow lift)
   saturation: 1.0,        // 0.0 to 2.5 (color vibrancy)
+  depthScale: 1.0,        // 0.0 to 2.0 (spatial perspective glyph scaling)
   edgeEnhance: true,      // 2D spatial gradient edge outline detection
   edgeThreshold: 0.10,    // sensitivity
   edgeStrength: 1.2,      // outline brightness boost
@@ -5508,6 +5543,9 @@ class CityRenderer {
             if (typeof parsed.saturation === 'number' && !isNaN(parsed.saturation)) {
               this.params.saturation = Math.max(0.0, Math.min(2.5, parsed.saturation));
             }
+            if (typeof parsed.depthScale === 'number' && !isNaN(parsed.depthScale)) {
+              this.params.depthScale = Math.max(0.0, Math.min(2.0, parsed.depthScale));
+            }
             if (typeof parsed.edgeEnhance === 'boolean') {
               this.params.edgeEnhance = parsed.edgeEnhance;
             }
@@ -5563,8 +5601,27 @@ class CityRenderer {
     this.asciiCanvas.height = height;
 
     const fontSize = Math.max(6, this.charH - 1);
+    this.baseFontSize = fontSize;
+    this.updateDepthFontTiers();
     this.asciiCtx.font = `bold ${fontSize}px "Courier New", monospace`;
     this.asciiCtx.textBaseline = 'top';
+  }
+
+  updateDepthFontTiers() {
+    const baseSize = this.baseFontSize || Math.max(6, this.charH - 1);
+    const depthFactor = typeof this.params.depthScale === 'number' ? this.params.depthScale : 1.0;
+
+    // 6-tier quantization: Tier 0 (<8m) down to Tier 5 (>250m)
+    const rawScales = [1.30, 1.10, 0.90, 0.70, 0.50, 0.35];
+    this.depthFontTiers = rawScales.map((baseScale) => {
+      const effectiveScale = Math.max(0.2, 1.0 + (baseScale - 1.0) * depthFactor);
+      const sizePx = Math.max(3, Math.round(baseSize * effectiveScale));
+      return {
+        scale: effectiveScale,
+        font: `bold ${sizePx}px "Courier New", monospace`,
+        sizePx
+      };
+    });
   }
 
   onWindowResize() {
@@ -5582,6 +5639,8 @@ class CityRenderer {
 
     if (newParams.density !== undefined && newParams.density !== oldDensity) {
       this.updateGridSize();
+    } else if (newParams.depthScale !== undefined) {
+      this.updateDepthFontTiers();
     }
 
     this.saveParams();
@@ -5665,8 +5724,42 @@ class CityRenderer {
     if (isMatrix) ctx.fillStyle = '#00ff66';
     if (isAmber) ctx.fillStyle = '#ffb300';
 
+    const depthScale = typeof this.params.depthScale === 'number' ? this.params.depthScale : 1.0;
+    const pitch = (this.camera && this.camera.rotation) ? this.camera.rotation.x : 0;
+    const fov = (this.camera && this.camera.fov) ? (this.camera.fov * Math.PI / 180) : (70 * Math.PI / 180);
+    const camY = (this.camera && this.camera.position) ? this.camera.position.y : 1.8;
+
+    let currentFontTier = -1;
+
     for (let r = 0; r < rows; r++) {
-      const posY = r * charH;
+      let rowTier = 2; // Default mid-distance
+      if (depthScale > 0.02) {
+        const angleY = ((r + 0.5) / rows - 0.5) * fov;
+        const rayAngleDown = -(pitch + angleY);
+        if (rayAngleDown > 0.03) {
+          const dist = Math.max(1.0, Math.min(300.0, camY / Math.sin(rayAngleDown)));
+          if (dist < 7.0) rowTier = 0;
+          else if (dist < 18.0) rowTier = 1;
+          else if (dist < 42.0) rowTier = 2;
+          else if (dist < 90.0) rowTier = 3;
+          else if (dist < 180.0) rowTier = 4;
+          else rowTier = 5;
+        } else {
+          // Horizon & sky/distant mountains
+          rowTier = 5;
+        }
+      }
+
+      if (rowTier !== currentFontTier && this.depthFontTiers && this.depthFontTiers[rowTier]) {
+        ctx.font = this.depthFontTiers[rowTier].font;
+        currentFontTier = rowTier;
+      }
+
+      const tierInfo = (this.depthFontTiers && this.depthFontTiers[rowTier]) ? this.depthFontTiers[rowTier] : { scale: 1.0 };
+      const scale = tierInfo.scale;
+      const glyphW = charW * scale;
+      const glyphH = charH * scale;
+      const posY = r * charH + (charH - glyphH) * 0.5;
       const rowOffset = r * cols * 4;
 
       for (let c = 0; c < cols; c++) {
@@ -5712,7 +5805,7 @@ class CityRenderer {
         // 6. Character selection from active ramp
         const rampIdx = Math.min(rampLen - 1, Math.floor(lum * rampLen));
         const char = ramp[rampIdx];
-        const posX = c * charW;
+        const posX = c * charW + (charW - glyphW) * 0.5;
 
         if (isColor) {
           // Saturation and brightness adjustments on RGB
@@ -10833,12 +10926,14 @@ class GameApp {
     const edgeChk = document.getElementById('chk-edges');
     const rampSelect = document.getElementById('select-ramp');
     const scanlineChk = document.getElementById('chk-scanlines');
+    const depthSlider = document.getElementById('slider-depth');
 
     if (densitySlider) densitySlider.value = params.density;
     if (brightnessSlider) brightnessSlider.value = params.brightness;
     if (contrastSlider) contrastSlider.value = params.contrast;
     if (gammaSlider) gammaSlider.value = params.gamma;
     if (saturationSlider) saturationSlider.value = params.saturation;
+    if (depthSlider) depthSlider.value = params.depthScale !== undefined ? params.depthScale : 1.0;
     if (edgeChk) edgeChk.checked = !!params.edgeEnhance;
     if (rampSelect) rampSelect.value = params.rampType || 'DETAILED';
     if (scanlineChk) scanlineChk.checked = !!params.scanlines;
@@ -10853,12 +10948,14 @@ class GameApp {
     const valContrast = document.getElementById('val-contrast');
     const valGamma = document.getElementById('val-gamma');
     const valSaturation = document.getElementById('val-saturation');
+    const valDepth = document.getElementById('val-depth');
 
     if (valDensity) valDensity.textContent = `${Number(params.density).toFixed(1)}x (${this.renderer.charW}px)`;
     if (valBrightness) valBrightness.textContent = `${Number(params.brightness).toFixed(2)}x`;
     if (valContrast) valContrast.textContent = `${Number(params.contrast).toFixed(2)}x`;
     if (valGamma) valGamma.textContent = `${Number(params.gamma).toFixed(2)}x`;
     if (valSaturation) valSaturation.textContent = `${Number(params.saturation).toFixed(2)}x`;
+    if (valDepth) valDepth.textContent = `${Number(params.depthScale !== undefined ? params.depthScale : 1.0).toFixed(1)}x`;
 
     // Keep slider thumbs synchronized when modified via hotkeys or presets
     const sliderDensity = document.getElementById('slider-density');
@@ -10866,12 +10963,14 @@ class GameApp {
     const sliderContrast = document.getElementById('slider-contrast');
     const sliderGamma = document.getElementById('slider-gamma');
     const sliderSaturation = document.getElementById('slider-saturation');
+    const sliderDepth = document.getElementById('slider-depth');
 
     if (sliderDensity && document.activeElement !== sliderDensity) sliderDensity.value = params.density;
     if (sliderBrightness && document.activeElement !== sliderBrightness) sliderBrightness.value = params.brightness;
     if (sliderContrast && document.activeElement !== sliderContrast) sliderContrast.value = params.contrast;
     if (sliderGamma && document.activeElement !== sliderGamma) sliderGamma.value = params.gamma;
     if (sliderSaturation && document.activeElement !== sliderSaturation) sliderSaturation.value = params.saturation;
+    if (sliderDepth && document.activeElement !== sliderDepth) sliderDepth.value = params.depthScale !== undefined ? params.depthScale : 1.0;
   }
 
   initUI() {
@@ -10978,6 +11077,14 @@ class GameApp {
     if (saturationSlider) {
       saturationSlider.addEventListener('input', (e) => {
         this.renderer.setVisualParams({ saturation: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const depthSlider = document.getElementById('slider-depth');
+    if (depthSlider) {
+      depthSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ depthScale: parseFloat(e.target.value) });
         this.updateVisualReadouts();
       });
     }

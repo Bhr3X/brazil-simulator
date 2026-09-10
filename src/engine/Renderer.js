@@ -19,6 +19,7 @@ export const DEFAULT_VISUAL_PARAMS = {
   contrast: 1.0,          // 0.5 to 2.5 (contrast expansion)
   gamma: 1.0,             // 0.6 to 2.2 (shadow lift)
   saturation: 1.0,        // 0.0 to 2.5 (color vibrancy)
+  depthScale: 1.0,        // 0.0 to 2.0 (spatial perspective glyph scaling)
   edgeEnhance: true,      // 2D spatial gradient edge outline detection
   edgeThreshold: 0.10,    // sensitivity
   edgeStrength: 1.2,      // outline brightness boost
@@ -148,6 +149,9 @@ export class CityRenderer {
             if (typeof parsed.saturation === 'number' && !isNaN(parsed.saturation)) {
               this.params.saturation = Math.max(0.0, Math.min(2.5, parsed.saturation));
             }
+            if (typeof parsed.depthScale === 'number' && !isNaN(parsed.depthScale)) {
+              this.params.depthScale = Math.max(0.0, Math.min(2.0, parsed.depthScale));
+            }
             if (typeof parsed.edgeEnhance === 'boolean') {
               this.params.edgeEnhance = parsed.edgeEnhance;
             }
@@ -203,8 +207,27 @@ export class CityRenderer {
     this.asciiCanvas.height = height;
 
     const fontSize = Math.max(6, this.charH - 1);
+    this.baseFontSize = fontSize;
+    this.updateDepthFontTiers();
     this.asciiCtx.font = `bold ${fontSize}px "Courier New", monospace`;
     this.asciiCtx.textBaseline = 'top';
+  }
+
+  updateDepthFontTiers() {
+    const baseSize = this.baseFontSize || Math.max(6, this.charH - 1);
+    const depthFactor = typeof this.params.depthScale === 'number' ? this.params.depthScale : 1.0;
+
+    // 6-tier quantization: Tier 0 (<8m) down to Tier 5 (>250m)
+    const rawScales = [1.30, 1.10, 0.90, 0.70, 0.50, 0.35];
+    this.depthFontTiers = rawScales.map((baseScale) => {
+      const effectiveScale = Math.max(0.2, 1.0 + (baseScale - 1.0) * depthFactor);
+      const sizePx = Math.max(3, Math.round(baseSize * effectiveScale));
+      return {
+        scale: effectiveScale,
+        font: `bold ${sizePx}px "Courier New", monospace`,
+        sizePx
+      };
+    });
   }
 
   onWindowResize() {
@@ -222,6 +245,8 @@ export class CityRenderer {
 
     if (newParams.density !== undefined && newParams.density !== oldDensity) {
       this.updateGridSize();
+    } else if (newParams.depthScale !== undefined) {
+      this.updateDepthFontTiers();
     }
 
     this.saveParams();
@@ -305,8 +330,42 @@ export class CityRenderer {
     if (isMatrix) ctx.fillStyle = '#00ff66';
     if (isAmber) ctx.fillStyle = '#ffb300';
 
+    const depthScale = typeof this.params.depthScale === 'number' ? this.params.depthScale : 1.0;
+    const pitch = (this.camera && this.camera.rotation) ? this.camera.rotation.x : 0;
+    const fov = (this.camera && this.camera.fov) ? (this.camera.fov * Math.PI / 180) : (70 * Math.PI / 180);
+    const camY = (this.camera && this.camera.position) ? this.camera.position.y : 1.8;
+
+    let currentFontTier = -1;
+
     for (let r = 0; r < rows; r++) {
-      const posY = r * charH;
+      let rowTier = 2; // Default mid-distance
+      if (depthScale > 0.02) {
+        const angleY = ((r + 0.5) / rows - 0.5) * fov;
+        const rayAngleDown = -(pitch + angleY);
+        if (rayAngleDown > 0.03) {
+          const dist = Math.max(1.0, Math.min(300.0, camY / Math.sin(rayAngleDown)));
+          if (dist < 7.0) rowTier = 0;
+          else if (dist < 18.0) rowTier = 1;
+          else if (dist < 42.0) rowTier = 2;
+          else if (dist < 90.0) rowTier = 3;
+          else if (dist < 180.0) rowTier = 4;
+          else rowTier = 5;
+        } else {
+          // Horizon & sky/distant mountains
+          rowTier = 5;
+        }
+      }
+
+      if (rowTier !== currentFontTier && this.depthFontTiers && this.depthFontTiers[rowTier]) {
+        ctx.font = this.depthFontTiers[rowTier].font;
+        currentFontTier = rowTier;
+      }
+
+      const tierInfo = (this.depthFontTiers && this.depthFontTiers[rowTier]) ? this.depthFontTiers[rowTier] : { scale: 1.0 };
+      const scale = tierInfo.scale;
+      const glyphW = charW * scale;
+      const glyphH = charH * scale;
+      const posY = r * charH + (charH - glyphH) * 0.5;
       const rowOffset = r * cols * 4;
 
       for (let c = 0; c < cols; c++) {
@@ -352,7 +411,7 @@ export class CityRenderer {
         // 6. Character selection from active ramp
         const rampIdx = Math.min(rampLen - 1, Math.floor(lum * rampLen));
         const char = ramp[rampIdx];
-        const posX = c * charW;
+        const posX = c * charW + (charW - glyphW) * 0.5;
 
         if (isColor) {
           // Saturation and brightness adjustments on RGB

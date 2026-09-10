@@ -68,6 +68,9 @@
       <strong id="hud-radio">AUTO (ZONAS)</strong>
       <small style="opacity:0.7">[N]</small>
     </button>
+    <a class="hud-btn" id="btn-studio" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="text-decoration:none; border-color:#38bdf8; color:#38bdf8;" title="Visitar estúdio game.md">
+      <span>👾 ESTÚDIO: game.md ↗</span>
+    </a>
   </div>
 
   <!-- Top Center: Survival HUD Status Dashboard -->
@@ -286,6 +289,15 @@
               <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
             </div>
 
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-depth">🔭 Profundidade 3D (Tamanho com Distância)</label>
+                <span class="slider-val" id="val-depth">1.0x</span>
+              </div>
+              <input type="range" id="slider-depth" min="0.0" max="2.0" step="0.1" value="1.0">
+              <div class="slider-hint">Reduz o tamanho dos caracteres mais distantes, criando perspectiva e profundidade real</div>
+            </div>
+
             <div class="toggle-group">
               <label class="toggle-label">
                 <input type="checkbox" id="chk-edges" checked>
@@ -328,11 +340,12 @@
 
   <!-- Click to Start / Resume Overlay -->
   <div id="click-overlay">
+    <div class="studio-badge"><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer">★ game.md PRESENTS ★</a></div>
     <div class="start-title">PIRITUBA // FAVELA SUBURBS</div>
-    <div class="start-subtitle">MOTOR DE PRIMEIRA PESSOA EM ASCII & 3D</div>
+    <div class="start-subtitle">MOTOR DE 1ª & 3ª PESSOA EM ASCII & 3D</div>
     <div class="start-prompt">CLIQUE AQUI PARA ENTRAR // CLICK TO PLAY</div>
     <div class="credits-footer">
-      Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
+      Desenvolvido por <strong><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">game.md</a></strong> • Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
       Explore os becos, o escadão, a laje com caixas d'água Fortlev, o boteco e a vista para o Pico do Jaraguá.
     </div>
   </div>

@@ -516,6 +516,93 @@ async function runTestSuite(url) {
       throw new Error(`TEST 2e FAILED: 3rd person mode test failed: ${JSON.stringify(thirdPersonTest)}`);
     }
 
+    // TEST 2f: Depth-Scaled Monospace Quantization & Studio Branding Parity
+    const depthStudioTest = await evaluate(`
+      (() => {
+        const app = window.app;
+        const renderer = app.renderer;
+        if (!renderer || !renderer.params) return { error: 'renderer params missing' };
+
+        // 1. Initial depth scale & tier verification
+        const initialDepth = renderer.params.depthScale;
+        const initialTiers = renderer.depthFontTiers ? renderer.depthFontTiers.map(t => ({ scale: t.scale, sizePx: t.sizePx })) : null;
+
+        // 2. Set depthScale to 1.8x
+        renderer.setVisualParams({ depthScale: 1.8 });
+        app.syncVisualControlsUI();
+        const highDepth = renderer.params.depthScale;
+        const highTiers = renderer.depthFontTiers.map(t => ({ scale: t.scale, sizePx: t.sizePx }));
+        const sliderValAfterSet = Number(document.getElementById('slider-depth')?.value);
+        const readoutTextAfterSet = document.getElementById('val-depth')?.textContent;
+
+        // 3. Set depthScale via slider DOM event
+        const depthSlider = document.getElementById('slider-depth');
+        if (depthSlider) {
+          depthSlider.value = '0.5';
+          depthSlider.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        const sliderInputDepth = renderer.params.depthScale;
+        const sliderInputReadout = document.getElementById('val-depth')?.textContent;
+
+        // 4. Flatten depthScale to 0.0 (uniform font scaling across all depth bands)
+        renderer.setVisualParams({ depthScale: 0.0 });
+        const flatTiers = renderer.depthFontTiers.map(t => t.scale);
+        const allFlatOne = flatTiers.every(s => Math.abs(s - 1.0) < 0.001);
+
+        // 5. Reset params
+        renderer.resetVisualParams();
+        app.syncVisualControlsUI();
+        const resetDepth = renderer.params.depthScale;
+
+        // 6. Studio Branding & Attribution Verification
+        const btnStudio = document.getElementById('btn-studio');
+        const studioBadge = document.querySelector('.studio-badge a');
+        const studioBtnHref = btnStudio ? btnStudio.getAttribute('href') : null;
+        const studioBtnText = btnStudio ? btnStudio.textContent : null;
+        const studioBadgeHref = studioBadge ? studioBadge.getAttribute('href') : null;
+        const studioBadgeText = studioBadge ? studioBadge.textContent : null;
+
+        return {
+          ok: true,
+          initialDepth,
+          initialTiersCount: initialTiers ? initialTiers.length : 0,
+          highDepth,
+          highTiersCount: highTiers ? highTiers.length : 0,
+          highDistantTierSmaller: highTiers && highTiers[5].sizePx < highTiers[0].sizePx,
+          sliderValAfterSet,
+          readoutTextAfterSet,
+          sliderInputDepth,
+          sliderInputReadout,
+          allFlatOne,
+          resetDepth,
+          studioBtnHref,
+          studioBtnText,
+          studioBadgeHref,
+          studioBadgeText
+        };
+      })()
+    `);
+    console.log('[TEST 2f] Depth-Scaled ASCII Perspective & Studio Branding:', depthStudioTest);
+    if (
+      !depthStudioTest.ok ||
+      depthStudioTest.initialDepth !== 1.0 ||
+      depthStudioTest.initialTiersCount !== 6 ||
+      depthStudioTest.highDepth !== 1.8 ||
+      !depthStudioTest.highDistantTierSmaller ||
+      Math.abs(depthStudioTest.sliderValAfterSet - 1.8) > 0.05 ||
+      !depthStudioTest.readoutTextAfterSet?.includes('1.8x') ||
+      Math.abs(depthStudioTest.sliderInputDepth - 0.5) > 0.05 ||
+      !depthStudioTest.sliderInputReadout?.includes('0.5x') ||
+      !depthStudioTest.allFlatOne ||
+      depthStudioTest.resetDepth !== 1.0 ||
+      depthStudioTest.studioBtnHref !== 'https://bhr3x.github.io/game.md/' ||
+      !depthStudioTest.studioBtnText?.includes('game.md') ||
+      depthStudioTest.studioBadgeHref !== 'https://bhr3x.github.io/game.md/' ||
+      !depthStudioTest.studioBadgeText?.includes('game.md')
+    ) {
+      throw new Error(`TEST 2f FAILED: Depth perspective & studio branding test failed: ${JSON.stringify(depthStudioTest)}`);
+    }
+
     // TEST 3: Clock advancement & Exploit Prevention
     // 3a. Forward-only RunClock monotonicity
     await evaluate(`

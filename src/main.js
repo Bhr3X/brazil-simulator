@@ -208,12 +208,14 @@ class GameApp {
     const edgeChk = document.getElementById('chk-edges');
     const rampSelect = document.getElementById('select-ramp');
     const scanlineChk = document.getElementById('chk-scanlines');
+    const depthSlider = document.getElementById('slider-depth');
 
     if (densitySlider) densitySlider.value = params.density;
     if (brightnessSlider) brightnessSlider.value = params.brightness;
     if (contrastSlider) contrastSlider.value = params.contrast;
     if (gammaSlider) gammaSlider.value = params.gamma;
     if (saturationSlider) saturationSlider.value = params.saturation;
+    if (depthSlider) depthSlider.value = params.depthScale !== undefined ? params.depthScale : 1.0;
     if (edgeChk) edgeChk.checked = !!params.edgeEnhance;
     if (rampSelect) rampSelect.value = params.rampType || 'DETAILED';
     if (scanlineChk) scanlineChk.checked = !!params.scanlines;
@@ -228,12 +230,14 @@ class GameApp {
     const valContrast = document.getElementById('val-contrast');
     const valGamma = document.getElementById('val-gamma');
     const valSaturation = document.getElementById('val-saturation');
+    const valDepth = document.getElementById('val-depth');
 
     if (valDensity) valDensity.textContent = `${Number(params.density).toFixed(1)}x (${this.renderer.charW}px)`;
     if (valBrightness) valBrightness.textContent = `${Number(params.brightness).toFixed(2)}x`;
     if (valContrast) valContrast.textContent = `${Number(params.contrast).toFixed(2)}x`;
     if (valGamma) valGamma.textContent = `${Number(params.gamma).toFixed(2)}x`;
     if (valSaturation) valSaturation.textContent = `${Number(params.saturation).toFixed(2)}x`;
+    if (valDepth) valDepth.textContent = `${Number(params.depthScale !== undefined ? params.depthScale : 1.0).toFixed(1)}x`;
 
     // Keep slider thumbs synchronized when modified via hotkeys or presets
     const sliderDensity = document.getElementById('slider-density');
@@ -241,12 +245,14 @@ class GameApp {
     const sliderContrast = document.getElementById('slider-contrast');
     const sliderGamma = document.getElementById('slider-gamma');
     const sliderSaturation = document.getElementById('slider-saturation');
+    const sliderDepth = document.getElementById('slider-depth');
 
     if (sliderDensity && document.activeElement !== sliderDensity) sliderDensity.value = params.density;
     if (sliderBrightness && document.activeElement !== sliderBrightness) sliderBrightness.value = params.brightness;
     if (sliderContrast && document.activeElement !== sliderContrast) sliderContrast.value = params.contrast;
     if (sliderGamma && document.activeElement !== sliderGamma) sliderGamma.value = params.gamma;
     if (sliderSaturation && document.activeElement !== sliderSaturation) sliderSaturation.value = params.saturation;
+    if (sliderDepth && document.activeElement !== sliderDepth) sliderDepth.value = params.depthScale !== undefined ? params.depthScale : 1.0;
   }
 
   initUI() {
@@ -353,6 +359,14 @@ class GameApp {
     if (saturationSlider) {
       saturationSlider.addEventListener('input', (e) => {
         this.renderer.setVisualParams({ saturation: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const depthSlider = document.getElementById('slider-depth');
+    if (depthSlider) {
+      depthSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ depthScale: parseFloat(e.target.value) });
         this.updateVisualReadouts();
       });
     }

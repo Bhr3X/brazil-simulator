@@ -3,3 +3,4 @@
 node_modules/
 .env
 .env.*
+Studio MKT/bundles/*.zip
