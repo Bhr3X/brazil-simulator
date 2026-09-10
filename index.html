@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Favela Suburbs 3D - Pirituba // ASCII Engine</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Offline Three.js Library -->
+  <script src="libs/three.min.js"></script>
+</head>
+<body>
+  <!-- 3D & ASCII Canvas Viewport Container -->
+  <div id="canvas-container"></div>
+
+  <!-- CRT Scanlines and Screen Glare Overlay -->
+  <div class="crt-overlay"></div>
+
+  <!-- Center Crosshair -->
+  <div id="crosshair"></div>
+
+  <!-- Top-Left HUD: Terminal Info -->
+  <div class="hud-layer" id="hud-top-left">
+    <div class="terminal-header">[ PIRITUBA ENGINE // SP-011 ]</div>
+    <div id="hud-location">📍 RUA PRINCIPAL (PIRITUBA Z/O)</div>
+    <div class="terminal-meta">
+      <span id="hud-fps">60 FPS</span>
+      <span id="hud-coords">X: 0.0 | Y: 1.8 | Z: 15.0</span>
+    </div>
+  </div>
+
+  <!-- Top-Right HUD: Interactive Buttons -->
+  <div class="hud-layer" id="hud-top-right">
+    <button class="hud-btn" id="btn-streetview">
+      <span>🌐 STREET VIEW</span>
+      <small style="opacity:0.7">[V]</small>
+    </button>
+    <button class="hud-btn" id="btn-mode">
+      <span>🖥️ MODO:</span>
+      <strong id="hud-mode">FAVELA ASCII (RGB)</strong>
+      <small style="opacity:0.7">[M]</small>
+    </button>
+    <button class="hud-btn" id="btn-tour">
+      <span>🎥 AUTO TOUR</span>
+      <small style="opacity:0.7">[U]</small>
+    </button>
+    <button class="hud-btn" id="btn-empty">
+      <span>🚗 TRÂNSITO ATIVO</span>
+      <small style="opacity:0.7">[X]</small>
+    </button>
+    <button class="hud-btn" id="btn-time">
+      <span id="hud-time">🌇 ENTARDECER (DOURADA)</span>
+      <small style="opacity:0.7">[T]</small>
+    </button>
+    <button class="hud-btn" id="btn-audio">
+      <span>🔊 SOM: LIGADO</span>
+      <small style="opacity:0.7">[O]</small>
+    </button>
+  </div>
+
+  <!-- Top Center: Survival HUD Status Dashboard -->
+  <div class="hud-layer" id="hud-survival-bar">
+    <div class="survival-stat-box" id="stat-time">
+      <div class="stat-label">⏱️ RUN 10 MIN</div>
+      <div class="stat-value"><span id="hud-run-clock">10:00</span> <small id="hud-ingame-clock">06:00</small></div>
+    </div>
+    <div class="survival-stat-box" id="stat-money">
+      <div class="stat-label">💵 GRANA</div>
+      <div class="stat-value"><span id="hud-grana">R$ 14,00</span> <small id="hud-debt" style="display:none; color:#ff5555;"></small></div>
+    </div>
+    <div class="survival-stat-box" id="stat-fome">
+      <div class="stat-label">🍗 BUCHO <span id="hud-fome-text">70%</span></div>
+      <div class="stat-bar-container"><div class="stat-bar-fill" id="hud-fome-bar" style="width:70%;"></div></div>
+    </div>
+    <div class="survival-stat-box" id="stat-sanidade">
+      <div class="stat-label">🧠 SANIDADE <span id="hud-sanidade-text">80%</span></div>
+      <div class="stat-bar-container"><div class="stat-bar-fill" id="hud-sanidade-bar" style="width:80%;"></div></div>
+    </div>
+    <div class="survival-stat-box" id="stat-perigo">
+      <div class="stat-label">🚨 B.O. / PERIGO <span id="hud-perigo-text">10%</span></div>
+      <div class="stat-bar-container"><div class="stat-bar-fill danger" id="hud-perigo-bar" style="width:10%;"></div></div>
+    </div>
+  </div>
+
+  <!-- Bottom Center: Daily Objective & Social Class Badge -->
+  <div class="hud-layer" id="hud-objective-bar">
+    <span id="hud-class-badge">CLASSE D/E: PERIFERIA</span>
+    <span id="hud-objective">META DO DIA: Ganhar R$ 40 em bicos e sobreviver 24h</span>
+  </div>
+
+  <!-- Center Reticle Contextual Interaction Prompt [E] -->
+  <div id="interact-prompt" class="modal-hidden"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="hud-toast-container"></div>
+
+  <!-- Interactive Dialogue & Choices Modal -->
+  <div id="dialogue-modal" class="modal-hidden">
+    <div class="modal-backdrop"></div>
+    <div class="dialog-window">
+      <div class="dialog-header">
+        <div class="dialog-title" id="dialog-title">ENCONTRO BRASILEIRO</div>
+        <button class="dialog-close-btn" id="dialog-btn-close" title="Fechar [Q]">✕</button>
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-text" id="dialog-text">...</div>
+      </div>
+      <div class="dialog-footer">
+        <div class="dialog-options" id="dialog-options"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Class Roulette Modal (Initial Choice / Spawn) -->
+  <div id="roulette-modal" class="modal-hidden">
+    <div class="modal-backdrop"></div>
+    <div class="roulette-window">
+      <div class="roulette-header">
+        <div class="roulette-title">🇧🇷 SOBREVIVÊNCIA BR // ROLETA SOCIAL DE NASCIMENTO</div>
+        <div class="roulette-subtitle">Você tem exatamente 10 minutos reais (24h de um dia paulistano). Onde você nasceu?</div>
+      </div>
+      <div class="roulette-grid">
+        <div class="class-card" id="card-classe-de">
+          <div class="class-badge-pill">60% POPULAÇÃO</div>
+          <div class="class-name">Muleque de Quebrada</div>
+          <div class="class-meta">R$ 14,00 • Laje & Favela</div>
+          <div class="class-desc">Nascido no alto do morro em Pirituba. Ginga no talo, chinelo com prego, celular com tela trincada e Bilhete Único no negativo.</div>
+          <button class="class-select-btn" data-class="CLASSE_DE">ESCOLHER QUEBRADA</button>
+        </div>
+        <div class="class-card featured" id="card-classe-c">
+          <div class="class-badge-pill">30% POPULAÇÃO</div>
+          <div class="class-name">Tiozão CLT do Subúrbio</div>
+          <div class="class-meta">R$ 180,00 • Subúrbio Raiz</div>
+          <div class="class-desc">Acorda às 05:30. Celta 2004 na reserva, boleto de luz vencendo hoje e carnê das Casas Bahia na gaveta.</div>
+          <button class="class-select-btn" data-class="CLASSE_C">ESCOLHER SUBÚRBIO</button>
+        </div>
+        <div class="class-card" id="card-classe-ab">
+          <div class="class-badge-pill">10% POPULAÇÃO</div>
+          <div class="class-name">Herdeiro da Faria Lima</div>
+          <div class="class-meta">R$ 3.800,00 • Perdido na Quebrada</div>
+          <div class="class-desc">Desceu na Edgar Facó por engano no Waze. iPhone 16 Pro, copo Stanley, cartão black e pânico total de motoboy.</div>
+          <button class="class-select-btn" data-class="CLASSE_AB">ESCOLHER FARIA LIMER</button>
+        </div>
+      </div>
+      <div class="roulette-footer">
+        <button id="btn-spin-roulette" class="roulette-spin-btn">🎲 GIRAR ROLETA SOCIAL ALEATÓRIA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End of Run Summary Modal (Victory / Game Over) -->
+  <div id="end-run-modal" class="modal-hidden">
+    <div class="modal-backdrop"></div>
+    <div class="end-window">
+      <div class="end-header">
+        <div class="end-title" id="end-run-title">RESULTADO DO DIA</div>
+      </div>
+      <div class="end-body">
+        <div class="end-desc" id="end-run-desc">...</div>
+        <div class="end-stats" id="end-run-stats"></div>
+      </div>
+      <div class="end-footer">
+        <button id="end-run-restart" class="end-restart-btn">🔄 JOGAR NOVA RUN DE 10 MINUTOS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Street View Modal Panel (Av. Gen. Edgar Facó x R. Paula Ferreira) -->
+  <div id="street-view-modal" class="modal-hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="pulse-indicator"></span>
+          GOOGLE STREET VIEW // CRUZAMENTO: AV. GEN. EDGAR FACÓ X R. PAULA FERREIRA
+        </div>
+        <button id="btn-close-streetview" class="modal-close-btn" title="Fechar Street View [V]">✕</button>
+      </div>
+      <div class="modal-body">
+        <iframe
+          id="streetview-iframe"
+          title="Google Street View - Edgar Facó x Paula Ferreira"
+          src="about:blank"
+          data-src="https://maps.google.com/maps?q=-23.5019,-46.7064&layer=c&cbll=-23.5019,-46.7064&cbp=12,280,0,0,0&output=svembed"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-coords-info">
+          📍 COORDENADAS REAIS: <strong>-23.5019, -46.7064</strong> &nbsp;|&nbsp; PIRITUBA / FREGUESIA DO Ó, SÃO PAULO - SP
+        </div>
+        <div class="modal-actions">
+          <button id="btn-refresh-sv" class="modal-action-btn">🔄 REINICIAR ÂNGULO</button>
+          <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=-23.5019,-46.7064" target="_blank" rel="noopener noreferrer" class="modal-action-link">🗺️ ABRIR NO MAPS ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Click to Start / Resume Overlay -->
+  <div id="click-overlay">
+    <div class="start-title">PIRITUBA // FAVELA SUBURBS</div>
+    <div class="start-subtitle">MOTOR DE PRIMEIRA PESSOA EM ASCII & 3D</div>
+    <div class="start-prompt">CLIQUE AQUI PARA ENTRAR // CLICK TO PLAY</div>
+    <div class="credits-footer">
+      Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
+      Explore os becos, o escadão, a laje com caixas d'água Fortlev, o boteco e a vista para o Pico do Jaraguá.
+    </div>
+  </div>
+
+  <!-- Main Game Script (ESM) -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
