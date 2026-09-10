@@ -1153,8 +1153,13 @@ async function runTestSuite(url) {
 
 async function main() {
   try {
-    await runTestSuite('http://localhost:8090/index.html?seed=42');
-    await runTestSuite('http://localhost:8090/pirituba_standalone.html?seed=42');
+    const customUrl = process.argv[2];
+    if (customUrl) {
+      await runTestSuite(customUrl);
+    } else {
+      await runTestSuite('http://localhost:8090/index.html?seed=42');
+      await runTestSuite('http://localhost:8090/pirituba_standalone.html?seed=42');
+    }
     console.log('🎉 ALL TEST SUITES PASSED WITH 100% INVARIANT COMPLIANCE!');
     process.exit(0);
   } catch (e) {
