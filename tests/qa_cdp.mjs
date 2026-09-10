@@ -1431,12 +1431,12 @@ async function runTestSuite(url) {
       (() => {
         const game = window.app.game;
         const npcs = game ? game.npcs : null;
-        if (!npcs || !npcs.npcs || npcs.npcs.length !== 4) {
+        if (!npcs || !npcs.npcs || npcs.npcs.length < 4) {
           return { ok: false, reason: 'NpcSystem or NPCs array missing' };
         }
 
         const ids = npcs.npcs.map(n => n.id);
-        const expectedIds = ['clodoaldo', 'caramelo', 'juninho', 'dona_neide'];
+        const expectedIds = ['clodoaldo', 'caramelo', 'juninho', 'dona_neide', 'sargento_rocha', 'menor_corre'];
         const hasAllIds = expectedIds.every(id => ids.includes(id));
 
         // Check 3D groups and children
@@ -1444,7 +1444,7 @@ async function runTestSuite(url) {
 
         // Check dynamic targets exported for raycasting
         const targets = npcs.getInteractableTargets();
-        const validTargets = targets.length === 4 && targets.every(t => t.isOpen && t.position && t.prompt);
+        const validTargets = targets.length >= 4 && targets.every(t => t.isOpen && t.position && t.prompt);
 
         // Test motion update: advance coordinates along waypoints
         const initialClodoaldoX = npcs.npcs[0].group.position.x;
@@ -1457,7 +1457,9 @@ async function runTestSuite(url) {
         const encCaramelo = window.app.game.encounters['NPC_CARAMELO'];
         const encBike = window.app.game.encounters['NPC_BIKE'];
         const encNeide = window.app.game.encounters['NPC_DONA_NEIDE'];
-        const hasAllEncounters = !!(encBaleiro && encCaramelo && encBike && encNeide);
+        const encPol = window.app.game.encounters['NPC_POLICIA'];
+        const encMal = window.app.game.encounters['NPC_MALANDRO'];
+        const hasAllEncounters = !!(encBaleiro && encCaramelo && encBike && encNeide && encPol && encMal);
 
         // Test Caramelo interaction execution
         const petOption = encCaramelo.getOptions(game.state).find(o => o.id === 'carinho_caramelo');
@@ -1591,6 +1593,99 @@ async function runTestSuite(url) {
     console.log(`[TEST 21] Mobile Touch Controls & Virtual Joystick Subsystem:`, touchTest);
     if (!touchTest.ok) {
       throw new Error(`TEST 21 FAILED: Touch controls test failed: ${JSON.stringify(touchTest)}`);
+    }
+
+    // TEST 22: Expanded City Streets, Bank & Bankruptcy Defeat, Cops & Thugs, and Visual Action Badges
+    const expansionTest = await evaluate(`
+      (() => {
+        const game = window.app.game;
+        const state = game.state;
+        const dialog = game.dialog;
+        const interactables = game.interactables;
+
+        // 1. Check Bank Anchor & Encounter
+        const bankAnchor = interactables.anchors.find(a => a.id === 'banco');
+        const hasBankAnchor = !!bankAnchor && bankAnchor.encounterId === 'BANCO_PIRITUBA';
+
+        const encBanco = game.encounters['BANCO_PIRITUBA'];
+        const encPol = game.encounters['NPC_POLICIA'];
+        const encMal = game.encounters['NPC_MALANDRO'];
+        const hasAllNewEncounters = !!(encBanco && encPol && encMal);
+
+        // 2. Test Bank Overdraft & Defeat Conditions
+        const savedGrana = state.grana;
+        const savedTimer = state.bankruptTimer;
+
+        // Saque Cheque Especial drives balance negative
+        const saqueOpt = encBanco.getOptions(state).find(o => o.id === 'saque_cheque_especial');
+        state.grana = 1000;
+        saqueOpt.execute(state, window.app.sound);
+        const balanceWentNegative = state.grana < 0;
+
+        // Test Overdraft Limit Defeat (-R$ 150,00)
+        state.grana = -15500;
+        const defeatLimit = state.checkDefeat();
+        const limitDefeatPassed = defeatLimit && defeatLimit.cause.includes('FALÊNCIA');
+
+        // Test Bankruptcy Timer Defeat (>= 90s)
+        state.grana = -5000;
+        state.bankruptTimer = 92;
+        const defeatTimer = state.checkDefeat();
+        const timerDefeatPassed = defeatTimer && defeatTimer.cause.includes('FALÊNCIA');
+
+        // Restore state
+        state.grana = savedGrana;
+        state.bankruptTimer = savedTimer;
+
+        // 3. Test Cops & Thugs Narrative Interactions
+        // Snitch to police
+        const caguetarOpt = encPol.getOptions(state).find(o => o.id === 'caguetar_malandro');
+        state.flags.caguetouMalandro = false;
+        caguetarOpt.execute(state, window.app.sound);
+        const snitchFlagRaised = state.flags.caguetouMalandro === true;
+
+        // When snitched, Menor do Corre offers Cobrança
+        const malandroOptions = encMal.getOptions(state);
+        const hasCobranca = malandroOptions.some(o => o.id === 'cobranca_pedagio');
+
+        // Normal crime courier gig
+        state.flags.caguetouMalandro = false;
+        const correOpt = encMal.getOptions(state).find(o => o.id === 'fazer_corre_crime');
+        const preCorreGrana = state.grana;
+        correOpt.execute(state, window.app.sound);
+        const correEarnedGrana = state.grana === preCorreGrana + 7500;
+
+        // 4. Test Visual Action Badges in Dialog
+        const gainBadges = dialog.formatActionBadges({ gainCentavos: 8000, label: 'Corre do Crime' });
+        const hasGreenPips = gainBadges.includes('badge-gain') && gainBadges.includes('💵 $$$$$');
+
+        const costBadges = dialog.formatActionBadges({ costCentavos: 1200, label: 'Lanche' });
+        const hasRedPips = costBadges.includes('badge-cost') && costBadges.includes('🔻 -$$');
+
+        const statBadges = dialog.formatActionBadges({ deltas: { fome: 30, sanidade: -15, perigo: 20 } });
+        const hasStatBadges = statBadges.includes('🍗 +30%') && statBadges.includes('🧠 -15%') && statBadges.includes('🚨 +20%');
+
+        return {
+          ok: hasBankAnchor && hasAllNewEncounters && balanceWentNegative && limitDefeatPassed &&
+              timerDefeatPassed && snitchFlagRaised && hasCobranca && correEarnedGrana &&
+              hasGreenPips && hasRedPips && hasStatBadges,
+          hasBankAnchor,
+          hasAllNewEncounters,
+          balanceWentNegative,
+          limitDefeatPassed,
+          timerDefeatPassed,
+          snitchFlagRaised,
+          hasCobranca,
+          correEarnedGrana,
+          hasGreenPips,
+          hasRedPips,
+          hasStatBadges
+        };
+      })()
+    `);
+    console.log(`[TEST 22] Expanded City Streets, Bank, Cops & Thugs, and Visual Action Badges:`, expansionTest);
+    if (!expansionTest.ok) {
+      throw new Error(`TEST 22 FAILED: Expansion test failed: ${JSON.stringify(expansionTest)}`);
     }
 
     // Check Console Errors

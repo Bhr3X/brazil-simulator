@@ -109,6 +109,15 @@ export class InteractableSystem {
         maxDist: 3.5,
         encounterId: 'SEMAFORO_BICO',
         zoneId: 'SEMAFORO_BICO'
+      },
+      {
+        id: 'banco',
+        name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)',
+        prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO',
+        position: new THREE.Vector3(48.0, 1.2, 38.0),
+        maxDist: 3.8,
+        encounterId: 'BANCO_PIRITUBA',
+        zoneId: 'BANCO_PIRITUBA'
       }
     ];
   }

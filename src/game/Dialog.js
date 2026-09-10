@@ -87,14 +87,89 @@ export class DialogSystem {
         }
 
         const keyBadge = `<span class="dialog-key-badge">[${idx + 1}]</span>`;
-        const costTag = opt.costLabel ? `<span class="dialog-cost-tag">${opt.costLabel}</span>` : '';
-        btn.innerHTML = `${keyBadge} <span class="dialog-option-label">${opt.label}</span> ${costTag}`;
+        const visualBadges = this.formatActionBadges(opt);
+        btn.innerHTML = `${keyBadge} <span class="dialog-option-label">${opt.label}</span> ${visualBadges}`;
 
         btn.addEventListener('click', () => this.selectOption(idx));
         this.optionsElem.appendChild(btn);
       });
     }
+  }
 
+  // Format visual action badges ($ to $$$$$ green/red and stat chips)
+  formatActionBadges(opt) {
+    let badgesHtml = '';
+
+    // 1. Determine money delta in centavos
+    let granaDelta = 0;
+    if (typeof opt.gainCentavos === 'number' && opt.gainCentavos > 0) {
+      granaDelta = opt.gainCentavos;
+    } else if (typeof opt.costCentavos === 'number' && opt.costCentavos > 0) {
+      granaDelta = -opt.costCentavos;
+    } else if (opt.deltas && typeof opt.deltas.grana === 'number') {
+      granaDelta = opt.deltas.grana;
+    } else if (typeof opt.costLabel === 'string' && opt.costLabel.includes('R$')) {
+      const match = opt.costLabel.match(/([+-]?)\s*R\$\s*(\d+)(?:[.,](\d{2}))?/);
+      if (match) {
+        const sign = match[1] === '+' ? 1 : -1;
+        const reais = parseInt(match[2], 10) || 0;
+        const centavos = match[3] ? parseInt(match[3], 10) : 0;
+        granaDelta = sign * (reais * 100 + centavos);
+      }
+    }
+
+    if (granaDelta > 0) {
+      let pips = '$';
+      if (granaDelta <= 500) pips = '$';
+      else if (granaDelta <= 1500) pips = '$$';
+      else if (granaDelta <= 3500) pips = '$$$';
+      else if (granaDelta <= 7500) pips = '$$$$';
+      else pips = '$$$$$';
+
+      badgesHtml += `<span class="action-badge badge-gain" title="+R$ ${(granaDelta / 100).toFixed(2)}">💵 ${pips}</span>`;
+    } else if (granaDelta < 0) {
+      const absVal = Math.abs(granaDelta);
+      let pips = '-$';
+      if (absVal <= 500) pips = '-$';
+      else if (absVal <= 1500) pips = '-$$';
+      else if (absVal <= 3500) pips = '-$$$';
+      else if (absVal <= 7500) pips = '-$$$$';
+      else pips = '-$$$$$';
+
+      badgesHtml += `<span class="action-badge badge-cost" title="-R$ ${(absVal / 100).toFixed(2)}">🔻 ${pips}</span>`;
+    }
+
+    // 2. Stat attributes in deltas
+    if (opt.deltas) {
+      if (typeof opt.deltas.fome === 'number' && opt.deltas.fome !== 0) {
+        const sign = opt.deltas.fome > 0 ? '+' : '';
+        const cls = opt.deltas.fome > 0 ? 'badge-fome' : 'badge-fome-neg';
+        badgesHtml += `<span class="action-badge ${cls}">🍗 ${sign}${opt.deltas.fome}%</span>`;
+      }
+      if (typeof opt.deltas.sanidade === 'number' && opt.deltas.sanidade !== 0) {
+        const sign = opt.deltas.sanidade > 0 ? '+' : '';
+        const cls = opt.deltas.sanidade > 0 ? 'badge-sanidade' : 'badge-sanidade-neg';
+        badgesHtml += `<span class="action-badge ${cls}">🧠 ${sign}${opt.deltas.sanidade}%</span>`;
+      }
+      if (typeof opt.deltas.perigo === 'number' && opt.deltas.perigo !== 0) {
+        const sign = opt.deltas.perigo > 0 ? '+' : '';
+        const cls = opt.deltas.perigo > 0 ? 'badge-perigo' : 'badge-perigo-safe';
+        badgesHtml += `<span class="action-badge ${cls}">🚨 ${sign}${opt.deltas.perigo}%</span>`;
+      }
+      if (typeof opt.deltas.ginga === 'number' && opt.deltas.ginga !== 0) {
+        const sign = opt.deltas.ginga > 0 ? '+' : '';
+        badgesHtml += `<span class="action-badge badge-ginga">⚡ ${sign}${opt.deltas.ginga}</span>`;
+      }
+    }
+
+    // 3. Keep narrative tag if no stats or special tag
+    if (!badgesHtml && opt.costLabel) {
+      badgesHtml += `<span class="dialog-cost-tag">${opt.costLabel}</span>`;
+    } else if (opt.costLabel && !opt.costLabel.includes('R$') && !opt.costLabel.includes('%')) {
+      badgesHtml += `<span class="dialog-cost-tag dialog-cost-secondary">${opt.costLabel}</span>`;
+    }
+
+    return `<div class="dialog-badges-container">${badgesHtml}</div>`;
   }
 
   selectOption(index) {

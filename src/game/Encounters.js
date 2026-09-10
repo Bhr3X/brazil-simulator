@@ -1111,11 +1111,269 @@ export const BRAZILIAN_ENCOUNTERS = {
         id: 'fofoca_bairro',
         label: 'Ouvir conselhos de mãe e fofocas quentes da vizinhança',
         costLabel: 'Papo Acolhedor',
+        deltas: { sanidade: 20, perigo: -15 },
         execute: (state) => {
           state.apply({ sanidade: 20, perigo: -15 }, 'Conselho de mãe da Dona Neide');
           return 'Dona Neide conta tudo: "— Fica atento, meu anjo: de tarde arma temporal daquele jeito, o céu fica preto! E não deixa dinheiro fácil à mostra na avenida. Toma juízo e vai com Deus!" (+20% Sanidade, -15% Perigo).';
         }
       }
     ]
+  },
+
+  // 14. Banco Pirituba (Autoatendimento 24h & Cheque Especial)
+  BANCO_PIRITUBA: {
+    id: 'BANCO_PIRITUBA',
+    title: '🏧 BANCO PIRITUBA // REDE 24 HORAS',
+    getIntroText: (state) => {
+      const isNegative = state.grana < 0;
+      const statusText = isNegative
+        ? `<strong style="color:#ff3344">⚠️ SALDO NEGATIVADO: ${state.formattedGrana} (LIMITE: -R$ 150,00) • PRAZO SERASA: ${Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)))}s</strong>`
+        : `<span style="color:#00ff88">Saldo Disponível: ${state.formattedGrana} • Situação Cadastral: REGULAR</span>`;
+      return `
+        A tela do terminal eletrônico emite um brilho azul estéril na penumbra.<br>
+        O teclado emborrachado está gasto pelos milhares de dedos paulistanos.<br>
+        <em>"Banco Pirituba: Conectando você ao seu dinheiro (ou às suas dívidas)."</em><br>
+        <small>${statusText}</small>
+      `;
+    },
+    getOptions: (state) => [
+      {
+        id: 'saque_cheque_especial',
+        label: state.grana <= -10000
+          ? 'Cheque Especial Bloqueado (Limite de crédito quase estourado)'
+          : 'Contratar Cheque Especial Emergencial (Crédito imediato, juros pesados)',
+        costLabel: 'Cheque Especial (-R$ 50,00 na conta)',
+        costCentavos: 5000,
+        disabled: state.grana <= -10000,
+        deltas: { grana: -5000, allowNegative: true, sanidade: -8 },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -5000, allowNegative: true, sanidade: -8 }, 'Saque emergencial no Cheque Especial');
+          return 'As notas saem estalando do compartimento inferior. O alívio é imediato, mas seu saldo caiu no vermelho! Quite a dívida antes de 90 segundos ou seu CPF será executado e você perderá a run!';
+        }
+      },
+      {
+        id: 'quitar_divida_banco',
+        label: state.grana >= 0
+          ? 'Depósito Bancário em Dinheiro (Saldo já está positivo)'
+          : 'Depositar Dinheiro e Abater Cheque Especial',
+        costLabel: state.grana >= 0 ? 'Depósito Poupanca' : 'Amortizar Saldo',
+        gainCentavos: 5000,
+        deltas: { grana: 5000, sanidade: 15 },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: 5000, sanidade: 15 }, 'Amortização de dívida bancária');
+          return 'Você insere o envelope de depósito no terminal. A compensação imediata alivia sua conta e afasta o fantasma do Serasa e da falência (+15% Sanidade)!';
+        }
+      },
+      {
+        id: 'consulta_extrato_serasa',
+        label: 'Consultar Extrato Detalhado & Score do Serasa',
+        costLabel: 'Grátis',
+        deltas: { sanidade: 5 },
+        execute: (state) => {
+          state.apply({ sanidade: 5 }, 'Consulta de extrato bancário');
+          const isNegative = state.grana < 0;
+          if (isNegative) {
+            const timeLeft = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
+            return `AVISO GRAVE DO BANCO PIRITUBA: Sua conta está em ${state.formattedGrana}. Você possui exatamente ${timeLeft} segundos restantes antes de uma execução judicial de bens que encerrará sua jornada!`;
+          } else {
+            return `EXTRATO CONSOLIDADO: Saldo positivo de ${state.formattedGrana}. Seu Score de crédito está favorável e não há pendências ativas no SPC/Serasa. Siga em frente (+5% Sanidade).`;
+          }
+        }
+      }
+    ]
+  },
+
+  // 15. Polícia Militar de SP (Sargento Rocha)
+  NPC_POLICIA: {
+    id: 'NPC_POLICIA',
+    title: '👮 SARGENTO ROCHA // POLÍCIA MILITAR DE SÃO PAULO',
+    getIntroText: (state) => {
+      const isHighPerigo = state.perigo >= 45;
+      const statusNote = isHighPerigo
+        ? `<strong style="color:#ff3344">⚠️ SEU PERIGO ESTÁ ALTO (${state.perigo}%)! O SARGENTO ESTÁ COM A MÃO NO COLDRE!</strong>`
+        : `<span style="color:#00ff88">Nível de Perigo: ${state.perigo}% • Ronda Ostensiva em Pirituba</span>`;
+      return `
+        A farda cinza bandeirante e a viatura Duster com giroflex desligado na calçada impõem respeito.<br>
+        O Sargento Rocha te mede de cima a baixo com olhos experientes:<br>
+        <em>"— Alguma novidade na área, cidadão? O 49º Batalhão não tolera desordem."</em><br>
+        <small>${statusNote}</small>
+      `;
+    },
+    getOptions: (state) => [
+      {
+        id: 'cumprimentar_pm',
+        label: state.perigo >= 45
+          ? 'Tentar conversar amigavelmente (Seu nível de perigo está muito alto!)'
+          : 'Cumprimentar respeitosamente e desejar bom patrulhamento',
+        costLabel: 'Cidadão Exemplar',
+        disabled: state.perigo >= 45,
+        deltas: { sanidade: 16, perigo: -12 },
+        execute: (state) => {
+          state.apply({ sanidade: 16, perigo: -12 }, 'Cumprimentou o Sargento da PM');
+          return 'O Sargento bate continência curta com a mão na boina: "— Boa tarde, cidadão de bem. Se ver qualquer elemento suspeito na Paula Ferreira, dê o toque na viatura." (+16% Sanidade, -12% Perigo).';
+        }
+      },
+      {
+        id: 'caguetar_malandro',
+        label: state.flags.caguetouMalandro
+          ? 'Denunciar o crime local (Você já delatou o movimento hoje)'
+          : 'Caguetar o Menor do Corre e denunciar o ponto de tráfico da Bento Bicudo',
+        costLabel: '+R$ 40,00 Recompensa | Marca de X-9',
+        gainCentavos: 4000,
+        disabled: Boolean(state.flags.caguetouMalandro),
+        deltas: { grana: 4000, perigo: -25, setFlags: { caguetouMalandro: true } },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 4000,
+            perigo: -25,
+            setFlags: { caguetouMalandro: true }
+          }, 'Delatou o corre pro Sargento Rocha');
+          return 'O PM puxa um bloquinho e anota a localização exata da viela: "— Boa, parceiro. Informação de primeira linha. Toma aqui R$ 40,00 da nossa caixinha de gratificação." Você se afasta com o bolso cheio, mas sente que virou X-9 na quebrada...';
+        }
+      },
+      {
+        id: 'enquadro_suborno',
+        label: state.perigo < 45
+          ? 'Acertar pendências / Pagar o café da ronda (Disponível apenas em B.O. alto)'
+          : 'Pagar o "Café da Viatura" (Propina de R$ 35,00 para evitar o camburão)',
+        costLabel: 'Propina R$ 35,00',
+        costCentavos: 3500,
+        disabled: state.perigo < 45,
+        deltas: { grana: -3500, allowNegative: true, perigo: -35, sanidade: -12 },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: -3500,
+            allowNegative: true,
+            perigo: -35,
+            sanidade: -12
+          }, 'Pagou café da viatura do PM');
+          return 'O sargento recolhe a nota discretamente pelo vão do cinto de guarnição: "— Vai andando devagar e não olha pra trás. Se eu te trombar de novo hoje, vai pro 33º DP!" (-R$ 35,00, -35% Perigo, -12% Sanidade).';
+        }
+      },
+      {
+        id: 'enquadro_revista',
+        label: 'Submeter-se ao enquadro: "Mão na cabeça e abre as pernas!"',
+        costLabel: 'Revista Policial',
+        deltas: { sanidade: -20, perigo: -15 },
+        execute: (state) => {
+          state.apply({ sanidade: -20, perigo: -15 }, 'Passou pelo enquadro da PMESP');
+          return 'O sargento revista seus bolsos, checa seu documento pelo rádio da viatura e dá dois tapas no seu ombro: "— Nada consta no Copom. Segue seu rumo, mas fica esperto." Humilhação da blitz (-20% Sanidade, -15% Perigo).';
+        }
+      }
+    ]
+  },
+
+  // 16. Menor do Corre (Malandro da Quebrada)
+  NPC_MALANDRO: {
+    id: 'NPC_MALANDRO',
+    title: '🧢 MENOR DO CORRE // MALANDRAGEM DE PIRITUBA',
+    getIntroText: (state) => {
+      if (state.flags.caguetouMalandro) {
+        return `
+          <strong style="color:#ff2233">🚨 O MENOR TE ENCARA COM ÓDIO PURO!</strong><br>
+          A notícia correu rápido pelo rádio pirata: você foi visto de papinho com o Sargento da PM!<br>
+          <em>"— Falou com os 'homi' né, comédia?! X-9 na quebrada não tem vez não!"</em><br>
+          <small style="color:#ffcc00">Perigo: ${state.perigo}% | Saldo: ${state.formattedGrana}</small>
+        `;
+      }
+      return `
+        De bermuda tactel, corrente e chinelo no asfalto quente da Cel. Bento Bicudo.<br>
+        O Menor do Corre acompanha o movimento da esquina mascando chiclete:<br>
+        <em>"— Salve, parça! Tá na atividade ou tá moscando no pedaço?"</em><br>
+        <small style="color:#00ff88">Ginga: ${state.ginga}% | Saldo: ${state.formattedGrana} | Perigo: ${state.perigo}%</small>
+      `;
+    },
+    getOptions: (state) => {
+      // Branch 1: If player snitched to police (Retribution / Cobrança)
+      if (state.flags.caguetouMalandro) {
+        return [
+          {
+            id: 'cobranca_pedagio',
+            label: 'Pagar pedágio de resgate da vida (R$ 50,00)',
+            costLabel: 'R$ 50,00 Resgate X-9',
+            costCentavos: 5000,
+            deltas: { grana: -5000, allowNegative: true, sanidade: -25, perigo: 10, setFlags: { caguetouMalandro: false } },
+            execute: (state, sound) => {
+              if (sound) sound.playCoin();
+              state.apply({
+                grana: -5000,
+                allowNegative: true,
+                sanidade: -25,
+                perigo: 10,
+                setFlags: { caguetouMalandro: false }
+              }, 'Pagou pedágio de X-9 pro malandro');
+              return 'O menor arranca o dinheiro da sua mão com truculência: "— Tá pago o vacilo. Mas se abrir o bico de novo pro Sargento, vai sumir do mapa!" Seu bolso chora e sua conta pode ter ido pro negativo (-R$ 50,00, -25% Sanidade).';
+            }
+          },
+          {
+            id: 'cobranca_apanhar',
+            label: 'Enfrentar o malandro na marra e levar uma surra da quebrada',
+            costLabel: 'Violência Urbana',
+            deltas: { fome: -30, sanidade: -35, perigo: 20, setFlags: { caguetouMalandro: false } },
+            execute: (state) => {
+              state.apply({
+                fome: -30,
+                sanidade: -35,
+                perigo: 20,
+                setFlags: { caguetouMalandro: false }
+              }, 'Levou surra de cobrança na viela');
+              return 'Dois comparsas brotam do beco da Bento Bicudo. Você leva um sacode, cai no asfalto com a roupa rasgada e o corpo moído de dor (-30% Fome, -35% Sanidade, +20% Perigo)!';
+            }
+          }
+        ];
+      }
+
+      // Branch 2: Normal street interactions
+      return [
+        {
+          id: 'salve_quebrada',
+          label: 'Mandar um salve de respeito e trocar idéia tranquila',
+          costLabel: 'Salve da Quebrada',
+          deltas: { sanidade: 14, ginga: 10 },
+          execute: (state) => {
+            state.apply({ sanidade: 14, ginga: 10 }, 'Trocou idéia com o Menor do Corre');
+            return 'Vocês batem as mãos no cumprimento tradicional da Z/O: "— Firmeza total, truta. Na humildade se vai longe." (+14% Sanidade, +10 Ginga).';
+          }
+        },
+        {
+          id: 'fazer_corre_crime',
+          label: 'Fazer um "Corre do Crime" (Entregar pacote sigiloso na Rua Emílio Lessore)',
+          costLabel: '+R$ 75,00 Grana Rápida | +35% B.O.',
+          gainCentavos: 7500,
+          deltas: { grana: 7500, perigo: 35, ginga: 18 },
+          execute: (state, sound) => {
+            if (sound) sound.playCoin();
+            state.apply({ grana: 7500, perigo: 35, ginga: 18 }, 'Fez o corre do crime na quebrada');
+            return 'Você enfia o pacote selado no cós da calça e sobe correndo até o topo da Emílio Lessore. A entrega é rápida e você volta com R$ 75,00 quentinho no bolso (+$$$$$), mas seu Perigo disparou (+35% Perigo, +18 Ginga)!';
+          }
+        },
+        {
+          id: 'assalto_mao_armada',
+          label: state.perigo < 45
+            ? 'Comprar um cigarro avulso no maço'
+            : 'Mão armada do malandro: "Passa a carteira e o celular logo!"',
+          costLabel: state.perigo < 45 ? 'R$ 2,00' : 'Assalto (-R$ 25,00)',
+          costCentavos: state.perigo < 45 ? 200 : 2500,
+          deltas: state.perigo < 45
+            ? { grana: -200, sanidade: 10 }
+            : { grana: -2500, allowNegative: true, sanidade: -20 },
+          execute: (state, sound) => {
+            if (state.perigo < 45) {
+              if (sound) sound.playCoin();
+              state.apply({ grana: -200, sanidade: 10 }, 'Comprou cigarro avulso');
+              return 'Você solta uma fumaça na esquina olhando os carros da Edgar Facó passarem (-R$ 2,00, +10% Sanidade).';
+            } else {
+              if (sound) sound.playCoin();
+              state.apply({ grana: -2500, allowNegative: true, sanidade: -20 }, 'Assaltado pelo malandro da esquina');
+              return 'O moleque exibe o cabo cromado por baixo da camisa e te revista na parede: "— Perdeu, comédia! Passa o cascalho!" Ele leva R$ 25,00 do seu bolso (-R$ 25,00, -20% Sanidade). Se faltou grana, sua conta afunda!';
+            }
+          }
+        }
+      ];
+    }
   }
 };

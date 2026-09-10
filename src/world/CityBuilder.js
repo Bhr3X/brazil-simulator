@@ -37,6 +37,7 @@ export class CityBuilder {
     this.buildBancaDeJornal();
     this.buildBarracaDePastel();
     this.buildBaileDaLaje();
+    this.buildExpandedStreetsAndDetails();
   }
 
   // 1. Scene Lighting & Atmospherics
@@ -196,6 +197,9 @@ export class CityBuilder {
       laje: true,
       hasWaterTank: true
     });
+
+    // 4.3b "BANCO PIRITUBA" (at X = 48, Z = 42)
+    this.buildBancoPirituba(48, 0.25, 42);
 
     // 4.4 "BORRACHARIA & OFICINA" (at X = -34, Z = 42)
     this.buildShopBuilding({
@@ -1950,4 +1954,404 @@ export class CityBuilder {
 
     this.scene.add(group);
   }
+
+  // 24. Modern Bank Branch Façade "Banco Pirituba" with 24h ATM Screen
+  buildBancoPirituba(x, y, z) {
+    const w = 11.5;
+    const h = 5.2;
+    const d = 8.0;
+    const posY = y + h / 2;
+
+    // Outer Granite / Brushed Metal Frame
+    const wallMat = new THREE.MeshLambertMaterial({ color: 0x222a35 });
+    const bankMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
+    bankMesh.position.set(x, posY, z);
+    this.scene.add(bankMesh);
+
+    // Front Façade (Facing Z = 38 towards south sidewalk)
+    const facadeZ = z - d / 2 - 0.02;
+
+    // Large illuminated bank header sign
+    const signGeo = new THREE.PlaneGeometry(w - 1.2, 1.6);
+    const signMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createBankSignTexture()
+    });
+    const signMesh = new THREE.Mesh(signGeo, signMat);
+    signMesh.position.set(x, y + h - 1.1, facadeZ);
+    signMesh.rotation.y = Math.PI;
+    this.scene.add(signMesh);
+
+    // Glass storefront window with blue corporate tint
+    const glassMat = new THREE.MeshLambertMaterial({
+      color: 0x113355,
+      transparent: true,
+      opacity: 0.8
+    });
+    const glassMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.0, 3.0), glassMat);
+    glassMesh.position.set(x - 2.5, y + 1.8, facadeZ);
+    glassMesh.rotation.y = Math.PI;
+    this.scene.add(glassMesh);
+
+    // Automated Sliding Double Doors (Glass & Chrome frame)
+    const doorFrameMat = new THREE.MeshLambertMaterial({ color: 0xc0c8d0 });
+    const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3.0, 0.1), doorFrameMat);
+    doorFrame.position.set(x + 2.8, y + 1.6, facadeZ + 0.02);
+    this.scene.add(doorFrame);
+
+    // 24h ATM Wall Kiosk (Caixa Eletrônico 24 Horas)
+    const atmKioskMat = new THREE.MeshLambertMaterial({ color: 0x1a2b3c });
+    const atmKiosk = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.8, 0.35), atmKioskMat);
+    atmKiosk.position.set(x - 0.5, y + 1.5, facadeZ + 0.15);
+    this.scene.add(atmKiosk);
+
+    // ATM Digital Screen (Glowing Terminal with Banking Operations)
+    const screenGeo = new THREE.PlaneGeometry(1.6, 1.3);
+    const screenMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createAtmScreenTexture()
+    });
+    const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+    screenMesh.position.set(x - 0.5, y + 1.7, facadeZ - 0.04);
+    screenMesh.rotation.y = Math.PI;
+    this.scene.add(screenMesh);
+
+    // Keypad and card slot shelf
+    const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.45), new THREE.MeshLambertMaterial({ color: 0x444f5a }));
+    shelf.position.set(x - 0.5, y + 1.0, facadeZ + 0.05);
+    this.scene.add(shelf);
+
+    // Security Surveillance Dome Camera
+    const cameraBase = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.08, 12), new THREE.MeshLambertMaterial({ color: 0xffffff }));
+    cameraBase.position.set(x, y + h - 0.2, facadeZ - 0.3);
+    this.scene.add(cameraBase);
+    const cameraDome = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), new THREE.MeshLambertMaterial({ color: 0x111111 }));
+    cameraDome.position.set(x, y + h - 0.26, facadeZ - 0.3);
+    this.scene.add(cameraDome);
+
+    // Cyan Neon Under-glow for 24h ATM
+    const atmLight = new THREE.PointLight(0x00d4ff, 1.8, 8);
+    atmLight.position.set(x - 0.5, y + 2.2, facadeZ - 0.8);
+    this.scene.add(atmLight);
+
+    // Solid collision box for the bank building
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, y, z - d / 2),
+      new THREE.Vector3(x + w / 2, y + h, z + d / 2),
+      'solid'
+    );
+  }
+
+  // 25. Expanded Street Grid: Rua Paula Ferreira, Cel. Bento Bicudo, Emílio Lessore & Street View Details
+  buildExpandedStreetsAndDetails() {
+    const asfaltoMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createAsfalto(12, 4)
+    });
+    const calcadaMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(16, 2)
+    });
+    const curbMat = new THREE.MeshLambertMaterial({ color: 0xdedede });
+
+    // -------------------------------------------------------------
+    // A. Rua Paula Ferreira Extension (Ascending from Z = 35 to Z = 96)
+    // -------------------------------------------------------------
+    const paulaExtGeo = new THREE.PlaneGeometry(10, 62);
+    const paulaExt = new THREE.Mesh(paulaExtGeo, asfaltoMat);
+    paulaExt.rotation.x = -Math.PI / 2;
+    paulaExt.position.set(1.5, 0.012, 65.5);
+    this.scene.add(paulaExt);
+
+    // West Sidewalk of Paula Ferreira
+    const pfWestWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 62), calcadaMat);
+    pfWestWalk.position.set(-5.0, 0.125, 65.5);
+    this.scene.add(pfWestWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-6.5, 0, 35),
+      new THREE.Vector3(-3.5, 0.25, 96),
+      'curb'
+    );
+
+    // East Sidewalk of Paula Ferreira
+    const pfEastWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 62), calcadaMat);
+    pfEastWalk.position.set(8.0, 0.125, 65.5);
+    this.scene.add(pfEastWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(6.5, 0, 35),
+      new THREE.Vector3(9.5, 0.25, 96),
+      'curb'
+    );
+
+    // -------------------------------------------------------------
+    // B. Rua Coronel Bento Bicudo (1ª Paralela crossing at Z = 58)
+    // -------------------------------------------------------------
+    const bentoRoadGeo = new THREE.PlaneGeometry(88, 9);
+    const bentoRoad = new THREE.Mesh(bentoRoadGeo, asfaltoMat);
+    bentoRoad.rotation.x = -Math.PI / 2;
+    bentoRoad.position.set(10.0, 0.016, 58.0);
+    this.scene.add(bentoRoad);
+
+    // North Sidewalk of Bento Bicudo
+    const bentoNorthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    bentoNorthWalk.position.set(10.0, 0.125, 52.0);
+    this.scene.add(bentoNorthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 50.5),
+      new THREE.Vector3(54, 0.25, 53.5),
+      'curb'
+    );
+
+    // South Sidewalk of Bento Bicudo
+    const bentoSouthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    bentoSouthWalk.position.set(10.0, 0.125, 64.0);
+    this.scene.add(bentoSouthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 62.5),
+      new THREE.Vector3(54, 0.25, 65.5),
+      'curb'
+    );
+
+    // -------------------------------------------------------------
+    // C. Rua Emílio Lessore (2ª Paralela crossing at Z = 88)
+    // -------------------------------------------------------------
+    const lessoreRoadGeo = new THREE.PlaneGeometry(88, 9);
+    const lessoreRoad = new THREE.Mesh(lessoreRoadGeo, asfaltoMat);
+    lessoreRoad.rotation.x = -Math.PI / 2;
+    lessoreRoad.position.set(10.0, 0.016, 88.0);
+    this.scene.add(lessoreRoad);
+
+    // North Sidewalk of Emílio Lessore
+    const lessoreNorthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    lessoreNorthWalk.position.set(10.0, 0.125, 82.0);
+    this.scene.add(lessoreNorthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 80.5),
+      new THREE.Vector3(54, 0.25, 83.5),
+      'curb'
+    );
+
+    // South Sidewalk of Emílio Lessore
+    const lessoreSouthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    lessoreSouthWalk.position.set(10.0, 0.125, 94.0);
+    this.scene.add(lessoreSouthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 92.5),
+      new THREE.Vector3(54, 0.25, 95.5),
+      'curb'
+    );
+
+    // -------------------------------------------------------------
+    // D. Speed Bumps (Lombadas) with Yellow Reflective Chevrons
+    // -------------------------------------------------------------
+    const lombadaMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createLombadaTexture()
+    });
+
+    const addLombada = (lx, lz, width, rotY = 0) => {
+      const geo = new THREE.BoxGeometry(width, 0.12, 1.6);
+      const m = new THREE.Mesh(geo, lombadaMat);
+      m.position.set(lx, 0.06, lz);
+      m.rotation.y = rotY;
+      this.scene.add(m);
+    };
+
+    // On Bento Bicudo
+    addLombada(-14.0, 58.0, 8.6, 0);
+    addLombada(26.0, 58.0, 8.6, 0);
+
+    // On Paula Ferreira
+    addLombada(1.5, 47.0, 9.6, Math.PI / 2);
+    addLombada(1.5, 74.0, 9.6, Math.PI / 2);
+
+    // -------------------------------------------------------------
+    // E. Storm Drains (Bueiros / Bocas de Lobo) along curbs
+    // -------------------------------------------------------------
+    const bueiroMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createBueiroTexture()
+    });
+
+    const addBueiro = (bx, bz, rotY = 0) => {
+      const bMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.55), bueiroMat);
+      bMesh.rotation.x = -Math.PI / 2;
+      bMesh.rotation.z = rotY;
+      bMesh.position.set(bx, 0.13, bz);
+      this.scene.add(bMesh);
+    };
+
+    addBueiro(4.8, 32.5, 0);
+    addBueiro(-3.4, 53.6, Math.PI / 2);
+    addBueiro(6.4, 53.6, Math.PI / 2);
+    addBueiro(-3.4, 83.6, Math.PI / 2);
+    addBueiro(6.4, 83.6, Math.PI / 2);
+
+    // -------------------------------------------------------------
+    // F. CET Street Name Signs (Placas Azuis Padrão CET São Paulo)
+    // -------------------------------------------------------------
+    const addStreetSign = (sx, sz, streetName, subtext, rotY = 0) => {
+      const postMat = new THREE.MeshLambertMaterial({ color: 0x888890 });
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 2.6, 8), postMat);
+      pole.position.set(sx, 1.3, sz);
+      this.scene.add(pole);
+
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createStreetSign(streetName, subtext)
+      });
+      const signGeo = new THREE.PlaneGeometry(1.0, 0.45);
+
+      // Double-sided sign plate
+      const plate = new THREE.Mesh(signGeo, signMat);
+      plate.position.set(sx, 2.35, sz);
+      plate.rotation.y = rotY;
+      this.scene.add(plate);
+
+      const plateBack = new THREE.Mesh(signGeo, signMat);
+      plateBack.position.set(sx, 2.35, sz);
+      plateBack.rotation.y = rotY + Math.PI;
+      this.scene.add(plateBack);
+    };
+
+    // 1. Edgar Facó x Paula Ferreira
+    addStreetSign(5.2, 32.0, 'Av. Gen. Edgar Facó', '0 - 1500 • Pirituba', 0);
+    addStreetSign(4.5, 32.8, 'R. Paula Ferreira', 'Subida Piqueri', Math.PI / 2);
+
+    // 2. Paula Ferreira x Cel. Bento Bicudo
+    addStreetSign(6.6, 52.2, 'R. Cel. Bento Bicudo', '1 - 450 • Piqueri', 0);
+    addStreetSign(-5.2, 52.2, 'R. Paula Ferreira', '200 - 800 • Pirituba', Math.PI / 2);
+
+    // 3. Paula Ferreira x Emílio Lessore
+    addStreetSign(6.6, 82.2, 'R. Emílio Lessore', '1 - 220 • Alto Pirituba', 0);
+    addStreetSign(-5.2, 82.2, 'R. Emílio Lessore', 'Viela da Paz', 0);
+
+    // -------------------------------------------------------------
+    // G. Auto Mecânica do Beto (Oficina on Bento Bicudo at X = 25, Z = 48)
+    // -------------------------------------------------------------
+    const ofiGeo = new THREE.BoxGeometry(10.0, 4.5, 7.0);
+    const ofiMat = new THREE.MeshLambertMaterial({ color: 0x4a4f56 });
+    const ofiBuilding = new THREE.Mesh(ofiGeo, ofiMat);
+    ofiBuilding.position.set(25.0, 2.25, 48.0);
+    this.scene.add(ofiBuilding);
+
+    // Oficina Signboard
+    const ofiSignGeo = new THREE.PlaneGeometry(8.5, 1.8);
+    const ofiSignMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createOficinaSignTexture()
+    });
+    const ofiSign = new THREE.Mesh(ofiSignGeo, ofiSignMat);
+    ofiSign.position.set(25.0, 3.8, 51.52);
+    this.scene.add(ofiSign);
+
+    // Rollup metal shutter
+    const ofiDoorGeo = new THREE.PlaneGeometry(5.5, 2.8);
+    const ofiDoorMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPortaAco('#c05020')
+    });
+    const ofiDoor = new THREE.Mesh(ofiDoorGeo, ofiDoorMat);
+    ofiDoor.position.set(25.0, 1.4, 51.52);
+    this.scene.add(ofiDoor);
+
+    this.physics.addBoxCollider(
+      new THREE.Vector3(20.0, 0, 44.5),
+      new THREE.Vector3(30.0, 4.5, 51.5),
+      'solid'
+    );
+
+    // Tire stack outside oficina
+    this.buildTireStack(20.5, 0.25, 52.2, 4);
+
+    // -------------------------------------------------------------
+    // H. Residential Sobrado Houses along Bento Bicudo and Emílio Lessore
+    // -------------------------------------------------------------
+    const addSobrado = (sx, sz, w, h, d, wallType = 'tijolo', color = '#5588a3') => {
+      const posY = 0.25 + h / 2;
+      let mat;
+      if (wallType === 'tijolo') {
+        mat = new THREE.MeshLambertMaterial({ map: this.textures.createTijoloBaiano(2, 2) });
+      } else if (wallType === 'reboco') {
+        mat = new THREE.MeshLambertMaterial({ map: this.textures.createReboco('#8f897e', 2, 2) });
+      } else {
+        mat = new THREE.MeshLambertMaterial({ map: this.textures.createPaintedWall(color, 2, 2) });
+      }
+
+      const house = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+      house.position.set(sx, posY, sz);
+      this.scene.add(house);
+
+      // Water tank on top
+      this.buildWaterTank(sx + 1.0, 0.25 + h, sz);
+
+      // Solid collision box
+      this.physics.addBoxCollider(
+        new THREE.Vector3(sx - w / 2, 0, sz - d / 2),
+        new THREE.Vector3(sx + w / 2, h + 0.5, sz + d / 2),
+        'solid'
+      );
+    };
+
+    // Bento Bicudo North side
+    addSobrado(-20.0, 47.5, 9.0, 5.5, 7.0, 'painted', '#4682b4');
+    addSobrado(-8.0, 47.5, 8.5, 6.0, 7.0, 'tijolo');
+
+    // Bento Bicudo South side
+    addSobrado(-20.0, 69.0, 9.0, 5.8, 7.0, 'tijolo');
+    addSobrado(-7.0, 69.0, 8.0, 5.2, 7.0, 'reboco');
+    addSobrado(18.0, 69.0, 8.5, 6.0, 7.0, 'painted', '#c47d4e');
+    addSobrado(32.0, 69.0, 9.0, 5.5, 7.0, 'tijolo');
+
+    // Emílio Lessore North side
+    addSobrado(-18.0, 77.0, 9.0, 5.8, 7.0, 'reboco');
+    addSobrado(22.0, 77.0, 8.5, 6.2, 7.0, 'painted', '#5e9482');
+
+    // Emílio Lessore South side
+    addSobrado(-20.0, 99.0, 9.0, 6.0, 7.0, 'tijolo');
+    addSobrado(1.5, 100.0, 10.0, 6.5, 7.0, 'painted', '#9c6f9e');
+    addSobrado(25.0, 99.0, 9.0, 5.8, 7.0, 'reboco');
+
+    // -------------------------------------------------------------
+    // I. Concrete Utility Poles with Street Lamps along Bento & Lessore
+    // -------------------------------------------------------------
+    const poleMat = new THREE.MeshLambertMaterial({ color: 0x77777a });
+    const lampMat = new THREE.MeshBasicMaterial({ color: 0xfff0aa });
+
+    const addLightPole = (px, pz) => {
+      const pole = new THREE.Mesh(new THREE.BoxGeometry(0.25, 7.0, 0.25), poleMat);
+      pole.position.set(px, 3.5, pz);
+      this.scene.add(pole);
+
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.1), poleMat);
+      arm.position.set(px + 0.6, 6.8, pz);
+      this.scene.add(arm);
+
+      const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.12, 0.2), lampMat);
+      lamp.position.set(px + 1.2, 6.7, pz);
+      this.scene.add(lamp);
+
+      const light = new THREE.PointLight(0xffea88, 1.2, 18);
+      light.position.set(px + 1.2, 6.4, pz);
+      this.scene.add(light);
+    };
+
+    addLightPole(-15.0, 53.0);
+    addLightPole(12.0, 53.0);
+    addLightPole(38.0, 53.0);
+    addLightPole(-15.0, 83.0);
+    addLightPole(12.0, 83.0);
+    addLightPole(38.0, 83.0);
+
+    // -------------------------------------------------------------
+    // J. Boundary Colliders (Keep player inside urban map)
+    // -------------------------------------------------------------
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-38.0, 0, 34.0),
+      new THREE.Vector3(-34.0, 10, 105.0),
+      'solid'
+    );
+    this.physics.addBoxCollider(
+      new THREE.Vector3(53.5, 0, 34.0),
+      new THREE.Vector3(58.0, 10, 105.0),
+      'solid'
+    );
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-38.0, 0, 103.0),
+      new THREE.Vector3(58.0, 10, 108.0),
+      'solid'
+    );
+  }
 }
+

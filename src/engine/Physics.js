@@ -10,8 +10,8 @@ export class PhysicsEngine {
     this.slopes = [];    // Sloped terrain ramps { minX, maxX, minZ, maxZ, baseY, slopeY_Z }
     this.dynamicBodies = []; // Array of physical interactable bodies (soccer ball, cans, crates)
     this.worldBounds = {
-      minX: -65, maxX: 65,
-      minZ: -80, maxZ: 70
+      minX: -70, maxX: 70,
+      minZ: -85, maxZ: 115
     };
   }
 

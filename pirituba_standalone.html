@@ -712,6 +712,92 @@ html, body {
   border-radius: 3px;
 }
 
+.dialog-badges-container {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-family: 'Share Tech Mono', monospace;
+  white-space: nowrap;
+}
+
+.badge-gain {
+  background: rgba(0, 255, 102, 0.18);
+  border: 1px solid #00ff66;
+  color: #00ff66;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+  text-shadow: 0 0 4px #00ff66;
+}
+
+.badge-cost {
+  background: rgba(255, 51, 68, 0.22);
+  border: 1px solid #ff3344;
+  color: #ff3344;
+  box-shadow: 0 0 8px rgba(255, 51, 68, 0.4);
+  text-shadow: 0 0 4px #ff3344;
+}
+
+.badge-fome {
+  background: rgba(255, 153, 0, 0.18);
+  border: 1px solid #ff9900;
+  color: #ffbb33;
+}
+
+.badge-fome-neg {
+  background: rgba(180, 50, 0, 0.2);
+  border: 1px solid #cc4400;
+  color: #ff7744;
+}
+
+.badge-sanidade {
+  background: rgba(180, 80, 255, 0.18);
+  border: 1px solid #b450ff;
+  color: #d188ff;
+}
+
+.badge-sanidade-neg {
+  background: rgba(120, 20, 180, 0.25);
+  border: 1px solid #8822bb;
+  color: #aa66dd;
+}
+
+.badge-perigo {
+  background: rgba(255, 40, 40, 0.2);
+  border: 1px solid #ff2828;
+  color: #ff5555;
+}
+
+.badge-perigo-safe {
+  background: rgba(0, 200, 255, 0.18);
+  border: 1px solid #00d4ff;
+  color: #00f0ff;
+}
+
+.badge-ginga {
+  background: rgba(255, 230, 0, 0.18);
+  border: 1px solid #ffe600;
+  color: #ffea33;
+}
+
+.dialog-cost-secondary {
+  background: rgba(100, 140, 180, 0.2);
+  border: 1px solid #6699cc;
+  color: #99ccee;
+  margin-left: 0;
+}
+
 /* ==========================================================================
    Roulette Modal System
    ========================================================================== */
@@ -3639,6 +3725,215 @@ class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 49. Official São Paulo Blue Street Corner Nameplate Sign (Placa de Rua Azul CET)
+  createStreetSign(streetName = 'AV. GEN. EDGAR FACÓ', subText = 'PIRITUBA • CEP 02924-000') {
+    const key = `street_sign_${streetName}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+
+    // Deep blue enamel background
+    ctx.fillStyle = '#0b396e';
+    ctx.fillRect(0, 0, 256, 96);
+
+    // Crisp white border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, 248, 88);
+
+    // Inner thin border
+    ctx.lineWidth = 1;
+    ctx.strokeRect(8, 8, 240, 80);
+
+    // Street Name
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial", sans-serif';
+    ctx.fillText(streetName, 128, 44);
+
+    // Subtext (Neighborhood & CEP)
+    ctx.fillStyle = '#9bc4f5';
+    ctx.font = 'bold 11px "Arial", sans-serif';
+    ctx.fillText(subText, 128, 70);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 50. Speed Bump Asphalt with Yellow Reflective Diagonal Stripes (Lombada)
+  createLombadaTexture() {
+    const key = 'lombada_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+
+    // Dark asphalt base
+    ctx.fillStyle = '#26292b';
+    ctx.fillRect(0, 0, 256, 128);
+
+    // Yellow diagonal safety chevrons
+    ctx.fillStyle = '#ffcc00';
+    for (let x = -64; x < 320; x += 48) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 24, 0);
+      ctx.lineTo(x - 16, 128);
+      ctx.lineTo(x - 40, 128);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Asphalt noise & tire wear marks
+    for (let i = 0; i < 1500; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
+      ctx.fillRect(Math.random() * 256, Math.random() * 128, 2, 2);
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 51. Storm Drain Cast Iron Grate (Bueiro de Rua)
+  createBueiroTexture() {
+    const key = 'bueiro_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 128);
+
+    // Dark underground opening
+    ctx.fillStyle = '#111315';
+    ctx.fillRect(0, 0, 128, 128);
+
+    // Metal frame
+    ctx.strokeStyle = '#4a5055';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(4, 4, 120, 120);
+
+    // Cast iron bars
+    ctx.fillStyle = '#3a4045';
+    for (let y = 14; y < 114; y += 12) {
+      ctx.fillRect(8, y, 112, 6);
+      ctx.fillStyle = '#5a626a';
+      ctx.fillRect(8, y, 112, 1); // Highlight
+      ctx.fillStyle = '#3a4045';
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 52. Banco Pirituba Facade & Glowing Signage (Bradesco / Itaú style)
+  createBankSignTexture() {
+    const key = 'banco_pirituba_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+
+    // Red & White metallic gradient banner (Iconic Brazilian Bank aesthetic)
+    const grad = ctx.createLinearGradient(0, 0, 0, 128);
+    grad.addColorStop(0.0, '#b80c1e');
+    grad.addColorStop(0.7, '#cc001a');
+    grad.addColorStop(1.0, '#8c0012');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 128);
+
+    // White glowing band
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 108, 512, 20);
+
+    // Bank Logo & Text
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 38px "Arial Black", sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 6;
+    ctx.fillText('BANCO PIRITUBA', 256, 60);
+
+    ctx.shadowBlur = 0;
+    ctx.font = 'bold 15px "Arial", sans-serif';
+    ctx.fillStyle = '#ffeeee';
+    ctx.fillText('AGÊNCIA 0086 • AUTOATENDIMENTO 24 HORAS', 256, 92);
+
+    ctx.fillStyle = '#cc001a';
+    ctx.font = 'bold 12px "Arial", sans-serif';
+    ctx.fillText('CHEQUE ESPECIAL • CRÉDITO • DEPÓSITO • SAQUES', 256, 122);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 53. Glowing ATM Terminal Screen Texture
+  createAtmScreenTexture() {
+    const key = 'atm_screen_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // ATM Screen Background (Deep cyan-blue terminal)
+    ctx.fillStyle = '#06162b';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Header bar
+    ctx.fillStyle = '#0a3568';
+    ctx.fillRect(0, 0, 256, 44);
+
+    ctx.fillStyle = '#00f0ff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText('BANCO 24 HORAS // REDE CIRRUS', 128, 28);
+
+    // Screen Content
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('ESCOLHA SUA OPERAÇÃO:', 128, 80);
+
+    ctx.textAlign = 'left';
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#00ff88';
+    ctx.fillText('> [1] SACAR CHEQUE ESPECIAL', 20, 120);
+    ctx.fillText('> [2] DEPOSITAR & QUITAR DÍVIDA', 20, 150);
+    ctx.fillText('> [3] EXTRATO / CONSULTA SERASA', 20, 180);
+
+    // Warning footer
+    ctx.fillStyle = '#ffaa33';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('EVITE FALÊNCIA • LIMITE R$ 150', 20, 225);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 54. Auto Repair Shop "Oficina Mecânica do Beto"
+  createOficinaSignTexture() {
+    const key = 'oficina_beto_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#1c2229';
+    ctx.fillRect(0, 0, 256, 96);
+    ctx.strokeStyle = '#f5b800';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, 248, 88);
+
+    ctx.fillStyle = '#f5b800';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 19px "Arial Black", sans-serif';
+    ctx.fillText('AUTO MECÂNICA DO BETO', 128, 42);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px "Arial", sans-serif';
+    ctx.fillText('INJEÇÃO • FREIOS • SUSPENSÃO • BORRACHARIA', 128, 70);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 
 
@@ -3654,8 +3949,8 @@ class PhysicsEngine {
     this.slopes = [];    // Sloped terrain ramps { minX, maxX, minZ, maxZ, baseY, slopeY_Z }
     this.dynamicBodies = []; // Array of physical interactable bodies (soccer ball, cans, crates)
     this.worldBounds = {
-      minX: -65, maxX: 65,
-      minZ: -80, maxZ: 70
+      minX: -70, maxX: 70,
+      minZ: -85, maxZ: 115
     };
   }
 
@@ -5319,6 +5614,42 @@ const WORLD_ZONES = [
     openHour: 7.0,
     closeHour: 21.0,
     description: 'Ponto de parada e vagas de estacionamento da Rua Paula Ferreira vigiadas pelo flanelinha.'
+  },
+  {
+    id: 'BANCO_PIRITUBA',
+    name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)',
+    min: { x: 42.0, y: 0.0, z: 36.0 },
+    max: { x: 55.0, y: 7.0, z: 47.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Terminal de autoatendimento bancário 24h. Saque, cheque especial, extrato Serasa e quitação de dívidas.'
+  },
+  {
+    id: 'RUA_BENTO_BICUDO',
+    name: 'RUA CORONEL BENTO BICUDO (1ª PARALELA)',
+    min: { x: -35.0, y: 0.0, z: 52.0 },
+    max: { x: 55.0, y: 8.0, z: 66.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Rua residencial com sobrados paulistanos, oficinas mecânicas, lombadas e fiação elétrica densa.'
+  },
+  {
+    id: 'RUA_EMILIO_LESSORE',
+    name: 'RUA EMÍLIO LESSORE (2ª PARALELA - ALTO)',
+    min: { x: -35.0, y: 0.0, z: 80.0 },
+    max: { x: 55.0, y: 8.0, z: 98.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Rua elevada paralela no topo da encosta. Vielas estreitas, calçadas de mosaico e vista dos morros.'
+  },
+  {
+    id: 'AUTO_MECANICA_BETO',
+    name: 'AUTO MECÂNICA DO BETO (CORONEL BENTO BICUDO)',
+    min: { x: 18.0, y: 0.0, z: 53.0 },
+    max: { x: 32.0, y: 6.0, z: 63.0 },
+    openHour: 7.5,
+    closeHour: 19.5,
+    description: 'Oficina mecânica tradicional de bairro. Peças usadas, troca de pneus, cheiro de graxa e rádio de pilha ligado.'
   }
 ];
 
@@ -8077,6 +8408,7 @@ class CityBuilder {
     this.buildBancaDeJornal();
     this.buildBarracaDePastel();
     this.buildBaileDaLaje();
+    this.buildExpandedStreetsAndDetails();
   }
 
   // 1. Scene Lighting & Atmospherics
@@ -8236,6 +8568,9 @@ class CityBuilder {
       laje: true,
       hasWaterTank: true
     });
+
+    // 4.3b "BANCO PIRITUBA" (at X = 48, Z = 42)
+    this.buildBancoPirituba(48, 0.25, 42);
 
     // 4.4 "BORRACHARIA & OFICINA" (at X = -34, Z = 42)
     this.buildShopBuilding({
@@ -9990,7 +10325,407 @@ class CityBuilder {
 
     this.scene.add(group);
   }
+
+  // 24. Modern Bank Branch Façade "Banco Pirituba" with 24h ATM Screen
+  buildBancoPirituba(x, y, z) {
+    const w = 11.5;
+    const h = 5.2;
+    const d = 8.0;
+    const posY = y + h / 2;
+
+    // Outer Granite / Brushed Metal Frame
+    const wallMat = new THREE.MeshLambertMaterial({ color: 0x222a35 });
+    const bankMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
+    bankMesh.position.set(x, posY, z);
+    this.scene.add(bankMesh);
+
+    // Front Façade (Facing Z = 38 towards south sidewalk)
+    const facadeZ = z - d / 2 - 0.02;
+
+    // Large illuminated bank header sign
+    const signGeo = new THREE.PlaneGeometry(w - 1.2, 1.6);
+    const signMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createBankSignTexture()
+    });
+    const signMesh = new THREE.Mesh(signGeo, signMat);
+    signMesh.position.set(x, y + h - 1.1, facadeZ);
+    signMesh.rotation.y = Math.PI;
+    this.scene.add(signMesh);
+
+    // Glass storefront window with blue corporate tint
+    const glassMat = new THREE.MeshLambertMaterial({
+      color: 0x113355,
+      transparent: true,
+      opacity: 0.8
+    });
+    const glassMesh = new THREE.Mesh(new THREE.PlaneGeometry(5.0, 3.0), glassMat);
+    glassMesh.position.set(x - 2.5, y + 1.8, facadeZ);
+    glassMesh.rotation.y = Math.PI;
+    this.scene.add(glassMesh);
+
+    // Automated Sliding Double Doors (Glass & Chrome frame)
+    const doorFrameMat = new THREE.MeshLambertMaterial({ color: 0xc0c8d0 });
+    const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3.0, 0.1), doorFrameMat);
+    doorFrame.position.set(x + 2.8, y + 1.6, facadeZ + 0.02);
+    this.scene.add(doorFrame);
+
+    // 24h ATM Wall Kiosk (Caixa Eletrônico 24 Horas)
+    const atmKioskMat = new THREE.MeshLambertMaterial({ color: 0x1a2b3c });
+    const atmKiosk = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.8, 0.35), atmKioskMat);
+    atmKiosk.position.set(x - 0.5, y + 1.5, facadeZ + 0.15);
+    this.scene.add(atmKiosk);
+
+    // ATM Digital Screen (Glowing Terminal with Banking Operations)
+    const screenGeo = new THREE.PlaneGeometry(1.6, 1.3);
+    const screenMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createAtmScreenTexture()
+    });
+    const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+    screenMesh.position.set(x - 0.5, y + 1.7, facadeZ - 0.04);
+    screenMesh.rotation.y = Math.PI;
+    this.scene.add(screenMesh);
+
+    // Keypad and card slot shelf
+    const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.45), new THREE.MeshLambertMaterial({ color: 0x444f5a }));
+    shelf.position.set(x - 0.5, y + 1.0, facadeZ + 0.05);
+    this.scene.add(shelf);
+
+    // Security Surveillance Dome Camera
+    const cameraBase = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.08, 12), new THREE.MeshLambertMaterial({ color: 0xffffff }));
+    cameraBase.position.set(x, y + h - 0.2, facadeZ - 0.3);
+    this.scene.add(cameraBase);
+    const cameraDome = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), new THREE.MeshLambertMaterial({ color: 0x111111 }));
+    cameraDome.position.set(x, y + h - 0.26, facadeZ - 0.3);
+    this.scene.add(cameraDome);
+
+    // Cyan Neon Under-glow for 24h ATM
+    const atmLight = new THREE.PointLight(0x00d4ff, 1.8, 8);
+    atmLight.position.set(x - 0.5, y + 2.2, facadeZ - 0.8);
+    this.scene.add(atmLight);
+
+    // Solid collision box for the bank building
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, y, z - d / 2),
+      new THREE.Vector3(x + w / 2, y + h, z + d / 2),
+      'solid'
+    );
+  }
+
+  // 25. Expanded Street Grid: Rua Paula Ferreira, Cel. Bento Bicudo, Emílio Lessore & Street View Details
+  buildExpandedStreetsAndDetails() {
+    const asfaltoMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createAsfalto(12, 4)
+    });
+    const calcadaMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(16, 2)
+    });
+    const curbMat = new THREE.MeshLambertMaterial({ color: 0xdedede });
+
+    // -------------------------------------------------------------
+    // A. Rua Paula Ferreira Extension (Ascending from Z = 35 to Z = 96)
+    // -------------------------------------------------------------
+    const paulaExtGeo = new THREE.PlaneGeometry(10, 62);
+    const paulaExt = new THREE.Mesh(paulaExtGeo, asfaltoMat);
+    paulaExt.rotation.x = -Math.PI / 2;
+    paulaExt.position.set(1.5, 0.012, 65.5);
+    this.scene.add(paulaExt);
+
+    // West Sidewalk of Paula Ferreira
+    const pfWestWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 62), calcadaMat);
+    pfWestWalk.position.set(-5.0, 0.125, 65.5);
+    this.scene.add(pfWestWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-6.5, 0, 35),
+      new THREE.Vector3(-3.5, 0.25, 96),
+      'curb'
+    );
+
+    // East Sidewalk of Paula Ferreira
+    const pfEastWalk = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.25, 62), calcadaMat);
+    pfEastWalk.position.set(8.0, 0.125, 65.5);
+    this.scene.add(pfEastWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(6.5, 0, 35),
+      new THREE.Vector3(9.5, 0.25, 96),
+      'curb'
+    );
+
+    // -------------------------------------------------------------
+    // B. Rua Coronel Bento Bicudo (1ª Paralela crossing at Z = 58)
+    // -------------------------------------------------------------
+    const bentoRoadGeo = new THREE.PlaneGeometry(88, 9);
+    const bentoRoad = new THREE.Mesh(bentoRoadGeo, asfaltoMat);
+    bentoRoad.rotation.x = -Math.PI / 2;
+    bentoRoad.position.set(10.0, 0.016, 58.0);
+    this.scene.add(bentoRoad);
+
+    // North Sidewalk of Bento Bicudo
+    const bentoNorthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    bentoNorthWalk.position.set(10.0, 0.125, 52.0);
+    this.scene.add(bentoNorthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 50.5),
+      new THREE.Vector3(54, 0.25, 53.5),
+      'curb'
+    );
+
+    // South Sidewalk of Bento Bicudo
+    const bentoSouthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    bentoSouthWalk.position.set(10.0, 0.125, 64.0);
+    this.scene.add(bentoSouthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 62.5),
+      new THREE.Vector3(54, 0.25, 65.5),
+      'curb'
+    );
+
+    // -------------------------------------------------------------
+    // C. Rua Emílio Lessore (2ª Paralela crossing at Z = 88)
+    // -------------------------------------------------------------
+    const lessoreRoadGeo = new THREE.PlaneGeometry(88, 9);
+    const lessoreRoad = new THREE.Mesh(lessoreRoadGeo, asfaltoMat);
+    lessoreRoad.rotation.x = -Math.PI / 2;
+    lessoreRoad.position.set(10.0, 0.016, 88.0);
+    this.scene.add(lessoreRoad);
+
+    // North Sidewalk of Emílio Lessore
+    const lessoreNorthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    lessoreNorthWalk.position.set(10.0, 0.125, 82.0);
+    this.scene.add(lessoreNorthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 80.5),
+      new THREE.Vector3(54, 0.25, 83.5),
+      'curb'
+    );
+
+    // South Sidewalk of Emílio Lessore
+    const lessoreSouthWalk = new THREE.Mesh(new THREE.BoxGeometry(88, 0.25, 3.0), calcadaMat);
+    lessoreSouthWalk.position.set(10.0, 0.125, 94.0);
+    this.scene.add(lessoreSouthWalk);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-34, 0, 92.5),
+      new THREE.Vector3(54, 0.25, 95.5),
+      'curb'
+    );
+
+    // -------------------------------------------------------------
+    // D. Speed Bumps (Lombadas) with Yellow Reflective Chevrons
+    // -------------------------------------------------------------
+    const lombadaMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createLombadaTexture()
+    });
+
+    const addLombada = (lx, lz, width, rotY = 0) => {
+      const geo = new THREE.BoxGeometry(width, 0.12, 1.6);
+      const m = new THREE.Mesh(geo, lombadaMat);
+      m.position.set(lx, 0.06, lz);
+      m.rotation.y = rotY;
+      this.scene.add(m);
+    };
+
+    // On Bento Bicudo
+    addLombada(-14.0, 58.0, 8.6, 0);
+    addLombada(26.0, 58.0, 8.6, 0);
+
+    // On Paula Ferreira
+    addLombada(1.5, 47.0, 9.6, Math.PI / 2);
+    addLombada(1.5, 74.0, 9.6, Math.PI / 2);
+
+    // -------------------------------------------------------------
+    // E. Storm Drains (Bueiros / Bocas de Lobo) along curbs
+    // -------------------------------------------------------------
+    const bueiroMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createBueiroTexture()
+    });
+
+    const addBueiro = (bx, bz, rotY = 0) => {
+      const bMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.55), bueiroMat);
+      bMesh.rotation.x = -Math.PI / 2;
+      bMesh.rotation.z = rotY;
+      bMesh.position.set(bx, 0.13, bz);
+      this.scene.add(bMesh);
+    };
+
+    addBueiro(4.8, 32.5, 0);
+    addBueiro(-3.4, 53.6, Math.PI / 2);
+    addBueiro(6.4, 53.6, Math.PI / 2);
+    addBueiro(-3.4, 83.6, Math.PI / 2);
+    addBueiro(6.4, 83.6, Math.PI / 2);
+
+    // -------------------------------------------------------------
+    // F. CET Street Name Signs (Placas Azuis Padrão CET São Paulo)
+    // -------------------------------------------------------------
+    const addStreetSign = (sx, sz, streetName, subtext, rotY = 0) => {
+      const postMat = new THREE.MeshLambertMaterial({ color: 0x888890 });
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 2.6, 8), postMat);
+      pole.position.set(sx, 1.3, sz);
+      this.scene.add(pole);
+
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createStreetSign(streetName, subtext)
+      });
+      const signGeo = new THREE.PlaneGeometry(1.0, 0.45);
+
+      // Double-sided sign plate
+      const plate = new THREE.Mesh(signGeo, signMat);
+      plate.position.set(sx, 2.35, sz);
+      plate.rotation.y = rotY;
+      this.scene.add(plate);
+
+      const plateBack = new THREE.Mesh(signGeo, signMat);
+      plateBack.position.set(sx, 2.35, sz);
+      plateBack.rotation.y = rotY + Math.PI;
+      this.scene.add(plateBack);
+    };
+
+    // 1. Edgar Facó x Paula Ferreira
+    addStreetSign(5.2, 32.0, 'Av. Gen. Edgar Facó', '0 - 1500 • Pirituba', 0);
+    addStreetSign(4.5, 32.8, 'R. Paula Ferreira', 'Subida Piqueri', Math.PI / 2);
+
+    // 2. Paula Ferreira x Cel. Bento Bicudo
+    addStreetSign(6.6, 52.2, 'R. Cel. Bento Bicudo', '1 - 450 • Piqueri', 0);
+    addStreetSign(-5.2, 52.2, 'R. Paula Ferreira', '200 - 800 • Pirituba', Math.PI / 2);
+
+    // 3. Paula Ferreira x Emílio Lessore
+    addStreetSign(6.6, 82.2, 'R. Emílio Lessore', '1 - 220 • Alto Pirituba', 0);
+    addStreetSign(-5.2, 82.2, 'R. Emílio Lessore', 'Viela da Paz', 0);
+
+    // -------------------------------------------------------------
+    // G. Auto Mecânica do Beto (Oficina on Bento Bicudo at X = 25, Z = 48)
+    // -------------------------------------------------------------
+    const ofiGeo = new THREE.BoxGeometry(10.0, 4.5, 7.0);
+    const ofiMat = new THREE.MeshLambertMaterial({ color: 0x4a4f56 });
+    const ofiBuilding = new THREE.Mesh(ofiGeo, ofiMat);
+    ofiBuilding.position.set(25.0, 2.25, 48.0);
+    this.scene.add(ofiBuilding);
+
+    // Oficina Signboard
+    const ofiSignGeo = new THREE.PlaneGeometry(8.5, 1.8);
+    const ofiSignMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createOficinaSignTexture()
+    });
+    const ofiSign = new THREE.Mesh(ofiSignGeo, ofiSignMat);
+    ofiSign.position.set(25.0, 3.8, 51.52);
+    this.scene.add(ofiSign);
+
+    // Rollup metal shutter
+    const ofiDoorGeo = new THREE.PlaneGeometry(5.5, 2.8);
+    const ofiDoorMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPortaAco('#c05020')
+    });
+    const ofiDoor = new THREE.Mesh(ofiDoorGeo, ofiDoorMat);
+    ofiDoor.position.set(25.0, 1.4, 51.52);
+    this.scene.add(ofiDoor);
+
+    this.physics.addBoxCollider(
+      new THREE.Vector3(20.0, 0, 44.5),
+      new THREE.Vector3(30.0, 4.5, 51.5),
+      'solid'
+    );
+
+    // Tire stack outside oficina
+    this.buildTireStack(20.5, 0.25, 52.2, 4);
+
+    // -------------------------------------------------------------
+    // H. Residential Sobrado Houses along Bento Bicudo and Emílio Lessore
+    // -------------------------------------------------------------
+    const addSobrado = (sx, sz, w, h, d, wallType = 'tijolo', color = '#5588a3') => {
+      const posY = 0.25 + h / 2;
+      let mat;
+      if (wallType === 'tijolo') {
+        mat = new THREE.MeshLambertMaterial({ map: this.textures.createTijoloBaiano(2, 2) });
+      } else if (wallType === 'reboco') {
+        mat = new THREE.MeshLambertMaterial({ map: this.textures.createReboco('#8f897e', 2, 2) });
+      } else {
+        mat = new THREE.MeshLambertMaterial({ map: this.textures.createPaintedWall(color, 2, 2) });
+      }
+
+      const house = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+      house.position.set(sx, posY, sz);
+      this.scene.add(house);
+
+      // Water tank on top
+      this.buildWaterTank(sx + 1.0, 0.25 + h, sz);
+
+      // Solid collision box
+      this.physics.addBoxCollider(
+        new THREE.Vector3(sx - w / 2, 0, sz - d / 2),
+        new THREE.Vector3(sx + w / 2, h + 0.5, sz + d / 2),
+        'solid'
+      );
+    };
+
+    // Bento Bicudo North side
+    addSobrado(-20.0, 47.5, 9.0, 5.5, 7.0, 'painted', '#4682b4');
+    addSobrado(-8.0, 47.5, 8.5, 6.0, 7.0, 'tijolo');
+
+    // Bento Bicudo South side
+    addSobrado(-20.0, 69.0, 9.0, 5.8, 7.0, 'tijolo');
+    addSobrado(-7.0, 69.0, 8.0, 5.2, 7.0, 'reboco');
+    addSobrado(18.0, 69.0, 8.5, 6.0, 7.0, 'painted', '#c47d4e');
+    addSobrado(32.0, 69.0, 9.0, 5.5, 7.0, 'tijolo');
+
+    // Emílio Lessore North side
+    addSobrado(-18.0, 77.0, 9.0, 5.8, 7.0, 'reboco');
+    addSobrado(22.0, 77.0, 8.5, 6.2, 7.0, 'painted', '#5e9482');
+
+    // Emílio Lessore South side
+    addSobrado(-20.0, 99.0, 9.0, 6.0, 7.0, 'tijolo');
+    addSobrado(1.5, 100.0, 10.0, 6.5, 7.0, 'painted', '#9c6f9e');
+    addSobrado(25.0, 99.0, 9.0, 5.8, 7.0, 'reboco');
+
+    // -------------------------------------------------------------
+    // I. Concrete Utility Poles with Street Lamps along Bento & Lessore
+    // -------------------------------------------------------------
+    const poleMat = new THREE.MeshLambertMaterial({ color: 0x77777a });
+    const lampMat = new THREE.MeshBasicMaterial({ color: 0xfff0aa });
+
+    const addLightPole = (px, pz) => {
+      const pole = new THREE.Mesh(new THREE.BoxGeometry(0.25, 7.0, 0.25), poleMat);
+      pole.position.set(px, 3.5, pz);
+      this.scene.add(pole);
+
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.1), poleMat);
+      arm.position.set(px + 0.6, 6.8, pz);
+      this.scene.add(arm);
+
+      const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.12, 0.2), lampMat);
+      lamp.position.set(px + 1.2, 6.7, pz);
+      this.scene.add(lamp);
+
+      const light = new THREE.PointLight(0xffea88, 1.2, 18);
+      light.position.set(px + 1.2, 6.4, pz);
+      this.scene.add(light);
+    };
+
+    addLightPole(-15.0, 53.0);
+    addLightPole(12.0, 53.0);
+    addLightPole(38.0, 53.0);
+    addLightPole(-15.0, 83.0);
+    addLightPole(12.0, 83.0);
+    addLightPole(38.0, 83.0);
+
+    // -------------------------------------------------------------
+    // J. Boundary Colliders (Keep player inside urban map)
+    // -------------------------------------------------------------
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-38.0, 0, 34.0),
+      new THREE.Vector3(-34.0, 10, 105.0),
+      'solid'
+    );
+    this.physics.addBoxCollider(
+      new THREE.Vector3(53.5, 0, 34.0),
+      new THREE.Vector3(58.0, 10, 105.0),
+      'solid'
+    );
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-38.0, 0, 103.0),
+      new THREE.Vector3(58.0, 10, 108.0),
+      'solid'
+    );
+  }
 }
+
 
 /**
  * Social Classes / Character Archetypes for Brazil Simulator
@@ -10196,6 +10931,7 @@ class GameState {
     // Currency in integer centavos (1 Real = 100 centavos)
     this.grana = classConfig.grana;
     this.debt = 0; // Fiado / Dívida acumulada
+    this.bankruptTimer = 0; // Tempo acumulado com saldo negativo (Falência se >= 90s)
 
     // Stats clamped 0..100 strictly integers
     this.fome = Math.round(classConfig.fome);
@@ -10277,6 +11013,8 @@ class GameState {
         const remainingCost = -(this.grana + deltas.grana);
         this.debt += remainingCost;
         this.grana = 0;
+      } else if (deltas.allowNegative) {
+        this.grana = Math.round(this.grana + deltas.grana);
       } else {
         this.grana = Math.max(0, Math.round(this.grana + deltas.grana));
       }
@@ -10385,6 +11123,20 @@ class GameState {
         isDead: true,
         cause: 'XILINDRÓ / COBRANÇA DO AGIOTA',
         desc: 'Seu medidor de B.O. chegou a 100%. A ROTA te levou detido pro 87º DP de Pirituba ou o agiota te pegou na esquina.'
+      };
+    }
+    if (this.grana <= -15000) {
+      return {
+        isDead: true,
+        cause: 'FALÊNCIA & EXECUÇÃO DO CPF',
+        desc: 'Sua conta estourou o limite de cheque especial do Banco Pirituba (-R$ 150,00). O banco bloqueou seus bens e executou seu CPF no Serasa. Você faliu na quebrada!'
+      };
+    }
+    if (this.bankruptTimer >= 90) {
+      return {
+        isDead: true,
+        cause: 'FALÊNCIA & PRAZO ESGOTADO',
+        desc: 'Você passou mais de 90 segundos com a conta no vermelho sem quitar a dívida no Banco Pirituba. O oficial de justiça confiscou seus pertences!'
       };
     }
     return null;
@@ -10648,14 +11400,89 @@ class DialogSystem {
         }
 
         const keyBadge = `<span class="dialog-key-badge">[${idx + 1}]</span>`;
-        const costTag = opt.costLabel ? `<span class="dialog-cost-tag">${opt.costLabel}</span>` : '';
-        btn.innerHTML = `${keyBadge} <span class="dialog-option-label">${opt.label}</span> ${costTag}`;
+        const visualBadges = this.formatActionBadges(opt);
+        btn.innerHTML = `${keyBadge} <span class="dialog-option-label">${opt.label}</span> ${visualBadges}`;
 
         btn.addEventListener('click', () => this.selectOption(idx));
         this.optionsElem.appendChild(btn);
       });
     }
+  }
 
+  // Format visual action badges ($ to $$$$$ green/red and stat chips)
+  formatActionBadges(opt) {
+    let badgesHtml = '';
+
+    // 1. Determine money delta in centavos
+    let granaDelta = 0;
+    if (typeof opt.gainCentavos === 'number' && opt.gainCentavos > 0) {
+      granaDelta = opt.gainCentavos;
+    } else if (typeof opt.costCentavos === 'number' && opt.costCentavos > 0) {
+      granaDelta = -opt.costCentavos;
+    } else if (opt.deltas && typeof opt.deltas.grana === 'number') {
+      granaDelta = opt.deltas.grana;
+    } else if (typeof opt.costLabel === 'string' && opt.costLabel.includes('R$')) {
+      const match = opt.costLabel.match(/([+-]?)\s*R\$\s*(\d+)(?:[.,](\d{2}))?/);
+      if (match) {
+        const sign = match[1] === '+' ? 1 : -1;
+        const reais = parseInt(match[2], 10) || 0;
+        const centavos = match[3] ? parseInt(match[3], 10) : 0;
+        granaDelta = sign * (reais * 100 + centavos);
+      }
+    }
+
+    if (granaDelta > 0) {
+      let pips = '$';
+      if (granaDelta <= 500) pips = '$';
+      else if (granaDelta <= 1500) pips = '$$';
+      else if (granaDelta <= 3500) pips = '$$$';
+      else if (granaDelta <= 7500) pips = '$$$$';
+      else pips = '$$$$$';
+
+      badgesHtml += `<span class="action-badge badge-gain" title="+R$ ${(granaDelta / 100).toFixed(2)}">💵 ${pips}</span>`;
+    } else if (granaDelta < 0) {
+      const absVal = Math.abs(granaDelta);
+      let pips = '-$';
+      if (absVal <= 500) pips = '-$';
+      else if (absVal <= 1500) pips = '-$$';
+      else if (absVal <= 3500) pips = '-$$$';
+      else if (absVal <= 7500) pips = '-$$$$';
+      else pips = '-$$$$$';
+
+      badgesHtml += `<span class="action-badge badge-cost" title="-R$ ${(absVal / 100).toFixed(2)}">🔻 ${pips}</span>`;
+    }
+
+    // 2. Stat attributes in deltas
+    if (opt.deltas) {
+      if (typeof opt.deltas.fome === 'number' && opt.deltas.fome !== 0) {
+        const sign = opt.deltas.fome > 0 ? '+' : '';
+        const cls = opt.deltas.fome > 0 ? 'badge-fome' : 'badge-fome-neg';
+        badgesHtml += `<span class="action-badge ${cls}">🍗 ${sign}${opt.deltas.fome}%</span>`;
+      }
+      if (typeof opt.deltas.sanidade === 'number' && opt.deltas.sanidade !== 0) {
+        const sign = opt.deltas.sanidade > 0 ? '+' : '';
+        const cls = opt.deltas.sanidade > 0 ? 'badge-sanidade' : 'badge-sanidade-neg';
+        badgesHtml += `<span class="action-badge ${cls}">🧠 ${sign}${opt.deltas.sanidade}%</span>`;
+      }
+      if (typeof opt.deltas.perigo === 'number' && opt.deltas.perigo !== 0) {
+        const sign = opt.deltas.perigo > 0 ? '+' : '';
+        const cls = opt.deltas.perigo > 0 ? 'badge-perigo' : 'badge-perigo-safe';
+        badgesHtml += `<span class="action-badge ${cls}">🚨 ${sign}${opt.deltas.perigo}%</span>`;
+      }
+      if (typeof opt.deltas.ginga === 'number' && opt.deltas.ginga !== 0) {
+        const sign = opt.deltas.ginga > 0 ? '+' : '';
+        badgesHtml += `<span class="action-badge badge-ginga">⚡ ${sign}${opt.deltas.ginga}</span>`;
+      }
+    }
+
+    // 3. Keep narrative tag if no stats or special tag
+    if (!badgesHtml && opt.costLabel) {
+      badgesHtml += `<span class="dialog-cost-tag">${opt.costLabel}</span>`;
+    } else if (opt.costLabel && !opt.costLabel.includes('R$') && !opt.costLabel.includes('%')) {
+      badgesHtml += `<span class="dialog-cost-tag dialog-cost-secondary">${opt.costLabel}</span>`;
+    }
+
+    return `<div class="dialog-badges-container">${badgesHtml}</div>`;
   }
 
   selectOption(index) {
@@ -11807,12 +12634,270 @@ const BRAZILIAN_ENCOUNTERS = {
         id: 'fofoca_bairro',
         label: 'Ouvir conselhos de mãe e fofocas quentes da vizinhança',
         costLabel: 'Papo Acolhedor',
+        deltas: { sanidade: 20, perigo: -15 },
         execute: (state) => {
           state.apply({ sanidade: 20, perigo: -15 }, 'Conselho de mãe da Dona Neide');
           return 'Dona Neide conta tudo: "— Fica atento, meu anjo: de tarde arma temporal daquele jeito, o céu fica preto! E não deixa dinheiro fácil à mostra na avenida. Toma juízo e vai com Deus!" (+20% Sanidade, -15% Perigo).';
         }
       }
     ]
+  },
+
+  // 14. Banco Pirituba (Autoatendimento 24h & Cheque Especial)
+  BANCO_PIRITUBA: {
+    id: 'BANCO_PIRITUBA',
+    title: '🏧 BANCO PIRITUBA // REDE 24 HORAS',
+    getIntroText: (state) => {
+      const isNegative = state.grana < 0;
+      const statusText = isNegative
+        ? `<strong style="color:#ff3344">⚠️ SALDO NEGATIVADO: ${state.formattedGrana} (LIMITE: -R$ 150,00) • PRAZO SERASA: ${Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)))}s</strong>`
+        : `<span style="color:#00ff88">Saldo Disponível: ${state.formattedGrana} • Situação Cadastral: REGULAR</span>`;
+      return `
+        A tela do terminal eletrônico emite um brilho azul estéril na penumbra.<br>
+        O teclado emborrachado está gasto pelos milhares de dedos paulistanos.<br>
+        <em>"Banco Pirituba: Conectando você ao seu dinheiro (ou às suas dívidas)."</em><br>
+        <small>${statusText}</small>
+      `;
+    },
+    getOptions: (state) => [
+      {
+        id: 'saque_cheque_especial',
+        label: state.grana <= -10000
+          ? 'Cheque Especial Bloqueado (Limite de crédito quase estourado)'
+          : 'Contratar Cheque Especial Emergencial (Crédito imediato, juros pesados)',
+        costLabel: 'Cheque Especial (-R$ 50,00 na conta)',
+        costCentavos: 5000,
+        disabled: state.grana <= -10000,
+        deltas: { grana: -5000, allowNegative: true, sanidade: -8 },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -5000, allowNegative: true, sanidade: -8 }, 'Saque emergencial no Cheque Especial');
+          return 'As notas saem estalando do compartimento inferior. O alívio é imediato, mas seu saldo caiu no vermelho! Quite a dívida antes de 90 segundos ou seu CPF será executado e você perderá a run!';
+        }
+      },
+      {
+        id: 'quitar_divida_banco',
+        label: state.grana >= 0
+          ? 'Depósito Bancário em Dinheiro (Saldo já está positivo)'
+          : 'Depositar Dinheiro e Abater Cheque Especial',
+        costLabel: state.grana >= 0 ? 'Depósito Poupanca' : 'Amortizar Saldo',
+        gainCentavos: 5000,
+        deltas: { grana: 5000, sanidade: 15 },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: 5000, sanidade: 15 }, 'Amortização de dívida bancária');
+          return 'Você insere o envelope de depósito no terminal. A compensação imediata alivia sua conta e afasta o fantasma do Serasa e da falência (+15% Sanidade)!';
+        }
+      },
+      {
+        id: 'consulta_extrato_serasa',
+        label: 'Consultar Extrato Detalhado & Score do Serasa',
+        costLabel: 'Grátis',
+        deltas: { sanidade: 5 },
+        execute: (state) => {
+          state.apply({ sanidade: 5 }, 'Consulta de extrato bancário');
+          const isNegative = state.grana < 0;
+          if (isNegative) {
+            const timeLeft = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
+            return `AVISO GRAVE DO BANCO PIRITUBA: Sua conta está em ${state.formattedGrana}. Você possui exatamente ${timeLeft} segundos restantes antes de uma execução judicial de bens que encerrará sua jornada!`;
+          } else {
+            return `EXTRATO CONSOLIDADO: Saldo positivo de ${state.formattedGrana}. Seu Score de crédito está favorável e não há pendências ativas no SPC/Serasa. Siga em frente (+5% Sanidade).`;
+          }
+        }
+      }
+    ]
+  },
+
+  // 15. Polícia Militar de SP (Sargento Rocha)
+  NPC_POLICIA: {
+    id: 'NPC_POLICIA',
+    title: '👮 SARGENTO ROCHA // POLÍCIA MILITAR DE SÃO PAULO',
+    getIntroText: (state) => {
+      const isHighPerigo = state.perigo >= 45;
+      const statusNote = isHighPerigo
+        ? `<strong style="color:#ff3344">⚠️ SEU PERIGO ESTÁ ALTO (${state.perigo}%)! O SARGENTO ESTÁ COM A MÃO NO COLDRE!</strong>`
+        : `<span style="color:#00ff88">Nível de Perigo: ${state.perigo}% • Ronda Ostensiva em Pirituba</span>`;
+      return `
+        A farda cinza bandeirante e a viatura Duster com giroflex desligado na calçada impõem respeito.<br>
+        O Sargento Rocha te mede de cima a baixo com olhos experientes:<br>
+        <em>"— Alguma novidade na área, cidadão? O 49º Batalhão não tolera desordem."</em><br>
+        <small>${statusNote}</small>
+      `;
+    },
+    getOptions: (state) => [
+      {
+        id: 'cumprimentar_pm',
+        label: state.perigo >= 45
+          ? 'Tentar conversar amigavelmente (Seu nível de perigo está muito alto!)'
+          : 'Cumprimentar respeitosamente e desejar bom patrulhamento',
+        costLabel: 'Cidadão Exemplar',
+        disabled: state.perigo >= 45,
+        deltas: { sanidade: 16, perigo: -12 },
+        execute: (state) => {
+          state.apply({ sanidade: 16, perigo: -12 }, 'Cumprimentou o Sargento da PM');
+          return 'O Sargento bate continência curta com a mão na boina: "— Boa tarde, cidadão de bem. Se ver qualquer elemento suspeito na Paula Ferreira, dê o toque na viatura." (+16% Sanidade, -12% Perigo).';
+        }
+      },
+      {
+        id: 'caguetar_malandro',
+        label: state.flags.caguetouMalandro
+          ? 'Denunciar o crime local (Você já delatou o movimento hoje)'
+          : 'Caguetar o Menor do Corre e denunciar o ponto de tráfico da Bento Bicudo',
+        costLabel: '+R$ 40,00 Recompensa | Marca de X-9',
+        gainCentavos: 4000,
+        disabled: Boolean(state.flags.caguetouMalandro),
+        deltas: { grana: 4000, perigo: -25, setFlags: { caguetouMalandro: true } },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: 4000,
+            perigo: -25,
+            setFlags: { caguetouMalandro: true }
+          }, 'Delatou o corre pro Sargento Rocha');
+          return 'O PM puxa um bloquinho e anota a localização exata da viela: "— Boa, parceiro. Informação de primeira linha. Toma aqui R$ 40,00 da nossa caixinha de gratificação." Você se afasta com o bolso cheio, mas sente que virou X-9 na quebrada...';
+        }
+      },
+      {
+        id: 'enquadro_suborno',
+        label: state.perigo < 45
+          ? 'Acertar pendências / Pagar o café da ronda (Disponível apenas em B.O. alto)'
+          : 'Pagar o "Café da Viatura" (Propina de R$ 35,00 para evitar o camburão)',
+        costLabel: 'Propina R$ 35,00',
+        costCentavos: 3500,
+        disabled: state.perigo < 45,
+        deltas: { grana: -3500, allowNegative: true, perigo: -35, sanidade: -12 },
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: -3500,
+            allowNegative: true,
+            perigo: -35,
+            sanidade: -12
+          }, 'Pagou café da viatura do PM');
+          return 'O sargento recolhe a nota discretamente pelo vão do cinto de guarnição: "— Vai andando devagar e não olha pra trás. Se eu te trombar de novo hoje, vai pro 33º DP!" (-R$ 35,00, -35% Perigo, -12% Sanidade).';
+        }
+      },
+      {
+        id: 'enquadro_revista',
+        label: 'Submeter-se ao enquadro: "Mão na cabeça e abre as pernas!"',
+        costLabel: 'Revista Policial',
+        deltas: { sanidade: -20, perigo: -15 },
+        execute: (state) => {
+          state.apply({ sanidade: -20, perigo: -15 }, 'Passou pelo enquadro da PMESP');
+          return 'O sargento revista seus bolsos, checa seu documento pelo rádio da viatura e dá dois tapas no seu ombro: "— Nada consta no Copom. Segue seu rumo, mas fica esperto." Humilhação da blitz (-20% Sanidade, -15% Perigo).';
+        }
+      }
+    ]
+  },
+
+  // 16. Menor do Corre (Malandro da Quebrada)
+  NPC_MALANDRO: {
+    id: 'NPC_MALANDRO',
+    title: '🧢 MENOR DO CORRE // MALANDRAGEM DE PIRITUBA',
+    getIntroText: (state) => {
+      if (state.flags.caguetouMalandro) {
+        return `
+          <strong style="color:#ff2233">🚨 O MENOR TE ENCARA COM ÓDIO PURO!</strong><br>
+          A notícia correu rápido pelo rádio pirata: você foi visto de papinho com o Sargento da PM!<br>
+          <em>"— Falou com os 'homi' né, comédia?! X-9 na quebrada não tem vez não!"</em><br>
+          <small style="color:#ffcc00">Perigo: ${state.perigo}% | Saldo: ${state.formattedGrana}</small>
+        `;
+      }
+      return `
+        De bermuda tactel, corrente e chinelo no asfalto quente da Cel. Bento Bicudo.<br>
+        O Menor do Corre acompanha o movimento da esquina mascando chiclete:<br>
+        <em>"— Salve, parça! Tá na atividade ou tá moscando no pedaço?"</em><br>
+        <small style="color:#00ff88">Ginga: ${state.ginga}% | Saldo: ${state.formattedGrana} | Perigo: ${state.perigo}%</small>
+      `;
+    },
+    getOptions: (state) => {
+      // Branch 1: If player snitched to police (Retribution / Cobrança)
+      if (state.flags.caguetouMalandro) {
+        return [
+          {
+            id: 'cobranca_pedagio',
+            label: 'Pagar pedágio de resgate da vida (R$ 50,00)',
+            costLabel: 'R$ 50,00 Resgate X-9',
+            costCentavos: 5000,
+            deltas: { grana: -5000, allowNegative: true, sanidade: -25, perigo: 10, setFlags: { caguetouMalandro: false } },
+            execute: (state, sound) => {
+              if (sound) sound.playCoin();
+              state.apply({
+                grana: -5000,
+                allowNegative: true,
+                sanidade: -25,
+                perigo: 10,
+                setFlags: { caguetouMalandro: false }
+              }, 'Pagou pedágio de X-9 pro malandro');
+              return 'O menor arranca o dinheiro da sua mão com truculência: "— Tá pago o vacilo. Mas se abrir o bico de novo pro Sargento, vai sumir do mapa!" Seu bolso chora e sua conta pode ter ido pro negativo (-R$ 50,00, -25% Sanidade).';
+            }
+          },
+          {
+            id: 'cobranca_apanhar',
+            label: 'Enfrentar o malandro na marra e levar uma surra da quebrada',
+            costLabel: 'Violência Urbana',
+            deltas: { fome: -30, sanidade: -35, perigo: 20, setFlags: { caguetouMalandro: false } },
+            execute: (state) => {
+              state.apply({
+                fome: -30,
+                sanidade: -35,
+                perigo: 20,
+                setFlags: { caguetouMalandro: false }
+              }, 'Levou surra de cobrança na viela');
+              return 'Dois comparsas brotam do beco da Bento Bicudo. Você leva um sacode, cai no asfalto com a roupa rasgada e o corpo moído de dor (-30% Fome, -35% Sanidade, +20% Perigo)!';
+            }
+          }
+        ];
+      }
+
+      // Branch 2: Normal street interactions
+      return [
+        {
+          id: 'salve_quebrada',
+          label: 'Mandar um salve de respeito e trocar idéia tranquila',
+          costLabel: 'Salve da Quebrada',
+          deltas: { sanidade: 14, ginga: 10 },
+          execute: (state) => {
+            state.apply({ sanidade: 14, ginga: 10 }, 'Trocou idéia com o Menor do Corre');
+            return 'Vocês batem as mãos no cumprimento tradicional da Z/O: "— Firmeza total, truta. Na humildade se vai longe." (+14% Sanidade, +10 Ginga).';
+          }
+        },
+        {
+          id: 'fazer_corre_crime',
+          label: 'Fazer um "Corre do Crime" (Entregar pacote sigiloso na Rua Emílio Lessore)',
+          costLabel: '+R$ 75,00 Grana Rápida | +35% B.O.',
+          gainCentavos: 7500,
+          deltas: { grana: 7500, perigo: 35, ginga: 18 },
+          execute: (state, sound) => {
+            if (sound) sound.playCoin();
+            state.apply({ grana: 7500, perigo: 35, ginga: 18 }, 'Fez o corre do crime na quebrada');
+            return 'Você enfia o pacote selado no cós da calça e sobe correndo até o topo da Emílio Lessore. A entrega é rápida e você volta com R$ 75,00 quentinho no bolso (+$$$$$), mas seu Perigo disparou (+35% Perigo, +18 Ginga)!';
+          }
+        },
+        {
+          id: 'assalto_mao_armada',
+          label: state.perigo < 45
+            ? 'Comprar um cigarro avulso no maço'
+            : 'Mão armada do malandro: "Passa a carteira e o celular logo!"',
+          costLabel: state.perigo < 45 ? 'R$ 2,00' : 'Assalto (-R$ 25,00)',
+          costCentavos: state.perigo < 45 ? 200 : 2500,
+          deltas: state.perigo < 45
+            ? { grana: -200, sanidade: 10 }
+            : { grana: -2500, allowNegative: true, sanidade: -20 },
+          execute: (state, sound) => {
+            if (state.perigo < 45) {
+              if (sound) sound.playCoin();
+              state.apply({ grana: -200, sanidade: 10 }, 'Comprou cigarro avulso');
+              return 'Você solta uma fumaça na esquina olhando os carros da Edgar Facó passarem (-R$ 2,00, +10% Sanidade).';
+            } else {
+              if (sound) sound.playCoin();
+              state.apply({ grana: -2500, allowNegative: true, sanidade: -20 }, 'Assaltado pelo malandro da esquina');
+              return 'O moleque exibe o cabo cromado por baixo da camisa e te revista na parede: "— Perdeu, comédia! Passa o cascalho!" Ele leva R$ 25,00 do seu bolso (-R$ 25,00, -20% Sanidade). Se faltou grana, sua conta afunda!';
+            }
+          }
+        }
+      ];
+    }
   }
 };
 
@@ -11923,6 +13008,53 @@ class NpcSystem {
       ]
     });
     this.npcs.push(donaNeide);
+
+    // 5. Sargento Rocha (Polícia Militar de SP - Ronda Ostensiva)
+    const sargentoRocha = this.createHumanoidNpc({
+      id: 'sargento_rocha',
+      name: 'SARGENTO ROCHA (PMESP)',
+      prompt: 'FALAR COM SARGENTO ROCHA (PMESP)',
+      encounterId: 'NPC_POLICIA',
+      shirtColor: 0x4f5d6b, // PM gray uniform
+      skinColor: 0x8a5832,
+      pantsColor: 0x1c2430, // Navy dark trousers
+      hasPoliceCap: true,
+      hasPoliceBelt: true,
+      speed: 1.2,
+      waypoints: [
+        { x: 1.5, z: 22.0 },
+        { x: 4.5, z: 34.0 },
+        { x: 4.5, z: 54.0 },
+        { x: -3.5, z: 54.0 },
+        { x: -3.5, z: 34.0 },
+        { x: 1.5, z: 22.0 }
+      ]
+    });
+    this.npcs.push(sargentoRocha);
+
+    // 6. Menor do Corre (Malandro / Aviãozinho da Quebrada)
+    const menorCorre = this.createHumanoidNpc({
+      id: 'menor_corre',
+      name: 'MENOR DO CORRE (MALANDRO)',
+      prompt: 'TROCAR UMA IDÉIA COM MENOR DO CORRE',
+      encounterId: 'NPC_MALANDRO',
+      shirtColor: 0x1e1e24, // Camisa preta / regata
+      skinColor: 0x9c653d,
+      pantsColor: 0x0077cc, // Bermuda tactel azul
+      hasForwardCap: true,
+      capColor: 0x111111,
+      hasShoulderBag: true,
+      speed: 1.5,
+      waypoints: [
+        { x: -16.0, z: 58.0 },
+        { x: 14.0, z: 58.0 },
+        { x: 1.5, z: 72.0 },
+        { x: 22.0, z: 88.0 },
+        { x: -14.0, z: 88.0 },
+        { x: 1.5, z: 66.0 }
+      ]
+    });
+    this.npcs.push(menorCorre);
   }
 
   // Build articulated humanoid 3D mesh
@@ -11947,7 +13079,29 @@ class NpcSystem {
     headGroup.add(headMesh);
 
     // Head Accessories
-    if (config.hasCap) {
+    if (config.hasPoliceCap) {
+      const capMat = new THREE.MeshLambertMaterial({ color: 0x1e2733 });
+      const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.12, 0.34), capMat);
+      capCrown.position.y = 0.15;
+      headGroup.add(capCrown);
+
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.03, 0.16), capMat);
+      visor.position.set(0, 0.1, 0.22);
+      headGroup.add(visor);
+
+      const goldBadge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.02), new THREE.MeshLambertMaterial({ color: 0xf1c40f }));
+      goldBadge.position.set(0, 0.16, 0.18);
+      headGroup.add(goldBadge);
+    } else if (config.hasForwardCap) {
+      const capMat = new THREE.MeshLambertMaterial({ color: config.capColor || 0x111111 });
+      const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.32), capMat);
+      capCrown.position.y = 0.14;
+      headGroup.add(capCrown);
+
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.03, 0.18), capMat);
+      visor.position.set(0, 0.1, 0.22);
+      headGroup.add(visor);
+    } else if (config.hasCap) {
       const capMat = new THREE.MeshLambertMaterial({ color: config.capColor || 0xffcc00 });
       const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.32), capMat);
       capCrown.position.y = 0.14;
@@ -12024,6 +13178,36 @@ class NpcSystem {
       const bagR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.32, 0.15), bagMatR);
       bagR.position.set(0.35, 0.65, 0.05);
       group.add(bagR);
+    } else if (config.hasPoliceBelt) {
+      const beltMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+      const belt = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.1, 0.3), beltMat);
+      belt.position.y = 0.77;
+      group.add(belt);
+
+      const holster = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.12), beltMat);
+      holster.position.set(0.28, 0.74, 0.05);
+      group.add(holster);
+
+      const badgeMat = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+      const chestBadge = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.1, 0.02), badgeMat);
+      chestBadge.position.set(-0.14, 1.22, 0.15);
+      group.add(chestBadge);
+    } else if (config.hasShoulderBag) {
+      const strapMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+      const strap = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.3), strapMat);
+      strap.position.set(0.0, 1.1, 0.02);
+      strap.rotation.z = 0.55;
+      group.add(strap);
+
+      const pouchMat = new THREE.MeshLambertMaterial({ color: 0x222225 });
+      const pouch = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.18, 0.12), pouchMat);
+      pouch.position.set(-0.25, 0.82, 0.15);
+      group.add(pouch);
+
+      const chainMat = new THREE.MeshLambertMaterial({ color: 0xdeb841 });
+      const chain = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.15), chainMat);
+      chain.position.set(0.0, 1.34, 0.12);
+      group.add(chain);
     }
 
     // Set initial position
@@ -12512,6 +13696,15 @@ class InteractableSystem {
         maxDist: 3.5,
         encounterId: 'SEMAFORO_BICO',
         zoneId: 'SEMAFORO_BICO'
+      },
+      {
+        id: 'banco',
+        name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)',
+        prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO',
+        position: new THREE.Vector3(48.0, 1.2, 38.0),
+        maxDist: 3.8,
+        encounterId: 'BANCO_PIRITUBA',
+        zoneId: 'BANCO_PIRITUBA'
       }
     ];
   }
@@ -12677,11 +13870,24 @@ class HudGame {
     if (this.runClockElem) this.runClockElem.textContent = clock.formatRemaining();
     if (this.inGameClockElem) this.inGameClockElem.textContent = clock.formatInGameTime();
 
-    if (this.granaElem) this.granaElem.textContent = state.formattedGrana;
+    if (this.granaElem) {
+      this.granaElem.textContent = state.formattedGrana;
+      if (state.grana < 0) {
+        this.granaElem.style.color = '#ff3344';
+      } else {
+        this.granaElem.style.color = '';
+      }
+    }
 
     if (this.debtElem) {
-      if (state.debt > 0) {
+      if (state.grana < 0) {
+        const remainingSec = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
+        this.debtElem.textContent = `[⚠️ DÉBITO BANCO: FALÊNCIA EM ${remainingSec}s]`;
+        this.debtElem.style.color = '#ff3344';
+        this.debtElem.style.display = 'inline';
+      } else if (state.debt > 0) {
         this.debtElem.textContent = `(Fiado: ${state.formattedDebt})`;
+        this.debtElem.style.color = '';
         this.debtElem.style.display = 'inline';
       } else {
         this.debtElem.style.display = 'none';
@@ -12918,6 +14124,15 @@ class GameManager {
         if (!this.dialog?.isOpen && !isSV) {
           this.triggerBlitzPM();
         }
+      }
+    }
+
+    // 8c. Update bank bankruptcy timer if account balance is negative
+    if (this.state) {
+      if (this.state.grana < 0) {
+        this.state.bankruptTimer = (this.state.bankruptTimer || 0) + delta;
+      } else {
+        this.state.bankruptTimer = 0;
       }
     }
 

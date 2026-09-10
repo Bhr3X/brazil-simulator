@@ -105,6 +105,53 @@ export class NpcSystem {
       ]
     });
     this.npcs.push(donaNeide);
+
+    // 5. Sargento Rocha (Polícia Militar de SP - Ronda Ostensiva)
+    const sargentoRocha = this.createHumanoidNpc({
+      id: 'sargento_rocha',
+      name: 'SARGENTO ROCHA (PMESP)',
+      prompt: 'FALAR COM SARGENTO ROCHA (PMESP)',
+      encounterId: 'NPC_POLICIA',
+      shirtColor: 0x4f5d6b, // PM gray uniform
+      skinColor: 0x8a5832,
+      pantsColor: 0x1c2430, // Navy dark trousers
+      hasPoliceCap: true,
+      hasPoliceBelt: true,
+      speed: 1.2,
+      waypoints: [
+        { x: 1.5, z: 22.0 },
+        { x: 4.5, z: 34.0 },
+        { x: 4.5, z: 54.0 },
+        { x: -3.5, z: 54.0 },
+        { x: -3.5, z: 34.0 },
+        { x: 1.5, z: 22.0 }
+      ]
+    });
+    this.npcs.push(sargentoRocha);
+
+    // 6. Menor do Corre (Malandro / Aviãozinho da Quebrada)
+    const menorCorre = this.createHumanoidNpc({
+      id: 'menor_corre',
+      name: 'MENOR DO CORRE (MALANDRO)',
+      prompt: 'TROCAR UMA IDÉIA COM MENOR DO CORRE',
+      encounterId: 'NPC_MALANDRO',
+      shirtColor: 0x1e1e24, // Camisa preta / regata
+      skinColor: 0x9c653d,
+      pantsColor: 0x0077cc, // Bermuda tactel azul
+      hasForwardCap: true,
+      capColor: 0x111111,
+      hasShoulderBag: true,
+      speed: 1.5,
+      waypoints: [
+        { x: -16.0, z: 58.0 },
+        { x: 14.0, z: 58.0 },
+        { x: 1.5, z: 72.0 },
+        { x: 22.0, z: 88.0 },
+        { x: -14.0, z: 88.0 },
+        { x: 1.5, z: 66.0 }
+      ]
+    });
+    this.npcs.push(menorCorre);
   }
 
   // Build articulated humanoid 3D mesh
@@ -129,7 +176,29 @@ export class NpcSystem {
     headGroup.add(headMesh);
 
     // Head Accessories
-    if (config.hasCap) {
+    if (config.hasPoliceCap) {
+      const capMat = new THREE.MeshLambertMaterial({ color: 0x1e2733 });
+      const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.12, 0.34), capMat);
+      capCrown.position.y = 0.15;
+      headGroup.add(capCrown);
+
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.03, 0.16), capMat);
+      visor.position.set(0, 0.1, 0.22);
+      headGroup.add(visor);
+
+      const goldBadge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.02), new THREE.MeshLambertMaterial({ color: 0xf1c40f }));
+      goldBadge.position.set(0, 0.16, 0.18);
+      headGroup.add(goldBadge);
+    } else if (config.hasForwardCap) {
+      const capMat = new THREE.MeshLambertMaterial({ color: config.capColor || 0x111111 });
+      const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.32), capMat);
+      capCrown.position.y = 0.14;
+      headGroup.add(capCrown);
+
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.03, 0.18), capMat);
+      visor.position.set(0, 0.1, 0.22);
+      headGroup.add(visor);
+    } else if (config.hasCap) {
       const capMat = new THREE.MeshLambertMaterial({ color: config.capColor || 0xffcc00 });
       const capCrown = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.12, 0.32), capMat);
       capCrown.position.y = 0.14;
@@ -206,6 +275,36 @@ export class NpcSystem {
       const bagR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.32, 0.15), bagMatR);
       bagR.position.set(0.35, 0.65, 0.05);
       group.add(bagR);
+    } else if (config.hasPoliceBelt) {
+      const beltMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+      const belt = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.1, 0.3), beltMat);
+      belt.position.y = 0.77;
+      group.add(belt);
+
+      const holster = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.12), beltMat);
+      holster.position.set(0.28, 0.74, 0.05);
+      group.add(holster);
+
+      const badgeMat = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+      const chestBadge = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.1, 0.02), badgeMat);
+      chestBadge.position.set(-0.14, 1.22, 0.15);
+      group.add(chestBadge);
+    } else if (config.hasShoulderBag) {
+      const strapMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+      const strap = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.3), strapMat);
+      strap.position.set(0.0, 1.1, 0.02);
+      strap.rotation.z = 0.55;
+      group.add(strap);
+
+      const pouchMat = new THREE.MeshLambertMaterial({ color: 0x222225 });
+      const pouch = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.18, 0.12), pouchMat);
+      pouch.position.set(-0.25, 0.82, 0.15);
+      group.add(pouch);
+
+      const chainMat = new THREE.MeshLambertMaterial({ color: 0xdeb841 });
+      const chain = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.15), chainMat);
+      chain.position.set(0.0, 1.34, 0.12);
+      group.add(chain);
     }
 
     // Set initial position

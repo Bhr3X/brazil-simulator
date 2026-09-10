@@ -24,11 +24,24 @@ export class HudGame {
     if (this.runClockElem) this.runClockElem.textContent = clock.formatRemaining();
     if (this.inGameClockElem) this.inGameClockElem.textContent = clock.formatInGameTime();
 
-    if (this.granaElem) this.granaElem.textContent = state.formattedGrana;
+    if (this.granaElem) {
+      this.granaElem.textContent = state.formattedGrana;
+      if (state.grana < 0) {
+        this.granaElem.style.color = '#ff3344';
+      } else {
+        this.granaElem.style.color = '';
+      }
+    }
 
     if (this.debtElem) {
-      if (state.debt > 0) {
+      if (state.grana < 0) {
+        const remainingSec = Math.max(0, Math.ceil(90 - (state.bankruptTimer || 0)));
+        this.debtElem.textContent = `[⚠️ DÉBITO BANCO: FALÊNCIA EM ${remainingSec}s]`;
+        this.debtElem.style.color = '#ff3344';
+        this.debtElem.style.display = 'inline';
+      } else if (state.debt > 0) {
         this.debtElem.textContent = `(Fiado: ${state.formattedDebt})`;
+        this.debtElem.style.color = '';
         this.debtElem.style.display = 'inline';
       } else {
         this.debtElem.style.display = 'none';

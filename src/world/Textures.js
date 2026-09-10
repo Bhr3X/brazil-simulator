@@ -1346,5 +1346,214 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 49. Official São Paulo Blue Street Corner Nameplate Sign (Placa de Rua Azul CET)
+  createStreetSign(streetName = 'AV. GEN. EDGAR FACÓ', subText = 'PIRITUBA • CEP 02924-000') {
+    const key = `street_sign_${streetName}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+
+    // Deep blue enamel background
+    ctx.fillStyle = '#0b396e';
+    ctx.fillRect(0, 0, 256, 96);
+
+    // Crisp white border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, 248, 88);
+
+    // Inner thin border
+    ctx.lineWidth = 1;
+    ctx.strokeRect(8, 8, 240, 80);
+
+    // Street Name
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial", sans-serif';
+    ctx.fillText(streetName, 128, 44);
+
+    // Subtext (Neighborhood & CEP)
+    ctx.fillStyle = '#9bc4f5';
+    ctx.font = 'bold 11px "Arial", sans-serif';
+    ctx.fillText(subText, 128, 70);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 50. Speed Bump Asphalt with Yellow Reflective Diagonal Stripes (Lombada)
+  createLombadaTexture() {
+    const key = 'lombada_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+
+    // Dark asphalt base
+    ctx.fillStyle = '#26292b';
+    ctx.fillRect(0, 0, 256, 128);
+
+    // Yellow diagonal safety chevrons
+    ctx.fillStyle = '#ffcc00';
+    for (let x = -64; x < 320; x += 48) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 24, 0);
+      ctx.lineTo(x - 16, 128);
+      ctx.lineTo(x - 40, 128);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Asphalt noise & tire wear marks
+    for (let i = 0; i < 1500; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
+      ctx.fillRect(Math.random() * 256, Math.random() * 128, 2, 2);
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 51. Storm Drain Cast Iron Grate (Bueiro de Rua)
+  createBueiroTexture() {
+    const key = 'bueiro_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 128);
+
+    // Dark underground opening
+    ctx.fillStyle = '#111315';
+    ctx.fillRect(0, 0, 128, 128);
+
+    // Metal frame
+    ctx.strokeStyle = '#4a5055';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(4, 4, 120, 120);
+
+    // Cast iron bars
+    ctx.fillStyle = '#3a4045';
+    for (let y = 14; y < 114; y += 12) {
+      ctx.fillRect(8, y, 112, 6);
+      ctx.fillStyle = '#5a626a';
+      ctx.fillRect(8, y, 112, 1); // Highlight
+      ctx.fillStyle = '#3a4045';
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 52. Banco Pirituba Facade & Glowing Signage (Bradesco / Itaú style)
+  createBankSignTexture() {
+    const key = 'banco_pirituba_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+
+    // Red & White metallic gradient banner (Iconic Brazilian Bank aesthetic)
+    const grad = ctx.createLinearGradient(0, 0, 0, 128);
+    grad.addColorStop(0.0, '#b80c1e');
+    grad.addColorStop(0.7, '#cc001a');
+    grad.addColorStop(1.0, '#8c0012');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 128);
+
+    // White glowing band
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 108, 512, 20);
+
+    // Bank Logo & Text
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 38px "Arial Black", sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 6;
+    ctx.fillText('BANCO PIRITUBA', 256, 60);
+
+    ctx.shadowBlur = 0;
+    ctx.font = 'bold 15px "Arial", sans-serif';
+    ctx.fillStyle = '#ffeeee';
+    ctx.fillText('AGÊNCIA 0086 • AUTOATENDIMENTO 24 HORAS', 256, 92);
+
+    ctx.fillStyle = '#cc001a';
+    ctx.font = 'bold 12px "Arial", sans-serif';
+    ctx.fillText('CHEQUE ESPECIAL • CRÉDITO • DEPÓSITO • SAQUES', 256, 122);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 53. Glowing ATM Terminal Screen Texture
+  createAtmScreenTexture() {
+    const key = 'atm_screen_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // ATM Screen Background (Deep cyan-blue terminal)
+    ctx.fillStyle = '#06162b';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Header bar
+    ctx.fillStyle = '#0a3568';
+    ctx.fillRect(0, 0, 256, 44);
+
+    ctx.fillStyle = '#00f0ff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText('BANCO 24 HORAS // REDE CIRRUS', 128, 28);
+
+    // Screen Content
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('ESCOLHA SUA OPERAÇÃO:', 128, 80);
+
+    ctx.textAlign = 'left';
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#00ff88';
+    ctx.fillText('> [1] SACAR CHEQUE ESPECIAL', 20, 120);
+    ctx.fillText('> [2] DEPOSITAR & QUITAR DÍVIDA', 20, 150);
+    ctx.fillText('> [3] EXTRATO / CONSULTA SERASA', 20, 180);
+
+    // Warning footer
+    ctx.fillStyle = '#ffaa33';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('EVITE FALÊNCIA • LIMITE R$ 150', 20, 225);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 54. Auto Repair Shop "Oficina Mecânica do Beto"
+  createOficinaSignTexture() {
+    const key = 'oficina_beto_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#1c2229';
+    ctx.fillRect(0, 0, 256, 96);
+    ctx.strokeStyle = '#f5b800';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, 248, 88);
+
+    ctx.fillStyle = '#f5b800';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 19px "Arial Black", sans-serif';
+    ctx.fillText('AUTO MECÂNICA DO BETO', 128, 42);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px "Arial", sans-serif';
+    ctx.fillText('INJEÇÃO • FREIOS • SUSPENSÃO • BORRACHARIA', 128, 70);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 

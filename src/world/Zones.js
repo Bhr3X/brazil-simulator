@@ -165,6 +165,42 @@ export const WORLD_ZONES = [
     openHour: 7.0,
     closeHour: 21.0,
     description: 'Ponto de parada e vagas de estacionamento da Rua Paula Ferreira vigiadas pelo flanelinha.'
+  },
+  {
+    id: 'BANCO_PIRITUBA',
+    name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)',
+    min: { x: 42.0, y: 0.0, z: 36.0 },
+    max: { x: 55.0, y: 7.0, z: 47.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Terminal de autoatendimento bancário 24h. Saque, cheque especial, extrato Serasa e quitação de dívidas.'
+  },
+  {
+    id: 'RUA_BENTO_BICUDO',
+    name: 'RUA CORONEL BENTO BICUDO (1ª PARALELA)',
+    min: { x: -35.0, y: 0.0, z: 52.0 },
+    max: { x: 55.0, y: 8.0, z: 66.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Rua residencial com sobrados paulistanos, oficinas mecânicas, lombadas e fiação elétrica densa.'
+  },
+  {
+    id: 'RUA_EMILIO_LESSORE',
+    name: 'RUA EMÍLIO LESSORE (2ª PARALELA - ALTO)',
+    min: { x: -35.0, y: 0.0, z: 80.0 },
+    max: { x: 55.0, y: 8.0, z: 98.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Rua elevada paralela no topo da encosta. Vielas estreitas, calçadas de mosaico e vista dos morros.'
+  },
+  {
+    id: 'AUTO_MECANICA_BETO',
+    name: 'AUTO MECÂNICA DO BETO (CORONEL BENTO BICUDO)',
+    min: { x: 18.0, y: 0.0, z: 53.0 },
+    max: { x: 32.0, y: 6.0, z: 63.0 },
+    openHour: 7.5,
+    closeHour: 19.5,
+    description: 'Oficina mecânica tradicional de bairro. Peças usadas, troca de pneus, cheiro de graxa e rádio de pilha ligado.'
   }
 ];
 

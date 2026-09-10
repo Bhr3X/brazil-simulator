@@ -16,6 +16,7 @@ export class GameState {
     // Currency in integer centavos (1 Real = 100 centavos)
     this.grana = classConfig.grana;
     this.debt = 0; // Fiado / Dívida acumulada
+    this.bankruptTimer = 0; // Tempo acumulado com saldo negativo (Falência se >= 90s)
 
     // Stats clamped 0..100 strictly integers
     this.fome = Math.round(classConfig.fome);
@@ -97,6 +98,8 @@ export class GameState {
         const remainingCost = -(this.grana + deltas.grana);
         this.debt += remainingCost;
         this.grana = 0;
+      } else if (deltas.allowNegative) {
+        this.grana = Math.round(this.grana + deltas.grana);
       } else {
         this.grana = Math.max(0, Math.round(this.grana + deltas.grana));
       }
@@ -205,6 +208,20 @@ export class GameState {
         isDead: true,
         cause: 'XILINDRÓ / COBRANÇA DO AGIOTA',
         desc: 'Seu medidor de B.O. chegou a 100%. A ROTA te levou detido pro 87º DP de Pirituba ou o agiota te pegou na esquina.'
+      };
+    }
+    if (this.grana <= -15000) {
+      return {
+        isDead: true,
+        cause: 'FALÊNCIA & EXECUÇÃO DO CPF',
+        desc: 'Sua conta estourou o limite de cheque especial do Banco Pirituba (-R$ 150,00). O banco bloqueou seus bens e executou seu CPF no Serasa. Você faliu na quebrada!'
+      };
+    }
+    if (this.bankruptTimer >= 90) {
+      return {
+        isDead: true,
+        cause: 'FALÊNCIA & PRAZO ESGOTADO',
+        desc: 'Você passou mais de 90 segundos com a conta no vermelho sem quitar a dívida no Banco Pirituba. O oficial de justiça confiscou seus pertences!'
       };
     }
     return null;

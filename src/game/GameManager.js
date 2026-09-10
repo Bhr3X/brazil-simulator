@@ -211,6 +211,15 @@ export class GameManager {
       }
     }
 
+    // 8c. Update bank bankruptcy timer if account balance is negative
+    if (this.state) {
+      if (this.state.grana < 0) {
+        this.state.bankruptTimer = (this.state.bankruptTimer || 0) + delta;
+      } else {
+        this.state.bankruptTimer = 0;
+      }
+    }
+
     // 9. Check defeat conditions
     const defeat = this.state.checkDefeat();
     if (defeat) {
