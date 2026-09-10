@@ -80,6 +80,7 @@ class GameApp {
     this.tourBtn = document.getElementById('btn-tour');
     this.emptyBtn = document.getElementById('btn-empty');
     this.streetViewBtn = document.getElementById('btn-streetview');
+    this.visualsBtn = document.getElementById('btn-visuals');
 
     // Google Street View Modal Elements
     this.streetViewModal = document.getElementById('street-view-modal');
@@ -87,6 +88,10 @@ class GameApp {
     this.btnCloseStreetView = document.getElementById('btn-close-streetview');
     this.btnRefreshStreetView = document.getElementById('btn-refresh-sv');
     this.isStreetViewOpen = false;
+
+    // Visual Parameters Modal Elements
+    this.visualsModal = document.getElementById('visuals-modal');
+    this.isVisualsModalOpen = false;
 
     this.initUI();
     this.initRoulette();
@@ -169,6 +174,63 @@ class GameApp {
     }
   }
 
+  toggleVisualsModal(forceState) {
+    this.isVisualsModalOpen = typeof forceState === 'boolean' ? forceState : !this.isVisualsModalOpen;
+
+    if (this.visualsModal) {
+      this.visualsModal.classList.toggle('modal-hidden', !this.isVisualsModalOpen);
+    }
+    if (this.visualsBtn) {
+      this.visualsBtn.classList.toggle('active', this.isVisualsModalOpen);
+    }
+    if (this.controls && this.controls.refreshFreeze) {
+      this.controls.refreshFreeze();
+    }
+
+    if (this.isVisualsModalOpen) {
+      if (document.exitPointerLock) document.exitPointerLock();
+      this.syncVisualControlsUI();
+    }
+  }
+
+  syncVisualControlsUI() {
+    const params = this.renderer.params;
+    const densitySlider = document.getElementById('slider-density');
+    const brightnessSlider = document.getElementById('slider-brightness');
+    const contrastSlider = document.getElementById('slider-contrast');
+    const gammaSlider = document.getElementById('slider-gamma');
+    const saturationSlider = document.getElementById('slider-saturation');
+    const edgeChk = document.getElementById('chk-edges');
+    const rampSelect = document.getElementById('select-ramp');
+    const scanlineChk = document.getElementById('chk-scanlines');
+
+    if (densitySlider) densitySlider.value = params.density;
+    if (brightnessSlider) brightnessSlider.value = params.brightness;
+    if (contrastSlider) contrastSlider.value = params.contrast;
+    if (gammaSlider) gammaSlider.value = params.gamma;
+    if (saturationSlider) saturationSlider.value = params.saturation;
+    if (edgeChk) edgeChk.checked = !!params.edgeEnhance;
+    if (rampSelect) rampSelect.value = params.rampType || 'DETAILED';
+    if (scanlineChk) scanlineChk.checked = !!params.scanlines;
+
+    this.updateVisualReadouts();
+  }
+
+  updateVisualReadouts() {
+    const params = this.renderer.params;
+    const valDensity = document.getElementById('val-density');
+    const valBrightness = document.getElementById('val-brightness');
+    const valContrast = document.getElementById('val-contrast');
+    const valGamma = document.getElementById('val-gamma');
+    const valSaturation = document.getElementById('val-saturation');
+
+    if (valDensity) valDensity.textContent = `${Number(params.density).toFixed(1)}x (${this.renderer.charW}px)`;
+    if (valBrightness) valBrightness.textContent = `${Number(params.brightness).toFixed(2)}x`;
+    if (valContrast) valContrast.textContent = `${Number(params.contrast).toFixed(2)}x`;
+    if (valGamma) valGamma.textContent = `${Number(params.gamma).toFixed(2)}x`;
+    if (valSaturation) valSaturation.textContent = `${Number(params.saturation).toFixed(2)}x`;
+  }
+
   initUI() {
     // Street View modal toggle button
     if (this.streetViewBtn) {
@@ -197,6 +259,206 @@ class GameApp {
       modeBtn.addEventListener('click', () => {
         const nextMode = this.renderer.cycleRenderMode();
         this.updateModeLabel(nextMode);
+      });
+    }
+
+    // Visual Parameters modal toggle button
+    if (this.visualsBtn) {
+      this.visualsBtn.addEventListener('click', () => this.toggleVisualsModal());
+    }
+
+    const btnCloseVisuals = document.getElementById('btn-close-visuals');
+    if (btnCloseVisuals) {
+      btnCloseVisuals.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    const btnDoneVisuals = document.getElementById('btn-done-visuals');
+    if (btnDoneVisuals) {
+      btnDoneVisuals.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    const visualsBackdrop = document.querySelector('#visuals-modal .modal-backdrop');
+    if (visualsBackdrop) {
+      visualsBackdrop.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    // Live sliders
+    const densitySlider = document.getElementById('slider-density');
+    if (densitySlider) {
+      densitySlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ density: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const brightnessSlider = document.getElementById('slider-brightness');
+    if (brightnessSlider) {
+      brightnessSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ brightness: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const contrastSlider = document.getElementById('slider-contrast');
+    if (contrastSlider) {
+      contrastSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ contrast: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const gammaSlider = document.getElementById('slider-gamma');
+    if (gammaSlider) {
+      gammaSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ gamma: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const saturationSlider = document.getElementById('slider-saturation');
+    if (saturationSlider) {
+      saturationSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ saturation: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const edgeChk = document.getElementById('chk-edges');
+    if (edgeChk) {
+      edgeChk.addEventListener('change', (e) => {
+        this.renderer.setVisualParams({ edgeEnhance: e.target.checked });
+      });
+    }
+
+    const rampSelect = document.getElementById('select-ramp');
+    if (rampSelect) {
+      rampSelect.addEventListener('change', (e) => {
+        this.renderer.setVisualParams({ rampType: e.target.value });
+      });
+    }
+
+    const scanlineChk = document.getElementById('chk-scanlines');
+    if (scanlineChk) {
+      scanlineChk.addEventListener('change', (e) => {
+        this.renderer.setVisualParams({ scanlines: e.target.checked });
+      });
+    }
+
+    // Reset button
+    const btnResetVisuals = document.getElementById('btn-reset-visuals');
+    if (btnResetVisuals) {
+      btnResetVisuals.addEventListener('click', () => {
+        this.renderer.resetVisualParams();
+        this.syncVisualControlsUI();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast('🔄 Padrões visuais restaurados', 2000);
+        }
+      });
+    }
+
+    // Presets
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    const setPresetActive = (targetBtn) => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      if (targetBtn) targetBtn.classList.add('active');
+    };
+
+    const btnPresetUltra = document.getElementById('preset-ultra');
+    if (btnPresetUltra) {
+      btnPresetUltra.addEventListener('click', () => {
+        setPresetActive(btnPresetUltra);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.8,
+          brightness: 1.35,
+          contrast: 1.35,
+          gamma: 1.35,
+          saturation: 1.3,
+          edgeEnhance: true,
+          rampType: 'CONTRAST',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetBlocks = document.getElementById('preset-blocks');
+    if (btnPresetBlocks) {
+      btnPresetBlocks.addEventListener('click', () => {
+        setPresetActive(btnPresetBlocks);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.4,
+          brightness: 1.25,
+          contrast: 1.4,
+          gamma: 1.25,
+          saturation: 1.2,
+          edgeEnhance: true,
+          rampType: 'BLOCKS',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetFavela = document.getElementById('preset-favela');
+    if (btnPresetFavela) {
+      btnPresetFavela.addEventListener('click', () => {
+        setPresetActive(btnPresetFavela);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.2,
+          brightness: 1.3,
+          contrast: 1.3,
+          gamma: 1.2,
+          saturation: 1.85,
+          edgeEnhance: true,
+          rampType: 'DETAILED',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetMatrix = document.getElementById('preset-matrix');
+    if (btnPresetMatrix) {
+      btnPresetMatrix.addEventListener('click', () => {
+        setPresetActive(btnPresetMatrix);
+        this.renderer.setRenderMode('ASCII_MATRIX');
+        this.updateModeLabel('ASCII_MATRIX');
+        this.renderer.setVisualParams({
+          density: 1.5,
+          brightness: 1.3,
+          contrast: 1.4,
+          gamma: 1.3,
+          edgeEnhance: true,
+          rampType: 'MATRIX',
+          scanlines: true
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPreset3d = document.getElementById('preset-3d');
+    if (btnPreset3d) {
+      btnPreset3d.addEventListener('click', () => {
+        setPresetActive(btnPreset3d);
+        this.renderer.setRenderMode('RETRO_3D');
+        this.updateModeLabel('RETRO_3D');
+      });
+    }
+
+    const btnPresetDefault = document.getElementById('preset-default');
+    if (btnPresetDefault) {
+      btnPresetDefault.addEventListener('click', () => {
+        setPresetActive(btnPresetDefault);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.resetVisualParams();
+        this.syncVisualControlsUI();
       });
     }
 
@@ -252,8 +514,42 @@ class GameApp {
     window.addEventListener('keydown', (e) => {
       if (e.code === 'KeyV') {
         this.toggleStreetView();
-      } else if (e.code === 'Escape' && this.isStreetViewOpen) {
-        this.toggleStreetView(false);
+      } else if (e.code === 'KeyP') {
+        this.toggleVisualsModal();
+      } else if (e.code === 'Escape') {
+        if (this.isStreetViewOpen) {
+          this.toggleStreetView(false);
+        } else if (this.isVisualsModalOpen) {
+          this.toggleVisualsModal(false);
+        }
+      } else if (e.code === 'BracketLeft') {
+        const newD = Math.max(0.6, +(this.renderer.params.density - 0.1).toFixed(1));
+        this.renderer.setVisualParams({ density: newD });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
+        }
+      } else if (e.code === 'BracketRight') {
+        const newD = Math.min(2.4, +(this.renderer.params.density + 0.1).toFixed(1));
+        this.renderer.setVisualParams({ density: newD });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
+        }
+      } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+        const newB = Math.max(0.5, +(this.renderer.params.brightness - 0.05).toFixed(2));
+        this.renderer.setVisualParams({ brightness: newB });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
+        }
+      } else if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+        const newB = Math.min(2.5, +(this.renderer.params.brightness + 0.05).toFixed(2));
+        this.renderer.setVisualParams({ brightness: newB });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
+        }
       } else if (e.code === 'KeyM') {
         const nextMode = this.renderer.cycleRenderMode();
         this.updateModeLabel(nextMode);

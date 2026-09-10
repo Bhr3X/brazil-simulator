@@ -946,6 +946,265 @@ html, body {
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* ==========================================================================
+   Visual Parameters & ASCII Readability Modal
+   ========================================================================== */
+#visuals-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 150;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.visual-modal-window {
+  width: 90vw;
+  max-width: 860px;
+  max-height: 88vh;
+  background: rgba(7, 14, 10, 0.94);
+  border: 2px solid #00f0ff;
+  box-shadow: 0 0 35px rgba(0, 240, 255, 0.35), inset 0 0 20px rgba(0, 240, 255, 0.08);
+}
+
+.visual-modal-window .modal-header {
+  background: rgba(0, 240, 255, 0.12);
+  border-bottom: 1px solid #00f0ff;
+}
+
+.visual-modal-window .modal-title {
+  color: #00f0ff;
+  text-shadow: 0 0 8px #00f0ff;
+}
+
+.visual-modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.visual-section-title {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: bold;
+  color: #00f0ff;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.visual-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.preset-btn {
+  background: rgba(0, 240, 255, 0.06);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  color: #a0f0ff;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.preset-btn:hover {
+  background: rgba(0, 240, 255, 0.18);
+  border-color: #00f0ff;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.preset-btn.active {
+  background: #00f0ff;
+  color: #050608;
+  border-color: #00f0ff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+}
+
+.visual-controls-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 680px) {
+  .visual-controls-columns {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.visual-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #e0f8e8;
+  font-weight: bold;
+}
+
+.slider-val {
+  color: #00ff66;
+  font-size: 12px;
+  background: rgba(0, 255, 102, 0.12);
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  padding: 2px 8px;
+  border-radius: 3px;
+  min-width: 46px;
+  text-align: center;
+}
+
+.slider-hint {
+  font-size: 10px;
+  color: #668877;
+  line-height: 1.3;
+}
+
+/* Custom Range Input */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #00f0ff;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00f0ff;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #e0f8e8;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #00f0ff;
+  cursor: pointer;
+}
+
+.select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.select-group label {
+  font-size: 12px;
+  color: #e0f8e8;
+  font-weight: bold;
+}
+
+.visual-select {
+  background: #060e0a;
+  border: 1px solid #00f0ff;
+  color: #00ff66;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.hotkey-tip-box {
+  background: rgba(0, 255, 102, 0.06);
+  border: 1px dashed rgba(0, 255, 102, 0.35);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #88c099;
+  line-height: 1.5;
+}
+
+.hotkey-tip-box code {
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.15);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.visual-modal-footer {
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(0, 240, 255, 0.3);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-confirm-btn {
+  background: #00f0ff;
+  color: #050608;
+  border: none;
+  padding: 8px 18px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
+.modal-confirm-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
+}
+
 
   </style>
   <script>
@@ -988,6 +1247,10 @@ html, body {
       <span>🖥️ MODO:</span>
       <strong id="hud-mode">FAVELA ASCII (RGB)</strong>
       <small style="opacity:0.7">[M]</small>
+    </button>
+    <button class="hud-btn" id="btn-visuals" style="border-color:#00f0ff; color:#00f0ff;">
+      <span>🎨 VISUAL / ASCII</span>
+      <small style="opacity:0.7">[P]</small>
     </button>
     <button class="hud-btn" id="btn-tour">
       <span>🎥 AUTO TOUR</span>
@@ -1148,6 +1411,122 @@ html, body {
           <button id="btn-refresh-sv" class="modal-action-btn">🔄 REINICIAR ÂNGULO</button>
           <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=-23.5019,-46.7064" target="_blank" rel="noopener noreferrer" class="modal-action-link">🗺️ ABRIR NO MAPS ↗</a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Parameters & ASCII Readability Modal -->
+  <div id="visuals-modal" class="modal-hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-window visual-modal-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="pulse-indicator"></span>
+          🎨 PARÂMETROS VISUAIS & NITIDEZ ASCII // PIRITUBA ENGINE
+        </div>
+        <button id="btn-close-visuals" class="modal-close-btn" title="Fechar Ajustes [P / ESC]">✕</button>
+      </div>
+      <div class="modal-body visual-modal-body">
+        <!-- Quick Presets -->
+        <div class="visual-section">
+          <div class="visual-section-title">⚡ PRESETS RÁPIDOS DE VISUALIZAÇÃO</div>
+          <div class="visual-presets-grid">
+            <button class="preset-btn active" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
+            <button class="preset-btn" id="preset-blocks">🧱 BLOCOS 3D</button>
+            <button class="preset-btn" id="preset-favela">🌈 FAVELA VIBRANTE</button>
+            <button class="preset-btn" id="preset-matrix">🟢 CYBER MATRIX</button>
+            <button class="preset-btn" id="preset-3d">🖥️ MODO 3D REAL</button>
+            <button class="preset-btn" id="preset-default">🔄 PADRÃO</button>
+          </div>
+        </div>
+
+        <div class="visual-controls-columns">
+          <!-- Left Column: Density, Lighting, Contrast -->
+          <div class="visual-col">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-density">🔤 Densidade / Resolução de Caracteres</label>
+                <span class="slider-val" id="val-density">1.0x (8px)</span>
+              </div>
+              <input type="range" id="slider-density" min="0.6" max="2.4" step="0.1" value="1.0">
+              <div class="slider-hint">Menor = Retrô e blocos grandes | Maior = Micro-ASCII ultra nítido</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-brightness">☀️ Brilho / Luminância</label>
+                <span class="slider-val" id="val-brightness">1.25x</span>
+              </div>
+              <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.25">
+              <div class="slider-hint">Aumenta a luz geral para enxergar à noite ou sob sol forte</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-contrast">🌓 Contraste Dinâmico</label>
+                <span class="slider-val" id="val-contrast">1.20x</span>
+              </div>
+              <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.20">
+              <div class="slider-hint">Diferencia prédios, calçadas e o asfalto com mais definição</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-gamma">💡 Clarear Sombras (Gamma)</label>
+                <span class="slider-val" id="val-gamma">1.25x</span>
+              </div>
+              <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.25">
+              <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
+            </div>
+          </div>
+
+          <!-- Right Column: Edge detection, Saturation, Ramps, CRT -->
+          <div class="visual-col">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-saturation">🎨 Saturação de Cores</label>
+                <span class="slider-val" id="val-saturation">1.25x</span>
+              </div>
+              <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.25">
+              <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
+            </div>
+
+            <div class="toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-edges" checked>
+                <span>📐 Realce de Bordas & Silhuetas (Edge Contour)</span>
+              </label>
+              <div class="slider-hint">Detecta e traça os contornos de paredes, postes e carros</div>
+            </div>
+
+            <div class="select-group">
+              <label for="select-ramp">🔣 Estilo / Conjunto de Caracteres</label>
+              <select id="select-ramp" class="visual-select">
+                <option value="DETAILED">COMPLETO (70 caracteres graduais)</option>
+                <option value="BLOCKS">BLOCOS ISOMÉTRICOS (░▒▓█)</option>
+                <option value="CONTRAST">ALTO CONTRASTE (.:-=+*#%@)</option>
+                <option value="MINIMAL">MINIMALISTA (.:*#@)</option>
+                <option value="MATRIX">CYBER MATRIX (0123456789...)</option>
+                <option value="SHARPLINE">LINHAS & PONTOS (.·-—~=+*#%@)</option>
+              </select>
+            </div>
+
+            <div class="toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-scanlines">
+                <span>📺 Linhas de Varredura CRT (Scanlines Retrô)</span>
+              </label>
+            </div>
+
+            <div class="hotkey-tip-box">
+              ⌨️ <strong>Atalhos Rápidos:</strong> <code>[P]</code> Abrir/fechar ajustes &nbsp;|&nbsp; <code>[</code> / <code>]</code> Densidade &nbsp;|&nbsp; <code>-</code> / <code>+</code> Brilho &nbsp;|&nbsp; <code>[M]</code> Alternar modos
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer visual-modal-footer">
+        <button id="btn-reset-visuals" class="modal-action-btn">🔄 RESTAURAR PADRÕES</button>
+        <button id="btn-done-visuals" class="modal-confirm-btn">✓ APLICAR & FECHAR [ESC / P]</button>
       </div>
     </div>
   </div>
@@ -4313,7 +4692,7 @@ class FirstPersonControls {
 
     document.addEventListener('mousedown', (e) => {
       if (this.freeze) return;
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, button, a')) return;
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select')) return;
       this.isMouseDown = true;
       this.lastMouseX = e.clientX;
       this.lastMouseY = e.clientY;
@@ -4499,11 +4878,13 @@ class FirstPersonControls {
       const isSV = !!document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
       const isRoulette = !!document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
       const isEnd = !!document.getElementById('end-run-modal') && !document.getElementById('end-run-modal').classList.contains('modal-hidden');
+      const isVisuals = !!document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden');
 
       if (isDialog) this.freezeSources.add('dialog'); else this.freezeSources.delete('dialog');
       if (isSV) this.freezeSources.add('streetView'); else this.freezeSources.delete('streetView');
       if (isRoulette) this.freezeSources.add('roulette'); else this.freezeSources.delete('roulette');
       if (isEnd) this.freezeSources.add('endModal'); else this.freezeSources.delete('endModal');
+      if (isVisuals) this.freezeSources.add('visuals'); else this.freezeSources.delete('visuals');
     }
     if (this.freeze) {
       this.moveForward = false;
@@ -4669,7 +5050,30 @@ class FirstPersonControls {
 /**
  * Dual Rendering Engine: Real-Time ASCII Rasterizer & Retro 3D Viewport
  * Faithful to "A Walkable ASCII Cyberpunk City in One HTML File"
+ * Enhanced with Real-Time Density, Brightness, Contrast, Gamma, Edge Detection & Character Sets
  */
+
+const ASCII_RAMPS = {
+  DETAILED: ' .`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$',
+  BLOCKS: ' ░▒▓█',
+  CONTRAST: ' .:-=+*#%@',
+  MINIMAL: ' .:*#@',
+  MATRIX: ' 0123456789ABCDEF!#*+=-',
+  SHARPLINE: ' .·-—~=+*#%@'
+};
+
+const DEFAULT_VISUAL_PARAMS = {
+  density: 1.0,           // 0.6 to 2.4 (scales character grid & font size)
+  brightness: 1.25,       // 0.5 to 2.5 (luminance multiplier)
+  contrast: 1.2,          // 0.5 to 2.5 (contrast expansion)
+  gamma: 1.25,            // 0.6 to 2.2 (shadow lift)
+  saturation: 1.25,       // 0.0 to 2.5 (color vibrancy)
+  edgeEnhance: true,      // 2D spatial gradient edge outline detection
+  edgeThreshold: 0.10,    // sensitivity
+  edgeStrength: 1.2,      // outline brightness boost
+  rampType: 'DETAILED',   // key in ASCII_RAMPS
+  scanlines: false        // CRT scanlines
+};
 
 class CityRenderer {
   constructor(container) {
@@ -4686,8 +5090,12 @@ class CityRenderer {
 
     this.currentMode = this.MODES.ASCII_COLOR;
 
+    // Visual Parameters
+    this.params = { ...DEFAULT_VISUAL_PARAMS };
+    this.loadSavedParams();
+
     // ASCII Ramp: from darkest to brightest
-    this.asciiRamp = ' .`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$';
+    this.asciiRamp = ASCII_RAMPS[this.params.rampType] || ASCII_RAMPS.DETAILED;
     this.rampLength = this.asciiRamp.length;
 
     // Offscreen small 3D target for ASCII downsampling
@@ -4762,32 +5170,82 @@ class CityRenderer {
     this.asciiCanvas.style.height = '100%';
     this.asciiCanvas.style.display = 'block';
 
-    this.onWindowResize();
+    this.updateGridSize();
     window.addEventListener('resize', () => this.onWindowResize());
   }
 
-  onWindowResize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+  loadSavedParams() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('brazil_sim_visual_params');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          Object.assign(this.params, parsed);
+        }
+      }
+    } catch (e) {}
+  }
+
+  saveParams() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('brazil_sim_visual_params', JSON.stringify(this.params));
+      }
+    } catch (e) {}
+  }
+
+  updateGridSize() {
+    const width = window.innerWidth || 800;
+    const height = window.innerHeight || 600;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
-    this.webglRenderer.setSize(width, height);
+    if (this.webglRenderer && this.webglRenderer.setSize) {
+      this.webglRenderer.setSize(width, height);
+    }
 
-    // Compute optimal ASCII column and row count to fill window
-    this.charW = 8;
-    this.charH = 13;
-    this.asciiCols = Math.max(80, Math.floor(width / this.charW));
-    this.asciiRows = Math.max(45, Math.floor(height / this.charH));
+    // Density factor: scales from 0.6x (chunky retro) to 2.4x (ultra-sharp micro-ASCII)
+    const densityFactor = Math.max(0.6, Math.min(2.4, this.params.density || 1.0));
+    this.charW = Math.max(3, Math.round(8 / densityFactor));
+    this.charH = Math.max(5, Math.round(13 / densityFactor));
+
+    this.asciiCols = Math.max(50, Math.floor(width / this.charW));
+    this.asciiRows = Math.max(30, Math.floor(height / this.charH));
 
     this.sampleCanvas.width = this.asciiCols;
     this.sampleCanvas.height = this.asciiRows;
 
     this.asciiCanvas.width = width;
     this.asciiCanvas.height = height;
-    this.asciiCtx.font = `bold ${this.charH - 1}px "Courier New", monospace`;
+
+    const fontSize = Math.max(6, this.charH - 1);
+    this.asciiCtx.font = `bold ${fontSize}px "Courier New", monospace`;
     this.asciiCtx.textBaseline = 'top';
+  }
+
+  onWindowResize() {
+    this.updateGridSize();
+  }
+
+  setVisualParams(newParams = {}) {
+    const oldDensity = this.params.density;
+    Object.assign(this.params, newParams);
+
+    if (newParams.rampType && ASCII_RAMPS[newParams.rampType]) {
+      this.asciiRamp = ASCII_RAMPS[newParams.rampType];
+      this.rampLength = this.asciiRamp.length;
+    }
+
+    if (newParams.density !== undefined && newParams.density !== oldDensity) {
+      this.updateGridSize();
+    }
+
+    this.saveParams();
+  }
+
+  resetVisualParams() {
+    this.setVisualParams({ ...DEFAULT_VISUAL_PARAMS });
   }
 
   setRenderMode(modeName) {
@@ -4813,7 +5271,9 @@ class CityRenderer {
 
   render() {
     // 1. Render the 3D scene with Three.js
-    this.webglRenderer.render(this.scene, this.camera);
+    if (this.webglRenderer && this.webglRenderer.render) {
+      this.webglRenderer.render(this.scene, this.camera);
+    }
 
     // If in pure 3D mode, the WebGL canvas is directly visible
     if (this.currentMode === this.MODES.RETRO_3D) {
@@ -4840,6 +5300,17 @@ class CityRenderer {
     const charW = this.charW;
     const charH = this.charH;
 
+    // Visual Parameters
+    const brightness = this.params.brightness;
+    const contrast = this.params.contrast;
+    const gamma = this.params.gamma;
+    const saturation = this.params.saturation;
+    const edgeEnhance = this.params.edgeEnhance;
+    const edgeThreshold = this.params.edgeThreshold;
+    const edgeStrength = this.params.edgeStrength;
+    const ramp = this.asciiRamp;
+    const rampLen = this.rampLength;
+
     // Configure mode coloring
     const isColor = this.currentMode === this.MODES.ASCII_COLOR;
     const isMatrix = this.currentMode === this.MODES.ASCII_MATRIX;
@@ -4849,31 +5320,71 @@ class CityRenderer {
     if (isMatrix) ctx.fillStyle = '#00ff66';
     if (isAmber) ctx.fillStyle = '#ffb300';
 
-    let pixelIndex = 0;
     for (let r = 0; r < rows; r++) {
       const posY = r * charH;
+      const rowOffset = r * cols * 4;
 
       for (let c = 0; c < cols; c++) {
-        const red = data[pixelIndex];
-        const green = data[pixelIndex + 1];
-        const blue = data[pixelIndex + 2];
-        pixelIndex += 4;
+        const pixelIndex = rowOffset + c * 4;
+        let red = data[pixelIndex];
+        let green = data[pixelIndex + 1];
+        let blue = data[pixelIndex + 2];
 
-        // Relative perceptual luminance
-        const lum = (red * 0.299 + green * 0.587 + blue * 0.114) / 255;
-        if (lum < 0.05) continue; // Skip dark pixels for contrast
+        // 1. Raw relative perceptual luminance
+        let lum = (red * 0.299 + green * 0.587 + blue * 0.114) / 255;
 
-        // Character selection based on brightness
-        const rampIdx = Math.min(this.rampLength - 1, Math.floor(lum * this.rampLength));
-        const char = this.asciiRamp[rampIdx];
+        // 2. Spatial gradient edge enhancement (detect silhouette contours)
+        if (edgeEnhance && c < cols - 1 && r < rows - 1) {
+          const lumRight = (data[pixelIndex + 4] * 0.299 + data[pixelIndex + 5] * 0.587 + data[pixelIndex + 6] * 0.114) / 255;
+          const lumDown = (data[pixelIndex + cols * 4] * 0.299 + data[pixelIndex + cols * 4 + 1] * 0.587 + data[pixelIndex + cols * 4 + 2] * 0.114) / 255;
+          const delta = Math.abs(lum - lumRight) + Math.abs(lum - lumDown);
+          if (delta > edgeThreshold) {
+            lum = Math.min(1.0, lum + delta * edgeStrength);
+          }
+        }
+
+        // 3. Dynamic contrast expansion around 0.5 midpoint
+        if (contrast !== 1.0) {
+          lum = (lum - 0.5) * contrast + 0.5;
+          lum = Math.max(0, Math.min(1, lum));
+        }
+
+        // 4. Brightness scaling
+        if (brightness !== 1.0) {
+          lum = lum * brightness;
+          lum = Math.max(0, Math.min(1, lum));
+        }
+
+        // 5. Non-linear gamma / shadow lift
+        if (gamma !== 1.0 && lum > 0.001) {
+          lum = Math.pow(lum, 1.0 / gamma);
+          lum = Math.max(0, Math.min(1, lum));
+        }
+
+        // Skip dark floor pixels for contrast and speed
+        if (lum < 0.035) continue;
+
+        // 6. Character selection from active ramp
+        const rampIdx = Math.min(rampLen - 1, Math.floor(lum * rampLen));
+        const char = ramp[rampIdx];
         const posX = c * charW;
 
         if (isColor) {
-          // Boost saturation slightly for ASCII vibrancy
+          // Saturation and brightness adjustments on RGB
+          if (saturation !== 1.0) {
+            const gray = red * 0.299 + green * 0.587 + blue * 0.114;
+            red = Math.min(255, Math.max(0, Math.round(gray + (red - gray) * saturation)));
+            green = Math.min(255, Math.max(0, Math.round(gray + (green - gray) * saturation)));
+            blue = Math.min(255, Math.max(0, Math.round(gray + (blue - gray) * saturation)));
+          }
+          if (brightness !== 1.0) {
+            red = Math.min(255, Math.round(red * brightness));
+            green = Math.min(255, Math.round(green * brightness));
+            blue = Math.min(255, Math.round(blue * brightness));
+          }
           ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
           ctx.fillText(char, posX, posY);
         } else if (isCyber) {
-          // Neon Cyan / Magenta duo
           const cyberColor = (c + r) % 2 === 0 ? '#00f0ff' : '#ff0077';
           ctx.fillStyle = cyberColor;
           ctx.fillText(char, posX, posY);
@@ -4881,6 +5392,14 @@ class CityRenderer {
           // Matrix or Amber monochrome
           ctx.fillText(char, posX, posY);
         }
+      }
+    }
+
+    // 7. Optional CRT Scanlines overlay
+    if (this.params.scanlines) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      for (let y = 0; y < this.asciiCanvas.height; y += 3) {
+        ctx.fillRect(0, y, this.asciiCanvas.width, 1);
       }
     }
   }
@@ -9813,6 +10332,7 @@ class GameApp {
     this.tourBtn = document.getElementById('btn-tour');
     this.emptyBtn = document.getElementById('btn-empty');
     this.streetViewBtn = document.getElementById('btn-streetview');
+    this.visualsBtn = document.getElementById('btn-visuals');
 
     // Google Street View Modal Elements
     this.streetViewModal = document.getElementById('street-view-modal');
@@ -9820,6 +10340,10 @@ class GameApp {
     this.btnCloseStreetView = document.getElementById('btn-close-streetview');
     this.btnRefreshStreetView = document.getElementById('btn-refresh-sv');
     this.isStreetViewOpen = false;
+
+    // Visual Parameters Modal Elements
+    this.visualsModal = document.getElementById('visuals-modal');
+    this.isVisualsModalOpen = false;
 
     this.initUI();
     this.initRoulette();
@@ -9902,6 +10426,63 @@ class GameApp {
     }
   }
 
+  toggleVisualsModal(forceState) {
+    this.isVisualsModalOpen = typeof forceState === 'boolean' ? forceState : !this.isVisualsModalOpen;
+
+    if (this.visualsModal) {
+      this.visualsModal.classList.toggle('modal-hidden', !this.isVisualsModalOpen);
+    }
+    if (this.visualsBtn) {
+      this.visualsBtn.classList.toggle('active', this.isVisualsModalOpen);
+    }
+    if (this.controls && this.controls.refreshFreeze) {
+      this.controls.refreshFreeze();
+    }
+
+    if (this.isVisualsModalOpen) {
+      if (document.exitPointerLock) document.exitPointerLock();
+      this.syncVisualControlsUI();
+    }
+  }
+
+  syncVisualControlsUI() {
+    const params = this.renderer.params;
+    const densitySlider = document.getElementById('slider-density');
+    const brightnessSlider = document.getElementById('slider-brightness');
+    const contrastSlider = document.getElementById('slider-contrast');
+    const gammaSlider = document.getElementById('slider-gamma');
+    const saturationSlider = document.getElementById('slider-saturation');
+    const edgeChk = document.getElementById('chk-edges');
+    const rampSelect = document.getElementById('select-ramp');
+    const scanlineChk = document.getElementById('chk-scanlines');
+
+    if (densitySlider) densitySlider.value = params.density;
+    if (brightnessSlider) brightnessSlider.value = params.brightness;
+    if (contrastSlider) contrastSlider.value = params.contrast;
+    if (gammaSlider) gammaSlider.value = params.gamma;
+    if (saturationSlider) saturationSlider.value = params.saturation;
+    if (edgeChk) edgeChk.checked = !!params.edgeEnhance;
+    if (rampSelect) rampSelect.value = params.rampType || 'DETAILED';
+    if (scanlineChk) scanlineChk.checked = !!params.scanlines;
+
+    this.updateVisualReadouts();
+  }
+
+  updateVisualReadouts() {
+    const params = this.renderer.params;
+    const valDensity = document.getElementById('val-density');
+    const valBrightness = document.getElementById('val-brightness');
+    const valContrast = document.getElementById('val-contrast');
+    const valGamma = document.getElementById('val-gamma');
+    const valSaturation = document.getElementById('val-saturation');
+
+    if (valDensity) valDensity.textContent = `${Number(params.density).toFixed(1)}x (${this.renderer.charW}px)`;
+    if (valBrightness) valBrightness.textContent = `${Number(params.brightness).toFixed(2)}x`;
+    if (valContrast) valContrast.textContent = `${Number(params.contrast).toFixed(2)}x`;
+    if (valGamma) valGamma.textContent = `${Number(params.gamma).toFixed(2)}x`;
+    if (valSaturation) valSaturation.textContent = `${Number(params.saturation).toFixed(2)}x`;
+  }
+
   initUI() {
     // Street View modal toggle button
     if (this.streetViewBtn) {
@@ -9930,6 +10511,206 @@ class GameApp {
       modeBtn.addEventListener('click', () => {
         const nextMode = this.renderer.cycleRenderMode();
         this.updateModeLabel(nextMode);
+      });
+    }
+
+    // Visual Parameters modal toggle button
+    if (this.visualsBtn) {
+      this.visualsBtn.addEventListener('click', () => this.toggleVisualsModal());
+    }
+
+    const btnCloseVisuals = document.getElementById('btn-close-visuals');
+    if (btnCloseVisuals) {
+      btnCloseVisuals.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    const btnDoneVisuals = document.getElementById('btn-done-visuals');
+    if (btnDoneVisuals) {
+      btnDoneVisuals.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    const visualsBackdrop = document.querySelector('#visuals-modal .modal-backdrop');
+    if (visualsBackdrop) {
+      visualsBackdrop.addEventListener('click', () => this.toggleVisualsModal(false));
+    }
+
+    // Live sliders
+    const densitySlider = document.getElementById('slider-density');
+    if (densitySlider) {
+      densitySlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ density: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const brightnessSlider = document.getElementById('slider-brightness');
+    if (brightnessSlider) {
+      brightnessSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ brightness: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const contrastSlider = document.getElementById('slider-contrast');
+    if (contrastSlider) {
+      contrastSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ contrast: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const gammaSlider = document.getElementById('slider-gamma');
+    if (gammaSlider) {
+      gammaSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ gamma: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const saturationSlider = document.getElementById('slider-saturation');
+    if (saturationSlider) {
+      saturationSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ saturation: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const edgeChk = document.getElementById('chk-edges');
+    if (edgeChk) {
+      edgeChk.addEventListener('change', (e) => {
+        this.renderer.setVisualParams({ edgeEnhance: e.target.checked });
+      });
+    }
+
+    const rampSelect = document.getElementById('select-ramp');
+    if (rampSelect) {
+      rampSelect.addEventListener('change', (e) => {
+        this.renderer.setVisualParams({ rampType: e.target.value });
+      });
+    }
+
+    const scanlineChk = document.getElementById('chk-scanlines');
+    if (scanlineChk) {
+      scanlineChk.addEventListener('change', (e) => {
+        this.renderer.setVisualParams({ scanlines: e.target.checked });
+      });
+    }
+
+    // Reset button
+    const btnResetVisuals = document.getElementById('btn-reset-visuals');
+    if (btnResetVisuals) {
+      btnResetVisuals.addEventListener('click', () => {
+        this.renderer.resetVisualParams();
+        this.syncVisualControlsUI();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast('🔄 Padrões visuais restaurados', 2000);
+        }
+      });
+    }
+
+    // Presets
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    const setPresetActive = (targetBtn) => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      if (targetBtn) targetBtn.classList.add('active');
+    };
+
+    const btnPresetUltra = document.getElementById('preset-ultra');
+    if (btnPresetUltra) {
+      btnPresetUltra.addEventListener('click', () => {
+        setPresetActive(btnPresetUltra);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.8,
+          brightness: 1.35,
+          contrast: 1.35,
+          gamma: 1.35,
+          saturation: 1.3,
+          edgeEnhance: true,
+          rampType: 'CONTRAST',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetBlocks = document.getElementById('preset-blocks');
+    if (btnPresetBlocks) {
+      btnPresetBlocks.addEventListener('click', () => {
+        setPresetActive(btnPresetBlocks);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.4,
+          brightness: 1.25,
+          contrast: 1.4,
+          gamma: 1.25,
+          saturation: 1.2,
+          edgeEnhance: true,
+          rampType: 'BLOCKS',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetFavela = document.getElementById('preset-favela');
+    if (btnPresetFavela) {
+      btnPresetFavela.addEventListener('click', () => {
+        setPresetActive(btnPresetFavela);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.2,
+          brightness: 1.3,
+          contrast: 1.3,
+          gamma: 1.2,
+          saturation: 1.85,
+          edgeEnhance: true,
+          rampType: 'DETAILED',
+          scanlines: false
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetMatrix = document.getElementById('preset-matrix');
+    if (btnPresetMatrix) {
+      btnPresetMatrix.addEventListener('click', () => {
+        setPresetActive(btnPresetMatrix);
+        this.renderer.setRenderMode('ASCII_MATRIX');
+        this.updateModeLabel('ASCII_MATRIX');
+        this.renderer.setVisualParams({
+          density: 1.5,
+          brightness: 1.3,
+          contrast: 1.4,
+          gamma: 1.3,
+          edgeEnhance: true,
+          rampType: 'MATRIX',
+          scanlines: true
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPreset3d = document.getElementById('preset-3d');
+    if (btnPreset3d) {
+      btnPreset3d.addEventListener('click', () => {
+        setPresetActive(btnPreset3d);
+        this.renderer.setRenderMode('RETRO_3D');
+        this.updateModeLabel('RETRO_3D');
+      });
+    }
+
+    const btnPresetDefault = document.getElementById('preset-default');
+    if (btnPresetDefault) {
+      btnPresetDefault.addEventListener('click', () => {
+        setPresetActive(btnPresetDefault);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.resetVisualParams();
+        this.syncVisualControlsUI();
       });
     }
 
@@ -9985,8 +10766,42 @@ class GameApp {
     window.addEventListener('keydown', (e) => {
       if (e.code === 'KeyV') {
         this.toggleStreetView();
-      } else if (e.code === 'Escape' && this.isStreetViewOpen) {
-        this.toggleStreetView(false);
+      } else if (e.code === 'KeyP') {
+        this.toggleVisualsModal();
+      } else if (e.code === 'Escape') {
+        if (this.isStreetViewOpen) {
+          this.toggleStreetView(false);
+        } else if (this.isVisualsModalOpen) {
+          this.toggleVisualsModal(false);
+        }
+      } else if (e.code === 'BracketLeft') {
+        const newD = Math.max(0.6, +(this.renderer.params.density - 0.1).toFixed(1));
+        this.renderer.setVisualParams({ density: newD });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
+        }
+      } else if (e.code === 'BracketRight') {
+        const newD = Math.min(2.4, +(this.renderer.params.density + 0.1).toFixed(1));
+        this.renderer.setVisualParams({ density: newD });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`🔤 Densidade ASCII: ${newD.toFixed(1)}x (${this.renderer.charW}px)`, 1500);
+        }
+      } else if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+        const newB = Math.max(0.5, +(this.renderer.params.brightness - 0.05).toFixed(2));
+        this.renderer.setVisualParams({ brightness: newB });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
+        }
+      } else if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+        const newB = Math.min(2.5, +(this.renderer.params.brightness + 0.05).toFixed(2));
+        this.renderer.setVisualParams({ brightness: newB });
+        this.updateVisualReadouts();
+        if (this.game && this.game.hud && this.game.hud.showToast) {
+          this.game.hud.showToast(`☀️ Brilho: ${newB.toFixed(2)}x`, 1500);
+        }
       } else if (e.code === 'KeyM') {
         const nextMode = this.renderer.cycleRenderMode();
         this.updateModeLabel(nextMode);

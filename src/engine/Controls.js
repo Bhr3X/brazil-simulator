@@ -127,7 +127,7 @@ export class FirstPersonControls {
 
     document.addEventListener('mousedown', (e) => {
       if (this.freeze) return;
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, button, a')) return;
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select')) return;
       this.isMouseDown = true;
       this.lastMouseX = e.clientX;
       this.lastMouseY = e.clientY;
@@ -313,11 +313,13 @@ export class FirstPersonControls {
       const isSV = !!document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
       const isRoulette = !!document.getElementById('roulette-modal') && !document.getElementById('roulette-modal').classList.contains('modal-hidden');
       const isEnd = !!document.getElementById('end-run-modal') && !document.getElementById('end-run-modal').classList.contains('modal-hidden');
+      const isVisuals = !!document.getElementById('visuals-modal') && !document.getElementById('visuals-modal').classList.contains('modal-hidden');
 
       if (isDialog) this.freezeSources.add('dialog'); else this.freezeSources.delete('dialog');
       if (isSV) this.freezeSources.add('streetView'); else this.freezeSources.delete('streetView');
       if (isRoulette) this.freezeSources.add('roulette'); else this.freezeSources.delete('roulette');
       if (isEnd) this.freezeSources.add('endModal'); else this.freezeSources.delete('endModal');
+      if (isVisuals) this.freezeSources.add('visuals'); else this.freezeSources.delete('visuals');
     }
     if (this.freeze) {
       this.moveForward = false;

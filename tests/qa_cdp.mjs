@@ -245,6 +245,89 @@ async function runTestSuite(url) {
       throw new Error(`TEST 2c FAILED: Music engine test failed: ${JSON.stringify(musicTest)}`);
     }
 
+    // TEST 2d: Visual Parameters, Character Density, & Real-Time Tuning
+    const visualTest = await evaluate(`
+      (() => {
+        const app = window.app;
+        const renderer = app.renderer;
+        if (!renderer || !renderer.params) return { error: 'renderer params missing' };
+
+        // 1. Initial defaults
+        const initialDensity = renderer.params.density;
+        const initialCols = renderer.asciiCols;
+        const initialCharW = renderer.charW;
+
+        // 2. Adjust density
+        renderer.setVisualParams({ density: 1.8, brightness: 1.4, contrast: 1.3, gamma: 1.35, edgeEnhance: true, rampType: 'CONTRAST' });
+        const highDensity = renderer.params.density;
+        const highCols = renderer.asciiCols;
+        const highCharW = renderer.charW;
+
+        // 3. Test hotkey [P] to toggle Visuals Modal
+        const prePFreeze = app.controls.freeze;
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyP', bubbles: true }));
+        const modalOpen = !document.getElementById('visuals-modal').classList.contains('modal-hidden');
+        const postPFreeze = app.controls.freeze;
+
+        // 4. Test hotkey [Escape] to close
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', bubbles: true }));
+        const modalClosed = document.getElementById('visuals-modal').classList.contains('modal-hidden');
+        const postCloseFreeze = app.controls.freeze;
+
+        // 5. Test hotkey [ and ] density stepping
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'BracketRight', bubbles: true }));
+        const steppedUpDensity = renderer.params.density;
+
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'BracketLeft', bubbles: true }));
+        const steppedDownDensity = renderer.params.density;
+
+        // 6. Test hotkey - and = brightness stepping
+        const preBright = renderer.params.brightness;
+        window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Equal', bubbles: true }));
+        const postBrightUp = renderer.params.brightness;
+
+        // 7. Reset to defaults
+        renderer.resetVisualParams();
+        const resetDensity = renderer.params.density;
+
+        return {
+          ok: true,
+          initialDensity,
+          initialCols,
+          initialCharW,
+          highDensity,
+          highCols,
+          highCharW,
+          colsIncreased: highCols > initialCols,
+          charWShrunk: highCharW < initialCharW,
+          prePFreeze,
+          modalOpen,
+          postPFreeze,
+          modalClosed,
+          postCloseFreeze,
+          steppedUpDensity,
+          steppedDownDensity,
+          preBright,
+          postBrightUp,
+          resetDensity
+        };
+      })()
+    `);
+    console.log('[TEST 2d] Visual Parameters & Real-Time Tuning:', visualTest);
+    if (
+      !visualTest.ok ||
+      !visualTest.colsIncreased ||
+      !visualTest.charWShrunk ||
+      !visualTest.modalOpen ||
+      visualTest.postPFreeze !== true ||
+      !visualTest.modalClosed ||
+      visualTest.postCloseFreeze !== false ||
+      visualTest.postBrightUp <= visualTest.preBright ||
+      visualTest.resetDensity !== 1.0
+    ) {
+      throw new Error(`TEST 2d FAILED: Visual parameters test failed: ${JSON.stringify(visualTest)}`);
+    }
+
     // TEST 3: Clock advancement & Exploit Prevention
     // 3a. Forward-only RunClock monotonicity
     await evaluate(`

@@ -39,6 +39,10 @@
       <strong id="hud-mode">FAVELA ASCII (RGB)</strong>
       <small style="opacity:0.7">[M]</small>
     </button>
+    <button class="hud-btn" id="btn-visuals" style="border-color:#00f0ff; color:#00f0ff;">
+      <span>🎨 VISUAL / ASCII</span>
+      <small style="opacity:0.7">[P]</small>
+    </button>
     <button class="hud-btn" id="btn-tour">
       <span>🎥 AUTO TOUR</span>
       <small style="opacity:0.7">[U]</small>
@@ -198,6 +202,122 @@
           <button id="btn-refresh-sv" class="modal-action-btn">🔄 REINICIAR ÂNGULO</button>
           <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=-23.5019,-46.7064" target="_blank" rel="noopener noreferrer" class="modal-action-link">🗺️ ABRIR NO MAPS ↗</a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Parameters & ASCII Readability Modal -->
+  <div id="visuals-modal" class="modal-hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-window visual-modal-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="pulse-indicator"></span>
+          🎨 PARÂMETROS VISUAIS & NITIDEZ ASCII // PIRITUBA ENGINE
+        </div>
+        <button id="btn-close-visuals" class="modal-close-btn" title="Fechar Ajustes [P / ESC]">✕</button>
+      </div>
+      <div class="modal-body visual-modal-body">
+        <!-- Quick Presets -->
+        <div class="visual-section">
+          <div class="visual-section-title">⚡ PRESETS RÁPIDOS DE VISUALIZAÇÃO</div>
+          <div class="visual-presets-grid">
+            <button class="preset-btn active" id="preset-ultra">⚡ ULTRA NÍTIDO</button>
+            <button class="preset-btn" id="preset-blocks">🧱 BLOCOS 3D</button>
+            <button class="preset-btn" id="preset-favela">🌈 FAVELA VIBRANTE</button>
+            <button class="preset-btn" id="preset-matrix">🟢 CYBER MATRIX</button>
+            <button class="preset-btn" id="preset-3d">🖥️ MODO 3D REAL</button>
+            <button class="preset-btn" id="preset-default">🔄 PADRÃO</button>
+          </div>
+        </div>
+
+        <div class="visual-controls-columns">
+          <!-- Left Column: Density, Lighting, Contrast -->
+          <div class="visual-col">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-density">🔤 Densidade / Resolução de Caracteres</label>
+                <span class="slider-val" id="val-density">1.0x (8px)</span>
+              </div>
+              <input type="range" id="slider-density" min="0.6" max="2.4" step="0.1" value="1.0">
+              <div class="slider-hint">Menor = Retrô e blocos grandes | Maior = Micro-ASCII ultra nítido</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-brightness">☀️ Brilho / Luminância</label>
+                <span class="slider-val" id="val-brightness">1.25x</span>
+              </div>
+              <input type="range" id="slider-brightness" min="0.5" max="2.5" step="0.05" value="1.25">
+              <div class="slider-hint">Aumenta a luz geral para enxergar à noite ou sob sol forte</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-contrast">🌓 Contraste Dinâmico</label>
+                <span class="slider-val" id="val-contrast">1.20x</span>
+              </div>
+              <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.20">
+              <div class="slider-hint">Diferencia prédios, calçadas e o asfalto com mais definição</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-gamma">💡 Clarear Sombras (Gamma)</label>
+                <span class="slider-val" id="val-gamma">1.25x</span>
+              </div>
+              <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.25">
+              <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
+            </div>
+          </div>
+
+          <!-- Right Column: Edge detection, Saturation, Ramps, CRT -->
+          <div class="visual-col">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-saturation">🎨 Saturação de Cores</label>
+                <span class="slider-val" id="val-saturation">1.25x</span>
+              </div>
+              <input type="range" id="slider-saturation" min="0.0" max="2.5" step="0.05" value="1.25">
+              <div class="slider-hint">0.0 = Preto e Branco | 2.5 = Cores vivas da periferia</div>
+            </div>
+
+            <div class="toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-edges" checked>
+                <span>📐 Realce de Bordas & Silhuetas (Edge Contour)</span>
+              </label>
+              <div class="slider-hint">Detecta e traça os contornos de paredes, postes e carros</div>
+            </div>
+
+            <div class="select-group">
+              <label for="select-ramp">🔣 Estilo / Conjunto de Caracteres</label>
+              <select id="select-ramp" class="visual-select">
+                <option value="DETAILED">COMPLETO (70 caracteres graduais)</option>
+                <option value="BLOCKS">BLOCOS ISOMÉTRICOS (░▒▓█)</option>
+                <option value="CONTRAST">ALTO CONTRASTE (.:-=+*#%@)</option>
+                <option value="MINIMAL">MINIMALISTA (.:*#@)</option>
+                <option value="MATRIX">CYBER MATRIX (0123456789...)</option>
+                <option value="SHARPLINE">LINHAS & PONTOS (.·-—~=+*#%@)</option>
+              </select>
+            </div>
+
+            <div class="toggle-group">
+              <label class="toggle-label">
+                <input type="checkbox" id="chk-scanlines">
+                <span>📺 Linhas de Varredura CRT (Scanlines Retrô)</span>
+              </label>
+            </div>
+
+            <div class="hotkey-tip-box">
+              ⌨️ <strong>Atalhos Rápidos:</strong> <code>[P]</code> Abrir/fechar ajustes &nbsp;|&nbsp; <code>[</code> / <code>]</code> Densidade &nbsp;|&nbsp; <code>-</code> / <code>+</code> Brilho &nbsp;|&nbsp; <code>[M]</code> Alternar modos
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer visual-modal-footer">
+        <button id="btn-reset-visuals" class="modal-action-btn">🔄 RESTAURAR PADRÕES</button>
+        <button id="btn-done-visuals" class="modal-confirm-btn">✓ APLICAR & FECHAR [ESC / P]</button>
       </div>
     </div>
   </div>
