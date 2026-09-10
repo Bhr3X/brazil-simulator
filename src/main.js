@@ -12,6 +12,7 @@ import { SoundEngine } from './audio/SoundEngine.js';
 import { TrafficSystem } from './engine/TrafficSystem.js';
 import { GameManager } from './game/GameManager.js';
 import { ZoneManager } from './world/Zones.js';
+import { TouchController } from './engine/TouchControls.js';
 
 class GameApp {
   constructor() {
@@ -57,6 +58,18 @@ class GameApp {
       initialSeed
     );
     console.log('[Sobrevivência BR] Active Seed:', this.game.seed);
+
+    // Touch Controls Subsystem (Virtual Thumbstick & Mobile Action Buttons)
+    this.touch = new TouchController(this.controls, this);
+
+    // Unlock Web Audio context on first mobile touch gesture
+    if (typeof window !== 'undefined') {
+      window.addEventListener('touchstart', () => {
+        if (this.sound && !this.sound.isInitialized) {
+          this.sound.init();
+        }
+      }, { once: true });
+    }
 
     // Initial time of day
     this.timeOfDay = 'DAY';
@@ -778,6 +791,79 @@ class GameApp {
       });
     }
 
+    // Wire Mobile Menu Drawer Buttons
+    const closeMobileDrawer = () => {
+      const drawer = document.getElementById('mobile-menu-drawer');
+      const btnMenu = document.getElementById('touch-btn-menu');
+      if (drawer) drawer.classList.add('modal-hidden');
+      if (btnMenu) btnMenu.classList.remove('active');
+    };
+
+    const mBtnStreetview = document.getElementById('mobile-btn-streetview');
+    if (mBtnStreetview) {
+      mBtnStreetview.addEventListener('click', () => {
+        closeMobileDrawer();
+        this.toggleStreetView();
+      });
+    }
+
+    const mBtnMode = document.getElementById('mobile-btn-mode');
+    if (mBtnMode) {
+      mBtnMode.addEventListener('click', () => {
+        const nextMode = this.renderer.cycleRenderMode();
+        this.updateModeLabel(nextMode);
+      });
+    }
+
+    const mBtnVisuals = document.getElementById('mobile-btn-visuals');
+    if (mBtnVisuals) {
+      mBtnVisuals.addEventListener('click', () => {
+        closeMobileDrawer();
+        this.toggleVisualsModal();
+      });
+    }
+
+    const mBtnCamera = document.getElementById('mobile-btn-camera');
+    if (mBtnCamera) {
+      mBtnCamera.addEventListener('click', () => {
+        this.controls.togglePerspective();
+      });
+    }
+
+    const mBtnRadio = document.getElementById('mobile-btn-radio');
+    if (mBtnRadio) {
+      mBtnRadio.addEventListener('click', () => {
+        handleRadioCycle();
+      });
+    }
+
+    const mBtnAudio = document.getElementById('mobile-btn-audio');
+    if (mBtnAudio) {
+      mBtnAudio.addEventListener('click', () => {
+        const muted = this.sound.toggleMute();
+        mBtnAudio.textContent = muted ? '🔇 Som: Desligado' : '🔊 Som: Ligado';
+        if (this.audioBtn) this.audioBtn.textContent = muted ? '🔇 SOM: DESLIGADO' : '🔊 SOM: LIGADO';
+      });
+    }
+
+    const mBtnTour = document.getElementById('mobile-btn-tour');
+    if (mBtnTour) {
+      mBtnTour.addEventListener('click', () => {
+        closeMobileDrawer();
+        if (this.controls.freeze) return;
+        const active = this.controls.toggleAutoTour();
+        mBtnTour.textContent = active ? '🎥 Tour: Ativo [U]' : '🎥 Auto Tour [U]';
+      });
+    }
+
+    const mBtnTraffic = document.getElementById('mobile-btn-traffic');
+    if (mBtnTraffic) {
+      mBtnTraffic.addEventListener('click', () => {
+        const isEmpty = this.traffic.toggleEmptyCity();
+        mBtnTraffic.textContent = isEmpty ? '🏙️ Cidade Vazia [X]' : '🚗 Trânsito Ativo [X]';
+      });
+    }
+
     // Hotkeys
     window.addEventListener('keydown', (e) => {
       // Guard browser-level commands: ignore Meta (Cmd) and Alt combos
@@ -975,6 +1061,13 @@ class GameApp {
       this.sound.updateMusicContext(zone.id, inGameHour);
     }
     this.updateRadioLabel();
+
+    // 5. Mobile Orientation Tip (Show only in portrait on mobile)
+    const orientBanner = document.getElementById('orientation-banner');
+    if (orientBanner && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0))) {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      orientBanner.classList.toggle('modal-hidden', !isPortrait);
+    }
   }
 
   updateRadioLabel() {
@@ -1000,6 +1093,11 @@ class GameApp {
     this.city.update(elapsedTime);
     this.traffic.update(delta, elapsedTime);
     this.game.update(delta);
+
+    // Update touch interaction button highlight state
+    if (this.touch && this.game && this.game.interactables) {
+      this.touch.updateInteractionState(!!this.game.interactables.activeTarget);
+    }
 
     // Render frame
     this.renderer.render();

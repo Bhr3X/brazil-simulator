@@ -1245,6 +1245,378 @@ input[type="range"]::-webkit-slider-thumb:hover {
   box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
 }
 
+/* =========================================================
+   MOBILE TOUCH CONTROLS & RESPONSIVE SUBSYSTEM
+   ========================================================= */
+
+/* Prevent default touch gestures (pinch-zoom, bounce) */
+body.mobile-touch-active,
+body.mobile-touch-active #canvas-container {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+.touch-hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Touch Controls Container */
+#touch-controls-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* Floating Thumbstick Base (Left Zone) */
+#touch-joystick-base {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 102, 0.20) 0%, rgba(0, 255, 102, 0.05) 70%, transparent 100%);
+  border: 2px solid rgba(0, 255, 102, 0.5);
+  pointer-events: none;
+  box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
+  transition: opacity 0.15s ease;
+}
+
+#touch-joystick-ring {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 255, 102, 0.35);
+  pointer-events: none;
+}
+
+#touch-joystick-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ff66, #00993a);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 12px #00ff66;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Action Buttons Cluster (Right Zone) */
+#touch-actions-cluster {
+  position: absolute;
+  bottom: 22px;
+  right: 22px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 60;
+}
+
+.touch-actions-subgroup {
+  display: flex;
+  gap: 10px;
+}
+
+.touch-action-btn {
+  user-select: none;
+  -webkit-user-select: none;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 26px;
+  font-family: inherit;
+  font-weight: bold;
+  background: rgba(5, 6, 8, 0.82);
+  border: 2px solid #00ff66;
+  color: #00ff66;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.25);
+  touch-action: manipulation;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.1s ease, background-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.touch-action-btn:active,
+.touch-action-btn.active {
+  transform: scale(0.92);
+  background: rgba(0, 255, 102, 0.35);
+  box-shadow: 0 0 18px #00ff66;
+}
+
+.touch-action-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.touch-action-label {
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* Highlighted Interact Button [E] */
+.touch-action-btn.interact-btn {
+  min-width: 68px;
+  min-height: 68px;
+  border-radius: 34px;
+  border-color: #ffcc00;
+  color: #ffcc00;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.35);
+}
+
+.touch-action-btn.interact-btn .touch-action-icon {
+  font-size: 22px;
+}
+
+.touch-action-btn.interact-btn .touch-action-label {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.touch-action-btn.interact-btn:active {
+  background: rgba(255, 204, 0, 0.4);
+  box-shadow: 0 0 20px #ffcc00;
+}
+
+.touch-action-btn.interact-btn.interact-active {
+  animation: touchPulseInteract 1s infinite alternate ease-in-out;
+  border-color: #fff066;
+  color: #ffffff;
+}
+
+@keyframes touchPulseInteract {
+  from {
+    transform: scale(1.0);
+    box-shadow: 0 0 12px #ffcc00;
+    background: rgba(255, 204, 0, 0.25);
+  }
+  to {
+    transform: scale(1.08);
+    box-shadow: 0 0 24px #ffe600, 0 0 8px #ffffff;
+    background: rgba(255, 204, 0, 0.55);
+  }
+}
+
+/* Mobile Quick Menu Button */
+#touch-btn-menu {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 95;
+  background: rgba(5, 6, 8, 0.88);
+  border: 1.5px solid #00f0ff;
+  color: #00f0ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  pointer-events: auto;
+  transition: all 0.15s ease;
+}
+
+#touch-btn-menu:active,
+#touch-btn-menu.active {
+  background: #00f0ff;
+  color: #050608;
+  box-shadow: 0 0 16px #00f0ff;
+}
+
+/* Mobile Secondary Menu Drawer */
+#mobile-menu-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.mobile-drawer-content {
+  width: min(320px, 85vw);
+  background: #090e14;
+  border-left: 2px solid #00f0ff;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  box-shadow: -6px 0 25px rgba(0, 0, 0, 0.8);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+  padding-bottom: 10px;
+  color: #00f0ff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.drawer-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-drawer-btn {
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: #d8f4ff;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.mobile-drawer-btn:active {
+  background: rgba(0, 240, 255, 0.3);
+  color: #ffffff;
+}
+
+/* Orientation Tip Banner */
+#orientation-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: linear-gradient(90deg, #ff0055, #ff5500);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 6px 10px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* =========================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Hide desktop right sidebar buttons on mobile screen */
+  #hud-top-right {
+    display: none !important;
+  }
+
+  /* Show mobile menu button */
+  #touch-btn-menu {
+    display: block;
+  }
+
+  /* Compact Top Left Terminal HUD */
+  #hud-top-left {
+    top: 8px;
+    left: 8px;
+    max-width: 50vw;
+  }
+
+  .terminal-header {
+    font-size: 10px;
+  }
+
+  #hud-location {
+    font-size: 11px;
+  }
+
+  .terminal-meta {
+    font-size: 9px;
+  }
+
+  /* Compact Survival Dashboard */
+  #hud-survival-bar {
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 4px;
+    padding: 3px 6px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
+  }
+
+  .survival-stat-box {
+    padding: 2px 4px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .stat-value {
+    font-size: 11px;
+  }
+
+  .stat-bar-container {
+    width: 38px;
+    height: 4px;
+  }
+
+  /* Objective Bar */
+  #hud-objective-bar {
+    bottom: 8px;
+    left: 8px;
+    font-size: 10px;
+    padding: 4px 8px;
+    max-width: 60vw;
+  }
+
+  /* Modals on Mobile */
+  .dialog-window,
+  .roulette-container,
+  .visual-modal-content,
+  .end-modal-content {
+    max-width: 94vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .class-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .class-card {
+    min-height: auto !important;
+    padding: 12px !important;
+  }
+}
+
+/* Show orientation banner only in portrait on narrow screens */
+@media (orientation: portrait) and (max-width: 768px) {
+  #orientation-banner:not(.modal-hidden) {
+    display: block;
+  }
+}
+
+
 
   </style>
   <script>
@@ -1321,6 +1693,16 @@ input[type="range"]::-webkit-slider-thumb:hover {
       <span>👾 ESTÚDIO: game.md ↗</span>
     </a>
   </div>
+
+  <!-- Mobile Landscape Orientation Tip Banner -->
+  <div id="orientation-banner" class="modal-hidden">
+    <span>📱 Gire o celular para o modo <strong>Paisagem (Horizontal)</strong> para melhor jogabilidade 🔄</span>
+  </div>
+
+  <!-- Mobile Menu Button (Visible on Touch screens) -->
+  <button id="touch-btn-menu" class="touch-btn touch-hidden" title="Menu de Ajustes">
+    <span>⚙️ MENU</span>
+  </button>
 
   <!-- Top Center: Survival HUD Status Dashboard -->
   <div class="hud-layer" id="hud-survival-bar">
@@ -1668,6 +2050,58 @@ input[type="range"]::-webkit-slider-thumb:hover {
     <div class="credits-footer">
       Desenvolvido por <strong><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">game.md</a></strong> • Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
       Explore os becos, o escadão, a laje com caixas d'água Fortlev, o boteco e a vista para o Pico do Jaraguá.
+    </div>
+  </div>
+
+  <!-- Mobile Secondary Menu Drawer -->
+  <div id="mobile-menu-drawer" class="modal-hidden">
+    <div class="mobile-drawer-content">
+      <div class="drawer-header">
+        <span class="drawer-title">⚙️ MENU & AJUSTES</span>
+        <button id="btn-close-mobile-menu" class="dialog-close-btn" title="Fechar Menu">✕</button>
+      </div>
+      <div class="drawer-buttons">
+        <button class="mobile-drawer-btn" id="mobile-btn-streetview">🌐 Street View [V]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-mode">🖥️ Modo Visual [M]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-visuals">🎨 Shaders & Cores [P]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-camera">👤 1ª / 3ª Pessoa [B]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-radio">📻 Rádio Pirituba [N]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-audio">🔊 Ligar/Desligar Som [O]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-tour">🎥 Auto Tour [U]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-traffic">🚗 Alternar Trânsito [X]</button>
+        <a class="mobile-drawer-btn" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">👾 Estúdio game.md ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Touch Controls Layer -->
+  <div id="touch-controls-container" class="touch-hidden">
+    <!-- Virtual Floating Thumbstick (Left Zone) -->
+    <div id="touch-joystick-base" style="display:none;">
+      <div id="touch-joystick-ring"></div>
+      <div id="touch-joystick-knob"></div>
+    </div>
+
+    <!-- Action Buttons Cluster (Right Zone) -->
+    <div id="touch-actions-cluster">
+      <button id="touch-btn-interact" class="touch-action-btn interact-btn" title="Interagir [E]">
+        <span class="touch-action-icon">⚡</span>
+        <span class="touch-action-label">INTERAGIR</span>
+      </button>
+      <div class="touch-actions-subgroup">
+        <button id="touch-btn-jump" class="touch-action-btn" title="Pular / Chute [Espaço]">
+          <span class="touch-action-icon">🦘</span>
+          <span class="touch-action-label">PULAR</span>
+        </button>
+        <button id="touch-btn-crouch" class="touch-action-btn" title="Agachar [C]">
+          <span class="touch-action-icon">🦵</span>
+          <span class="touch-action-label">AGACHA</span>
+        </button>
+        <button id="touch-btn-camera" class="touch-action-btn" title="Alternar Câmera [B]">
+          <span class="touch-action-icon">👤</span>
+          <span class="touch-action-label">3ªP</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -4862,6 +5296,7 @@ class FirstPersonControls {
     this.isSprinting = false;
     this.isCrouching = false;
     this.canJump = false;
+    this.touchMoveVector = null;
 
     // Arrow keys rotation state (look up, down, left, right)
     this.lookUp = false;
@@ -4963,13 +5398,14 @@ class FirstPersonControls {
 
     // Pointer lock request on canvas / body
     document.addEventListener('click', (e) => {
-      // Don't re-lock if clicking buttons, links, or active modals
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select')) return;
+      // Don't re-lock if clicking buttons, links, active modals or mobile touch controls
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select, .touch-btn, #touch-controls-container, #mobile-menu-drawer')) return;
       if (this.freeze) return;
       if (!this.hasStarted) return;
       if (!this.isLocked) {
         try {
-          const p = document.body.requestPointerLock ? document.body.requestPointerLock() : null;
+          const target = document.body;
+          const p = target.requestPointerLock ? target.requestPointerLock() : null;
           if (p && p.catch) p.catch(() => {});
         } catch (err) {}
       }
@@ -5233,6 +5669,24 @@ class FirstPersonControls {
     this.camera.position.set(x, y + this.eyeHeight, z);
   }
 
+  setTouchMovement(vx, vy) {
+    if (!this.touchMoveVector) {
+      this.touchMoveVector = new THREE.Vector2();
+    }
+    this.touchMoveVector.set(vx, vy);
+  }
+
+  addTouchRotation(rotX, rotY) {
+    if (this.freeze) return;
+    this.euler.x += rotX;
+    this.euler.y += rotY;
+    const maxPitch = Math.PI / 2 - 0.05;
+    this.euler.x = Math.max(-maxPitch, Math.min(maxPitch, this.euler.x));
+    if (!this.isThirdPerson) {
+      this.camera.quaternion.setFromEuler(this.euler);
+    }
+  }
+
   update(delta) {
     if (!this.hasStarted || this.freeze) return;
 
@@ -5290,8 +5744,14 @@ class FirstPersonControls {
     if (this.moveRight) moveDir.add(right);
     if (this.moveLeft) moveDir.sub(right);
 
+    // Support analog touch joystick vector
+    if (this.touchMoveVector && (this.touchMoveVector.x !== 0 || this.touchMoveVector.y !== 0)) {
+      moveDir.addScaledVector(forward, -this.touchMoveVector.y);
+      moveDir.addScaledVector(right, this.touchMoveVector.x);
+    }
+
     const isMoving = moveDir.lengthSq() > 0.001;
-    if (isMoving) moveDir.normalize();
+    if (isMoving && moveDir.lengthSq() > 1.0) moveDir.normalize();
 
     // 2. Select speed based on state
     let speed = this.walkSpeed;
@@ -5675,6 +6135,343 @@ class FirstPersonControls {
     // Aim convergence: point towards target 25m ahead along player's forward aim vector
     const aimTarget = focusPoint.clone().addScaledVector(forwardDir, 25.0);
     this.camera.lookAt(aimTarget);
+  }
+}
+
+/**
+ * TouchControls.js — Mobile Touch Controller for Brazil Simulator // Sobrevivência BR
+ * Provides a dual-zone touch interface:
+ * - Left Zone: Floating Virtual Thumbstick (360° analog movement + auto-sprint)
+ * - Right Zone: Touch Drag-to-Look Orbit Camera (Yaw + Pitch)
+ * - Action Buttons: [E] Interagir, [Pular / Chute], [Agachar], [1ª/3ª Pessoa], [Menu]
+ */
+
+class TouchController {
+  constructor(controls, app) {
+    this.controls = controls;
+    this.app = app;
+    this.isEnabled = false;
+
+    // Active touch tracking IDs
+    this.moveTouchId = null;
+    this.lookTouchId = null;
+
+    // Joystick coordinates
+    this.joystickOrigin = { x: 0, y: 0 };
+    this.maxRadius = 50; // Max displacement in pixels
+
+    // Look tracking
+    this.lastLookX = 0;
+    this.lastLookY = 0;
+    this.lookSensitivity = 0.0036;
+
+    // DOM Elements
+    this.container = null;
+    this.joystickBase = null;
+    this.joystickKnob = null;
+    this.btnInteract = null;
+    this.btnJump = null;
+    this.btnCrouch = null;
+    this.btnCam = null;
+    this.btnMenu = null;
+    this.menuDrawer = null;
+
+    this.init();
+  }
+
+  isTouchDevice() {
+    return (
+      'ontouchstart' in window ||
+      (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0)
+    );
+  }
+
+  init() {
+    this.container = document.getElementById('touch-controls-container');
+    this.joystickBase = document.getElementById('touch-joystick-base');
+    this.joystickKnob = document.getElementById('touch-joystick-knob');
+    this.btnInteract = document.getElementById('touch-btn-interact');
+    this.btnJump = document.getElementById('touch-btn-jump');
+    this.btnCrouch = document.getElementById('touch-btn-crouch');
+    this.btnCam = document.getElementById('touch-btn-camera');
+    this.btnMenu = document.getElementById('touch-btn-menu');
+    this.menuDrawer = document.getElementById('mobile-menu-drawer');
+
+    if (this.isTouchDevice()) {
+      this.enable();
+    }
+
+    this.bindEvents();
+  }
+
+  enable() {
+    this.isEnabled = true;
+    if (this.container) {
+      this.container.classList.remove('touch-hidden');
+    }
+    if (this.btnMenu) {
+      this.btnMenu.classList.remove('touch-hidden');
+    }
+    document.body.classList.add('mobile-touch-active');
+  }
+
+  disable() {
+    this.isEnabled = false;
+    if (this.container) {
+      this.container.classList.add('touch-hidden');
+    }
+    if (this.btnMenu) {
+      this.btnMenu.classList.add('touch-hidden');
+    }
+    document.body.classList.remove('mobile-touch-active');
+    this.resetMove();
+    this.resetLook();
+  }
+
+  bindEvents() {
+    // 1. Fullscreen / Canvas Touch Routing
+    window.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+    window.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+    window.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+    window.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
+
+    // 2. Action Button Listeners
+    if (this.btnJump) {
+      const doJump = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.controls && !this.controls.freeze) {
+          if (this.controls.canJump) {
+            this.controls.velocity.y = this.controls.jumpVelocity;
+            this.controls.canJump = false;
+            if (this.controls.sound && typeof this.controls.sound.playFootstep === 'function') {
+              this.controls.sound.playFootstep('concrete');
+            }
+          }
+        }
+      };
+      this.btnJump.addEventListener('touchstart', doJump, { passive: false });
+      this.btnJump.addEventListener('mousedown', doJump);
+    }
+
+    if (this.btnCrouch) {
+      const doCrouch = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.controls && !this.controls.freeze) {
+          this.controls.isCrouching = !this.controls.isCrouching;
+          this.btnCrouch.classList.toggle('active', this.controls.isCrouching);
+        }
+      };
+      this.btnCrouch.addEventListener('touchstart', doCrouch, { passive: false });
+      this.btnCrouch.addEventListener('mousedown', doCrouch);
+    }
+
+    if (this.btnInteract) {
+      const doInteract = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.app && this.app.game && !this.controls.freeze) {
+          this.app.game.handleInteract();
+        }
+      };
+      this.btnInteract.addEventListener('touchstart', doInteract, { passive: false });
+      this.btnInteract.addEventListener('mousedown', doInteract);
+    }
+
+    if (this.btnCam) {
+      const doCam = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.controls) {
+          const is3rd = this.controls.togglePerspective();
+          if (this.btnCam) {
+            this.btnCam.textContent = is3rd ? '👤 3ªP' : '👁️ 1ªP';
+          }
+        }
+      };
+      this.btnCam.addEventListener('touchstart', doCam, { passive: false });
+      this.btnCam.addEventListener('mousedown', doCam);
+    }
+
+    if (this.btnMenu) {
+      const toggleMenu = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.menuDrawer) {
+          this.menuDrawer.classList.toggle('modal-hidden');
+          const isOpen = !this.menuDrawer.classList.contains('modal-hidden');
+          this.btnMenu.classList.toggle('active', isOpen);
+        }
+      };
+      this.btnMenu.addEventListener('touchstart', toggleMenu, { passive: false });
+      this.btnMenu.addEventListener('mousedown', toggleMenu);
+    }
+
+    // Close menu drawer button
+    const closeDrawerBtn = document.getElementById('btn-close-mobile-menu');
+    if (closeDrawerBtn) {
+      closeDrawerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.menuDrawer) {
+          this.menuDrawer.classList.add('modal-hidden');
+          if (this.btnMenu) this.btnMenu.classList.remove('active');
+        }
+      });
+    }
+
+    // Close drawer when clicking outside
+    if (this.menuDrawer) {
+      this.menuDrawer.addEventListener('click', (e) => {
+        if (e.target === this.menuDrawer) {
+          this.menuDrawer.classList.add('modal-hidden');
+          if (this.btnMenu) this.btnMenu.classList.remove('active');
+        }
+      });
+    }
+  }
+
+  isInteractiveElement(target) {
+    if (!target) return false;
+    return !!target.closest(
+      'button, a, input, select, .touch-btn, #mobile-menu-drawer, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, .hud-btn'
+    );
+  }
+
+  handleTouchStart(e) {
+    // If not enabled or modal frozen, ignore movement
+    if (!this.isEnabled) return;
+    if (this.controls && this.controls.freeze) return;
+
+    const screenWidth = window.innerWidth;
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const target = touch.target;
+
+      // Ignore touches on HUD buttons or modals
+      if (this.isInteractiveElement(target)) continue;
+
+      // Left Half: Virtual Joystick (Movement)
+      if (touch.clientX < screenWidth * 0.48 && this.moveTouchId === null) {
+        e.preventDefault();
+        this.moveTouchId = touch.identifier;
+        this.joystickOrigin.x = touch.clientX;
+        this.joystickOrigin.y = touch.clientY;
+
+        if (this.joystickBase) {
+          this.joystickBase.style.left = `${touch.clientX}px`;
+          this.joystickBase.style.top = `${touch.clientY}px`;
+          this.joystickBase.style.display = 'block';
+        }
+        if (this.joystickKnob) {
+          this.joystickKnob.style.transform = 'translate(-50%, -50%)';
+        }
+      }
+      // Right Half: Camera Drag Look
+      else if (touch.clientX >= screenWidth * 0.48 && this.lookTouchId === null) {
+        e.preventDefault();
+        this.lookTouchId = touch.identifier;
+        this.lastLookX = touch.clientX;
+        this.lastLookY = touch.clientY;
+      }
+    }
+  }
+
+  handleTouchMove(e) {
+    if (!this.isEnabled) return;
+    if (this.controls && this.controls.freeze) return;
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+
+      // Handle Movement Joystick
+      if (touch.identifier === this.moveTouchId) {
+        e.preventDefault();
+        const dx = touch.clientX - this.joystickOrigin.x;
+        const dy = touch.clientY - this.joystickOrigin.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        const clampedDist = Math.min(dist, this.maxRadius);
+        const angle = Math.atan2(dy, dx);
+        const clampedX = Math.cos(angle) * clampedDist;
+        const clampedY = Math.sin(angle) * clampedDist;
+
+        if (this.joystickKnob) {
+          this.joystickKnob.style.transform = `translate(calc(-50% + ${clampedX}px), calc(-50% + ${clampedY}px))`;
+        }
+
+        // Normalize movement vector between -1.0 and 1.0
+        let vx = clampedX / this.maxRadius;
+        let vy = clampedY / this.maxRadius;
+
+        // Deadzone threshold (0.12)
+        if (Math.hypot(vx, vy) < 0.12) {
+          vx = 0;
+          vy = 0;
+        }
+
+        // Auto-sprint when pulling beyond 82% radius
+        if (this.controls) {
+          this.controls.isSprinting = (dist > this.maxRadius * 0.82);
+          this.controls.setTouchMovement(vx, vy);
+        }
+      }
+      // Handle Camera Drag Look
+      else if (touch.identifier === this.lookTouchId) {
+        e.preventDefault();
+        const deltaX = touch.clientX - this.lastLookX;
+        const deltaY = touch.clientY - this.lastLookY;
+
+        this.lastLookX = touch.clientX;
+        this.lastLookY = touch.clientY;
+
+        if (this.controls) {
+          this.controls.addTouchRotation(
+            -deltaY * this.lookSensitivity,
+            -deltaX * this.lookSensitivity
+          );
+        }
+      }
+    }
+  }
+
+  handleTouchEnd(e) {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      if (touch.identifier === this.moveTouchId) {
+        this.resetMove();
+      } else if (touch.identifier === this.lookTouchId) {
+        this.resetLook();
+      }
+    }
+  }
+
+  resetMove() {
+    this.moveTouchId = null;
+    if (this.joystickBase) {
+      this.joystickBase.style.display = 'none';
+    }
+    if (this.joystickKnob) {
+      this.joystickKnob.style.transform = 'translate(-50%, -50%)';
+    }
+    if (this.controls) {
+      this.controls.setTouchMovement(0, 0);
+      this.controls.isSprinting = false;
+    }
+  }
+
+  resetLook() {
+    this.lookTouchId = null;
+  }
+
+  updateInteractionState(hasActiveTarget) {
+    if (!this.btnInteract) return;
+    if (hasActiveTarget) {
+      this.btnInteract.classList.add('interact-active');
+    } else {
+      this.btnInteract.classList.remove('interact-active');
+    }
   }
 }
 
@@ -12226,6 +13023,18 @@ class GameApp {
     );
     console.log('[Sobrevivência BR] Active Seed:', this.game.seed);
 
+    // Touch Controls Subsystem (Virtual Thumbstick & Mobile Action Buttons)
+    this.touch = new TouchController(this.controls, this);
+
+    // Unlock Web Audio context on first mobile touch gesture
+    if (typeof window !== 'undefined') {
+      window.addEventListener('touchstart', () => {
+        if (this.sound && !this.sound.isInitialized) {
+          this.sound.init();
+        }
+      }, { once: true });
+    }
+
     // Initial time of day
     this.timeOfDay = 'DAY';
     this.city.setTimeOfDay(this.timeOfDay);
@@ -12946,6 +13755,79 @@ class GameApp {
       });
     }
 
+    // Wire Mobile Menu Drawer Buttons
+    const closeMobileDrawer = () => {
+      const drawer = document.getElementById('mobile-menu-drawer');
+      const btnMenu = document.getElementById('touch-btn-menu');
+      if (drawer) drawer.classList.add('modal-hidden');
+      if (btnMenu) btnMenu.classList.remove('active');
+    };
+
+    const mBtnStreetview = document.getElementById('mobile-btn-streetview');
+    if (mBtnStreetview) {
+      mBtnStreetview.addEventListener('click', () => {
+        closeMobileDrawer();
+        this.toggleStreetView();
+      });
+    }
+
+    const mBtnMode = document.getElementById('mobile-btn-mode');
+    if (mBtnMode) {
+      mBtnMode.addEventListener('click', () => {
+        const nextMode = this.renderer.cycleRenderMode();
+        this.updateModeLabel(nextMode);
+      });
+    }
+
+    const mBtnVisuals = document.getElementById('mobile-btn-visuals');
+    if (mBtnVisuals) {
+      mBtnVisuals.addEventListener('click', () => {
+        closeMobileDrawer();
+        this.toggleVisualsModal();
+      });
+    }
+
+    const mBtnCamera = document.getElementById('mobile-btn-camera');
+    if (mBtnCamera) {
+      mBtnCamera.addEventListener('click', () => {
+        this.controls.togglePerspective();
+      });
+    }
+
+    const mBtnRadio = document.getElementById('mobile-btn-radio');
+    if (mBtnRadio) {
+      mBtnRadio.addEventListener('click', () => {
+        handleRadioCycle();
+      });
+    }
+
+    const mBtnAudio = document.getElementById('mobile-btn-audio');
+    if (mBtnAudio) {
+      mBtnAudio.addEventListener('click', () => {
+        const muted = this.sound.toggleMute();
+        mBtnAudio.textContent = muted ? '🔇 Som: Desligado' : '🔊 Som: Ligado';
+        if (this.audioBtn) this.audioBtn.textContent = muted ? '🔇 SOM: DESLIGADO' : '🔊 SOM: LIGADO';
+      });
+    }
+
+    const mBtnTour = document.getElementById('mobile-btn-tour');
+    if (mBtnTour) {
+      mBtnTour.addEventListener('click', () => {
+        closeMobileDrawer();
+        if (this.controls.freeze) return;
+        const active = this.controls.toggleAutoTour();
+        mBtnTour.textContent = active ? '🎥 Tour: Ativo [U]' : '🎥 Auto Tour [U]';
+      });
+    }
+
+    const mBtnTraffic = document.getElementById('mobile-btn-traffic');
+    if (mBtnTraffic) {
+      mBtnTraffic.addEventListener('click', () => {
+        const isEmpty = this.traffic.toggleEmptyCity();
+        mBtnTraffic.textContent = isEmpty ? '🏙️ Cidade Vazia [X]' : '🚗 Trânsito Ativo [X]';
+      });
+    }
+
     // Hotkeys
     window.addEventListener('keydown', (e) => {
       // Guard browser-level commands: ignore Meta (Cmd) and Alt combos
@@ -13143,6 +14025,13 @@ class GameApp {
       this.sound.updateMusicContext(zone.id, inGameHour);
     }
     this.updateRadioLabel();
+
+    // 5. Mobile Orientation Tip (Show only in portrait on mobile)
+    const orientBanner = document.getElementById('orientation-banner');
+    if (orientBanner && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0))) {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      orientBanner.classList.toggle('modal-hidden', !isPortrait);
+    }
   }
 
   updateRadioLabel() {
@@ -13168,6 +14057,11 @@ class GameApp {
     this.city.update(elapsedTime);
     this.traffic.update(delta, elapsedTime);
     this.game.update(delta);
+
+    // Update touch interaction button highlight state
+    if (this.touch && this.game && this.game.interactables) {
+      this.touch.updateInteractionState(!!this.game.interactables.activeTarget);
+    }
 
     // Render frame
     this.renderer.render();

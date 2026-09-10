@@ -1238,3 +1238,375 @@ input[type="range"]::-webkit-slider-thumb:hover {
   box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
 }
 
+/* =========================================================
+   MOBILE TOUCH CONTROLS & RESPONSIVE SUBSYSTEM
+   ========================================================= */
+
+/* Prevent default touch gestures (pinch-zoom, bounce) */
+body.mobile-touch-active,
+body.mobile-touch-active #canvas-container {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+.touch-hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Touch Controls Container */
+#touch-controls-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* Floating Thumbstick Base (Left Zone) */
+#touch-joystick-base {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 102, 0.20) 0%, rgba(0, 255, 102, 0.05) 70%, transparent 100%);
+  border: 2px solid rgba(0, 255, 102, 0.5);
+  pointer-events: none;
+  box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
+  transition: opacity 0.15s ease;
+}
+
+#touch-joystick-ring {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 255, 102, 0.35);
+  pointer-events: none;
+}
+
+#touch-joystick-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ff66, #00993a);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 12px #00ff66;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Action Buttons Cluster (Right Zone) */
+#touch-actions-cluster {
+  position: absolute;
+  bottom: 22px;
+  right: 22px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 60;
+}
+
+.touch-actions-subgroup {
+  display: flex;
+  gap: 10px;
+}
+
+.touch-action-btn {
+  user-select: none;
+  -webkit-user-select: none;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 26px;
+  font-family: inherit;
+  font-weight: bold;
+  background: rgba(5, 6, 8, 0.82);
+  border: 2px solid #00ff66;
+  color: #00ff66;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.25);
+  touch-action: manipulation;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.1s ease, background-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.touch-action-btn:active,
+.touch-action-btn.active {
+  transform: scale(0.92);
+  background: rgba(0, 255, 102, 0.35);
+  box-shadow: 0 0 18px #00ff66;
+}
+
+.touch-action-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.touch-action-label {
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* Highlighted Interact Button [E] */
+.touch-action-btn.interact-btn {
+  min-width: 68px;
+  min-height: 68px;
+  border-radius: 34px;
+  border-color: #ffcc00;
+  color: #ffcc00;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.35);
+}
+
+.touch-action-btn.interact-btn .touch-action-icon {
+  font-size: 22px;
+}
+
+.touch-action-btn.interact-btn .touch-action-label {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.touch-action-btn.interact-btn:active {
+  background: rgba(255, 204, 0, 0.4);
+  box-shadow: 0 0 20px #ffcc00;
+}
+
+.touch-action-btn.interact-btn.interact-active {
+  animation: touchPulseInteract 1s infinite alternate ease-in-out;
+  border-color: #fff066;
+  color: #ffffff;
+}
+
+@keyframes touchPulseInteract {
+  from {
+    transform: scale(1.0);
+    box-shadow: 0 0 12px #ffcc00;
+    background: rgba(255, 204, 0, 0.25);
+  }
+  to {
+    transform: scale(1.08);
+    box-shadow: 0 0 24px #ffe600, 0 0 8px #ffffff;
+    background: rgba(255, 204, 0, 0.55);
+  }
+}
+
+/* Mobile Quick Menu Button */
+#touch-btn-menu {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 95;
+  background: rgba(5, 6, 8, 0.88);
+  border: 1.5px solid #00f0ff;
+  color: #00f0ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  pointer-events: auto;
+  transition: all 0.15s ease;
+}
+
+#touch-btn-menu:active,
+#touch-btn-menu.active {
+  background: #00f0ff;
+  color: #050608;
+  box-shadow: 0 0 16px #00f0ff;
+}
+
+/* Mobile Secondary Menu Drawer */
+#mobile-menu-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.mobile-drawer-content {
+  width: min(320px, 85vw);
+  background: #090e14;
+  border-left: 2px solid #00f0ff;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  box-shadow: -6px 0 25px rgba(0, 0, 0, 0.8);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.3);
+  padding-bottom: 10px;
+  color: #00f0ff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.drawer-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-drawer-btn {
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  color: #d8f4ff;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.mobile-drawer-btn:active {
+  background: rgba(0, 240, 255, 0.3);
+  color: #ffffff;
+}
+
+/* Orientation Tip Banner */
+#orientation-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: linear-gradient(90deg, #ff0055, #ff5500);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 6px 10px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* =========================================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Hide desktop right sidebar buttons on mobile screen */
+  #hud-top-right {
+    display: none !important;
+  }
+
+  /* Show mobile menu button */
+  #touch-btn-menu {
+    display: block;
+  }
+
+  /* Compact Top Left Terminal HUD */
+  #hud-top-left {
+    top: 8px;
+    left: 8px;
+    max-width: 50vw;
+  }
+
+  .terminal-header {
+    font-size: 10px;
+  }
+
+  #hud-location {
+    font-size: 11px;
+  }
+
+  .terminal-meta {
+    font-size: 9px;
+  }
+
+  /* Compact Survival Dashboard */
+  #hud-survival-bar {
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 4px;
+    padding: 3px 6px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
+  }
+
+  .survival-stat-box {
+    padding: 2px 4px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .stat-value {
+    font-size: 11px;
+  }
+
+  .stat-bar-container {
+    width: 38px;
+    height: 4px;
+  }
+
+  /* Objective Bar */
+  #hud-objective-bar {
+    bottom: 8px;
+    left: 8px;
+    font-size: 10px;
+    padding: 4px 8px;
+    max-width: 60vw;
+  }
+
+  /* Modals on Mobile */
+  .dialog-window,
+  .roulette-container,
+  .visual-modal-content,
+  .end-modal-content {
+    max-width: 94vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .class-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .class-card {
+    min-height: auto !important;
+    padding: 12px !important;
+  }
+}
+
+/* Show orientation banner only in portrait on narrow screens */
+@media (orientation: portrait) and (max-width: 768px) {
+  #orientation-banner:not(.modal-hidden) {
+    display: block;
+  }
+}
+
+

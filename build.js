@@ -32,6 +32,7 @@ function bundle() {
 
   // 2. Engine & Controls
   const controls = cleanModule(read('src/engine/Controls.js'));
+  const touch = cleanModule(read('src/engine/TouchControls.js'));
   const renderer = cleanModule(read('src/engine/Renderer.js'));
   const traffic = cleanModule(read('src/engine/TrafficSystem.js'));
   const city = cleanModule(read('src/world/CityBuilder.js'));
@@ -84,6 +85,7 @@ ${music}
 ${audio}
 ${zones}
 ${controls}
+${touch}
 ${renderer}
 ${traffic}
 ${city}

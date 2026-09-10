@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Favela Suburbs 3D - Pirituba // ASCII Engine</title>
   <link rel="stylesheet" href="style.css">
   <!-- Offline Three.js Library -->
@@ -72,6 +72,16 @@
       <span>👾 ESTÚDIO: game.md ↗</span>
     </a>
   </div>
+
+  <!-- Mobile Landscape Orientation Tip Banner -->
+  <div id="orientation-banner" class="modal-hidden">
+    <span>📱 Gire o celular para o modo <strong>Paisagem (Horizontal)</strong> para melhor jogabilidade 🔄</span>
+  </div>
+
+  <!-- Mobile Menu Button (Visible on Touch screens) -->
+  <button id="touch-btn-menu" class="touch-btn touch-hidden" title="Menu de Ajustes">
+    <span>⚙️ MENU</span>
+  </button>
 
   <!-- Top Center: Survival HUD Status Dashboard -->
   <div class="hud-layer" id="hud-survival-bar">
@@ -419,6 +429,58 @@
     <div class="credits-footer">
       Desenvolvido por <strong><a href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">game.md</a></strong> • Inspirado no projeto viral <em>"A Walkable ASCII Cyberpunk City in One HTML File"</em>.<br>
       Explore os becos, o escadão, a laje com caixas d'água Fortlev, o boteco e a vista para o Pico do Jaraguá.
+    </div>
+  </div>
+
+  <!-- Mobile Secondary Menu Drawer -->
+  <div id="mobile-menu-drawer" class="modal-hidden">
+    <div class="mobile-drawer-content">
+      <div class="drawer-header">
+        <span class="drawer-title">⚙️ MENU & AJUSTES</span>
+        <button id="btn-close-mobile-menu" class="dialog-close-btn" title="Fechar Menu">✕</button>
+      </div>
+      <div class="drawer-buttons">
+        <button class="mobile-drawer-btn" id="mobile-btn-streetview">🌐 Street View [V]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-mode">🖥️ Modo Visual [M]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-visuals">🎨 Shaders & Cores [P]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-camera">👤 1ª / 3ª Pessoa [B]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-radio">📻 Rádio Pirituba [N]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-audio">🔊 Ligar/Desligar Som [O]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-tour">🎥 Auto Tour [U]</button>
+        <button class="mobile-drawer-btn" id="mobile-btn-traffic">🚗 Alternar Trânsito [X]</button>
+        <a class="mobile-drawer-btn" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:none;">👾 Estúdio game.md ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Touch Controls Layer -->
+  <div id="touch-controls-container" class="touch-hidden">
+    <!-- Virtual Floating Thumbstick (Left Zone) -->
+    <div id="touch-joystick-base" style="display:none;">
+      <div id="touch-joystick-ring"></div>
+      <div id="touch-joystick-knob"></div>
+    </div>
+
+    <!-- Action Buttons Cluster (Right Zone) -->
+    <div id="touch-actions-cluster">
+      <button id="touch-btn-interact" class="touch-action-btn interact-btn" title="Interagir [E]">
+        <span class="touch-action-icon">⚡</span>
+        <span class="touch-action-label">INTERAGIR</span>
+      </button>
+      <div class="touch-actions-subgroup">
+        <button id="touch-btn-jump" class="touch-action-btn" title="Pular / Chute [Espaço]">
+          <span class="touch-action-icon">🦘</span>
+          <span class="touch-action-label">PULAR</span>
+        </button>
+        <button id="touch-btn-crouch" class="touch-action-btn" title="Agachar [C]">
+          <span class="touch-action-icon">🦵</span>
+          <span class="touch-action-label">AGACHA</span>
+        </button>
+        <button id="touch-btn-camera" class="touch-action-btn" title="Alternar Câmera [B]">
+          <span class="touch-action-icon">👤</span>
+          <span class="touch-action-label">3ªP</span>
+        </button>
+      </div>
     </div>
   </div>
 

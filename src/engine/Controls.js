@@ -69,6 +69,7 @@ export class FirstPersonControls {
     this.isSprinting = false;
     this.isCrouching = false;
     this.canJump = false;
+    this.touchMoveVector = null;
 
     // Arrow keys rotation state (look up, down, left, right)
     this.lookUp = false;
@@ -170,13 +171,14 @@ export class FirstPersonControls {
 
     // Pointer lock request on canvas / body
     document.addEventListener('click', (e) => {
-      // Don't re-lock if clicking buttons, links, or active modals
-      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select')) return;
+      // Don't re-lock if clicking buttons, links, active modals or mobile touch controls
+      if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select, .touch-btn, #touch-controls-container, #mobile-menu-drawer')) return;
       if (this.freeze) return;
       if (!this.hasStarted) return;
       if (!this.isLocked) {
         try {
-          const p = document.body.requestPointerLock ? document.body.requestPointerLock() : null;
+          const target = document.body;
+          const p = target.requestPointerLock ? target.requestPointerLock() : null;
           if (p && p.catch) p.catch(() => {});
         } catch (err) {}
       }
@@ -440,6 +442,24 @@ export class FirstPersonControls {
     this.camera.position.set(x, y + this.eyeHeight, z);
   }
 
+  setTouchMovement(vx, vy) {
+    if (!this.touchMoveVector) {
+      this.touchMoveVector = new THREE.Vector2();
+    }
+    this.touchMoveVector.set(vx, vy);
+  }
+
+  addTouchRotation(rotX, rotY) {
+    if (this.freeze) return;
+    this.euler.x += rotX;
+    this.euler.y += rotY;
+    const maxPitch = Math.PI / 2 - 0.05;
+    this.euler.x = Math.max(-maxPitch, Math.min(maxPitch, this.euler.x));
+    if (!this.isThirdPerson) {
+      this.camera.quaternion.setFromEuler(this.euler);
+    }
+  }
+
   update(delta) {
     if (!this.hasStarted || this.freeze) return;
 
@@ -497,8 +517,14 @@ export class FirstPersonControls {
     if (this.moveRight) moveDir.add(right);
     if (this.moveLeft) moveDir.sub(right);
 
+    // Support analog touch joystick vector
+    if (this.touchMoveVector && (this.touchMoveVector.x !== 0 || this.touchMoveVector.y !== 0)) {
+      moveDir.addScaledVector(forward, -this.touchMoveVector.y);
+      moveDir.addScaledVector(right, this.touchMoveVector.x);
+    }
+
     const isMoving = moveDir.lengthSq() > 0.001;
-    if (isMoving) moveDir.normalize();
+    if (isMoving && moveDir.lengthSq() > 1.0) moveDir.normalize();
 
     // 2. Select speed based on state
     let speed = this.walkSpeed;

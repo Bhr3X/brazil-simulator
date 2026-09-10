@@ -1490,6 +1490,109 @@ async function runTestSuite(url) {
       throw new Error(`TEST 20 FAILED: NPC test failed: ${JSON.stringify(npcTest)}`);
     }
 
+    // TEST 21: Mobile Touch Controls & Virtual Joystick Subsystem
+    const touchTest = await evaluate(`
+      (() => {
+        const touch = window.app.touch;
+        const controls = window.app.controls;
+        if (!touch) return { ok: false, error: 'TouchController missing' };
+
+        // Ensure modals closed and controls active for touch testing
+        document.getElementById('end-run-modal').classList.add('modal-hidden');
+        document.getElementById('dialogue-modal').classList.add('modal-hidden');
+        controls.refreshFreeze();
+        controls.hasStarted = true;
+
+        // Force enable touch mode for test verification
+        touch.enable();
+        const isEnabled = touch.isEnabled;
+        const containerVisible = !touch.container.classList.contains('touch-hidden');
+        const bodyClass = document.body.classList.contains('mobile-touch-active');
+
+        // Helper for touch events
+        const simulateTouch = (handlerName, id, x, y) => {
+          try {
+            const t = new Touch({ identifier: id, target: document.body, clientX: x, clientY: y });
+            const type = handlerName.replace('handleTouch', 'touch').toLowerCase();
+            window.dispatchEvent(new TouchEvent(type, { changedTouches: [t], touches: [t], cancelable: true }));
+          } catch (e) {
+            touch[handlerName]({
+              changedTouches: [{ identifier: id, target: document.body, clientX: x, clientY: y }],
+              preventDefault: () => {}
+            });
+          }
+        };
+
+        // 1. Test Virtual Joystick Simulation (Left Zone)
+        simulateTouch('handleTouchStart', 101, 120, 250);
+        const baseDisplayed = touch.joystickBase.style.display === 'block';
+
+        // Move thumbstick forward (dy = -40px)
+        simulateTouch('handleTouchMove', 101, 120, 210);
+        const hasMoveVector = controls.touchMoveVector && controls.touchMoveVector.y < -0.5;
+
+        // Release thumbstick
+        simulateTouch('handleTouchEnd', 101, 120, 210);
+        const moveReset = controls.touchMoveVector.y === 0 && touch.joystickBase.style.display === 'none';
+
+        // 2. Test Swipe-to-Look Simulation (Right Zone)
+        const initialPitch = controls.euler.x;
+        const initialYaw = controls.euler.y;
+        const lookStartX = window.innerWidth - 80;
+        simulateTouch('handleTouchStart', 102, lookStartX, 200);
+        simulateTouch('handleTouchMove', 102, lookStartX - 60, 170);
+        const yawChanged = controls.euler.y !== initialYaw;
+        const pitchChanged = controls.euler.x !== initialPitch;
+        simulateTouch('handleTouchEnd', 102, lookStartX - 60, 170);
+
+        // 3. Test Action Buttons: Jump, Crouch, Camera, Menu
+        controls.canJump = true;
+        touch.btnJump.dispatchEvent(new Event('touchstart'));
+        const jumpTriggered = controls.velocity.y > 0;
+
+        const initialCrouch = controls.isCrouching;
+        touch.btnCrouch.dispatchEvent(new Event('touchstart'));
+        const crouchToggled = controls.isCrouching !== initialCrouch;
+        touch.btnCrouch.dispatchEvent(new Event('touchstart')); // restore
+
+        const initial3rd = controls.isThirdPerson;
+        touch.btnCam.dispatchEvent(new Event('touchstart'));
+        const camToggled = controls.isThirdPerson !== initial3rd;
+        touch.btnCam.dispatchEvent(new Event('touchstart')); // restore
+
+        // Menu drawer
+        touch.btnMenu.dispatchEvent(new Event('touchstart'));
+        const drawerOpen = !touch.menuDrawer.classList.contains('modal-hidden');
+        document.getElementById('btn-close-mobile-menu').click();
+        const drawerClosed = touch.menuDrawer.classList.contains('modal-hidden');
+
+        // Restore state
+        touch.disable();
+
+        return {
+          ok: isEnabled && containerVisible && bodyClass && baseDisplayed && hasMoveVector && moveReset &&
+              yawChanged && pitchChanged && jumpTriggered && crouchToggled && camToggled && drawerOpen && drawerClosed,
+          isEnabled,
+          containerVisible,
+          bodyClass,
+          baseDisplayed,
+          hasMoveVector,
+          moveReset,
+          yawChanged,
+          pitchChanged,
+          jumpTriggered,
+          crouchToggled,
+          camToggled,
+          drawerOpen,
+          drawerClosed
+        };
+      })()
+    `);
+    console.log(`[TEST 21] Mobile Touch Controls & Virtual Joystick Subsystem:`, touchTest);
+    if (!touchTest.ok) {
+      throw new Error(`TEST 21 FAILED: Touch controls test failed: ${JSON.stringify(touchTest)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {
