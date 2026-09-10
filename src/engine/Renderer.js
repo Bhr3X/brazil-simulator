@@ -13,6 +13,15 @@ export const ASCII_RAMPS = {
   SHARPLINE: ' .·-—~=+*#%@'
 };
 
+export const COLOR_PALETTES = {
+  DEFAULT: 'DEFAULT',
+  SEPIA: 'SEPIA',
+  GAMEBOY: 'GAMEBOY',
+  VAPORWAVE: 'VAPORWAVE',
+  CYBERPUNK: 'CYBERPUNK',
+  NOIR: 'NOIR'
+};
+
 export const DEFAULT_VISUAL_PARAMS = {
   density: 1.0,           // 0.6 to 2.4 (scales character grid & font size)
   brightness: 1.0,        // 0.5 to 2.5 (luminance multiplier)
@@ -20,6 +29,11 @@ export const DEFAULT_VISUAL_PARAMS = {
   gamma: 1.0,             // 0.6 to 2.2 (shadow lift)
   saturation: 1.0,        // 0.0 to 2.5 (color vibrancy)
   depthScale: 1.0,        // 0.0 to 2.0 (spatial perspective glyph scaling)
+  fov: 70,                // 50 to 110 (camera field of view in degrees)
+  bloom: 0.0,             // 0.0 to 2.0 (glow intensity on bright highlights)
+  bloomThreshold: 0.70,   // threshold above which highlights glow
+  fogDensity: 0.8,        // 0.0 to 2.5 (atmospheric fog density multiplier)
+  colorPalette: 'DEFAULT', // key in COLOR_PALETTES
   edgeEnhance: true,      // 2D spatial gradient edge outline detection
   edgeThreshold: 0.10,    // sensitivity
   edgeStrength: 1.2,      // outline brightness boost
@@ -57,7 +71,8 @@ export class CityRenderer {
 
     // Three.js Scene, Camera, Renderer
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 800);
+    this.camera = new THREE.PerspectiveCamera(this.params.fov || 70, window.innerWidth / window.innerHeight, 0.1, 800);
+    this.updateFog();
 
     // 1. WebGL Canvas for 3D rendering
     this.webglCanvas = document.createElement('canvas');
@@ -167,6 +182,18 @@ export class CityRenderer {
             if (typeof parsed.scanlines === 'boolean') {
               this.params.scanlines = parsed.scanlines;
             }
+            if (typeof parsed.fov === 'number' && !isNaN(parsed.fov)) {
+              this.params.fov = Math.max(50, Math.min(110, parsed.fov));
+            }
+            if (typeof parsed.bloom === 'number' && !isNaN(parsed.bloom)) {
+              this.params.bloom = Math.max(0.0, Math.min(2.0, parsed.bloom));
+            }
+            if (typeof parsed.fogDensity === 'number' && !isNaN(parsed.fogDensity)) {
+              this.params.fogDensity = Math.max(0.0, Math.min(2.5, parsed.fogDensity));
+            }
+            if (parsed.colorPalette && COLOR_PALETTES[parsed.colorPalette]) {
+              this.params.colorPalette = parsed.colorPalette;
+            }
           }
         }
       }
@@ -185,8 +212,11 @@ export class CityRenderer {
     const width = window.innerWidth || 800;
     const height = window.innerHeight || 600;
 
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    if (this.camera) {
+      this.camera.fov = this.params.fov || 70;
+      this.camera.aspect = width / height;
+      this.camera.updateProjectionMatrix();
+    }
 
     if (this.webglRenderer && this.webglRenderer.setSize) {
       this.webglRenderer.setSize(width, height);
@@ -243,6 +273,15 @@ export class CityRenderer {
       this.rampLength = this.asciiRamp.length;
     }
 
+    if (newParams.fov !== undefined && this.camera) {
+      this.camera.fov = Math.max(50, Math.min(110, this.params.fov));
+      this.camera.updateProjectionMatrix();
+    }
+
+    if (newParams.fogDensity !== undefined) {
+      this.updateFog();
+    }
+
     if (newParams.density !== undefined && newParams.density !== oldDensity) {
       this.updateGridSize();
     } else if (newParams.depthScale !== undefined) {
@@ -250,6 +289,65 @@ export class CityRenderer {
     }
 
     this.saveParams();
+  }
+
+  updateFog(ambientOrSkyColor) {
+    if (!this.scene) return;
+    const densityFactor = typeof this.params.fogDensity === 'number' ? this.params.fogDensity : 0.8;
+    if (densityFactor <= 0.01) {
+      this.scene.fog = null;
+    } else {
+      const expDensity = 0.0035 * densityFactor;
+      if (!this.scene.fog) {
+        const initialCol = ambientOrSkyColor || 0x0c1424;
+        this.scene.fog = new THREE.FogExp2(initialCol, expDensity);
+      } else {
+        this.scene.fog.density = expDensity;
+        if (ambientOrSkyColor) {
+          this.scene.fog.color.copy(ambientOrSkyColor);
+        }
+      }
+    }
+  }
+
+  applyColorPalette(red, green, blue, lum) {
+    switch (this.params.colorPalette) {
+      case 'SEPIA': {
+        const gray = red * 0.299 + green * 0.587 + blue * 0.114;
+        return [
+          Math.min(255, Math.round(gray * 1.18)),
+          Math.min(255, Math.round(gray * 0.95)),
+          Math.min(255, Math.round(gray * 0.70))
+        ];
+      }
+      case 'GAMEBOY': {
+        if (lum < 0.25) return [15, 56, 15];
+        if (lum < 0.50) return [48, 98, 48];
+        if (lum < 0.75) return [139, 172, 15];
+        return [155, 188, 15];
+      }
+      case 'VAPORWAVE': {
+        const rVal = Math.min(255, Math.round(lum * 255));
+        const gVal = Math.min(255, Math.round((1.0 - lum) * 160 + lum * 40));
+        const bVal = Math.min(255, Math.round((1.0 - lum) * 120 + 135));
+        return [rVal, gVal, bVal];
+      }
+      case 'CYBERPUNK': {
+        if (lum < 0.45) {
+          const t = lum / 0.45;
+          return [Math.round(15 * t), Math.round(90 * t), Math.min(255, Math.round(180 * t + 75))];
+        } else {
+          const t = (lum - 0.45) / 0.55;
+          return [Math.min(255, Math.round(255 * t)), Math.min(255, Math.round(225 * t)), Math.round(40 * (1 - t))];
+        }
+      }
+      case 'NOIR': {
+        const bw = Math.min(255, Math.round(lum * 255));
+        return [bw, bw, bw];
+      }
+      default:
+        return [red, green, blue];
+    }
   }
 
   resetVisualParams() {
@@ -336,6 +434,10 @@ export class CityRenderer {
     const camY = (this.camera && this.camera.position) ? this.camera.position.y : 1.8;
 
     let currentFontTier = -1;
+
+    const bloom = typeof this.params.bloom === 'number' ? this.params.bloom : 0.0;
+    const bloomThreshold = typeof this.params.bloomThreshold === 'number' ? this.params.bloomThreshold : 0.70;
+    let isGlowing = false;
 
     for (let r = 0; r < rows; r++) {
       let rowTier = 2; // Default mid-distance
@@ -426,17 +528,54 @@ export class CityRenderer {
             green = Math.min(255, Math.round(green * brightness));
             blue = Math.min(255, Math.round(blue * brightness));
           }
+
+          // Apply stylized color palette if active
+          if (this.params.colorPalette && this.params.colorPalette !== 'DEFAULT') {
+            [red, green, blue] = this.applyColorPalette(red, green, blue, lum);
+          }
+
+          // Bloom highlight glow
+          if (bloom > 0.05 && lum >= bloomThreshold) {
+            ctx.shadowBlur = Math.round(bloom * 8);
+            ctx.shadowColor = `rgb(${red}, ${green}, ${blue})`;
+            isGlowing = true;
+          } else if (isGlowing) {
+            ctx.shadowBlur = 0;
+            isGlowing = false;
+          }
+
           ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
           ctx.fillText(char, posX, posY);
         } else if (isCyber) {
           const cyberColor = (c + r) % 2 === 0 ? '#00f0ff' : '#ff0077';
+          if (bloom > 0.05 && lum >= bloomThreshold) {
+            ctx.shadowBlur = Math.round(bloom * 8);
+            ctx.shadowColor = cyberColor;
+            isGlowing = true;
+          } else if (isGlowing) {
+            ctx.shadowBlur = 0;
+            isGlowing = false;
+          }
           ctx.fillStyle = cyberColor;
           ctx.fillText(char, posX, posY);
         } else {
           // Matrix or Amber monochrome
+          if (bloom > 0.05 && lum >= bloomThreshold) {
+            ctx.shadowBlur = Math.round(bloom * 8);
+            ctx.shadowColor = isMatrix ? '#00ff66' : '#ffb300';
+            isGlowing = true;
+          } else if (isGlowing) {
+            ctx.shadowBlur = 0;
+            isGlowing = false;
+          }
           ctx.fillText(char, posX, posY);
         }
       }
+    }
+
+    if (isGlowing) {
+      ctx.shadowBlur = 0;
+      isGlowing = false;
     }
 
     // 7. Optional CRT Scanlines overlay

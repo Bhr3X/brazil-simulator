@@ -209,6 +209,10 @@ class GameApp {
     const rampSelect = document.getElementById('select-ramp');
     const scanlineChk = document.getElementById('chk-scanlines');
     const depthSlider = document.getElementById('slider-depth');
+    const fovSlider = document.getElementById('slider-fov');
+    const bloomSlider = document.getElementById('slider-bloom');
+    const fogSlider = document.getElementById('slider-fog');
+    const paletteSelect = document.getElementById('select-palette');
 
     if (densitySlider) densitySlider.value = params.density;
     if (brightnessSlider) brightnessSlider.value = params.brightness;
@@ -216,6 +220,10 @@ class GameApp {
     if (gammaSlider) gammaSlider.value = params.gamma;
     if (saturationSlider) saturationSlider.value = params.saturation;
     if (depthSlider) depthSlider.value = params.depthScale !== undefined ? params.depthScale : 1.0;
+    if (fovSlider) fovSlider.value = params.fov !== undefined ? params.fov : 70;
+    if (bloomSlider) bloomSlider.value = params.bloom !== undefined ? params.bloom : 0.0;
+    if (fogSlider) fogSlider.value = params.fogDensity !== undefined ? params.fogDensity : 0.8;
+    if (paletteSelect) paletteSelect.value = params.colorPalette || 'DEFAULT';
     if (edgeChk) edgeChk.checked = !!params.edgeEnhance;
     if (rampSelect) rampSelect.value = params.rampType || 'DETAILED';
     if (scanlineChk) scanlineChk.checked = !!params.scanlines;
@@ -231,6 +239,9 @@ class GameApp {
     const valGamma = document.getElementById('val-gamma');
     const valSaturation = document.getElementById('val-saturation');
     const valDepth = document.getElementById('val-depth');
+    const valFov = document.getElementById('val-fov');
+    const valBloom = document.getElementById('val-bloom');
+    const valFog = document.getElementById('val-fog');
 
     if (valDensity) valDensity.textContent = `${Number(params.density).toFixed(1)}x (${this.renderer.charW}px)`;
     if (valBrightness) valBrightness.textContent = `${Number(params.brightness).toFixed(2)}x`;
@@ -238,6 +249,9 @@ class GameApp {
     if (valGamma) valGamma.textContent = `${Number(params.gamma).toFixed(2)}x`;
     if (valSaturation) valSaturation.textContent = `${Number(params.saturation).toFixed(2)}x`;
     if (valDepth) valDepth.textContent = `${Number(params.depthScale !== undefined ? params.depthScale : 1.0).toFixed(1)}x`;
+    if (valFov) valFov.textContent = `${Math.round(params.fov !== undefined ? params.fov : 70)}°`;
+    if (valBloom) valBloom.textContent = `${Number(params.bloom !== undefined ? params.bloom : 0.0).toFixed(1)}x`;
+    if (valFog) valFog.textContent = `${Number(params.fogDensity !== undefined ? params.fogDensity : 0.8).toFixed(1)}x`;
 
     // Keep slider thumbs synchronized when modified via hotkeys or presets
     const sliderDensity = document.getElementById('slider-density');
@@ -246,6 +260,10 @@ class GameApp {
     const sliderGamma = document.getElementById('slider-gamma');
     const sliderSaturation = document.getElementById('slider-saturation');
     const sliderDepth = document.getElementById('slider-depth');
+    const sliderFov = document.getElementById('slider-fov');
+    const sliderBloom = document.getElementById('slider-bloom');
+    const sliderFog = document.getElementById('slider-fog');
+    const selectPalette = document.getElementById('select-palette');
 
     if (sliderDensity && document.activeElement !== sliderDensity) sliderDensity.value = params.density;
     if (sliderBrightness && document.activeElement !== sliderBrightness) sliderBrightness.value = params.brightness;
@@ -253,6 +271,10 @@ class GameApp {
     if (sliderGamma && document.activeElement !== sliderGamma) sliderGamma.value = params.gamma;
     if (sliderSaturation && document.activeElement !== sliderSaturation) sliderSaturation.value = params.saturation;
     if (sliderDepth && document.activeElement !== sliderDepth) sliderDepth.value = params.depthScale !== undefined ? params.depthScale : 1.0;
+    if (sliderFov && document.activeElement !== sliderFov) sliderFov.value = params.fov !== undefined ? params.fov : 70;
+    if (sliderBloom && document.activeElement !== sliderBloom) sliderBloom.value = params.bloom !== undefined ? params.bloom : 0.0;
+    if (sliderFog && document.activeElement !== sliderFog) sliderFog.value = params.fogDensity !== undefined ? params.fogDensity : 0.8;
+    if (selectPalette && document.activeElement !== selectPalette) selectPalette.value = params.colorPalette || 'DEFAULT';
   }
 
   initUI() {
@@ -371,6 +393,37 @@ class GameApp {
       });
     }
 
+    const fovSlider = document.getElementById('slider-fov');
+    if (fovSlider) {
+      fovSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ fov: parseInt(e.target.value, 10) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const bloomSlider = document.getElementById('slider-bloom');
+    if (bloomSlider) {
+      bloomSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ bloom: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const fogSlider = document.getElementById('slider-fog');
+    if (fogSlider) {
+      fogSlider.addEventListener('input', (e) => {
+        this.renderer.setVisualParams({ fogDensity: parseFloat(e.target.value) });
+        this.updateVisualReadouts();
+      });
+    }
+
+    const paletteSelect = document.getElementById('select-palette');
+    if (paletteSelect) {
+      paletteSelect.addEventListener('change', (e) => {
+        this.renderer.setVisualParams({ colorPalette: e.target.value });
+      });
+    }
+
     const edgeChk = document.getElementById('chk-edges');
     if (edgeChk) {
       edgeChk.addEventListener('change', (e) => {
@@ -423,6 +476,9 @@ class GameApp {
           contrast: 1.35,
           gamma: 1.35,
           saturation: 1.3,
+          bloom: 0.3,
+          fogDensity: 0.3,
+          colorPalette: 'DEFAULT',
           edgeEnhance: true,
           rampType: 'CONTRAST',
           scanlines: false
@@ -443,6 +499,9 @@ class GameApp {
           contrast: 1.4,
           gamma: 1.25,
           saturation: 1.2,
+          bloom: 0.0,
+          fogDensity: 0.8,
+          colorPalette: 'DEFAULT',
           edgeEnhance: true,
           rampType: 'BLOCKS',
           scanlines: false
@@ -463,6 +522,9 @@ class GameApp {
           contrast: 1.3,
           gamma: 1.2,
           saturation: 1.85,
+          bloom: 0.6,
+          fogDensity: 0.5,
+          colorPalette: 'DEFAULT',
           edgeEnhance: true,
           rampType: 'DETAILED',
           scanlines: false
@@ -482,9 +544,57 @@ class GameApp {
           brightness: 1.3,
           contrast: 1.4,
           gamma: 1.3,
+          bloom: 0.8,
+          fogDensity: 0.6,
           edgeEnhance: true,
           rampType: 'MATRIX',
           scanlines: true
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetVaporwave = document.getElementById('preset-vaporwave');
+    if (btnPresetVaporwave) {
+      btnPresetVaporwave.addEventListener('click', () => {
+        setPresetActive(btnPresetVaporwave);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.2,
+          brightness: 1.25,
+          contrast: 1.4,
+          gamma: 1.25,
+          saturation: 1.8,
+          bloom: 0.9,
+          fogDensity: 0.6,
+          colorPalette: 'VAPORWAVE',
+          edgeEnhance: true,
+          rampType: 'SHARPLINE',
+          scanlines: true
+        });
+        this.syncVisualControlsUI();
+      });
+    }
+
+    const btnPresetGameboy = document.getElementById('preset-gameboy');
+    if (btnPresetGameboy) {
+      btnPresetGameboy.addEventListener('click', () => {
+        setPresetActive(btnPresetGameboy);
+        this.renderer.setRenderMode('ASCII_COLOR');
+        this.updateModeLabel('ASCII_COLOR');
+        this.renderer.setVisualParams({
+          density: 1.1,
+          brightness: 1.15,
+          contrast: 1.35,
+          gamma: 1.1,
+          saturation: 1.0,
+          bloom: 0.0,
+          fogDensity: 0.4,
+          colorPalette: 'GAMEBOY',
+          edgeEnhance: true,
+          rampType: 'BLOCKS',
+          scanlines: false
         });
         this.syncVisualControlsUI();
       });

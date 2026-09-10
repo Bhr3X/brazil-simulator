@@ -71,6 +71,10 @@ export class DayCycle {
       this.city.skyMesh.material.color.copy(skyColor);
     }
 
+    if (this.city.scene && this.city.scene.fog) {
+      this.city.scene.fog.color.copy(skyColor);
+    }
+
     // Streetlights on/off (also softly on during storm)
     const lightsOn = (h >= 18.5 || h < 6.0 || this.weather === 'STORM');
     this.city.streetLights.forEach(sl => {

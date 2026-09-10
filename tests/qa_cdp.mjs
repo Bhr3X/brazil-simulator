@@ -549,12 +549,53 @@ async function runTestSuite(url) {
         const flatTiers = renderer.depthFontTiers.map(t => t.scale);
         const allFlatOne = flatTiers.every(s => Math.abs(s - 1.0) < 0.001);
 
-        // 5. Reset params
+        // 5. Extended Visual Controls: FOV, Bloom, Fog & Color Palettes
+        const initialFov = renderer.params.fov;
+        const initialBloom = renderer.params.bloom;
+        const initialFog = renderer.params.fogDensity;
+        const initialPalette = renderer.params.colorPalette;
+        const hasInitialFogObj = !!renderer.scene.fog;
+
+        // Test FOV adjustment
+        renderer.setVisualParams({ fov: 90 });
+        app.syncVisualControlsUI();
+        const postSetCamFov = renderer.camera.fov;
+        const sliderFovVal = Number(document.getElementById('slider-fov')?.value);
+        const readoutFovText = document.getElementById('val-fov')?.textContent;
+
+        // Test Bloom adjustment
+        renderer.setVisualParams({ bloom: 1.4 });
+        app.syncVisualControlsUI();
+        const postSetBloom = renderer.params.bloom;
+        const sliderBloomVal = Number(document.getElementById('slider-bloom')?.value);
+        const readoutBloomText = document.getElementById('val-bloom')?.textContent;
+
+        // Test Fog adjustment
+        renderer.setVisualParams({ fogDensity: 2.0 });
+        app.syncVisualControlsUI();
+        const postSetFog = renderer.params.fogDensity;
+        const fogDensityVal = renderer.scene.fog ? renderer.scene.fog.density : 0;
+        renderer.setVisualParams({ fogDensity: 0.0 });
+        const zeroFogObj = renderer.scene.fog;
+
+        // Test Palette adjustment & grading
+        renderer.setVisualParams({ colorPalette: 'VAPORWAVE' });
+        app.syncVisualControlsUI();
+        const postSetPalette = renderer.params.colorPalette;
+        const paletteSelectVal = document.getElementById('select-palette')?.value;
+        const [rVap, gVap, bVap] = renderer.applyColorPalette(100, 100, 100, 0.5);
+        const isPaletteGraded = (rVap !== 100 || gVap !== 100 || bVap !== 100);
+
+        // 6. Reset params
         renderer.resetVisualParams();
         app.syncVisualControlsUI();
         const resetDepth = renderer.params.depthScale;
+        const resetFov = renderer.params.fov;
+        const resetBloom = renderer.params.bloom;
+        const resetFog = renderer.params.fogDensity;
+        const resetPalette = renderer.params.colorPalette;
 
-        // 6. Studio Branding & Attribution Verification
+        // 7. Studio Branding & Attribution Verification
         const btnStudio = document.getElementById('btn-studio');
         const studioBadge = document.querySelector('.studio-badge a');
         const studioBtnHref = btnStudio ? btnStudio.getAttribute('href') : null;
@@ -574,7 +615,28 @@ async function runTestSuite(url) {
           sliderInputDepth,
           sliderInputReadout,
           allFlatOne,
+          initialFov,
+          initialBloom,
+          initialFog,
+          initialPalette,
+          hasInitialFogObj,
+          postSetCamFov,
+          sliderFovVal,
+          readoutFovText,
+          postSetBloom,
+          sliderBloomVal,
+          readoutBloomText,
+          postSetFog,
+          fogDensityVal,
+          zeroFogObj,
+          postSetPalette,
+          paletteSelectVal,
+          isPaletteGraded,
           resetDepth,
+          resetFov,
+          resetBloom,
+          resetFog,
+          resetPalette,
           studioBtnHref,
           studioBtnText,
           studioBadgeHref,
@@ -582,7 +644,7 @@ async function runTestSuite(url) {
         };
       })()
     `);
-    console.log('[TEST 2f] Depth-Scaled ASCII Perspective & Studio Branding:', depthStudioTest);
+    console.log('[TEST 2f] Depth-Scaled ASCII Perspective, Extended Visuals & Studio Branding:', depthStudioTest);
     if (
       !depthStudioTest.ok ||
       depthStudioTest.initialDepth !== 1.0 ||
@@ -594,7 +656,28 @@ async function runTestSuite(url) {
       Math.abs(depthStudioTest.sliderInputDepth - 0.5) > 0.05 ||
       !depthStudioTest.sliderInputReadout?.includes('0.5x') ||
       !depthStudioTest.allFlatOne ||
+      depthStudioTest.initialFov !== 70 ||
+      depthStudioTest.postSetCamFov !== 90 ||
+      depthStudioTest.sliderFovVal !== 90 ||
+      !depthStudioTest.readoutFovText?.includes('90°') ||
+      depthStudioTest.initialBloom !== 0.0 ||
+      Math.abs(depthStudioTest.postSetBloom - 1.4) > 0.05 ||
+      Math.abs(depthStudioTest.sliderBloomVal - 1.4) > 0.05 ||
+      !depthStudioTest.readoutBloomText?.includes('1.4x') ||
+      depthStudioTest.initialFog !== 0.8 ||
+      !depthStudioTest.hasInitialFogObj ||
+      Math.abs(depthStudioTest.postSetFog - 2.0) > 0.05 ||
+      depthStudioTest.fogDensityVal <= 0.005 ||
+      depthStudioTest.zeroFogObj !== null ||
+      depthStudioTest.initialPalette !== 'DEFAULT' ||
+      depthStudioTest.postSetPalette !== 'VAPORWAVE' ||
+      depthStudioTest.paletteSelectVal !== 'VAPORWAVE' ||
+      !depthStudioTest.isPaletteGraded ||
       depthStudioTest.resetDepth !== 1.0 ||
+      depthStudioTest.resetFov !== 70 ||
+      depthStudioTest.resetBloom !== 0.0 ||
+      depthStudioTest.resetFog !== 0.8 ||
+      depthStudioTest.resetPalette !== 'DEFAULT' ||
       depthStudioTest.studioBtnHref !== 'https://bhr3x.github.io/game.md/' ||
       !depthStudioTest.studioBtnText?.includes('game.md') ||
       depthStudioTest.studioBadgeHref !== 'https://bhr3x.github.io/game.md/' ||

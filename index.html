@@ -233,13 +233,15 @@
             <button class="preset-btn" id="preset-blocks">🧱 BLOCOS 3D</button>
             <button class="preset-btn" id="preset-favela">🌈 FAVELA VIBRANTE</button>
             <button class="preset-btn" id="preset-matrix">🟢 CYBER MATRIX</button>
+            <button class="preset-btn" id="preset-vaporwave">🌆 VAPORWAVE</button>
+            <button class="preset-btn" id="preset-gameboy">🕹️ GAME BOY</button>
             <button class="preset-btn" id="preset-3d">🖥️ MODO 3D REAL</button>
             <button class="preset-btn active" id="preset-default">🔄 PADRÃO</button>
           </div>
         </div>
 
         <div class="visual-controls-columns">
-          <!-- Left Column: Density, Lighting, Contrast -->
+          <!-- Left Column: Density, Lighting, Contrast, FOV, Bloom -->
           <div class="visual-col">
             <div class="slider-group">
               <div class="slider-header">
@@ -276,9 +278,27 @@
               <input type="range" id="slider-gamma" min="0.6" max="2.2" step="0.05" value="1.0">
               <div class="slider-hint">Ilumina becos escuros e sombras sem queimar áreas claras</div>
             </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-fov">🎥 Campo de Visão (FOV)</label>
+                <span class="slider-val" id="val-fov">70°</span>
+              </div>
+              <input type="range" id="slider-fov" min="50" max="110" step="1" value="70">
+              <div class="slider-hint">50° = Foco cinematográfico | 110° = Grande angular fish-eye</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-bloom">✨ Brilho Neon / Bloom</label>
+                <span class="slider-val" id="val-bloom">0.0x</span>
+              </div>
+              <input type="range" id="slider-bloom" min="0.0" max="2.0" step="0.1" value="0.0">
+              <div class="slider-hint">Emite halo de luz radiante em postes, placas e faróis</div>
+            </div>
           </div>
 
-          <!-- Right Column: Edge detection, Saturation, Ramps, CRT -->
+          <!-- Right Column: Saturation, Depth, Fog, Palette, Edges, Ramps, CRT -->
           <div class="visual-col">
             <div class="slider-group">
               <div class="slider-header">
@@ -296,6 +316,27 @@
               </div>
               <input type="range" id="slider-depth" min="0.0" max="2.0" step="0.1" value="1.0">
               <div class="slider-hint">Reduz o tamanho dos caracteres mais distantes, criando perspectiva e profundidade real</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="slider-fog">🌫️ Neblina & Garoa (Fog)</label>
+                <span class="slider-val" id="val-fog">0.8x</span>
+              </div>
+              <input type="range" id="slider-fog" min="0.0" max="2.5" step="0.1" value="0.8">
+              <div class="slider-hint">0.0 = Ar limpo cristalino | 2.5 = Garoa densa paulistana</div>
+            </div>
+
+            <div class="select-group">
+              <label for="select-palette">🎨 Paleta de Cores & Tonalidade</label>
+              <select id="select-palette" class="visual-select">
+                <option value="DEFAULT">PADRÃO (Cores Reais RGB)</option>
+                <option value="SEPIA">SÉPIA (Foto Antiga 1970)</option>
+                <option value="GAMEBOY">GAME BOY (Monocromático LCD Verde)</option>
+                <option value="VAPORWAVE">VAPORWAVE (Rosa Choque & Ciano Neon)</option>
+                <option value="CYBERPUNK">CYBERPUNK (Amarelo Solar & Azul Elétrico)</option>
+                <option value="NOIR">NOIR POLICIAL (Preto e Branco Puro)</option>
+              </select>
             </div>
 
             <div class="toggle-group">
