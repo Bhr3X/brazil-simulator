@@ -2,7 +2,7 @@
 
 Studio: **game.md** (`https://gamemd.itch.io`)  
 Deployment Authority: `/Users/bhreno/bin/butler` (v15.31.0 darwin-arm64)  
-Updated: 2026-09-10T10:35:11-03:00
+Updated: 2026-09-11T12:00:00-03:00
 
 ---
 
@@ -24,4 +24,5 @@ Updated: 2026-09-10T10:35:11-03:00
 - `2026-09-10 10:35`: Pushed `bundles/vegan-t-rex.zip` to `gamemd/vegan-t-rex:html5`. Build #1965271 processed successfully.
 - `2026-09-11 11:32`: Pushed `bundles/brazil-simulator.zip` to `gamemd/brazil-simulator:html5`. Build #1968529 (Version 19) processed successfully with Carnival Plaza & Favela Campinho updates.
 - `2026-09-11 11:40`: Pushed `bundles/brazil-simulator.zip` to `gamemd/brazil-simulator:html5`. Build #1968560 (Version 20) processed successfully with Trompe-l'œil Boundary Walls, Construction Sites ("Desculpe pelo transtorno, estamos em Obras"), and Head-Bonk slapstick physics.
+- `2026-09-11 11:52`: Packaged local pre-release bundle (Version 21) containing intermediate corridor geometry and initial test harnesses.
 - `2026-09-11 12:00`: Pushed `bundles/brazil-simulator.zip` to `gamemd/brazil-simulator:html5`. Build #1968628 (Version 22) processed successfully with continuous urban commercial corridor filling along Paula Ferreira and Edgar Facó (8 authentic establishments, 3D props, and QA Test 36).

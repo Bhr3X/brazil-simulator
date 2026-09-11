@@ -7155,10 +7155,19 @@ class NewsDesk {
     const debts = recent.filter(e => e.category === 'DEBT');
     const encounters = recent.filter(e => e.category === 'ENCOUNTER');
     const streetviews = recent.filter(e => e.category === 'STREETVIEW');
+    const bonks = recent.filter(e => e.category === 'HEAD_BONK');
 
     let story = null;
 
-    if (kicks.length >= 2) {
+    if (bonks.length > 0) {
+      story = {
+        title: 'Transtorno na Divisa: Pedestre Bate a Cabeça em Obra',
+        cadu1: 'Atenção, ouvintes! Um incidente bizarro acabou de acontecer no limite das obras da Edgar Facó com a Paula Ferreira! Marcão, temos imagens?',
+        marcao1: 'Ao vivo, Cadu! Um cidadão desatento tentou atravessar o tapume achando que a rua continuava e bateu a cabeça com tudo na parede pintada em obras! O barulho do impacto ecoou no quarteirão!',
+        cadu2: 'Mas é inacreditável, Marcão! A placa gigante de "Desculpe pelo transtorno, estamos em Obras" estava bem na cara dele! Faltou atenção ou sobrou cachaça?',
+        marcao2: 'Ele ainda tentou empurrar os tapumes, Cadu! O Seu Tião do bar disse que o sujeito ficou meio tonto e reclamando da prefeitura no meio da poeira!'
+      };
+    } else if (kicks.length >= 2) {
       story = {
         title: 'O Chutador Serial de Latinhas da Edgar Facó',
         cadu1: 'Atenção, ouvintes da Rede Simulação! Um flagrante de desordem pública na Edgar Facó está mobilizando a vizinhança. Marcão, você está ao vivo. O que está acontecendo?',
@@ -20467,14 +20476,16 @@ const EN_ENCOUNTER_TEXTS = {
       pagar_conta_luz: {
         label: (state) => state.flags.boletoPago
           ? 'Pay Enel electric bill (Daily bill already paid)'
-          : 'Pay Enel electric bill at the counter (Daily Objective)',
+          : (!state.hasItem('boleto_enel')
+            ? 'Pay Enel electric bill at the counter (No bill in wallet)'
+            : 'Pay Enel electric bill at the counter (Daily Objective)'),
         costLabel: 'R$ 124.50',
         outcome: 'Bill officially stamped and paid at the counter! Good credit preserved and lights stay on (+35% Sanity)!'
       },
       raspadinha_dinheiro: {
         label: 'Buy a Caixa instant scratch-off lottery ticket',
         outcome: (state, ptResult) => ptResult.includes('Ganhou R$')
-          ? 'Scratched the foil and found three golden clovers! Won R$ 10.00 on the spot (+R$ 10.00 net, +15% Sanity, +10 Ginga)!'
+          ? 'Scratched the foil and found three golden clovers! Won R$ 10.00 on the spot (+R$ 7.00 net, +15% Sanity, +10 Ginga)!'
           : 'Just missed: two matching numbers and one dud. Better luck next time (-R$ 3.00, -3% Sanity).'
       }
     }
@@ -24146,10 +24157,12 @@ const BRAZILIAN_ENCOUNTERS = {
         id: 'pagar_conta_luz',
         label: state.flags.boletoPago
           ? 'Pagar conta de luz Enel (Boleto do dia já quitado com sucesso)'
-          : 'Pagar conta de luz da Enel (Meta do dia)',
+          : (!state.hasItem('boleto_enel')
+            ? 'Pagar conta de luz da Enel (Sem boleto na carteira)'
+            : 'Pagar conta de luz da Enel (Meta do dia)'),
         costLabel: 'R$ 124,50',
         costCentavos: 12450,
-        disabled: Boolean(state.flags.boletoPago) || !state.canAfford(12450),
+        disabled: Boolean(state.flags.boletoPago) || !state.canAfford(12450) || !state.hasItem('boleto_enel'),
         execute: (state, sound) => {
           if (sound) sound.playCoin();
           state.apply({
@@ -24172,7 +24185,7 @@ const BRAZILIAN_ENCOUNTERS = {
           const ganhou = state.rng.chance(0.40);
           if (ganhou) {
             state.apply({ grana: 700, sanidade: 15, ginga: 10 }, 'Prêmio na Raspadinha');
-            return 'Raspou a moeda e achou três trevos dourados! Ganhou R$ 10,00 no ato (+R$ 10,00 líquido, +15% Sanidade, +10 Ginga)!';
+            return 'Raspou a moeda e achou três trevos dourados! Ganhou R$ 10,00 no ato (+R$ 7,00 líquido, +15% Sanidade, +10 Ginga)!';
           } else {
             state.apply({ grana: -300, sanidade: -3 }, 'Raspadinha sem prêmio');
             return 'Bateu na trave: dois números iguais e um diferente. Fica pra próxima (-R$ 3,00, -3% Sanidade).';
@@ -25873,7 +25886,8 @@ class InteractableSystem {
     }
 
     // Check item robbery or police confiscation hooks
-    if (this.activeQuickNpc === 'menor_corre' && Math.random() < 0.35) {
+    const robberyChance = game.state?.rng ? game.state.rng.chance(0.35) : (Math.random() < 0.35);
+    if (this.activeQuickNpc === 'menor_corre' && robberyChance) {
       if (game.hands) game.hands.robItem();
     } else if (this.activeQuickNpc === 'sargento_rocha' && opt.id === 'tomar_geral') {
       if (game.hands) game.hands.confiscateItem();
@@ -27572,7 +27586,11 @@ class GameManager {
 
       const emptyMoment = t('ui.end_moments_empty', 'Dia tranquilo em Pirituba sem grandes incidentes');
       const recentHistory = notableEvents.length > 0
-        ? notableEvents.map(h => `<li><span style="color:#888">${h.hour || h.time}</span>: ${h.desc || h.reason}</li>`).join('')
+        ? notableEvents.map(h => {
+            const raw = h.desc || h.reason || '';
+            const translated = (typeof t === 'function' && raw) ? t(raw, raw) : raw;
+            return `<li><span style="color:#888">${h.hour || h.time}</span>: ${translated}</li>`;
+          }).join('')
         : `<li>${emptyMoment}</li>`;
 
       const lblClass = t('ui.end_stat_class', 'Classe Social:');

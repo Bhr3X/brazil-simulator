@@ -871,14 +871,16 @@ export const EN_ENCOUNTER_TEXTS = {
       pagar_conta_luz: {
         label: (state) => state.flags.boletoPago
           ? 'Pay Enel electric bill (Daily bill already paid)'
-          : 'Pay Enel electric bill at the counter (Daily Objective)',
+          : (!state.hasItem('boleto_enel')
+            ? 'Pay Enel electric bill at the counter (No bill in wallet)'
+            : 'Pay Enel electric bill at the counter (Daily Objective)'),
         costLabel: 'R$ 124.50',
         outcome: 'Bill officially stamped and paid at the counter! Good credit preserved and lights stay on (+35% Sanity)!'
       },
       raspadinha_dinheiro: {
         label: 'Buy a Caixa instant scratch-off lottery ticket',
         outcome: (state, ptResult) => ptResult.includes('Ganhou R$')
-          ? 'Scratched the foil and found three golden clovers! Won R$ 10.00 on the spot (+R$ 10.00 net, +15% Sanity, +10 Ginga)!'
+          ? 'Scratched the foil and found three golden clovers! Won R$ 10.00 on the spot (+R$ 7.00 net, +15% Sanity, +10 Ginga)!'
           : 'Just missed: two matching numbers and one dud. Better luck next time (-R$ 3.00, -3% Sanity).'
       }
     }

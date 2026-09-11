@@ -504,7 +504,8 @@ export class InteractableSystem {
     }
 
     // Check item robbery or police confiscation hooks
-    if (this.activeQuickNpc === 'menor_corre' && Math.random() < 0.35) {
+    const robberyChance = game.state?.rng ? game.state.rng.chance(0.35) : (Math.random() < 0.35);
+    if (this.activeQuickNpc === 'menor_corre' && robberyChance) {
       if (game.hands) game.hands.robItem();
     } else if (this.activeQuickNpc === 'sargento_rocha' && opt.id === 'tomar_geral') {
       if (game.hands) game.hands.confiscateItem();

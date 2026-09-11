@@ -2000,10 +2000,12 @@ export const BRAZILIAN_ENCOUNTERS = {
         id: 'pagar_conta_luz',
         label: state.flags.boletoPago
           ? 'Pagar conta de luz Enel (Boleto do dia já quitado com sucesso)'
-          : 'Pagar conta de luz da Enel (Meta do dia)',
+          : (!state.hasItem('boleto_enel')
+            ? 'Pagar conta de luz da Enel (Sem boleto na carteira)'
+            : 'Pagar conta de luz da Enel (Meta do dia)'),
         costLabel: 'R$ 124,50',
         costCentavos: 12450,
-        disabled: Boolean(state.flags.boletoPago) || !state.canAfford(12450),
+        disabled: Boolean(state.flags.boletoPago) || !state.canAfford(12450) || !state.hasItem('boleto_enel'),
         execute: (state, sound) => {
           if (sound) sound.playCoin();
           state.apply({
@@ -2026,7 +2028,7 @@ export const BRAZILIAN_ENCOUNTERS = {
           const ganhou = state.rng.chance(0.40);
           if (ganhou) {
             state.apply({ grana: 700, sanidade: 15, ginga: 10 }, 'Prêmio na Raspadinha');
-            return 'Raspou a moeda e achou três trevos dourados! Ganhou R$ 10,00 no ato (+R$ 10,00 líquido, +15% Sanidade, +10 Ginga)!';
+            return 'Raspou a moeda e achou três trevos dourados! Ganhou R$ 10,00 no ato (+R$ 7,00 líquido, +15% Sanidade, +10 Ginga)!';
           } else {
             state.apply({ grana: -300, sanidade: -3 }, 'Raspadinha sem prêmio');
             return 'Bateu na trave: dois números iguais e um diferente. Fica pra próxima (-R$ 3,00, -3% Sanidade).';

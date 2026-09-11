@@ -489,7 +489,11 @@ export class GameManager {
 
       const emptyMoment = t('ui.end_moments_empty', 'Dia tranquilo em Pirituba sem grandes incidentes');
       const recentHistory = notableEvents.length > 0
-        ? notableEvents.map(h => `<li><span style="color:#888">${h.hour || h.time}</span>: ${h.desc || h.reason}</li>`).join('')
+        ? notableEvents.map(h => {
+            const raw = h.desc || h.reason || '';
+            const translated = (typeof t === 'function' && raw) ? t(raw, raw) : raw;
+            return `<li><span style="color:#888">${h.hour || h.time}</span>: ${translated}</li>`;
+          }).join('')
         : `<li>${emptyMoment}</li>`;
 
       const lblClass = t('ui.end_stat_class', 'Classe Social:');

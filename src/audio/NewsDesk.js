@@ -122,10 +122,19 @@ export class NewsDesk {
     const debts = recent.filter(e => e.category === 'DEBT');
     const encounters = recent.filter(e => e.category === 'ENCOUNTER');
     const streetviews = recent.filter(e => e.category === 'STREETVIEW');
+    const bonks = recent.filter(e => e.category === 'HEAD_BONK');
 
     let story = null;
 
-    if (kicks.length >= 2) {
+    if (bonks.length > 0) {
+      story = {
+        title: 'Transtorno na Divisa: Pedestre Bate a Cabeça em Obra',
+        cadu1: 'Atenção, ouvintes! Um incidente bizarro acabou de acontecer no limite das obras da Edgar Facó com a Paula Ferreira! Marcão, temos imagens?',
+        marcao1: 'Ao vivo, Cadu! Um cidadão desatento tentou atravessar o tapume achando que a rua continuava e bateu a cabeça com tudo na parede pintada em obras! O barulho do impacto ecoou no quarteirão!',
+        cadu2: 'Mas é inacreditável, Marcão! A placa gigante de "Desculpe pelo transtorno, estamos em Obras" estava bem na cara dele! Faltou atenção ou sobrou cachaça?',
+        marcao2: 'Ele ainda tentou empurrar os tapumes, Cadu! O Seu Tião do bar disse que o sujeito ficou meio tonto e reclamando da prefeitura no meio da poeira!'
+      };
+    } else if (kicks.length >= 2) {
       story = {
         title: 'O Chutador Serial de Latinhas da Edgar Facó',
         cadu1: 'Atenção, ouvintes da Rede Simulação! Um flagrante de desordem pública na Edgar Facó está mobilizando a vizinhança. Marcão, você está ao vivo. O que está acontecendo?',

@@ -3724,6 +3724,24 @@ async function runTestSuite(url) {
           if (prevOnBonk) prevOnBonk(w);
         };
 
+        const prevIsRunActive = app.game ? app.game.isRunActive : false;
+        const prevState = app.game ? app.game.state : null;
+        if (app.game) {
+          app.game.isRunActive = true;
+          if (!app.game.state) {
+            app.game.state = {
+              sanidade: 50,
+              history: [],
+              apply: function(deltas, reason) {
+                if (deltas.sanidade !== undefined) this.sanidade += deltas.sanidade;
+                this.history.push({ reason, deltas });
+              }
+            };
+          } else {
+            app.game.state.sanidade = 50;
+          }
+        }
+
         controls.teleport(-58.8, 0, 20.0, Math.PI / 2); // Facing west (-X)
         controls.moveForward = true;
         controls.lastBonkTime = 0; // Reset cooldown
@@ -3732,6 +3750,22 @@ async function runTestSuite(url) {
         const bonkFired = bonkCallbackFired && bonkedWallId === 'west_edgar_facco';
         const cameraJarOk = controls.headBonkOffset > 0;
         const playerBlocked = controls.position.x > -59.5; // Did not penetrate solid wall at -60
+        const sanidadeDropped = app.game && app.game.state ? app.game.state.sanidade === 49 : false;
+        const headBonkHistoryOk = app.game && app.game.state && Array.isArray(app.game.state.history)
+          ? app.game.state.history.some(h => h.reason === 'news.head_bonk')
+          : false;
+
+        let newsDeskScriptHasBonk = false;
+        if (app.sound && app.sound.newsDesk && typeof app.sound.newsDesk.generateNewsScript === 'function') {
+          const script = app.sound.newsDesk.generateNewsScript(app.game.state);
+          newsDeskScriptHasBonk = !!(script && script.story && script.story.title.includes('Pedestre Bate a Cabeça'));
+        }
+
+        // Restore game state
+        if (app.game) {
+          app.game.isRunActive = prevIsRunActive;
+          app.game.state = prevState;
+        }
 
         // Reset controls
         controls.moveForward = false;
@@ -3767,6 +3801,7 @@ async function runTestSuite(url) {
           && signsCountOk && signTextOk && hasSceneGroup
           && hasBonkSound && soundExecutedSafely
           && bonkFired && cameraJarOk && playerBlocked
+          && sanidadeDropped && headBonkHistoryOk && newsDeskScriptHasBonk
           && ptOk && enOk;
 
         return {
@@ -3785,6 +3820,9 @@ async function runTestSuite(url) {
           bonkedWallId,
           cameraJarOk,
           playerBlocked,
+          sanidadeDropped,
+          headBonkHistoryOk,
+          newsDeskScriptHasBonk,
           ptOk,
           enOk
         };
@@ -3867,28 +3905,73 @@ async function runTestSuite(url) {
           return enc && enc.title && typeof enc.getIntroText === 'function' && typeof enc.getOptions === 'function';
         });
 
-        // Test Mega-Sena interaction in Lotérica
+        // Test Mega-Sena, Boleto Enel guard, and Raspadinha in Lotérica
         let lotericaMegaSenaTested = false;
+        let lotericaBoletoGuardTested = false;
+        let lotericaRaspadinhaTested = false;
+
         if (encountersDict && encountersDict.LOTERICA_PIRITUBA) {
-          const mockState = {
-            formattedGrana: 'R$ 50,00',
-            granaCentavos: 5000,
-            canAfford: (cost) => true,
+          const makeMockState = (custom = {}) => ({
+            formattedGrana: 'R$ 200,00',
+            granaCentavos: 20000,
+            canAfford: function(cost) { return this.granaCentavos >= cost; },
+            hasItem: function(id) { return false; },
             ginga: 50,
             sanidade: 70,
             flags: {},
-            rng: { chance: (p) => p > 0.5 },
+            rng: { chance: (p) => true },
             apply: function(deltas, reason) {
               if (deltas.grana !== undefined) this.granaCentavos += deltas.grana;
-            }
-          };
-          const options = encountersDict.LOTERICA_PIRITUBA.getOptions(mockState);
+              if (deltas.flags) Object.assign(this.flags, deltas.flags);
+            },
+            ...custom
+          });
+
+          // 1. Mega-Sena test
+          const sMega = makeMockState();
+          const options = encountersDict.LOTERICA_PIRITUBA.getOptions(sMega);
           const megaOption = options.find(o => o.id === 'aposta_mega_sena');
           if (megaOption && megaOption.costCentavos === 500) {
-            const result = megaOption.execute(mockState, null);
+            const result = megaOption.execute(sMega, null);
             lotericaMegaSenaTested = typeof result === 'string' && result.length > 0;
           }
+
+          // 2. Boleto item guard test (I4 & finding 2)
+          const sNoBoleto = makeMockState();
+          const optNoBoleto = encountersDict.LOTERICA_PIRITUBA.getOptions(sNoBoleto).find(o => o.id === 'pagar_conta_luz');
+          const noBoletoDisabled = !!(optNoBoleto && optNoBoleto.disabled);
+
+          const sWithBoleto = makeMockState({ hasItem: (id) => id === 'boleto_enel' });
+          const optWithBoleto = encountersDict.LOTERICA_PIRITUBA.getOptions(sWithBoleto).find(o => o.id === 'pagar_conta_luz');
+          const withBoletoEnabled = !!(optWithBoleto && !optWithBoleto.disabled);
+          if (optWithBoleto) optWithBoleto.execute(sWithBoleto, null);
+          const boletoPaidOk = sWithBoleto.flags.boletoPago === true && sWithBoleto.granaCentavos === (20000 - 12450);
+          lotericaBoletoGuardTested = noBoletoDisabled && withBoletoEnabled && boletoPaidOk;
+
+          // 3. Raspadinha test (finding 6 copy & centavos check)
+          const sWin = makeMockState({ rng: { chance: () => true } });
+          const optWin = encountersDict.LOTERICA_PIRITUBA.getOptions(sWin).find(o => o.id === 'raspadinha_dinheiro');
+          const winText = optWin ? optWin.execute(sWin, null) : '';
+          const winOk = sWin.granaCentavos === (20000 + 700) && winText.includes('+R$ 7,00 líquido');
+
+          const sLoss = makeMockState({ rng: { chance: () => false } });
+          const optLoss = encountersDict.LOTERICA_PIRITUBA.getOptions(sLoss).find(o => o.id === 'raspadinha_dinheiro');
+          const lossText = optLoss ? optLoss.execute(sLoss, null) : '';
+          const lossOk = sLoss.granaCentavos === (20000 - 300) && lossText.includes('-R$ 3,00');
+          lotericaRaspadinhaTested = winOk && lossOk;
         }
+
+        // Test operating hours schedule check for all 8 corridor establishments (I5)
+        const checkOpen = (zone, hour) => {
+          if (!zone) return true;
+          const o = zone.openHour ?? 0;
+          const c = zone.closeHour ?? 24;
+          return o < c ? (hour >= o && hour < c) : (hour >= o || hour < c);
+        };
+        const allCorridorZones = expectedZoneIds.map(zid => zonesList.find(z => z.id === zid)).filter(Boolean);
+        const allOpenAtNoon = allCorridorZones.length === 8 && allCorridorZones.every(z => checkOpen(z, 12.0) === true);
+        const allClosedAtNight = allCorridorZones.length === 8 && allCorridorZones.every(z => checkOpen(z, 3.0) === false);
+        const operatingHoursTested = allOpenAtNoon && allClosedAtNight;
 
         // Verify PT & EN translations for all 8 establishments
         const ptInteractablesOk = expectedIds.every(id => transPt && transPt.interactables && transPt.interactables[id]);
@@ -3899,6 +3982,9 @@ async function runTestSuite(url) {
           && zonesExist
           && encountersExist
           && lotericaMegaSenaTested
+          && lotericaBoletoGuardTested
+          && lotericaRaspadinhaTested
+          && operatingHoursTested
           && ptInteractablesOk
           && enInteractablesOk
           && enEncountersOk;
@@ -3910,6 +3996,9 @@ async function runTestSuite(url) {
           zonesExist,
           encountersExist,
           lotericaMegaSenaTested,
+          lotericaBoletoGuardTested,
+          lotericaRaspadinhaTested,
+          operatingHoursTested,
           ptInteractablesOk,
           enInteractablesOk,
           enEncountersOk
