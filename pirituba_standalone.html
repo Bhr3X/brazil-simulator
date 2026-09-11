@@ -21176,11 +21176,18 @@ const BRAZILIAN_ENCOUNTERS = {
  * waypoint navigation, walking animations, and dynamic interaction hooks.
  */
 
+
+const EVENT_CULL_DISTANCE = 70;
+const BLOCO_ZONE_ID = 'BLOCO_EDGAR_FACCO';
+const CAMPINHO_ZONE_ID = 'CAMPINHO_CHURRASCO';
+const CARNIVAL_COSTUMES = ['spider', 'nocturnal_cape', 'red_gold_armor', 'neon_masked', 'round_mascot', 'antenna_suit'];
+
 class NpcSystem {
   constructor(scene, soundEngine, rng, textures = null) {
     this.scene = scene;
     this.sound = soundEngine;
     this.rng = rng;
+    this.crowdRng = new Rng((((rng && rng.seed) ? rng.seed : 1) ^ 0xC4A111) >>> 0);
     this.textures = textures;
 
     this.npcGroup = new THREE.Group();
@@ -21189,6 +21196,8 @@ class NpcSystem {
 
     this.npcs = [];
     this.activeTalkingNpc = null;
+    this.blocoSpectatorGroup = null;
+    this.campinhoSpectatorGroup = null;
 
     this.initNpcs();
   }
@@ -21324,6 +21333,8 @@ class NpcSystem {
       ]
     });
     this.npcs.push(menorCorre);
+
+    this.initEventCrowds();
   }
 
   // Build articulated humanoid 3D mesh
@@ -21479,9 +21490,13 @@ class NpcSystem {
       group.add(chain);
     }
 
-    // Set initial position
+    this.applyCarnivalCostume(group, headGroup, config.costumeId);
+
+    // Set initial position (waypoint y / baseY keep elevated NPCs off the street plane)
     const startWp = config.waypoints[0];
-    group.position.set(startWp.x, 0, startWp.z);
+    const startY = startWp.y != null ? startWp.y : (config.baseY != null ? config.baseY : 0);
+    group.position.set(startWp.x, startY, startWp.z);
+    if (config.zoneId) group.visible = false;
     this.npcGroup.add(group);
 
     return {
@@ -21498,9 +21513,14 @@ class NpcSystem {
       waypoints: config.waypoints,
       currentWpIndex: 0,
       speed: config.speed || 1.4,
-      animTimer: 0,
-      animSpeed: 7.0,
-      type: 'HUMANOID'
+      animTimer: config.animTimer != null ? config.animTimer : 0,
+      animSpeed: config.animSpeed || 7.0,
+      type: 'HUMANOID',
+      zoneId: config.zoneId || null,
+      interactable: config.interactable !== false,
+      animationMode: config.animationMode || null,
+      baseY: config.baseY != null ? config.baseY : startY,
+      costumeId: config.costumeId || null
     };
   }
 
@@ -21720,6 +21740,9 @@ class NpcSystem {
 
   // Update NPC navigation, motion, and visual animations
   update(delta, playerPos, isModalOpen, gameState = null) {
+    const hour = (gameState && typeof gameState.currentHour === 'number') ? gameState.currentHour : 6;
+    this.updateEventVisibility(hour);
+
     for (const npc of this.npcs) {
       // 1. Companion logic: If Caramelo is player's companion, follow player!
       if (npc.id === 'caramelo' && gameState && gameState.flags && gameState.flags.carameloCompanheiro) {
@@ -21727,15 +21750,29 @@ class NpcSystem {
         continue;
       }
 
-      // 2. Waypoint navigation along streets and sidewalks
-      const targetWp = npc.waypoints[npc.currentWpIndex];
-      const dx = targetWp.x - npc.group.position.x;
-      const dz = targetWp.z - npc.group.position.z;
-      const distToWp = Math.sqrt(dx * dx + dz * dz);
+      if (npc.zoneId) {
+        if (!this.isZoneNpcActive(npc, hour)) continue;
+        const dist3 = Math.hypot(
+          playerPos.x - npc.group.position.x,
+          (playerPos.y || 0) - npc.group.position.y,
+          playerPos.z - npc.group.position.z
+        );
+        if (dist3 > EVENT_CULL_DISTANCE) continue;
+      }
 
-      // Advance to next waypoint if reached
+      // 2. Waypoint navigation along streets and sidewalks
+      let targetWp = npc.waypoints[npc.currentWpIndex];
+      let dx = targetWp.x - npc.group.position.x;
+      let dz = targetWp.z - npc.group.position.z;
+      let distToWp = Math.sqrt(dx * dx + dz * dz);
+
+      // Advance to next waypoint if reached, then steer toward the new target this frame
       if (distToWp < 1.0) {
         npc.currentWpIndex = (npc.currentWpIndex + 1) % npc.waypoints.length;
+        targetWp = npc.waypoints[npc.currentWpIndex];
+        dx = targetWp.x - npc.group.position.x;
+        dz = targetWp.z - npc.group.position.z;
+        distToWp = Math.sqrt(dx * dx + dz * dz);
       }
 
       // Check distance to player for conversational pauses
@@ -21753,6 +21790,8 @@ class NpcSystem {
         continue;
       }
 
+      const isDance = npc.animationMode === 'DANCE';
+
       // Move towards target waypoint
       if (distToWp > 0.05) {
         const moveDist = Math.min(npc.speed * delta, distToWp);
@@ -21766,7 +21805,13 @@ class NpcSystem {
         const targetYaw = Math.atan2(dirX, dirZ);
         npc.group.rotation.y = targetYaw;
 
-        // Advance animation
+        if (!isDance) {
+          npc.animTimer += delta;
+          this.animateNpc(npc, delta);
+        }
+      }
+
+      if (isDance) {
         npc.animTimer += delta;
         this.animateNpc(npc, delta);
       }
@@ -21802,6 +21847,40 @@ class NpcSystem {
 
   // Animate character limbs based on type
   animateNpc(npc, delta) {
+    const baseY = npc.baseY != null ? npc.baseY : 0;
+
+    if (npc.animationMode === 'DANCE') {
+      const sway = Math.sin(npc.animTimer * 6.0) * 0.35;
+      npc.leftArm.rotation.z = 0.8 + sway;
+      npc.rightArm.rotation.z = -0.8 - sway;
+      npc.leftArm.rotation.x = Math.sin(npc.animTimer * 7.0) * 0.4;
+      npc.rightArm.rotation.x = Math.cos(npc.animTimer * 7.0) * 0.4;
+      npc.leftLeg.rotation.x = Math.sin(npc.animTimer * 5.0) * 0.12;
+      npc.rightLeg.rotation.x = -npc.leftLeg.rotation.x;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 8.0)) * 0.08;
+      return;
+    }
+
+    if (npc.animationMode === 'FOOTBALL') {
+      const kick = Math.sin(npc.animTimer * npc.animSpeed) * 0.7;
+      npc.leftLeg.rotation.x = kick;
+      npc.rightLeg.rotation.x = -kick * 0.45;
+      npc.leftArm.rotation.x = -kick * 0.3;
+      npc.rightArm.rotation.x = kick * 0.3;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.06;
+      return;
+    }
+
+    if (npc.animationMode === 'RUN') {
+      const swing = Math.sin(npc.animTimer * npc.animSpeed) * 0.7;
+      npc.leftLeg.rotation.x = swing;
+      npc.rightLeg.rotation.x = -swing;
+      npc.leftArm.rotation.x = -swing * 0.85;
+      npc.rightArm.rotation.x = swing * 0.85;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.07;
+      return;
+    }
+
     if (npc.type === 'HUMANOID') {
       const legSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.55;
       const armSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.45;
@@ -21811,8 +21890,8 @@ class NpcSystem {
       npc.leftArm.rotation.x = -armSwing;
       npc.rightArm.rotation.x = armSwing;
 
-      // Subtle walking vertical bob
-      npc.group.position.y = Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.05;
+      // Subtle walking vertical bob relative to street or elevated base
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.05;
     } else if (npc.type === 'CARAMELO') {
       const trot = Math.sin(npc.animTimer * npc.animSpeed) * 0.5;
 
@@ -21827,7 +21906,7 @@ class NpcSystem {
         npc.tailGroup.rotation.y = Math.sin(npc.animTimer * 16) * 0.5;
       }
 
-      npc.group.position.y = Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.04;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.04;
     } else if (npc.type === 'BIKE') {
       // Spin bicycle wheels
       const spinSpeed = npc.speed * 5.0 * delta;
@@ -21843,7 +21922,7 @@ class NpcSystem {
 
   // Expose dynamic targets for raycast interaction in InteractableSystem
   getInteractableTargets() {
-    return this.npcs.map(npc => ({
+    return this.npcs.filter((npc) => npc.interactable !== false).map(npc => ({
       id: npc.id,
       name: npc.name,
       prompt: npc.prompt,
@@ -21853,6 +21932,274 @@ class NpcSystem {
       isOpen: true,
       isNpc: true
     }));
+  }
+
+  isZoneNpcActive(npc, hour) {
+    if (!npc.zoneId) return true;
+    const zone = WORLD_ZONES.find((z) => z.id === npc.zoneId);
+    return ZoneManager.isZoneOpen(zone, hour);
+  }
+
+  updateEventVisibility(hour) {
+    const blocoZone = WORLD_ZONES.find((z) => z.id === BLOCO_ZONE_ID);
+    const campZone = WORLD_ZONES.find((z) => z.id === CAMPINHO_ZONE_ID);
+    const blocoOpen = ZoneManager.isZoneOpen(blocoZone, hour);
+    const campOpen = ZoneManager.isZoneOpen(campZone, hour);
+    for (const npc of this.npcs) {
+      if (npc.zoneId === BLOCO_ZONE_ID) npc.group.visible = blocoOpen;
+      if (npc.zoneId === CAMPINHO_ZONE_ID) npc.group.visible = campOpen;
+    }
+    if (this.blocoSpectatorGroup) this.blocoSpectatorGroup.visible = blocoOpen;
+    if (this.campinhoSpectatorGroup) this.campinhoSpectatorGroup.visible = campOpen;
+  }
+
+  shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = this.crowdRng.int(0, i);
+      const tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  applyCarnivalCostume(group, headGroup, costumeId) {
+    if (!costumeId) return;
+    if (costumeId === 'spider') {
+      const extraMat = new THREE.MeshLambertMaterial({ color: 0x330000 });
+      [-0.18, 0.18].forEach((x) => {
+        const limb = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.42), extraMat);
+        limb.position.set(x, 1.15, -0.22);
+        limb.rotation.x = 0.6;
+        group.add(limb);
+      });
+      const abdomen = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.22, 0.2), extraMat);
+      abdomen.position.set(0, 1.0, -0.22);
+      group.add(abdomen);
+      return;
+    }
+    if (costumeId === 'nocturnal_cape') {
+      const cape = new THREE.Mesh(
+        new THREE.BoxGeometry(0.7, 0.95, 0.06),
+        new THREE.MeshLambertMaterial({ color: 0x0b0b18 })
+      );
+      cape.position.set(0, 1.05, -0.2);
+      cape.rotation.x = 0.15;
+      group.add(cape);
+      return;
+    }
+    if (costumeId === 'red_gold_armor') {
+      const gold = new THREE.MeshLambertMaterial({ color: 0xf1c40f });
+      const pauldronL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.22), gold);
+      pauldronL.position.set(-0.32, 1.32, 0);
+      group.add(pauldronL);
+      const pauldronR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.22), gold);
+      pauldronR.position.set(0.32, 1.32, 0);
+      group.add(pauldronR);
+      return;
+    }
+    if (costumeId === 'neon_masked') {
+      const mask = new THREE.Mesh(
+        new THREE.BoxGeometry(0.32, 0.14, 0.08),
+        new THREE.MeshLambertMaterial({ color: 0x22d3ee })
+      );
+      mask.position.set(0, 0.02, 0.16);
+      headGroup.add(mask);
+      return;
+    }
+    if (costumeId === 'round_mascot') {
+      const noggin = new THREE.Mesh(
+        new THREE.SphereGeometry(0.28, 10, 10),
+        new THREE.MeshLambertMaterial({ color: 0xf2c14e })
+      );
+      noggin.position.set(0, 0.06, 0);
+      headGroup.add(noggin);
+      return;
+    }
+    if (costumeId === 'antenna_suit') {
+      const antMat = new THREE.MeshLambertMaterial({ color: 0xf5d90a });
+      const bulbMat = new THREE.MeshLambertMaterial({ color: 0x22c55e });
+      [-0.08, 0.08].forEach((x) => {
+        const rod = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.28, 0.03), antMat);
+        rod.position.set(x, 0.28, 0);
+        headGroup.add(rod);
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), bulbMat);
+        bulb.position.set(x, 0.42, 0);
+        headGroup.add(bulb);
+      });
+    }
+  }
+
+  initEventCrowds() {
+    const costumes = this.shuffleInPlace(CARNIVAL_COSTUMES.slice());
+    const costumeColors = {
+      spider: { shirt: 0x1a0508, pants: 0x111111, skin: 0x8d5524 },
+      nocturnal_cape: { shirt: 0x141428, pants: 0x0a0a12, skin: 0x6b4423 },
+      red_gold_armor: { shirt: 0xb91c1c, pants: 0x7f1d1d, skin: 0xa0673d },
+      neon_masked: { shirt: 0x22c55e, pants: 0x14532d, skin: 0x8d5524 },
+      round_mascot: { shirt: 0xf59e0b, pants: 0xc2410c, skin: 0xf2c14e },
+      antenna_suit: { shirt: 0x7c3aed, pants: 0x4c1d95, skin: 0xb58055 }
+    };
+
+    const dancerLoops = this.shuffleInPlace([
+      [{ x: 140.2, z: 47.2 }, { x: 141.4, z: 48.4 }],
+      [{ x: 146.0, z: 48.6 }, { x: 147.1, z: 49.4 }],
+      [{ x: 151.8, z: 47.0 }, { x: 150.6, z: 48.3 }],
+      [{ x: 146.2, z: 37.6 }, { x: 147.4, z: 38.8 }],
+      [{ x: 138.8, z: 45.5 }, { x: 139.6, z: 46.8 }],
+      [{ x: 153.4, z: 45.2 }, { x: 154.2, z: 46.6 }]
+    ]);
+
+    const runnerLoops = [
+      [{ x: 137.0, z: 39.0 }, { x: 137.0, z: 48.0 }, { x: 155.0, z: 48.0 }, { x: 155.0, z: 39.0 }],
+      [{ x: 136.5, z: 38.2 }, { x: 136.5, z: 49.0 }, { x: 155.5, z: 49.0 }, { x: 155.5, z: 38.2 }],
+      [{ x: 138.0, z: 40.0 }, { x: 154.0, z: 40.0 }, { x: 154.0, z: 47.2 }, { x: 138.0, z: 47.2 }]
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      const costumeId = costumes[i];
+      const pal = costumeColors[costumeId];
+      this.npcs.push(this.createHumanoidNpc({
+        id: `bloco_dancer_${i}`,
+        name: 'FOLIAO DO BLOCO',
+        prompt: '',
+        encounterId: null,
+        shirtColor: pal.shirt,
+        skinColor: pal.skin,
+        pantsColor: pal.pants,
+        speed: 0.55,
+        waypoints: dancerLoops[i],
+        zoneId: BLOCO_ZONE_ID,
+        interactable: false,
+        animationMode: 'DANCE',
+        baseY: 0,
+        costumeId,
+        animTimer: this.crowdRng.range(0, Math.PI * 2),
+        animSpeed: 6.0
+      }));
+    }
+
+    for (let i = 0; i < 2; i++) {
+      const costumeId = costumes[4 + i];
+      const pal = costumeColors[costumeId];
+      this.npcs.push(this.createHumanoidNpc({
+        id: `bloco_runner_${i}`,
+        name: 'CORREDOR DO BLOCO',
+        prompt: '',
+        encounterId: null,
+        shirtColor: pal.shirt,
+        skinColor: pal.skin,
+        pantsColor: pal.pants,
+        speed: 3.1,
+        waypoints: runnerLoops[this.crowdRng.int(0, runnerLoops.length - 1)],
+        zoneId: BLOCO_ZONE_ID,
+        interactable: false,
+        animationMode: 'RUN',
+        baseY: 0,
+        costumeId,
+        animTimer: this.crowdRng.range(0, Math.PI * 2),
+        animSpeed: 10.0
+      }));
+    }
+
+    const footballPaths = this.shuffleInPlace([
+      [{ x: -10, y: 9.5, z: -99 }, { x: -10, y: 9.5, z: -94 }, { x: -6, y: 9.5, z: -99 }],
+      [{ x: 10, y: 9.5, z: -99 }, { x: 10, y: 9.5, z: -104 }, { x: 6, y: 9.5, z: -99 }],
+      [{ x: 0, y: 9.5, z: -94 }, { x: 4, y: 9.5, z: -96 }, { x: 0, y: 9.5, z: -98 }],
+      [{ x: -4, y: 9.5, z: -99 }, { x: 4, y: 9.5, z: -99 }],
+      [{ x: -8, y: 9.5, z: -104 }, { x: 8, y: 9.5, z: -104 }],
+      [{ x: -12, y: 9.5, z: -99 }, { x: -11, y: 9.5, z: -97 }, { x: -11, y: 9.5, z: -101 }],
+      [{ x: 8, y: 9.5, z: -96 }, { x: 3, y: 9.5, z: -100 }, { x: 8, y: 9.5, z: -103 }],
+      [{ x: -2, y: 9.5, z: -102 }, { x: 2, y: 9.5, z: -93 }, { x: -5, y: 9.5, z: -97 }]
+    ]);
+    const kits = [
+      { shirt: 0x16a34a, pants: 0xffffff, skin: 0x8d5524 },
+      { shirt: 0xf8fafc, pants: 0x111827, skin: 0xa0673d },
+      { shirt: 0x2563eb, pants: 0x1e3a8a, skin: 0x9c653d },
+      { shirt: 0xdc2626, pants: 0xffffff, skin: 0xb58055 },
+      { shirt: 0xfacc15, pants: 0x1f2937, skin: 0x8a5832 },
+      { shirt: 0x0f172a, pants: 0x22c55e, skin: 0x6b4423 }
+    ];
+
+    for (let i = 0; i < 6; i++) {
+      const kit = kits[this.crowdRng.int(0, kits.length - 1)];
+      this.npcs.push(this.createHumanoidNpc({
+        id: `campinho_player_${i}`,
+        name: 'JOGADOR DO CAMPINHO',
+        prompt: '',
+        encounterId: null,
+        shirtColor: kit.shirt,
+        skinColor: kit.skin,
+        pantsColor: kit.pants,
+        speed: 2.15,
+        waypoints: footballPaths[i],
+        zoneId: CAMPINHO_ZONE_ID,
+        interactable: false,
+        animationMode: 'FOOTBALL',
+        baseY: 9.5,
+        animTimer: this.crowdRng.range(0, Math.PI * 2),
+        animSpeed: 8.0
+      }));
+    }
+
+    this.initEventSpectators();
+  }
+
+  initEventSpectators() {
+    if (!this._spectatorGeo) {
+      this._spectatorGeo = new THREE.BoxGeometry(0.36, 1.1, 0.26);
+      this._blocoSpecMat = new THREE.MeshLambertMaterial({ color: 0xdb2777 });
+      this._campSpecMat = new THREE.MeshLambertMaterial({ color: 0x15803d });
+    }
+
+    const dummy = new THREE.Object3D();
+    const placeInstances = (mesh, spots, baseY) => {
+      for (let i = 0; i < 16; i++) {
+        const spot = spots[i];
+        dummy.position.set(
+          spot.x + this.crowdRng.range(-0.15, 0.15),
+          baseY + 0.55,
+          spot.z + this.crowdRng.range(-0.15, 0.15)
+        );
+        dummy.rotation.set(0, this.crowdRng.range(0, Math.PI * 2), 0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+    };
+
+    const blocoSpots = [
+      { x: 134.2, z: 50.4 }, { x: 137.4, z: 50.6 }, { x: 140.6, z: 50.5 }, { x: 144.0, z: 50.7 },
+      { x: 147.6, z: 50.5 }, { x: 151.0, z: 50.6 }, { x: 154.4, z: 50.4 }, { x: 157.4, z: 50.2 },
+      { x: 133.4, z: 36.4 }, { x: 133.6, z: 39.2 }, { x: 133.5, z: 46.8 }, { x: 133.6, z: 49.2 },
+      { x: 158.6, z: 36.6 }, { x: 158.4, z: 39.4 }, { x: 158.5, z: 46.6 }, { x: 158.4, z: 49.0 }
+    ];
+    const campSpots = [
+      { x: -12.0, z: -107.4 }, { x: -8.0, z: -107.6 }, { x: -4.0, z: -107.5 }, { x: 0.0, z: -107.6 },
+      { x: 4.0, z: -107.5 }, { x: 8.0, z: -107.4 }, { x: 12.0, z: -107.6 }, { x: -12.0, z: -90.6 },
+      { x: -6.0, z: -90.4 }, { x: 0.0, z: -90.5 }, { x: 6.0, z: -90.4 }, { x: 12.0, z: -90.6 },
+      { x: -16.2, z: -102.0 }, { x: -16.2, z: -96.0 }, { x: 16.2, z: -102.0 }, { x: 16.2, z: -96.0 }
+    ];
+
+    this.blocoSpectatorGroup = new THREE.Group();
+    this.blocoSpectatorGroup.name = 'blocoSpectatorGroup';
+    const blocoMesh = new THREE.InstancedMesh(this._spectatorGeo, this._blocoSpecMat, 16);
+    blocoMesh.count = 16;
+    blocoMesh.name = 'blocoSpectators';
+    placeInstances(blocoMesh, blocoSpots, 0);
+    this.blocoSpectatorGroup.add(blocoMesh);
+    this.blocoSpectatorGroup.visible = false;
+    this.npcGroup.add(this.blocoSpectatorGroup);
+
+    this.campinhoSpectatorGroup = new THREE.Group();
+    this.campinhoSpectatorGroup.name = 'campinhoSpectatorGroup';
+    const campMesh = new THREE.InstancedMesh(this._spectatorGeo, this._campSpecMat, 16);
+    campMesh.count = 16;
+    campMesh.name = 'campinhoSpectators';
+    placeInstances(campMesh, campSpots, 9.5);
+    this.campinhoSpectatorGroup.add(campMesh);
+    this.campinhoSpectatorGroup.visible = false;
+    this.npcGroup.add(this.campinhoSpectatorGroup);
   }
 }
 

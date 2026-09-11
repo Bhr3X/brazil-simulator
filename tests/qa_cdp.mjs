@@ -2796,6 +2796,285 @@ async function runTestSuite(url) {
       throw new Error(`TEST 32 FAILED: both soccer balls must exist once on the I9 path, keep ballBody as the street body, settle on their real surfaces, stay in bounds above the 9.5 pitch, and take real kicks with distinct NewsDesk/sound callbacks under cooldown and range guards. ${JSON.stringify(carnivalBallsTested)}`);
     }
 
+    // TEST 33: Scheduled carnival + campinho crowds, elevation, cull, and seed signature
+    const carnivalCrowdTested = await evaluate(`
+      (async () => {
+        const game = window.app.game;
+        const npcs = game && game.npcs;
+        if (!npcs || !Array.isArray(npcs.npcs)) {
+          return { ok: false, reason: 'NpcSystem missing' };
+        }
+
+        const originalIds = ['clodoaldo', 'caramelo', 'juninho', 'dona_neide', 'sargento_rocha', 'menor_corre'];
+        const ids = npcs.npcs.map((n) => n.id);
+        const originalsPresent = originalIds.every((id) => ids.includes(id));
+        const originals = originalIds.map((id) => npcs.npcs.find((n) => n.id === id)).filter(Boolean);
+        const originalsIntact = originals.length === 6 && originals.every((n) => n.group && n.group.children.length > 0);
+
+        const carnivalCostumes = ['spider', 'nocturnal_cape', 'red_gold_armor', 'neon_masked', 'round_mascot', 'antenna_suit'];
+        const forbiddenNameRe = /homem[-\\s]?aranha|spiderman|batman|iron\\s*man|homem\\s*de\\s*ferro|capit[aã]o\\s*am[eé]rica|super[-\\s]?homem/i;
+
+        const blocoZone = { min: { x: 132, y: 0, z: 34 }, max: { x: 160, y: 8, z: 52 } };
+        const inOrBordering = (pos, zone, margin = 1.5) => !!(pos
+          && pos.x >= zone.min.x - margin && pos.x <= zone.max.x + margin
+          && pos.z >= zone.min.z - margin && pos.z <= zone.max.z + margin);
+        const hitsCampFurniture = (x, z) => {
+          if (x >= -18.7 && x <= -17.3 && z >= -89.1 && z <= -87.9) return true;
+          const tables = [[-17.2, -91.2], [17.4, -88.8], [17.6, -91.4]];
+          return tables.some(([tx, tz]) => Math.abs(x - tx) <= 0.7 && Math.abs(z - tz) <= 0.45);
+        };
+        const inCampSafe = (x, z) => x >= -20 && x <= 20 && z >= -111 && z <= -87 && !hitsCampFurniture(x, z);
+
+        const carnival = npcs.npcs.filter((n) => n.zoneId === 'BLOCO_EDGAR_FACCO' && n.interactable === false);
+        const campinho = npcs.npcs.filter((n) => n.zoneId === 'CAMPINHO_CHURRASCO' && n.interactable === false);
+        const danceCount = carnival.filter((n) => n.animationMode === 'DANCE').length;
+        const runCount = carnival.filter((n) => n.animationMode === 'RUN').length;
+        const footballCount = campinho.filter((n) => n.animationMode === 'FOOTBALL').length;
+        const carnivalCostumesUsed = carnival.map((n) => n.costumeId).filter(Boolean).sort();
+        const costumesExact = carnivalCostumesUsed.length === 6
+          && carnivalCostumes.slice().sort().every((c, i) => carnivalCostumesUsed[i] === c);
+        const namesClean = [...carnival, ...campinho].every((n) => !forbiddenNameRe.test(n.id || '') && !forbiddenNameRe.test(n.name || '') && !forbiddenNameRe.test(n.costumeId || ''));
+
+        const carnivalPlaced = carnival.length === 6 && carnival.every((n) => {
+          const p = n.group && n.group.position;
+          const wps = n.waypoints || [];
+          return inOrBordering(p, blocoZone)
+            && wps.length > 0
+            && wps.every((wp) => inOrBordering(wp, blocoZone) && wp.z > 32);
+        });
+        const runnersOffRoad = carnival.filter((n) => n.animationMode === 'RUN').every((n) =>
+          (n.waypoints || []).every((wp) => wp.z > 32)
+        );
+        const campPlaced = campinho.length === 6 && campinho.every((n) => {
+          const p = n.group && n.group.position;
+          const wps = n.waypoints || [];
+          const baseOk = Math.abs((n.baseY != null ? n.baseY : -99) - 9.5) <= 0.05;
+          return baseOk && p && inCampSafe(p.x, p.z)
+            && wps.length > 0
+            && wps.every((wp) => inCampSafe(wp.x, wp.z) && (wp.y == null || Math.abs(wp.y - 9.5) <= 0.05));
+        });
+
+        const countSpectators = (group) => {
+          if (!group) return 0;
+          let instanced = 0;
+          const visit = (obj) => {
+            if (obj.isInstancedMesh) instanced += obj.count;
+            (obj.children || []).forEach(visit);
+          };
+          visit(group);
+          if (instanced > 0) return instanced;
+          return (group.children || []).length;
+        };
+        const blocoSpecs = countSpectators(npcs.blocoSpectatorGroup);
+        const campSpecs = countSpectators(npcs.campinhoSpectatorGroup);
+        const spectatorCountsOk = blocoSpecs === 16 && campSpecs === 16;
+        const spectatorsLightweight = spectatorCountsOk
+          && !npcs.npcs.some((n) => n.id && String(n.id).includes('spectator'));
+
+        const hasPointLight = (() => {
+          let found = false;
+          const scan = (root) => {
+            if (!root) return;
+            root.traverse((obj) => {
+              if (obj.isPointLight) found = true;
+            });
+          };
+          scan(npcs.npcGroup);
+          scan(npcs.blocoSpectatorGroup);
+          scan(npcs.campinhoSpectatorGroup);
+          return found;
+        })();
+
+        const hourState = (hour) => ({ currentHour: hour });
+        const applyHour = (hour, playerPos) => {
+          if (game.state) game.state.currentHour = hour;
+          npcs.update(0.016, playerPos, false, hourState(hour));
+        };
+        const farStreet = { x: 0, y: 1.2, z: 0 };
+        applyHour(9.99, farStreet);
+        const blocoClosedBefore = carnival.every((n) => n.group.visible === false)
+          && !!(npcs.blocoSpectatorGroup && npcs.blocoSpectatorGroup.visible === false);
+        applyHour(10.0, farStreet);
+        const blocoOpenAtOpen = carnival.every((n) => n.group.visible === true)
+          && !!(npcs.blocoSpectatorGroup && npcs.blocoSpectatorGroup.visible === true);
+        applyHour(15.99, farStreet);
+        const blocoOpenBeforeClose = carnival.every((n) => n.group.visible === true)
+          && !!(npcs.blocoSpectatorGroup && npcs.blocoSpectatorGroup.visible === true);
+        applyHour(16.0, farStreet);
+        const blocoClosedAtClose = carnival.every((n) => n.group.visible === false)
+          && !!(npcs.blocoSpectatorGroup && npcs.blocoSpectatorGroup.visible === false);
+
+        applyHour(10.99, farStreet);
+        const campClosedBefore = campinho.every((n) => n.group.visible === false)
+          && !!(npcs.campinhoSpectatorGroup && npcs.campinhoSpectatorGroup.visible === false);
+        applyHour(11.0, farStreet);
+        const campOpenAtOpen = campinho.every((n) => n.group.visible === true)
+          && !!(npcs.campinhoSpectatorGroup && npcs.campinhoSpectatorGroup.visible === true);
+        applyHour(19.99, farStreet);
+        const campOpenBeforeClose = campinho.every((n) => n.group.visible === true)
+          && !!(npcs.campinhoSpectatorGroup && npcs.campinhoSpectatorGroup.visible === true);
+        applyHour(20.0, farStreet);
+        const campClosedAtClose = campinho.every((n) => n.group.visible === false)
+          && !!(npcs.campinhoSpectatorGroup && npcs.campinhoSpectatorGroup.visible === false);
+        const scheduleOk = blocoClosedBefore && blocoOpenAtOpen && blocoOpenBeforeClose && blocoClosedAtClose
+          && campClosedBefore && campOpenAtOpen && campOpenBeforeClose && campClosedAtClose;
+
+        const clodoaldo = npcs.npcs.find((n) => n.id === 'clodoaldo');
+        const streetX0 = clodoaldo ? clodoaldo.group.position.x : null;
+        applyHour(12.0, farStreet);
+        const streetMoved = !!(clodoaldo && streetX0 != null && clodoaldo.group.position.x !== streetX0);
+
+        const runner = carnival.find((n) => n.animationMode === 'RUN');
+        const dancer = carnival.find((n) => n.animationMode === 'DANCE');
+        const campNpc = campinho[0];
+        const snap = (n) => n && n.group ? { x: n.group.position.x, y: n.group.position.y, z: n.group.position.z, anim: n.animTimer } : null;
+        const runnerFar0 = snap(runner);
+        applyHour(12.0, farStreet);
+        npcs.update(1.0, farStreet, false, hourState(12));
+        const runnerFar1 = snap(runner);
+        const farCulled = !!(runnerFar0 && runnerFar1
+          && runnerFar0.x === runnerFar1.x && runnerFar0.z === runnerFar1.z && runnerFar0.anim === runnerFar1.anim);
+
+        const nearRunner = runner ? { x: runner.group.position.x, y: 1.2, z: runner.group.position.z } : farStreet;
+        const runnerNear0 = snap(runner);
+        npcs.update(1.0, nearRunner, false, hourState(12));
+        const runnerNear1 = snap(runner);
+        const nearMoved = !!(runnerNear0 && runnerNear1
+          && (runnerNear0.x !== runnerNear1.x || runnerNear0.z !== runnerNear1.z || runnerNear0.anim !== runnerNear1.anim));
+
+        if (dancer) {
+          npcs.update(0.5, { x: dancer.group.position.x, y: 1.2, z: dancer.group.position.z }, false, hourState(12));
+        }
+        if (campNpc) {
+          const nearCamp = { x: campNpc.group.position.x, y: 9.5, z: campNpc.group.position.z };
+          for (let i = 0; i < 24; i++) npcs.update(0.05, nearCamp, false, hourState(12));
+        }
+        const campYAfter = campNpc && campNpc.group ? campNpc.group.position.y : null;
+        const campYOk = campYAfter != null && Math.abs(campYAfter - 9.5) <= 0.2;
+        const dancerStreetYOk = !dancer || Math.abs(dancer.group.position.y) <= 0.2;
+
+        const targetsOpen = npcs.getInteractableTargets();
+        const targetIdsOpen = targetsOpen.map((t) => t.id).sort();
+        const expectedTargets = originalIds.slice().sort();
+        const targetsExactWhenOpen = targetIdsOpen.length === 6
+          && expectedTargets.every((id, i) => targetIdsOpen[i] === id)
+          && targetsOpen.every((t) => t.isNpc && t.isOpen);
+        applyHour(8.0, farStreet);
+        const targetsClosed = npcs.getInteractableTargets();
+        const targetsExactWhenClosed = targetsClosed.length === 6
+          && targetsClosed.map((t) => t.id).sort().every((id, i) => expectedTargets[i] === id);
+        const eventNeverTargeted = [...carnival, ...campinho].every((n) =>
+          !targetsOpen.some((t) => t.id === n.id) && !targetsClosed.some((t) => t.id === n.id)
+        );
+
+        const pagePath = window.location.pathname;
+        const isEsmBuild = pagePath.endsWith('index.html') || pagePath === '/' || pagePath === '';
+        let NpcCtor = null;
+        let RngCtor = null;
+        let ctorSource = 'missing';
+        if (isEsmBuild) {
+          const npcMod = await import('/src/game/NpcSystem.js');
+          const rngMod = await import('/src/game/Rng.js');
+          NpcCtor = npcMod.NpcSystem;
+          RngCtor = rngMod.Rng;
+          ctorSource = 'esm-import';
+        } else if (typeof NpcSystem !== 'undefined' && typeof Rng !== 'undefined') {
+          NpcCtor = NpcSystem;
+          RngCtor = Rng;
+          ctorSource = 'classic-lexical';
+        }
+
+        const crowdSignature = (system) => (system.npcs || [])
+          .filter((n) => n.zoneId === 'BLOCO_EDGAR_FACCO' || n.zoneId === 'CAMPINHO_CHURRASCO')
+          .map((n) => [
+            n.id,
+            n.costumeId || '',
+            n.animationMode || '',
+            Number(n.animTimer || 0).toFixed(4),
+            (n.waypoints || []).map((wp) => [wp.x, wp.y, wp.z].join(',')).join('/')
+          ].join('|'))
+          .join(';');
+
+        let sameSeed = false;
+        let differentSeed = false;
+        let sigA = '';
+        if (NpcCtor && RngCtor && game.scene) {
+          const sysA = new NpcCtor(game.scene, game.sound, new RngCtor(424242), game.textures);
+          const sysB = new NpcCtor(game.scene, game.sound, new RngCtor(424242), game.textures);
+          const sysC = new NpcCtor(game.scene, game.sound, new RngCtor(999001), game.textures);
+          sigA = crowdSignature(sysA);
+          const sigB = crowdSignature(sysB);
+          const sigC = crowdSignature(sysC);
+          sameSeed = sigA.length > 0 && sigA === sigB;
+          differentSeed = sigA.length > 0 && sigA !== sigC;
+          [sysA, sysB, sysC].forEach((sys) => {
+            if (sys.npcGroup && sys.npcGroup.parent) sys.npcGroup.parent.remove(sys.npcGroup);
+            if (sys.blocoSpectatorGroup && sys.blocoSpectatorGroup.parent) sys.blocoSpectatorGroup.parent.remove(sys.blocoSpectatorGroup);
+            if (sys.campinhoSpectatorGroup && sys.campinhoSpectatorGroup.parent) sys.campinhoSpectatorGroup.parent.remove(sys.campinhoSpectatorGroup);
+          });
+        }
+
+        const ok = originalsPresent && originalsIntact
+          && carnival.length === 6 && campinho.length === 6
+          && danceCount === 4 && runCount === 2 && footballCount === 6
+          && costumesExact && namesClean
+          && carnivalPlaced && runnersOffRoad && campPlaced
+          && spectatorCountsOk && spectatorsLightweight && hasPointLight === false
+          && scheduleOk && streetMoved && farCulled && nearMoved
+          && campYOk && dancerStreetYOk
+          && targetsExactWhenOpen && targetsExactWhenClosed && eventNeverTargeted
+          && sameSeed && differentSeed
+          && (ctorSource === 'esm-import' || ctorSource === 'classic-lexical');
+
+        return {
+          ok,
+          originalsPresent,
+          originalsIntact,
+          carnivalCount: carnival.length,
+          campinhoCount: campinho.length,
+          danceCount,
+          runCount,
+          footballCount,
+          costumesExact,
+          carnivalCostumesUsed,
+          namesClean,
+          carnivalPlaced,
+          runnersOffRoad,
+          campPlaced,
+          blocoSpecs,
+          campSpecs,
+          spectatorCountsOk,
+          spectatorsLightweight,
+          hasPointLight,
+          schedule: {
+            blocoClosedBefore, blocoOpenAtOpen, blocoOpenBeforeClose, blocoClosedAtClose,
+            campClosedBefore, campOpenAtOpen, campOpenBeforeClose, campClosedAtClose
+          },
+          scheduleOk,
+          streetMoved,
+          farCulled,
+          nearMoved,
+          campYAfter,
+          campYOk,
+          dancerStreetYOk,
+          targetsOpenCount: targetsOpen.length,
+          targetsClosedCount: targetsClosed.length,
+          targetIdsOpen,
+          targetsExactWhenOpen,
+          targetsExactWhenClosed,
+          eventNeverTargeted,
+          sameSeed,
+          differentSeed,
+          ctorSource,
+          sigLen: sigA.length
+        };
+      })()
+    `);
+    console.log(`[TEST 33] Scheduled carnival and campinho crowds:`, carnivalCrowdTested);
+    if (!carnivalCrowdTested.ok) {
+      throw new Error(`TEST 33 FAILED: scheduled carnival/campinho crowds must preserve the original six NPCs, add 6+6 articulated event NPCs with exact modes, elevate campinho to y≈9.5, honor zone hours, instance 16+16 spectators, cull far motion, keep event NPCs out of interaction targets, and stay seed-deterministic. ${JSON.stringify(carnivalCrowdTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {
