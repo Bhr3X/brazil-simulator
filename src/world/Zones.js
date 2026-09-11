@@ -372,6 +372,42 @@ export const WORLD_ZONES = [
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Subida íngreme e charmosa que atravessa a Edgar Facó e conecta Pirituba ao coração histórico da Freguesia do Ó.'
+  },
+  {
+    id: 'ESCOLA_LOURENCO_FILHO',
+    name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)',
+    min: { x: 105.0, y: 0.0, z: 64.0 },
+    max: { x: 137.0, y: 8.0, z: 110.0 },
+    openHour: 7.0,
+    closeHour: 22.5,
+    description: 'Escola Estadual clássica de Pirituba. Portão de ferro, catraca, sirene, quadra poliesportiva e merenda escolar.'
+  },
+  {
+    id: 'PARQUE_PETRONIO',
+    name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA',
+    min: { x: 153.0, y: 0.0, z: 64.0 },
+    max: { x: 205.0, y: 8.0, z: 126.0 },
+    openHour: 6.0,
+    closeHour: 22.0,
+    description: 'Área verde arborizada com Ipês floridos, pista de cooper, academia da terceira idade (ATI) e carrinho de pipoca do Seu Zico.'
+  },
+  {
+    id: 'ESPETINHO_PETRONIO',
+    name: 'BAR & ESPETINHO DA PETRÔNIO',
+    min: { x: 114.0, y: 0.0, z: 116.0 },
+    max: { x: 137.0, y: 6.0, z: 148.0 },
+    openHour: 16.0,
+    closeHour: 2.0,
+    description: 'Boteco de esquina na Petrônio Portela com churrasqueira a carvão, espetinhos no capricho, farofa, vinagrete e chopp gelado.'
+  },
+  {
+    id: 'PAPELARIA_BAZAR',
+    name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO',
+    min: { x: 153.0, y: 0.0, z: 132.0 },
+    max: { x: 185.0, y: 8.0, z: 172.0 },
+    openHour: 8.0,
+    closeHour: 19.0,
+    description: 'Centro comercial com Papelaria Pirituba (cópias, xerox, materiais) e Autoescola Petrônio (CFC A/B).'
   }
 ];
 

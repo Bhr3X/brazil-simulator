@@ -473,6 +473,10 @@ export class SoundEngine {
     osc.stop(t + 0.18);
   }
 
+  playKick() {
+    this.playKickBall();
+  }
+
   // 10. Distant Police Siren (Viatura da PM / B.O. Alto)
   playSiren() {
     if (!this.isInitialized || this.isMuted) return;

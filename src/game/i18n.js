@@ -155,7 +155,7 @@ export const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'PADARIA ESTRELA DE PIRITUBA', prompt: 'ENTRAR NA PADOCA E PEDIR PÃO NA CHAPA' },
-      bar_sinuca: { name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)', prompt: 'JOGAR SINUCA OU PEDIR NO BALCÃO' },
+      bar_sinuca: { name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)', prompt: 'PEDIR NO BALCÃO DO SEU TIÃO OU JOGAR SINUCA' },
       adega: { name: 'ADEGA DO ZÉ (BEBIDAS & LITRÃO)', prompt: 'COMPRAR LITRÃO OU VENDER LATINHAS' },
       flanelinha: { name: 'FLANELINHA NO CRUZAMENTO', prompt: 'CONVERSAR COM O FLANELINHA' },
       posto: { name: 'POSTO PIRITUBA 24H', prompt: 'ABASTECER OU TOMAR ÁGUA NO BEBEDOURO' },
@@ -177,7 +177,11 @@ export const TRANSLATIONS = {
       casa_do_norte: { name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)', prompt: 'PEDIR BAIÃO DE DOIS OU COMPRAR QUEIJO COALHO' },
       loterica_pirituba: { name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)', prompt: 'APOSTAR NA MEGA-SENA OU PAGAR CONTAS' },
       pastelaria_beto: { name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)', prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA' },
-      bar_peixe: { name: 'BAR & PETISCARIA CANTINHO DO PEIXE', prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO' }
+      bar_peixe: { name: 'BAR & PETISCARIA CANTINHO DO PEIXE', prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO' },
+      escola_publica: { name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)', prompt: 'FALAR COM A TIA CIDA NO PORTÃO DA ESCOLA' },
+      parque_petronio: { name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA', prompt: 'COMPRAR PIPOCA DO SEU ZICO OU USAR A PRAÇA' },
+      espetinho_petronio: { name: 'BAR & ESPETINHO DA PETRÔNIO', prompt: 'PEDIR ESPETINHO COM SEU TONINHO NA BRASA' },
+      papelaria_bazar: { name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO', prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS' }
     },
 
     npcs: {
@@ -387,7 +391,7 @@ export const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'ESTRELA BAKERY OF PIRITUBA', prompt: 'ENTER BAKERY & ORDER TOASTED FRENCH BREAD' },
-      bar_sinuca: { name: 'TIÃO\'S CORNER PUB (POOL TABLE & BAR)', prompt: 'PLAY POOL OR ORDER AT THE COUNTER' },
+      bar_sinuca: { name: 'TIÃO\'S CORNER PUB (POOL TABLE & BAR)', prompt: 'ORDER AT SEU TIÃO\'S COUNTER OR PLAY POOL' },
       adega: { name: 'ZÉ\'S LIQUOR & BEVERAGE SHOP', prompt: 'BUY 1L BEER BOTTLE OR SELL CRUSHED CANS' },
       flanelinha: { name: 'UNOFFICIAL PARKING VALET', prompt: 'TALK TO THE PARKING HUSTLER' },
       posto: { name: 'PIRITUBA 24H GAS STATION', prompt: 'REFUEL OR DRINK FROM WATER FOUNTAIN' },
@@ -409,7 +413,11 @@ export const TRANSLATIONS = {
       casa_do_norte: { name: 'ASA BRANCA NORTHEASTERN EMPORIUM', prompt: 'ORDER BAIÃO DE DOIS OR BUY COALHO CHEESE' },
       loterica_pirituba: { name: 'PIRITUBA LOTTERY & BANK AGENCY (CAIXA AQUI)', prompt: 'PLAY MEGA-SENA JACKPOT OR PAY BILLS' },
       pastelaria_beto: { name: 'BETO\'S PASTELARIA (GIANT PASTEL & CANE JUICE)', prompt: 'ORDER 30CM PASTEL & SUGARCANE JUICE' },
-      bar_peixe: { name: 'CANTINHO DO PEIXE SEAFOOD PUB', prompt: 'ORDER CRISPY TILAPIA TENDERS & COLD BEER' }
+      bar_peixe: { name: 'CANTINHO DO PEIXE SEAFOOD PUB', prompt: 'ORDER CRISPY TILAPIA TENDERS & COLD BEER' },
+      escola_publica: { name: 'PROF. LOURENÇO FILHO PUBLIC SCHOOL', prompt: 'TALK TO TIA CIDA AT THE SCHOOL GATE' },
+      parque_petronio: { name: 'PETRÔNIO PORTELA LINEAR PARK & SQUARE', prompt: 'BUY POPCORN FROM SEU ZICO OR WORK OUT IN THE PARK' },
+      espetinho_petronio: { name: 'PETRÔNIO STREET BBQ & CORNER PUB', prompt: 'ORDER STREET SKEWERS FROM SEU TONINHO' },
+      papelaria_bazar: { name: 'PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL', prompt: 'RECHARGE TRANSIT PASS OR BUY STATIONERY' }
     },
 
     npcs: {

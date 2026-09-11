@@ -24,6 +24,7 @@ export class NpcSystem {
     this.scene.add(this.npcGroup);
 
     this.npcs = [];
+    this.establishmentNpcs = [];
     this.activeTalkingNpc = null;
     this.blocoSpectatorGroup = null;
     this.campinhoSpectatorGroup = null;
@@ -165,6 +166,7 @@ export class NpcSystem {
 
     this.initEventCrowds();
     this.initEventHosts();
+    this.initEstablishmentNpcs();
   }
 
   // Build articulated humanoid 3D mesh
@@ -225,6 +227,37 @@ export class NpcSystem {
       const hairBun = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), hairMat);
       hairBun.position.set(0, 0.18, -0.12);
       headGroup.add(hairBun);
+    } else if (config.hasChefHat) {
+      const hatMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      const hatBand = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.1, 12), hatMat);
+      hatBand.position.y = 0.2;
+      headGroup.add(hatBand);
+      const hatCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 0.22, 12), hatMat);
+      hatCrown.name = 'npc_chef_hat';
+      hatCrown.position.y = 0.32;
+      headGroup.add(hatCrown);
+    } else if (config.hasHairnet) {
+      const netMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+      const netMesh = new THREE.Mesh(new THREE.SphereGeometry(0.19, 10, 10), netMat);
+      netMesh.name = 'npc_hairnet';
+      netMesh.position.set(0, 0.08, 0);
+      headGroup.add(netMesh);
+    }
+
+    // Facial features: glasses & boteco mustache
+    if (config.hasGlasses) {
+      const frameMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+      const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.07, 0.04), frameMat);
+      glasses.name = 'npc_glasses';
+      glasses.position.set(0, 0.02, 0.16);
+      headGroup.add(glasses);
+    }
+    if (config.hasMustache) {
+      const stacheMat = new THREE.MeshLambertMaterial({ color: 0x18181b });
+      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.06), stacheMat);
+      mustache.name = 'npc_mustache';
+      mustache.position.set(0, -0.06, 0.16);
+      headGroup.add(mustache);
     }
     group.add(headGroup);
 
@@ -262,7 +295,56 @@ export class NpcSystem {
     rightLeg.add(rLegMesh);
     group.add(rightLeg);
 
-    // 5. Props (Cooler Box or Shopping Bags)
+    // 5. Props (Cooler Box, Shopping Bags, Apron, Cloth, Tongs, Scoop, Lanyard)
+    if (config.hasApron) {
+      const apronMat = new THREE.MeshLambertMaterial({ color: config.apronColor || 0xffffff });
+      const apronBib = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.55, 0.04), apronMat);
+      apronBib.name = 'npc_apron';
+      apronBib.position.set(0, 1.05, 0.15);
+      group.add(apronBib);
+      const apronSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.45, 0.04), apronMat);
+      apronSkirt.position.set(0, 0.62, 0.15);
+      group.add(apronSkirt);
+    }
+
+    if (config.hasCloth) {
+      const clothMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+      const cloth = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 0.12), clothMat);
+      cloth.name = 'npc_cloth';
+      cloth.position.set(-0.24, 1.25, 0.08);
+      group.add(cloth);
+    }
+
+    if (config.hasTongs) {
+      const tongMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+      const tongs = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.36, 0.04), tongMat);
+      tongs.name = 'npc_tongs';
+      tongs.position.set(0, -0.38, 0.08);
+      rightArm.add(tongs);
+    }
+
+    if (config.hasScoop) {
+      const scoopMat = new THREE.MeshLambertMaterial({ color: 0xcbd5e1 });
+      const scoop = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.25, 0.1), scoopMat);
+      scoop.name = 'npc_scoop';
+      scoop.position.set(0, -0.35, 0.08);
+      rightArm.add(scoop);
+    }
+
+    if (config.hasLanyard) {
+      const strapMat = new THREE.MeshLambertMaterial({ color: 0xef4444 });
+      const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.45, 0.02), strapMat);
+      strapL.position.set(-0.08, 1.15, 0.15);
+      group.add(strapL);
+      const strapR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.45, 0.02), strapMat);
+      strapR.position.set(0.08, 1.15, 0.15);
+      group.add(strapR);
+      const whistle = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.04), new THREE.MeshLambertMaterial({ color: 0xfacc15 }));
+      whistle.name = 'npc_lanyard';
+      whistle.position.set(0, 0.92, 0.16);
+      group.add(whistle);
+    }
+
     if (config.hasCoolerBox) {
       const boxGroup = new THREE.Group();
       boxGroup.position.set(0, 0.95, 0.32);
@@ -326,6 +408,7 @@ export class NpcSystem {
     const startWp = config.waypoints[0];
     const startY = startWp.y != null ? startWp.y : (config.baseY != null ? config.baseY : 0);
     group.position.set(startWp.x, startY, startWp.z);
+    if (config.defaultYaw != null) group.rotation.y = config.defaultYaw;
     if (config.zoneId) group.visible = false;
     this.npcGroup.add(group);
 
@@ -335,6 +418,7 @@ export class NpcSystem {
       prompt: config.prompt,
       encounterId: config.encounterId,
       group,
+      mesh: group,
       leftArm,
       rightArm,
       leftLeg,
@@ -350,7 +434,9 @@ export class NpcSystem {
       interactable: config.interactable !== false,
       animationMode: config.animationMode || null,
       baseY: config.baseY != null ? config.baseY : startY,
-      costumeId: config.costumeId || null
+      costumeId: config.costumeId || null,
+      stationary: config.stationary || false,
+      defaultYaw: config.defaultYaw != null ? config.defaultYaw : 0
     };
   }
 
@@ -591,7 +677,32 @@ export class NpcSystem {
         if (dist3 > EVENT_CULL_DISTANCE) continue;
       }
 
-      // 2. Waypoint navigation along streets and sidewalks
+      // 2. Distance to player
+      const distToPlayer = Math.sqrt(
+        (playerPos.x - npc.group.position.x) ** 2 +
+        (playerPos.z - npc.group.position.z) ** 2
+      );
+
+      // 3. Stationary establishment shopkeepers (Tião, Zé, Manuel, etc.)
+      if (npc.stationary) {
+        if (distToPlayer < 7.5) {
+          const lookAngle = Math.atan2(playerPos.x - npc.group.position.x, playerPos.z - npc.group.position.z);
+          let angleDiff = lookAngle - npc.group.rotation.y;
+          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+          while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+          npc.group.rotation.y += angleDiff * Math.min(1.0, delta * 3.5);
+        } else if (npc.defaultYaw != null) {
+          let angleDiff = npc.defaultYaw - npc.group.rotation.y;
+          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+          while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+          npc.group.rotation.y += angleDiff * Math.min(1.0, delta * 2.0);
+        }
+        npc.animTimer += delta;
+        this.animateNpc(npc, delta);
+        continue;
+      }
+
+      // 4. Waypoint navigation along streets and sidewalks
       let targetWp = npc.waypoints[npc.currentWpIndex];
       let dx = targetWp.x - npc.group.position.x;
       let dz = targetWp.z - npc.group.position.z;
@@ -608,12 +719,6 @@ export class NpcSystem {
           distToWp = Math.sqrt(dx * dx + dz * dz);
         }
       }
-
-      // Check distance to player for conversational pauses
-      const distToPlayer = Math.sqrt(
-        (playerPos.x - npc.group.position.x) ** 2 +
-        (playerPos.z - npc.group.position.z) ** 2
-      );
 
       // Pause moving if active dialog is open and player is interacting nearby
       const isTalkingToThisNpc = isModalOpen && distToPlayer < 4.0;
@@ -687,6 +792,25 @@ export class NpcSystem {
   // Animate character limbs based on type
   animateNpc(npc, delta) {
     const baseY = npc.baseY != null ? npc.baseY : 0;
+
+    if (npc.animationMode === 'WIPE') {
+      const wipe = Math.sin(npc.animTimer * 2.5) * 0.2;
+      npc.rightArm.rotation.x = -0.85 + wipe;
+      npc.rightArm.rotation.z = -0.25 + Math.cos(npc.animTimer * 2.5) * 0.15;
+      npc.leftArm.rotation.x = -0.2 + Math.sin(npc.animTimer * 1.2) * 0.05;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 0.8) * 0.12;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.02;
+      return;
+    }
+
+    if (npc.animationMode === 'IDLE_HOST') {
+      const breath = Math.sin(npc.animTimer * 1.6) * 0.04;
+      npc.rightArm.rotation.x = -0.25 + breath;
+      npc.leftArm.rotation.x = -0.25 - breath;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 0.6) * 0.15;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.6)) * 0.02;
+      return;
+    }
 
     if (npc.animationMode === 'DANCE') {
       const sway = Math.sin(npc.animTimer * 6.0) * 0.35;
@@ -1084,5 +1208,193 @@ export class NpcSystem {
     this.campinhoSpectatorGroup.add(campMesh);
     this.campinhoSpectatorGroup.visible = false;
     this.npcGroup.add(this.campinhoSpectatorGroup);
+  }
+
+  // Populate iconic local establishments with visible shopkeeper/character 3D meshes
+  initEstablishmentNpcs() {
+    this.establishmentNpcs = [
+      // 1. Tião do Bar (Barkeep of Bar do Tião)
+      this.createHumanoidNpc({
+        id: 'tiao_bar',
+        name: 'SEU TIÃO (BAR DO TIÃO)',
+        prompt: 'CONVERSAR COM SEU TIÃO NO BALCÃO',
+        encounterId: 'BAR_DO_TIAO',
+        shirtColor: 0x1e3a8a, // Classic blue polo shirt
+        skinColor: 0x94603d,
+        pantsColor: 0x1f2937,
+        hasApron: true,
+        apronColor: 0xffffff, // White boteco apron
+        hasMustache: true,
+        hasCloth: true,
+        stationary: true,
+        defaultYaw: Math.PI, // Facing front (-Z towards entrance)
+        waypoints: [{ x: 14.8, y: 0.25, z: 45.4 }],
+        interactable: false, // Handled authoritatively by bar_sinuca anchor in Interactables
+        animationMode: 'WIPE',
+        baseY: 0.25
+      }),
+
+      // 2. Seu Zé da Adega (Beverage Wholesaler)
+      this.createHumanoidNpc({
+        id: 'ze_adega',
+        name: 'SEU ZÉ (ADEGA DO ZÉ)',
+        prompt: 'FALAR COM SEU ZÉ DA ADEGA',
+        encounterId: 'ADEGA_DO_ZE',
+        shirtColor: 0x18181b, // Black tee
+        skinColor: 0x8a5832,
+        pantsColor: 0x27272a,
+        hasCap: true,
+        capColor: 0xdc2626, // Red cap
+        hasApron: true,
+        apronColor: 0x991b1b, // Dark red apron
+        stationary: true,
+        defaultYaw: Math.PI,
+        waypoints: [{ x: -12.2, y: 0.25, z: 44.8 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 3. Seu Manuel (Padeiro da Padaria Estrela)
+      this.createHumanoidNpc({
+        id: 'manuel_padeiro',
+        name: 'SEU MANUEL (PADARIA ESTRELA)',
+        prompt: 'PEDIR PÃO COM SEU MANUEL',
+        encounterId: 'PADARIA_ESTRELA',
+        shirtColor: 0xfef08a, // Cream baker shirt
+        skinColor: 0xae7d55,
+        pantsColor: 0xf5f5f5,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xffffff,
+        hasMustache: true,
+        stationary: true,
+        defaultYaw: Math.PI,
+        waypoints: [{ x: 33.2, y: 0.25, z: 44.6 }],
+        interactable: false,
+        animationMode: 'WIPE',
+        baseY: 0.25
+      }),
+
+      // 4. Dona Maria (Pasteleira da Feira)
+      this.createHumanoidNpc({
+        id: 'dona_maria_pastel',
+        name: 'DONA MARIA (PASTEL DA FEIRA)',
+        prompt: 'PEDIR PASTEL COM DONA MARIA',
+        encounterId: 'PASTEL_FEIRA',
+        shirtColor: 0xdc2626, // Red shirt
+        skinColor: 0xa86c43,
+        pantsColor: 0x475569,
+        hasHairnet: true,
+        hasApron: true,
+        apronColor: 0xf59e0b, // Yellow/golden apron
+        stationary: true,
+        defaultYaw: 0, // Facing street (+Z)
+        waypoints: [{ x: -3.5, y: 0.25, z: 37.0 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 5. Seu Mário (Banca de Jornal)
+      this.createHumanoidNpc({
+        id: 'mario_banca',
+        name: 'SEU MÁRIO (BANCA DE JORNAL)',
+        prompt: 'FALAR COM SEU MÁRIO NA BANCA',
+        encounterId: 'BANCA_JORNAL',
+        shirtColor: 0x15803d, // Green cardigan
+        skinColor: 0x92613d,
+        pantsColor: 0x374151,
+        hasGlasses: true,
+        stationary: true,
+        defaultYaw: 0, // Facing street (+Z)
+        waypoints: [{ x: 7.5, y: 0.25, z: 36.8 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 6. Frentista Tonho (Posto Pirituba 24H)
+      this.createHumanoidNpc({
+        id: 'frentista_tonho',
+        name: 'TONHO (FRENTISTA POSTO 24H)',
+        prompt: 'FALAR COM FRENTISTA TONHO',
+        encounterId: 'POSTO_PIRITUBA',
+        shirtColor: 0xeab308, // Yellow Petrobras uniform
+        skinColor: 0x7c4e2d,
+        pantsColor: 0x15803d, // Green pants
+        hasCap: true,
+        capColor: 0x15803d, // Green Petrobras cap
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing +X
+        waypoints: [{ x: -38.0, y: 0.25, z: 41.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 7. Tia Cida (Inspetora Escolar - E.E. Prof. Lourenço Filho)
+      this.createHumanoidNpc({
+        id: 'tia_cida',
+        name: 'TIA CIDA (INSPETORA ESCOLAR)',
+        prompt: 'FALAR COM TIA CIDA NA PORTARIA',
+        encounterId: 'ESCOLA_PUBLICA',
+        shirtColor: 0x2563eb, // Blue school uniform/smock
+        skinColor: 0x6e4325,
+        pantsColor: 0x334155,
+        hasGlasses: true,
+        hasLanyard: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East (+X towards sidewalk)
+        waypoints: [{ x: 131.5, y: 0.25, z: 74.0 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 8. Seu Zico (Pipoca & Algodão Doce - Praça Petrônio Portela)
+      this.createHumanoidNpc({
+        id: 'zico_pipoca',
+        name: 'SEU ZICO (PIPOCA & ALGODÃO DOCE)',
+        prompt: 'COMPRAR PIPOCA COM SEU ZICO',
+        encounterId: 'PARQUE_PETRONIO',
+        shirtColor: 0xffffff,
+        skinColor: 0x8a5832,
+        pantsColor: 0x1e293b,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xdc2626, // Red/white vendor apron
+        hasScoop: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West (-X towards sidewalk)
+        waypoints: [{ x: 160.5, y: 0.25, z: 72.0 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 9. Seu Toninho (Espeteiro & Bar da Petrônio)
+      this.createHumanoidNpc({
+        id: 'toninho_espetinho',
+        name: 'SEU TONINHO (BAR & ESPETINHO)',
+        prompt: 'PEDIR ESPETINHO COM SEU TONINHO',
+        encounterId: 'ESPETINHO_PETRONIO',
+        shirtColor: 0x1c1917, // Dark tee
+        skinColor: 0x9a653f,
+        pantsColor: 0x292524,
+        hasApron: true,
+        apronColor: 0x7f1d1d, // Barbecue apron
+        hasTongs: true,
+        hasCloth: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East (+X towards sidewalk)
+        waypoints: [{ x: 129.8, y: 0.25, z: 125.0 }],
+        interactable: false,
+        animationMode: 'WIPE',
+        baseY: 0.25
+      })
+    ];
+
+    this.establishmentNpcs.forEach(n => this.npcs.push(n));
   }
 }

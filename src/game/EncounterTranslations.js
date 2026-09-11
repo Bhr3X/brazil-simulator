@@ -935,6 +935,113 @@ export const EN_ENCOUNTER_TEXTS = {
         outcome: 'Steaming broth with scallions and mild pepper that warms your core and restores vitality (+22% Stomach, +16% Sanity).'
       }
     }
+  },
+
+  ESCOLA_PUBLICA: {
+    title: '🏫 PROF. LOURENÇO FILHO PUBLIC SCHOOL',
+    intro: (state) => `
+      Tia Cida, the veteran hallway monitor in her blue smock with a ring of keys on her hip, spots you at the gate:<br>
+      <em>"— Look who showed up! You studied here, didn't you? Or did you come to ditch class in the square again?"</em><br>
+      The unforgettable scent of public school lunch drifts onto the sidewalk, and the thud of a futsal ball echoes from the court.<br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pedir_merenda: {
+        label: (state) => state.flags.merendaHoje
+          ? 'Ask for school lunch (Already ate school lunch today)'
+          : 'Ask for a plate of public school lunch (warm cinnamon rice pudding & manioc biscuits)',
+        costLabel: 'Free (School Lunch)',
+        outcome: 'Tia Cida lovingly serves you a deep plastic bowl of piping hot cinnamon rice pudding. Sweet childhood memories of Pirituba (+35% Stomach, +20% Sanity)!'
+      },
+      pelada_quadra: {
+        label: 'Step onto the cement court and join the neighborhood kids in a futsal scrimmage',
+        costLabel: '+10 Ginga (Energy Expense)',
+        outcome: 'You bolted across the rough cement court, nutmegged two kids, and drilled a screamer right into the top corner! The entire playground cheered (+10 Ginga, +16% Sanity, -10% Stomach).'
+      },
+      lembranca_boletim: {
+        label: 'Chat with Tia Cida and reminisce about old report card scares',
+        costLabel: '+12% Sanity (Nostalgia)',
+        outcome: 'Tia Cida laughs remembering when you hid your report card in the ceiling tiles from your mom: "— You were a handful, but you had a good heart!" (+12% Sanity, +4 Ginga).'
+      }
+    }
+  },
+
+  PARQUE_PETRONIO: {
+    title: '🌳 PETRÔNIO PORTELA LINEAR PARK & SQUARE',
+    intro: (state) => `
+      Golden trumpet trees shed bright yellow blossoms across the stone sidewalk. A gentle breeze sways the palm leaves as retirees exercise on outdoor gym machines.<br>
+      Seu Zico grins beside his striped popcorn cart:<br>
+      <em>"— Hot and fresh with crispy bacon bits and grated parmesan, boss! Want a loaded bag?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pipoca_bacon: {
+        label: 'Buy a large bag of fresh popcorn topped with crispy bacon cubes and grated cheese',
+        outcome: 'Crunchy, freshly popped corn loaded with golden bacon bits and salty parmesan. The timeless aroma of São Paulo public squares (+30% Stomach, +22% Sanity)!'
+      },
+      academia_ar_livre: {
+        label: 'Do a full workout set on the municipal outdoor gym walkers and pull-up bars',
+        costLabel: '+20% Sanity (Free Workout)',
+        outcome: 'You spend 15 minutes on the yellow walker and stretch your back on the bar. Blood flows freely and mental fatigue evaporates (+20% Sanity, +8 Ginga, -8% Stomach).'
+      },
+      descanso_ipe: {
+        label: 'Rest on a wooden bench beneath the shade of the blooming golden trumpet tree',
+        costLabel: '+15% Sanity (Peace of Mind)',
+        outcome: 'You sit on the park bench listening to thrushes sing amidst yellow blossoms. A rare moment of quiet serenity amidst São Paulo\'s hustle (+15% Sanity).'
+      }
+    }
+  },
+
+  ESPETINHO_PETRONIO: {
+    title: '🍢 PETRÔNIO STREET BBQ & CORNER PUB',
+    intro: (state) => `
+      The fragrant smoke of glowing charcoal and sizzling skewered meats draws neighbors to yellow sidewalk tables.<br>
+      Seu Toninho, wielding long barbecue tongs with a kitchen towel slung over his shoulder, turns the skewers with mastery:<br>
+      <em>"— Fresh garlic steak, squeaky cheese with molasses, and bacon-wrapped chicken! Ice-cold draft beer flowing from the tap!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      combo_espetinho: {
+        label: 'Combo of 2 artisan skewers with seasoned manioc flour, tomato vinaigrette, and garlic bread',
+        outcome: 'Tender, juicy flame-kissed steak skewers, crunchy farofa, and zesty fresh vinaigrette. A complete street food banquet (+50% Stomach, +25% Sanity)!'
+      },
+      chopp_artesanal: {
+        label: 'Frosty mug of draft beer with thick foam served at a sidewalk Skol table',
+        outcome: 'Crisp and refreshing brew going down smooth while the evening breeze rolls down Av. Petrônio Portela (+26% Sanity, +6 Ginga).'
+      },
+      queijo_coalho: {
+        label: 'Golden grilled coalho cheese skewer sprinkled with oregano and cane syrup',
+        outcome: 'Toasted crispy exterior with a warm, stretchy sweet-and-savory bite. A beloved Brazilian classic (+26% Stomach, +18% Sanity).'
+      }
+    }
+  },
+
+  PAPELARIA_BAZAR: {
+    title: '📚 PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL',
+    intro: (state) => `
+      Bright spiral notebooks, school backpacks, and poster boards fill the shop windows of Papelaria Pirituba.<br>
+      Next door, the backlit sign of Autoescola Petrônio highlights a white driving-school hatchback parked out front.<br>
+      The clerk behind the glass counter greets you with a warm smile:<br>
+      <em>"— Good afternoon! Need photocopies, school supplies, or to top up your SPTrans transit card?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      recarga_bilhete: {
+        label: (state) => state.flags.bilheteRecarregado
+          ? 'Recharge transit card (Already topped up today)'
+          : 'Top up R$ 20.00 on your SPTrans Bilhete Único bus pass',
+        outcome: 'Card tapped against the terminal, loud confirmation chime, and balance loaded to ride any city bus without hassle (+15% Sanity, Transit Card Loaded)!'
+      },
+      comprar_material: {
+        label: 'Buy a classic blue Bic ballpoint pen, pocket notepad, and cinnamon hard candies',
+        outcome: 'A shiny new pen to sign documents and a notepad in your pocket. Gives you that sharp feeling of professional organization (+12% Sanity, +4 Ginga).'
+      },
+      tirar_xerox: {
+        label: 'Make photocopies of identity documents and proof of residency at the counter',
+        outcome: 'The green scanner light runs across the glass bed and warm printed sheets slide into the tray. Everyday bureaucracy handled smoothly (+8% Sanity).'
+      }
+    }
   }
 };
+
 

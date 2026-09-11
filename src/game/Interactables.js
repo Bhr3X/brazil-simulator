@@ -65,7 +65,7 @@ export class InteractableSystem {
       {
         id: 'bar_sinuca',
         name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)',
-        prompt: 'JOGAR SINUCA OU PEDIR NO BALCÃO',
+        prompt: 'PEDIR NO BALCÃO DO SEU TIÃO OU JOGAR SINUCA',
         position: new THREE.Vector3(12.0, 1.2, 41.5),
         maxDist: 3.8,
         encounterId: 'BAR_DO_TIAO',
@@ -268,6 +268,42 @@ export class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'BAR_DO_PEIXE',
         zoneId: 'BAR_DO_PEIXE'
+      },
+      {
+        id: 'escola_publica',
+        name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)',
+        prompt: 'FALAR COM A TIA CIDA NO PORTÃO DA ESCOLA',
+        position: new THREE.Vector3(131.5, 1.2, 74.0),
+        maxDist: 3.8,
+        encounterId: 'ESCOLA_PUBLICA',
+        zoneId: 'ESCOLA_LOURENCO_FILHO'
+      },
+      {
+        id: 'parque_petronio',
+        name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA',
+        prompt: 'COMPRAR PIPOCA DO SEU ZICO OU USAR A PRAÇA',
+        position: new THREE.Vector3(160.5, 1.2, 72.0),
+        maxDist: 3.8,
+        encounterId: 'PARQUE_PETRONIO',
+        zoneId: 'PARQUE_PETRONIO'
+      },
+      {
+        id: 'espetinho_petronio',
+        name: 'BAR & ESPETINHO DA PETRÔNIO',
+        prompt: 'PEDIR ESPETINHO COM SEU TONINHO NA BRASA',
+        position: new THREE.Vector3(129.8, 1.2, 125.0),
+        maxDist: 3.8,
+        encounterId: 'ESPETINHO_PETRONIO',
+        zoneId: 'ESPETINHO_PETRONIO'
+      },
+      {
+        id: 'papelaria_bazar',
+        name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO',
+        prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS',
+        position: new THREE.Vector3(159.0, 1.2, 145.0),
+        maxDist: 3.8,
+        encounterId: 'PAPELARIA_BAZAR',
+        zoneId: 'PAPELARIA_BAZAR'
       }
     ];
   }

@@ -11,7 +11,7 @@ Updated: 2026-09-11T13:35:00-03:00
 | # | Game Title | Slug | Channel | Upload ID | Build | Version | Deployment Status |
 |---|---|---|---|---|---|---|---|
 | **1** | **game.md** | `game-md` | `html5` | `#19180416` | `✓ #1965233` | `1.11.2` | **DEPLOYED & ACTIVE (✓)** |
-| **2** | **Brazil Simulator // Sobrevivência BR** | `brazil-simulator` | `html5` | `#19180466` | `✓ #1969079` | `26` | **DEPLOYED & ACTIVE (✓)** |
+| **2** | **Brazil Simulator // Sobrevivência BR** | `brazil-simulator` | `html5` | `#19180466` | `✓ #1969894` | `27` | **DEPLOYED & ACTIVE (✓)** |
 | **3** | **Rogue Chronicles: The Becoming** | `rogue-chronicles` | `html5` | `#19180472` | `✓ #1965270` | `0.3.0` | **DEPLOYED & ACTIVE (✓)** |
 | **4** | **Vegan T-Rex: A Matter of Principle** | `vegan-t-rex` | `html5` | `#19180476` | `✓ #1965271` | `0.5.0` | **DEPLOYED & ACTIVE (✓)** |
 
@@ -30,3 +30,4 @@ Updated: 2026-09-11T13:35:00-03:00
 - `2026-09-11 13:35`: Pushed `bundles/brazil-simulator.zip` to `gamemd/brazil-simulator:html5`. Build #1968919 (Version 24) processed successfully with OpenArt ElevenLabs Multilingual v2 studio voice pack (28 high-fidelity MP3 clips for Cadu and Marcão across all news incidents and weather forecasts, plus full audio media bundle).
 - `2026-09-11 14:02`: Pushed `bundles/brazil-simulator.zip` to `gamemd/brazil-simulator:html5`. Build #1968985 (Version 25) processed successfully with portrait-first mobile UX redesign (independent right thumb look, removal of landscape orientation banner and clutter, notch-safe 5-stat bar, non-overlapping objective ticker, tappable interact prompts, and vertically stacked touch-friendly NPC action cards).
 - `2026-09-11 14:32`: Pushed `bundles/brazil-simulator.zip` to `gamemd/brazil-simulator:html5`. Build #1969079 (Version 26) processed successfully eliminating audio overlap, establishing pristine 20kHz radio station broadcast, silencing parallel procedural synths and ambient chatter loops, and starting Muleke de Quebrada with 90s São Paulo Rap Boom Bap ("Sobreviver Não É Videogame" by Racionais do Asfalto).
+- `2026-09-11 19:40`: Pushed `bundles/brazil-simulator.zip` to `gamemd/brazil-simulator:html5`. Build #1969894 (Version 27) processed successfully with Av. Ministro Petrônio Portela extension (Z = 58 to 178), E.E. Prof. Lourenço Filho public school, Praça & Parque Linear Petrônio Portela, Bar & Espetinho da Petrônio, Papelaria & Autoescola, 9 visible 3D establishment character NPCs (Tião do Bar, Seu Zé da Adega, Manuel Padeiro, Dona Maria do Pastel, Seu Mário da Banca, Tonho do Posto, Tia Cida, Seu Zico da Pipoca, Seu Toninho do Espetinho), boundary wall relocation, and CDP Test 37 pass.

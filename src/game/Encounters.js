@@ -2134,6 +2134,194 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  ESCOLA_PUBLICA: {
+    id: 'ESCOLA_PUBLICA',
+    title: '🏫 E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)',
+    getIntroText: (state) => `
+      Tia Cida, inspetora de longa data com seu avental azul e molho de chaves na cintura, te encara no portão:<br>
+      <em>"— Olha só quem apareceu! Você estudou aqui, né? Ou veio matar aula de novo na praça?"</em><br>
+      O cheiro inconfundível de merenda escolar invade a calçada e o som de uma bola de futsal quicando na quadra ecoa pelo pátio.<br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pedir_merenda',
+        label: 'Pedir prato de merenda escolar (arroz doce com canela & biscoito de polvilho)',
+        costLabel: 'Grátis (Merenda Escolar)',
+        disabled: Boolean(state.flags.merendaHoje),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ fome: 35, sanidade: 20, flags: { merendaHoje: true } }, 'Merenda da Tia Cida');
+          return 'Tia Cida te serve com carinho um prato fundo de arroz doce quentinho com canela polvilhada. Lembrança doce da infância em Pirituba (+35% Bucho, +20% Sanidade)!';
+        }
+      },
+      {
+        id: 'pelada_quadra',
+        label: 'Entrar na quadra poliesportiva e jogar uma pelada de futsal com a molecada',
+        costLabel: '+10 Ginga (Gasto de Energia)',
+        execute: (state, sound) => {
+          if (sound) {
+            if (typeof sound.playKickBall === 'function') sound.playKickBall();
+            else if (typeof sound.playKick === 'function') sound.playKick();
+          }
+          state.apply({ ginga: 10, sanidade: 16, fome: -10 }, 'Pelada na quadra da escola');
+          return 'Você correu na quadra de cimento áspero, driblou dois moleques e mandou um golaço de bico no ângulo! O recreio inteiro aplaudiu (+10 Ginga, +16% Sanidade, -10% Bucho).';
+        }
+      },
+      {
+        id: 'lembranca_boletim',
+        label: 'Conversar com a Tia Cida e lembrar das histórias do antigo boletim escolar',
+        costLabel: '+12% Sanidade (Nostalgia)',
+        execute: (state) => {
+          state.apply({ sanidade: 12, ginga: 4 }, 'Papo com a inspetora Tia Cida');
+          return 'Tia Cida dá risada lembrando de quando você escondia o boletim da sua mãe no forro do telhado: "— Você dava trabalho, mas tinha coração bom!" (+12% Sanidade, +4 Ginga).';
+        }
+      }
+    ]
+  },
+
+  PARQUE_PETRONIO: {
+    id: 'PARQUE_PETRONIO',
+    title: '🌳 PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA',
+    getIntroText: (state) => `
+      Os Ipês amarelos derramam flores douradas na calçada de pedra. O vento fresco balança as folhas enquanto aposentados se exercitam na academia ao ar livre.<br>
+      Seu Zico sorri ao lado do seu carrinho de pipoca com sombrinha listrada:<br>
+      <em>"— Pipoca quentinha com bacon crocante e queijo ralado, chefia! Vai um saco caprichado?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pipoca_bacon',
+        label: 'Comprar saquinho grande de pipoca com cubos de bacon crocante e queijo ralado',
+        costLabel: 'R$ 6,00',
+        costCentavos: 600,
+        disabled: !state.canAfford(600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -600, fome: 30, sanidade: 22 }, 'Pipoca com bacon do Seu Zico');
+          return 'Pipoca salgadinha estalando de fresca com cubinhos de bacon dourado e queijo parmesão. O aroma clássico das praças paulistanas (+30% Bucho, +22% Sanidade)!';
+        }
+      },
+      {
+        id: 'academia_ar_livre',
+        label: 'Fazer uma série completa no simulador de caminhada e barras da academia da prefeitura',
+        costLabel: '+20% Sanidade (Exercício Grátis)',
+        execute: (state) => {
+          state.apply({ sanidade: 20, ginga: 8, fome: -8 }, 'Academia ao ar livre');
+          return 'Você faz 15 minutos no aparelho de caminhada amarelo e alonga as costas na barra. O sangue circula e o cansaço mental vai embora (+20% Sanidade, +8 Ginga, -8% Bucho).';
+        }
+      },
+      {
+        id: 'descanso_ipe',
+        label: 'Sentar no banco de madeira sob a copa florida do Ipê amarelo para respirar',
+        costLabel: '+15% Sanidade (Paz de Espírito)',
+        execute: (state) => {
+          state.apply({ sanidade: 15 }, 'Descanso na sombra do Ipê');
+          return 'Você senta no banco de praça ouvindo o canto dos sabiás entre as flores amarelas. Um momento raro de calma e serenidade na correria de São Paulo (+15% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  ESPETINHO_PETRONIO: {
+    id: 'ESPETINHO_PETRONIO',
+    title: '🍢 BAR & ESPETINHO DA PETRÔNIO',
+    getIntroText: (state) => `
+      A fumaça perfumada de carvão vegetal com gordura chiando na brasa atrai a vizinhança para as mesas amarelas na calçada.<br>
+      Seu Toninho, de pinça longa e pano de prato no ombro, vira os espetos com maestria:<br>
+      <em>"— Saiu carne no capricho, queijo coalho com melaço e frango com bacon! Chopp gelado trincando saindo na bica!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'combo_espetinho',
+        label: 'Combo de 2 espetinhos artesanais com farofa crocante, vinagrete caseiro e pão de alho',
+        costLabel: 'R$ 16,00',
+        costCentavos: 1600,
+        disabled: !state.canAfford(1600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1600, fome: 50, sanidade: 25 }, 'Combo de espetinhos com farofa');
+          return 'Carne macia e suculenta assada na brasa, farofinha temperada e vinagrete fresquinho. Refeição completa de boteco (+50% Bucho, +25% Sanidade)!';
+        }
+      },
+      {
+        id: 'chopp_artesanal',
+        label: 'Caneca de chopp gelado com colarinho cremoso servido na mesa da calçada',
+        costLabel: 'R$ 9,00',
+        costCentavos: 900,
+        disabled: !state.canAfford(900),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -900, sanidade: 26, ginga: 6, fome: 6 }, 'Chopp gelado no espetinho');
+          return 'Chopp leve e refrescante descendo redondo enquanto a brisa da noite sopra pela Petrônio Portela (+26% Sanidade, +6 Ginga).';
+        }
+      },
+      {
+        id: 'queijo_coalho',
+        label: 'Espetinho de queijo coalho dourado com orégano e fio de melado',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -800, fome: 26, sanidade: 18 }, 'Queijo coalho com melaço');
+          return 'Queijo com casquinha tostada e recheio puxento doce e salgado. Delícia nordestina tradicional (+26% Bucho, +18% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  PAPELARIA_BAZAR: {
+    id: 'PAPELARIA_BAZAR',
+    title: '📚 PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO',
+    getIntroText: (state) => `
+      Cadernos espirais coloridos, mochilas escolares e cartolinas preenchem a vitrine da Papelaria Pirituba.<br>
+      Ao lado, a placa iluminada da Autoescola Petrônio exibe o Fiat Uno com teto de autoescola estacionado.<br>
+      A atendente no balcão de vidro te cumprimenta com um sorriso:<br>
+      <em>"— Boa tarde! Precisa tirar xerox, materiais ou recarregar o Bilhete Único?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'recarga_bilhete',
+        label: 'Recarregar R$ 20,00 no Bilhete Único para transporte público SPTrans',
+        costLabel: 'R$ 20,00',
+        costCentavos: 2000,
+        disabled: !state.canAfford(2000) || Boolean(state.flags.bilheteRecarregado),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -2000, sanidade: 15, flags: { bilheteRecarregado: true } }, 'Recarga Bilhete Único');
+          return 'Cartão encostado na máquina, bipe sonoro de confirmação e saldo liberado para pegar qualquer ônibus municipal sem perrengue (+15% Sanidade, Bilhete Carregado)!';
+        }
+      },
+      {
+        id: 'comprar_material',
+        label: 'Comprar caneta Bic azul, bloquinho de notas e balas de canela no caixa',
+        costLabel: 'R$ 5,00',
+        costCentavos: 500,
+        disabled: !state.canAfford(500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -500, sanidade: 12, ginga: 4 }, 'Materiais e balas de canela');
+          return 'Caneta nova para assinar documentos e o bloquinho de anotações no bolso. Dá uma sensação profissional de organização (+12% Sanidade, +4 Ginga).';
+        }
+      },
+      {
+        id: 'tirar_xerox',
+        label: 'Tirar xerox de documentos e comprovante de residência no balcão',
+        costLabel: 'R$ 2,00',
+        costCentavos: 200,
+        disabled: !state.canAfford(200),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -200, sanidade: 8 }, 'Xerox de documentos');
+          return 'Luz verde da máquina correndo no vidro e folha quente saindo na bandeja. Burocracia paulistana resolvida rápido (+8% Sanidade).';
+        }
+      }
+    ]
   }
 };
 

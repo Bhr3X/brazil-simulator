@@ -51,6 +51,7 @@ export class CityBuilder {
     this.buildLargoDaMatrizFreguesia();
     this.buildBlocoEdgarFaccoTrioPlaza();
     this.buildFavelaCampinho();
+    this.buildPetronioPortelaSouthCorridor();
     this.buildMapBoundaryIllusionWallsAndConstructionSites();
   }
 
@@ -4908,7 +4909,7 @@ export class CityBuilder {
     // Exterior Perimeter Boundaries for Edgar Facó & Petrônio Portela
     this.physics.addBoxCollider(new THREE.Vector3(165.0, 0, -20.0), new THREE.Vector3(175.0, 10, 60.0), 'solid'); // Far East Wall
     this.physics.addBoxCollider(new THREE.Vector3(135.0, 0, -25.0), new THREE.Vector3(155.0, 10, -18.0), 'solid'); // North Petrônio Dead End
-    this.physics.addBoxCollider(new THREE.Vector3(135.0, 0, 58.0), new THREE.Vector3(155.0, 10, 65.0), 'solid');  // South Petrônio Dead End
+    // (South Petrônio corridor is extended to Z=178 with boundary relocated to Z=178)
     this.physics.addBoxCollider(new THREE.Vector3(50.0, 0, -15.0), new THREE.Vector3(135.0, 10, -8.0), 'solid');   // North corridor wall
   }
 
@@ -5782,6 +5783,411 @@ export class CityBuilder {
   }
 
   // =========================================================================
+  // 24.5 Av. Ministro Petrônio Portela South Corridor Extension (Z = 58 to 178)
+  // Schools, Linear Park, Bares, Espetinhos, Papelarias, Commerces & Street Furniture
+  // =========================================================================
+  buildPetronioPortelaSouthCorridor() {
+    const roadMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createAsfalto(4, 24)
+    });
+    const sideMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(4, 24)
+    });
+    const yellowStripeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const whiteStripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    // 1. Roadway Asphalt (X = 137.0 to 153.0, Z = 58.0 to 178.0)
+    const roadGeo = new THREE.PlaneGeometry(16.0, 120.0);
+    const roadMesh = new THREE.Mesh(roadGeo, roadMat);
+    roadMesh.rotation.x = -Math.PI / 2;
+    roadMesh.position.set(145.0, 0.01, 118.0);
+    this.scene.add(roadMesh);
+
+    // Center dashed double yellow line (Faixa Amarela Dupla Pontilhada)
+    for (let z = 60.0; z < 176.0; z += 5.0) {
+      [-0.15, 0.15].forEach(dx => {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 2.8), yellowStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(145.0 + dx, 0.016, z);
+        this.scene.add(stripe);
+      });
+    }
+
+    // Pedestrian crosswalks at Z = 95.0 and Z = 150.0
+    [95.0, 150.0].forEach(crossZ => {
+      for (let x = 137.6; x <= 152.4; x += 1.6) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 4.0), whiteStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(x, 0.018, crossZ);
+        this.scene.add(stripe);
+      }
+    });
+
+    // 2. Sidewalks (West: X = 131 to 137, East: X = 153 to 159)
+    // West Sidewalk
+    const westSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 120.0), sideMat);
+    westSide.position.set(134.0, 0.125, 118.0);
+    this.scene.add(westSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(131.0, 0, 58.0),
+      new THREE.Vector3(137.0, 0.25, 178.0),
+      'curb'
+    );
+
+    // East Sidewalk
+    const eastSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 120.0), sideMat);
+    eastSide.position.set(156.0, 0.125, 118.0);
+    this.scene.add(eastSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(153.0, 0, 58.0),
+      new THREE.Vector3(159.0, 0.25, 178.0),
+      'curb'
+    );
+
+    // 3. Concrete Utility Poles with Street Lights along Petrônio Portela
+    [68.0, 95.0, 122.0, 148.0, 170.0].forEach((pz, idx) => {
+      this.buildUtilityPole(136.5, 0.25, pz, idx % 2 === 0);
+      this.buildUtilityPole(153.5, 0.25, pz + 12.0, idx % 2 === 1);
+    });
+
+    // -------------------------------------------------------------------------
+    // 4. WEST SIDE: E.E. PROF. LOURENÇO FILHO (Z = 64.0 to 108.0)
+    // -------------------------------------------------------------------------
+    {
+      const schoolGroup = new THREE.Group();
+
+      const schoolWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#f5efe6', 4, 3)
+      });
+      const schoolNavyMat = new THREE.MeshLambertMaterial({
+        color: 0x1e3a8a
+      });
+
+      const schoolBody = new THREE.Mesh(new THREE.BoxGeometry(26.0, 8.0, 28.0), schoolWallMat);
+      schoolBody.position.set(117.0, 4.0, 92.0);
+      schoolGroup.add(schoolBody);
+
+      const schoolBase = new THREE.Mesh(new THREE.BoxGeometry(26.2, 1.2, 28.2), schoolNavyMat);
+      schoolBase.position.set(117.0, 0.6, 92.0);
+      schoolGroup.add(schoolBase);
+
+      const portico = new THREE.Mesh(new THREE.BoxGeometry(3.0, 4.2, 8.0), schoolNavyMat);
+      portico.position.set(129.5, 2.1, 74.0);
+      schoolGroup.add(portico);
+
+      const boardMat = new THREE.MeshLambertMaterial({ color: 0x0f172a });
+      const signBoard = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.2, 7.0), boardMat);
+      signBoard.position.set(131.1, 4.5, 74.0);
+      schoolGroup.add(signBoard);
+
+      const poleMat = new THREE.MeshLambertMaterial({ color: 0xd1d5db });
+      const pole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6.0, 8), poleMat);
+      pole1.position.set(131.8, 3.0, 71.5);
+      schoolGroup.add(pole1);
+
+      const flagBr = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.9, 1.4), new THREE.MeshBasicMaterial({ color: 0x059669 }));
+      flagBr.position.set(131.8, 5.2, 72.2);
+      schoolGroup.add(flagBr);
+
+      const pole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6.0, 8), poleMat);
+      pole2.position.set(131.8, 3.0, 76.5);
+      schoolGroup.add(pole2);
+
+      const flagSp = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.9, 1.4), new THREE.MeshBasicMaterial({ color: 0x111827 }));
+      flagSp.position.set(131.8, 5.2, 77.2);
+      schoolGroup.add(flagSp);
+
+      // Sports Court (Quadra Poliesportiva) at Z = 66 to 82, X = 105 to 127
+      const courtGeo = new THREE.PlaneGeometry(22.0, 14.0);
+      const courtMat = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+      const court = new THREE.Mesh(courtGeo, courtMat);
+      court.rotation.x = -Math.PI / 2;
+      court.position.set(116.0, 0.02, 74.0);
+      schoolGroup.add(court);
+
+      const courtBorder = new THREE.Mesh(new THREE.PlaneGeometry(21.4, 13.4), new THREE.MeshBasicMaterial({ color: 0x047857 }));
+      courtBorder.rotation.x = -Math.PI / 2;
+      courtBorder.position.set(116.0, 0.025, 74.0);
+      schoolGroup.add(courtBorder);
+
+      const goalMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      [-10.0, 10.0].forEach(gx => {
+        const goalCross = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 3.0), goalMat);
+        goalCross.position.set(116.0 + gx, 1.6, 74.0);
+        schoolGroup.add(goalCross);
+
+        const goalL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6), goalMat);
+        goalL.position.set(116.0 + gx, 0.8, 72.5);
+        schoolGroup.add(goalL);
+
+        const goalR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6), goalMat);
+        goalR.position.set(116.0 + gx, 0.8, 75.5);
+        schoolGroup.add(goalR);
+      });
+
+      const fenceMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
+      const fenceN = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.2, 7.5), fenceMat);
+      fenceN.position.set(131.0, 1.6, 67.75);
+      schoolGroup.add(fenceN);
+
+      const fenceS = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.2, 31.5), fenceMat);
+      fenceS.position.set(131.0, 1.6, 92.25);
+      schoolGroup.add(fenceS);
+
+      const gatePostMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
+      const gp1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.8, 0.5), gatePostMat);
+      gp1.position.set(131.0, 1.9, 71.8);
+      schoolGroup.add(gp1);
+
+      const gp2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.8, 0.5), gatePostMat);
+      gp2.position.set(131.0, 1.9, 76.2);
+      schoolGroup.add(gp2);
+
+      this.scene.add(schoolGroup);
+
+      this.physics.addBoxCollider(new THREE.Vector3(104.0, 0, 78.0), new THREE.Vector3(130.0, 8.5, 106.0), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(130.8, 0, 64.0), new THREE.Vector3(131.4, 3.5, 71.6), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(130.8, 0, 76.4), new THREE.Vector3(131.4, 3.5, 108.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. WEST SIDE: BAR & ESPETINHO DA PETRÔNIO (Z = 118.0 to 142.0)
+    // -------------------------------------------------------------------------
+    {
+      const espetinhoGroup = new THREE.Group();
+
+      const barMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#b45309', 3, 2)
+      });
+      const barBuilding = new THREE.Mesh(new THREE.BoxGeometry(14.0, 5.0, 24.0), barMat);
+      barBuilding.position.set(121.0, 2.5, 130.0);
+      espetinhoGroup.add(barBuilding);
+
+      const awningMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createTelhaOndulada(3, 8)
+      });
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(5.0, 0.15, 18.0), awningMat);
+      awning.position.set(129.5, 3.5, 128.0);
+      awning.rotation.z = -0.08;
+      espetinhoGroup.add(awning);
+
+      const counterMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const counter = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 6.0), counterMat);
+      counter.position.set(129.5, 0.5, 125.0);
+      espetinhoGroup.add(counter);
+
+      const drumMat = new THREE.MeshLambertMaterial({ color: 0x18181b });
+      const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2, 12), drumMat);
+      drum.rotation.z = Math.PI / 2;
+      drum.position.set(129.5, 0.85, 122.2);
+      espetinhoGroup.add(drum);
+
+      const coalMat = new THREE.MeshBasicMaterial({ color: 0xff4500 });
+      const coals = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.1, 1.0), coalMat);
+      coals.position.set(129.5, 0.95, 122.2);
+      espetinhoGroup.add(coals);
+
+      const legMat = new THREE.MeshLambertMaterial({ color: 0x27272a });
+      [-0.45, 0.45].forEach(lz => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 6), legMat);
+        leg.position.set(129.5, 0.425, 122.2 + lz);
+        espetinhoGroup.add(leg);
+      });
+
+      const neonMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+      const espetinhoSign = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.0, 8.0), neonMat);
+      espetinhoSign.position.set(131.2, 3.8, 127.0);
+      espetinhoGroup.add(espetinhoSign);
+
+      this.scene.add(espetinhoGroup);
+
+      this.buildBotecoTableSet(133.5, 0.25, 120.5);
+      this.buildBotecoTableSet(133.5, 0.25, 128.5);
+      this.buildBotecoTableSet(133.5, 0.25, 134.5);
+      this.buildBeerCrateStack(128.5, 0.25, 137.0, '#f5b800', 3, 2);
+      this.buildBeerCrateStack(128.5, 0.25, 139.0, '#c92418', 2, 2);
+
+      this.physics.addBoxCollider(new THREE.Vector3(114.0, 0, 118.0), new THREE.Vector3(128.5, 5.5, 142.0), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(128.8, 0, 121.5), new THREE.Vector3(130.2, 1.2, 128.2), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. WEST SIDE: COMMERCIAL SOBRADOS (Z = 142.0 to 178.0)
+    // -------------------------------------------------------------------------
+    {
+      const sobradoMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createTijoloBaiano(4, 4)
+      });
+      const sobradoBlock = new THREE.Mesh(new THREE.BoxGeometry(18.0, 7.5, 36.0), sobradoMat);
+      sobradoBlock.position.set(122.0, 3.75, 160.0);
+      this.scene.add(sobradoBlock);
+
+      this.physics.addBoxCollider(new THREE.Vector3(113.0, 0, 142.0), new THREE.Vector3(131.0, 8.0, 178.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. EAST SIDE: PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA (Z = 62.0 to 125.0)
+    // -------------------------------------------------------------------------
+    {
+      const parkGroup = new THREE.Group();
+
+      const grassMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPitchGrass(6, 12)
+      });
+      const grass = new THREE.Mesh(new THREE.PlaneGeometry(27.0, 63.0), grassMat);
+      grass.rotation.x = -Math.PI / 2;
+      grass.position.set(172.5, 0.13, 93.5);
+      parkGroup.add(grass);
+
+      const pathMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createCalcadaPaulista(2, 14)
+      });
+      const path = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 60.0), pathMat);
+      path.rotation.x = -Math.PI / 2;
+      path.position.set(166.5, 0.14, 93.5);
+      parkGroup.add(path);
+
+      const atiMatY = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+      const atiMatB = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+
+      const atiPost1 = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.8, 8), atiMatB);
+      atiPost1.position.set(174.5, 0.9, 88.0);
+      parkGroup.add(atiPost1);
+
+      const atiPost2 = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.8, 8), atiMatB);
+      atiPost2.position.set(175.5, 0.9, 88.0);
+      parkGroup.add(atiPost2);
+
+      const atiBarTop = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.08, 0.08), atiMatY);
+      atiBarTop.position.set(175.0, 1.4, 88.0);
+      parkGroup.add(atiBarTop);
+
+      const barH1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.4, 8), atiMatB);
+      barH1.position.set(177.0, 1.2, 92.0);
+      parkGroup.add(barH1);
+
+      const barH2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.4, 8), atiMatB);
+      barH2.position.set(179.0, 1.2, 92.0);
+      parkGroup.add(barH2);
+
+      const barCross = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.0, 8), atiMatY);
+      barCross.rotation.z = Math.PI / 2;
+      barCross.position.set(178.0, 2.2, 92.0);
+      parkGroup.add(barCross);
+
+      const swingMat = new THREE.MeshLambertMaterial({ color: 0xef4444 });
+      const swingFrameL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.2, 6), swingMat);
+      swingFrameL.position.set(176.0, 1.6, 102.5);
+      parkGroup.add(swingFrameL);
+
+      const swingFrameR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.2, 6), swingMat);
+      swingFrameR.position.set(176.0, 1.6, 105.5);
+      parkGroup.add(swingFrameR);
+
+      const swingTop = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 3.2), swingMat);
+      swingTop.position.set(176.0, 3.1, 104.0);
+      parkGroup.add(swingTop);
+
+      const cartMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+      const cartBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 0.8), cartMat);
+      cartBody.position.set(160.5, 0.75, 72.0);
+      parkGroup.add(cartBody);
+
+      const glassMat = new THREE.MeshLambertMaterial({ color: 0xfef08a, transparent: true, opacity: 0.85 });
+      const cartGlass = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.8, 0.75), glassMat);
+      cartGlass.position.set(160.5, 1.65, 72.0);
+      parkGroup.add(cartGlass);
+
+      const umbrellaMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+      const umbrella = new THREE.Mesh(new THREE.ConeGeometry(1.4, 0.6, 12), umbrellaMat);
+      umbrella.position.set(160.5, 2.5, 72.0);
+      parkGroup.add(umbrella);
+
+      const benchMat = new THREE.MeshLambertMaterial({ color: 0x15803d });
+      [76.0, 86.0, 98.0, 112.0].forEach(bz => {
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 2.2), benchMat);
+        bench.position.set(164.2, 0.35, bz);
+        parkGroup.add(bench);
+      });
+
+      this.scene.add(parkGroup);
+
+      this.buildIpeTree(164.0, 0.25, 66.0);
+      this.buildIpeTree(176.0, 0.25, 78.0);
+      this.buildIpeTree(165.0, 0.25, 92.0);
+      this.buildIpeTree(178.0, 0.25, 108.0);
+      this.buildIpeTree(165.0, 0.25, 120.0);
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. EAST SIDE: PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO (Z = 132.0 to 168.0)
+    // -------------------------------------------------------------------------
+    {
+      const commGroup = new THREE.Group();
+
+      const commWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#f1f5f9', 3, 3)
+      });
+      const commBlock = new THREE.Mesh(new THREE.BoxGeometry(18.0, 6.0, 36.0), commWallMat);
+      commBlock.position.set(169.0, 3.0, 150.0);
+      commGroup.add(commBlock);
+
+      const papSignMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+      const papSign = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.1, 12.0), papSignMat);
+      papSign.position.set(159.9, 4.0, 141.0);
+      commGroup.add(papSign);
+
+      const autoSignMat = new THREE.MeshBasicMaterial({ color: 0x1e3a8a });
+      const autoSign = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.1, 12.0), autoSignMat);
+      autoSign.position.set(159.9, 4.0, 159.0);
+      commGroup.add(autoSign);
+
+      const carGroup = new THREE.Group();
+      const carMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      const carBody = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.9, 3.4), carMat);
+      carBody.position.set(0, 0.6, 0);
+      carGroup.add(carBody);
+
+      const carCabin = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.7, 1.8), new THREE.MeshLambertMaterial({ color: 0x38bdf8 }));
+      carCabin.position.set(0, 1.3, -0.2);
+      carGroup.add(carCabin);
+
+      const roofBoardMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+      const roofBoard = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.35, 1.2), roofBoardMat);
+      roofBoard.position.set(0, 1.8, -0.2);
+      carGroup.add(roofBoard);
+
+      carGroup.position.set(157.0, 0.25, 158.0);
+      commGroup.add(carGroup);
+
+      this.scene.add(commGroup);
+
+      this.physics.addBoxCollider(new THREE.Vector3(160.0, 0, 132.0), new THREE.Vector3(178.0, 6.5, 168.0), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(156.0, 0, 156.0), new THREE.Vector3(158.2, 2.0, 160.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. EAST SIDE: COMMERCIAL SOBRADOS (Z = 168.0 to 178.0)
+    // -------------------------------------------------------------------------
+    {
+      const southSobradoMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createReboco('#94a3b8', 2, 2)
+      });
+      const southSobrado = new THREE.Mesh(new THREE.BoxGeometry(18.0, 6.5, 10.0), southSobradoMat);
+      southSobrado.position.set(169.0, 3.25, 173.0);
+      this.scene.add(southSobrado);
+
+      this.physics.addBoxCollider(new THREE.Vector3(160.0, 0, 168.0), new THREE.Vector3(178.0, 7.0, 178.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. WEST & EAST PERIMETER BOUNDARY COLLIDERS (Z = 58.0 to 180.0)
+    // -------------------------------------------------------------------------
+    this.physics.addBoxCollider(new THREE.Vector3(98.0, 0, 58.0), new THREE.Vector3(103.0, 12.0, 180.0), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(184.0, 0, 58.0), new THREE.Vector3(192.0, 12.0, 180.0), 'solid');
+  }
+
+  // =========================================================================
   // 24. Map Boundary Trompe-l'œil Illusion Walls & Construction Sites
   // "Desculpe pelo transtorno, estamos em Obras"
   // =========================================================================
@@ -6050,7 +6456,7 @@ export class CityBuilder {
     }
 
     // -----------------------------------------------------------------------
-    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 58.0, Y = 0)
+    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 178.0, Y = 0)
     // -----------------------------------------------------------------------
     {
       const wallW = 22.0, wallH = 9.0;
@@ -6059,33 +6465,33 @@ export class CityBuilder {
         new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
       );
       plane.rotation.y = Math.PI; // Faces -Z (towards player coming south)
-      plane.position.set(145.0, wallH / 2, 57.8);
+      plane.position.set(145.0, wallH / 2, 177.8);
       boundaryGroup.add(plane);
 
       const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(145.0, wallH / 2, 58.6);
+      back.position.set(145.0, wallH / 2, 178.6);
       boundaryGroup.add(back);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(134.0, 0, 57.5),
-        new THREE.Vector3(156.0, 11.0, 59.5),
+        new THREE.Vector3(134.0, 0, 177.5),
+        new THREE.Vector3(156.0, 11.0, 179.5),
         'solid'
       );
 
       this.illusionWalls.push({
         id: 'south_petronio',
         name: 'Muro Pintado Petrônio Portela (Sul)',
-        planePos: new THREE.Vector3(145.0, 0, 57.8),
+        planePos: new THREE.Vector3(145.0, 0, 177.8),
         normal: new THREE.Vector3(0, 0, -1),
-        bounds: { minX: 134.0, maxX: 156.0, minZ: 57.5, maxZ: 59.5, minY: 0, maxY: 11.0 }
+        bounds: { minX: 134.0, maxX: 156.0, minZ: 177.5, maxZ: 179.5, minY: 0, maxY: 11.0 }
       });
 
-      buildHugeObrasSign(145.0, 5.5, 53.5, Math.PI);
+      buildHugeObrasSign(145.0, 5.5, 173.5, Math.PI);
 
-      addCone(140.0, 0, 55.0);
-      addCone(145.0, 0, 55.0);
-      addCone(150.0, 0, 55.0);
-      addHeap(138.0, 0, 54.5, 2.5, 1.3, true);
+      addCone(140.0, 0, 175.0);
+      addCone(145.0, 0, 175.0);
+      addCone(150.0, 0, 175.0);
+      addHeap(138.0, 0, 174.5, 2.5, 1.3, true);
     }
 
     // -----------------------------------------------------------------------

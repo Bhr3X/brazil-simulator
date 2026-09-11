@@ -4030,6 +4030,196 @@ async function runTestSuite(url) {
       throw new Error(`TEST 36 FAILED: continuous corridor must provide all 8 authentic establishments with anchors, zones, encounters, and i18n. ${JSON.stringify(corridorTested)}`);
     }
 
+    // -----------------------------------------------------------------------
+    // [TEST 37] Av. Ministro Petrônio Portela Extension & 3D Establishment NPCs
+    // -----------------------------------------------------------------------
+    const petronioAndNpcTested = await evaluate(`
+      (async () => {
+        try {
+          const app = window.app;
+          const game = app && app.game;
+          const npcSystem = (game && game.npcs) || app.npcSystem || app.npcs;
+          const city = app.city;
+          const controls = app.controls;
+          const physics = app.physics;
+          const interactables = (game && game.interactables) || app.interactables;
+
+          // 1. Check all 9 3D establishment NPCs exist in npcSystem.establishmentNpcs
+          const establishmentNpcs = (npcSystem && npcSystem.establishmentNpcs) || [];
+          const expectedNpcIds = [
+            'tiao_bar',
+            'ze_adega',
+            'manuel_padeiro',
+            'dona_maria_pastel',
+            'mario_banca',
+            'frentista_tonho',
+            'tia_cida',
+            'zico_pipoca',
+            'toninho_espetinho'
+          ];
+
+          const allNpcsExist = expectedNpcIds.every(id => establishmentNpcs.some(n => n.id === id));
+          const allNpcsHaveMeshes = expectedNpcIds.every(id => {
+            const npc = establishmentNpcs.find(n => n.id === id);
+            return !!(npc && npc.mesh && npc.mesh.isGroup && npc.mesh.children.length > 0 && npc.stationary === true);
+          });
+
+          // Verify specific accessories
+          const tiao = establishmentNpcs.find(n => n.id === 'tiao_bar');
+          const hasTiaoAccessories = !!(tiao && tiao.mesh && tiao.mesh.getObjectByName('npc_mustache') && tiao.mesh.getObjectByName('npc_cloth'));
+
+          const manuel = establishmentNpcs.find(n => n.id === 'manuel_padeiro');
+          const hasManuelHat = !!(manuel && manuel.mesh && manuel.mesh.getObjectByName('npc_chef_hat'));
+
+          const maria = establishmentNpcs.find(n => n.id === 'dona_maria_pastel');
+          const hasMariaHairnet = !!(maria && maria.mesh && maria.mesh.getObjectByName('npc_hairnet'));
+
+          const toninho = establishmentNpcs.find(n => n.id === 'toninho_espetinho');
+          const hasToninhoTongs = !!(toninho && toninho.mesh && toninho.mesh.getObjectByName('npc_tongs'));
+
+          const zico = establishmentNpcs.find(n => n.id === 'zico_pipoca');
+          const hasZicoScoop = !!(zico && zico.mesh && zico.mesh.getObjectByName('npc_scoop'));
+
+          const cida = establishmentNpcs.find(n => n.id === 'tia_cida');
+          const hasCidaLanyard = !!(cida && cida.mesh && cida.mesh.getObjectByName('npc_lanyard'));
+
+          const accessoriesOk = !!(hasTiaoAccessories && hasManuelHat && hasMariaHairnet && hasToninhoTongs && hasZicoScoop && hasCidaLanyard);
+
+          // Verify that establishment NPCs are not interactable via direct target raycast
+          // so that Tests 33/34 invariants are strictly preserved
+          const targetIds = npcSystem ? npcSystem.getInteractableTargets().map(t => t.id) : [];
+          const shopkeepersExcludedFromDirectTargets = expectedNpcIds.every(id => !targetIds.includes(id));
+
+          // 2. Check Petrônio Portela new anchors
+          const anchors = (interactables && interactables.anchors) || [];
+          const expectedPetronioAnchors = [
+            'escola_publica',
+            'parque_petronio',
+            'espetinho_petronio',
+            'papelaria_bazar'
+          ];
+          const allPetronioAnchorsExist = expectedPetronioAnchors.every(id => {
+            const a = anchors.find(x => x.id === id);
+            return !!(a && a.position && a.position.z > 58.0 && a.encounterId && a.zoneId);
+          });
+
+          // Verify bar_sinuca prompt updated
+          const barAnchor = anchors.find(a => a.id === 'bar_sinuca');
+          const barAnchorUpdated = !!(barAnchor && barAnchor.prompt && barAnchor.prompt.includes('TIÃO'));
+
+          // 3. Check new zones
+          const isEsm = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
+          let zonesList = [];
+          let encountersDict = null;
+          let transPt = null;
+          let transEn = null;
+          let enEncDict = null;
+
+          if (isEsm) {
+            const zMod = await import('/src/world/Zones.js');
+            zonesList = zMod.WORLD_ZONES || [];
+            const eMod = await import('/src/game/Encounters.js');
+            encountersDict = eMod.BRAZILIAN_ENCOUNTERS;
+            const iMod = await import('/src/game/i18n.js');
+            transPt = iMod.TRANSLATIONS.pt;
+            transEn = iMod.TRANSLATIONS.en;
+            const tMod = await import('/src/game/EncounterTranslations.js');
+            enEncDict = tMod.EN_ENCOUNTER_TEXTS;
+          } else {
+            zonesList = typeof WORLD_ZONES !== 'undefined' ? WORLD_ZONES : [];
+            encountersDict = typeof BRAZILIAN_ENCOUNTERS !== 'undefined' ? BRAZILIAN_ENCOUNTERS : null;
+            transPt = typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS.pt : null;
+            transEn = typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS.en : null;
+            enEncDict = typeof EN_ENCOUNTER_TEXTS !== 'undefined' ? EN_ENCOUNTER_TEXTS : null;
+          }
+
+          const expectedNewZones = [
+            'ESCOLA_LOURENCO_FILHO',
+            'PARQUE_PETRONIO',
+            'ESPETINHO_PETRONIO',
+            'PAPELARIA_BAZAR'
+          ];
+          const newZonesExist = expectedNewZones.every(zid => zonesList.some(z => z.id === zid));
+
+          // 4. Check new encounters exist and are executable
+          const expectedNewEncounters = [
+            'ESCOLA_PUBLICA',
+            'PARQUE_PETRONIO',
+            'ESPETINHO_PETRONIO',
+            'PAPELARIA_BAZAR'
+          ];
+          const newEncountersExist = expectedNewEncounters.every(eid => {
+            const enc = encountersDict && encountersDict[eid];
+            return !!(enc && typeof enc.title === 'string' && typeof enc.getIntroText === 'function' && typeof enc.getOptions === 'function');
+          });
+
+          // 5. Check south_petronio boundary wall is relocated to Z ~ 178
+          const southPetronioWall = (city.illusionWalls || []).find(w => w.id === 'south_petronio');
+          const wallRelocated = !!(southPetronioWall && southPetronioWall.bounds && southPetronioWall.bounds.minZ > 170.0);
+          const wallSolid = !!(southPetronioWall && physics.collidesWithSolids(
+            new window.THREE.Vector3(
+              (southPetronioWall.bounds.minX + southPetronioWall.bounds.maxX) / 2,
+              (southPetronioWall.bounds.minY + southPetronioWall.bounds.maxY) / 2,
+              (southPetronioWall.bounds.minZ + southPetronioWall.bounds.maxZ) / 2
+            ),
+            0.38,
+            0.45
+          ));
+
+          // 6. Check avenue corridor is walkable at Z = 60, 100, 140 (no false colliders blocking roadway)
+          const roadWalkableAt60 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 60.0), 0.38, 0.8);
+          const roadWalkableAt100 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 100.0), 0.38, 0.8);
+          const roadWalkableAt140 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 140.0), 0.38, 0.8);
+          const roadWalkable = !!(roadWalkableAt60 && roadWalkableAt100 && roadWalkableAt140);
+
+          // 7. Check bilingual translations for new interactables and encounters
+          const ptInteractablesOk = expectedPetronioAnchors.every(id => !!(transPt && transPt.interactables && transPt.interactables[id]));
+          const enInteractablesOk = expectedPetronioAnchors.every(id => !!(transEn && transEn.interactables && transEn.interactables[id]));
+          const enEncountersOk = expectedNewEncounters.every(eid => !!(enEncDict && enEncDict[eid] && enEncDict[eid].title));
+
+          const ok = allNpcsExist
+            && allNpcsHaveMeshes
+            && accessoriesOk
+            && shopkeepersExcludedFromDirectTargets
+            && allPetronioAnchorsExist
+            && barAnchorUpdated
+            && newZonesExist
+            && newEncountersExist
+            && wallRelocated
+            && wallSolid
+            && roadWalkable
+            && ptInteractablesOk
+            && enInteractablesOk
+            && enEncountersOk;
+
+          return {
+            ok: Boolean(ok),
+            allNpcsExist: Boolean(allNpcsExist),
+            allNpcsHaveMeshes: Boolean(allNpcsHaveMeshes),
+            accessoriesOk: Boolean(accessoriesOk),
+            shopkeepersExcludedFromDirectTargets: Boolean(shopkeepersExcludedFromDirectTargets),
+            allPetronioAnchorsExist: Boolean(allPetronioAnchorsExist),
+            barAnchorUpdated: Boolean(barAnchorUpdated),
+            newZonesExist: Boolean(newZonesExist),
+            newEncountersExist: Boolean(newEncountersExist),
+            wallRelocated: Boolean(wallRelocated),
+            wallSolid: Boolean(wallSolid),
+            roadWalkable: Boolean(roadWalkable),
+            ptInteractablesOk: Boolean(ptInteractablesOk),
+            enInteractablesOk: Boolean(enInteractablesOk),
+            enEncountersOk: Boolean(enEncountersOk),
+            establishmentCount: Number(establishmentNpcs.length)
+          };
+        } catch (err) {
+          return { ok: false, error: err.message || String(err) };
+        }
+      })()
+    `);
+    console.log(`[TEST 37] Av. Ministro Petrônio Portela Extension & 3D Establishment NPCs:`, petronioAndNpcTested);
+    if (!petronioAndNpcTested.ok) {
+      throw new Error(`TEST 37 FAILED: Av. Ministro Petrônio Portela Extension & 3D Establishment NPCs failed. ${JSON.stringify(petronioAndNpcTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

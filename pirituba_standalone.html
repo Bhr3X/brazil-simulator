@@ -8783,6 +8783,10 @@ class SoundEngine {
     osc.stop(t + 0.18);
   }
 
+  playKick() {
+    this.playKickBall();
+  }
+
   // 10. Distant Police Siren (Viatura da PM / B.O. Alto)
   playSiren() {
     if (!this.isInitialized || this.isMuted) return;
@@ -9777,6 +9781,42 @@ const WORLD_ZONES = [
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Subida íngreme e charmosa que atravessa a Edgar Facó e conecta Pirituba ao coração histórico da Freguesia do Ó.'
+  },
+  {
+    id: 'ESCOLA_LOURENCO_FILHO',
+    name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)',
+    min: { x: 105.0, y: 0.0, z: 64.0 },
+    max: { x: 137.0, y: 8.0, z: 110.0 },
+    openHour: 7.0,
+    closeHour: 22.5,
+    description: 'Escola Estadual clássica de Pirituba. Portão de ferro, catraca, sirene, quadra poliesportiva e merenda escolar.'
+  },
+  {
+    id: 'PARQUE_PETRONIO',
+    name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA',
+    min: { x: 153.0, y: 0.0, z: 64.0 },
+    max: { x: 205.0, y: 8.0, z: 126.0 },
+    openHour: 6.0,
+    closeHour: 22.0,
+    description: 'Área verde arborizada com Ipês floridos, pista de cooper, academia da terceira idade (ATI) e carrinho de pipoca do Seu Zico.'
+  },
+  {
+    id: 'ESPETINHO_PETRONIO',
+    name: 'BAR & ESPETINHO DA PETRÔNIO',
+    min: { x: 114.0, y: 0.0, z: 116.0 },
+    max: { x: 137.0, y: 6.0, z: 148.0 },
+    openHour: 16.0,
+    closeHour: 2.0,
+    description: 'Boteco de esquina na Petrônio Portela com churrasqueira a carvão, espetinhos no capricho, farofa, vinagrete e chopp gelado.'
+  },
+  {
+    id: 'PAPELARIA_BAZAR',
+    name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO',
+    min: { x: 153.0, y: 0.0, z: 132.0 },
+    max: { x: 185.0, y: 8.0, z: 172.0 },
+    openHour: 8.0,
+    closeHour: 19.0,
+    description: 'Centro comercial com Papelaria Pirituba (cópias, xerox, materiais) e Autoescola Petrônio (CFC A/B).'
   }
 ];
 
@@ -13586,6 +13626,7 @@ class CityBuilder {
     this.buildLargoDaMatrizFreguesia();
     this.buildBlocoEdgarFaccoTrioPlaza();
     this.buildFavelaCampinho();
+    this.buildPetronioPortelaSouthCorridor();
     this.buildMapBoundaryIllusionWallsAndConstructionSites();
   }
 
@@ -18443,7 +18484,7 @@ class CityBuilder {
     // Exterior Perimeter Boundaries for Edgar Facó & Petrônio Portela
     this.physics.addBoxCollider(new THREE.Vector3(165.0, 0, -20.0), new THREE.Vector3(175.0, 10, 60.0), 'solid'); // Far East Wall
     this.physics.addBoxCollider(new THREE.Vector3(135.0, 0, -25.0), new THREE.Vector3(155.0, 10, -18.0), 'solid'); // North Petrônio Dead End
-    this.physics.addBoxCollider(new THREE.Vector3(135.0, 0, 58.0), new THREE.Vector3(155.0, 10, 65.0), 'solid');  // South Petrônio Dead End
+    // (South Petrônio corridor is extended to Z=178 with boundary relocated to Z=178)
     this.physics.addBoxCollider(new THREE.Vector3(50.0, 0, -15.0), new THREE.Vector3(135.0, 10, -8.0), 'solid');   // North corridor wall
   }
 
@@ -19317,6 +19358,411 @@ class CityBuilder {
   }
 
   // =========================================================================
+  // 24.5 Av. Ministro Petrônio Portela South Corridor Extension (Z = 58 to 178)
+  // Schools, Linear Park, Bares, Espetinhos, Papelarias, Commerces & Street Furniture
+  // =========================================================================
+  buildPetronioPortelaSouthCorridor() {
+    const roadMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createAsfalto(4, 24)
+    });
+    const sideMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(4, 24)
+    });
+    const yellowStripeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const whiteStripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    // 1. Roadway Asphalt (X = 137.0 to 153.0, Z = 58.0 to 178.0)
+    const roadGeo = new THREE.PlaneGeometry(16.0, 120.0);
+    const roadMesh = new THREE.Mesh(roadGeo, roadMat);
+    roadMesh.rotation.x = -Math.PI / 2;
+    roadMesh.position.set(145.0, 0.01, 118.0);
+    this.scene.add(roadMesh);
+
+    // Center dashed double yellow line (Faixa Amarela Dupla Pontilhada)
+    for (let z = 60.0; z < 176.0; z += 5.0) {
+      [-0.15, 0.15].forEach(dx => {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 2.8), yellowStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(145.0 + dx, 0.016, z);
+        this.scene.add(stripe);
+      });
+    }
+
+    // Pedestrian crosswalks at Z = 95.0 and Z = 150.0
+    [95.0, 150.0].forEach(crossZ => {
+      for (let x = 137.6; x <= 152.4; x += 1.6) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 4.0), whiteStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(x, 0.018, crossZ);
+        this.scene.add(stripe);
+      }
+    });
+
+    // 2. Sidewalks (West: X = 131 to 137, East: X = 153 to 159)
+    // West Sidewalk
+    const westSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 120.0), sideMat);
+    westSide.position.set(134.0, 0.125, 118.0);
+    this.scene.add(westSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(131.0, 0, 58.0),
+      new THREE.Vector3(137.0, 0.25, 178.0),
+      'curb'
+    );
+
+    // East Sidewalk
+    const eastSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 120.0), sideMat);
+    eastSide.position.set(156.0, 0.125, 118.0);
+    this.scene.add(eastSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(153.0, 0, 58.0),
+      new THREE.Vector3(159.0, 0.25, 178.0),
+      'curb'
+    );
+
+    // 3. Concrete Utility Poles with Street Lights along Petrônio Portela
+    [68.0, 95.0, 122.0, 148.0, 170.0].forEach((pz, idx) => {
+      this.buildUtilityPole(136.5, 0.25, pz, idx % 2 === 0);
+      this.buildUtilityPole(153.5, 0.25, pz + 12.0, idx % 2 === 1);
+    });
+
+    // -------------------------------------------------------------------------
+    // 4. WEST SIDE: E.E. PROF. LOURENÇO FILHO (Z = 64.0 to 108.0)
+    // -------------------------------------------------------------------------
+    {
+      const schoolGroup = new THREE.Group();
+
+      const schoolWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#f5efe6', 4, 3)
+      });
+      const schoolNavyMat = new THREE.MeshLambertMaterial({
+        color: 0x1e3a8a
+      });
+
+      const schoolBody = new THREE.Mesh(new THREE.BoxGeometry(26.0, 8.0, 28.0), schoolWallMat);
+      schoolBody.position.set(117.0, 4.0, 92.0);
+      schoolGroup.add(schoolBody);
+
+      const schoolBase = new THREE.Mesh(new THREE.BoxGeometry(26.2, 1.2, 28.2), schoolNavyMat);
+      schoolBase.position.set(117.0, 0.6, 92.0);
+      schoolGroup.add(schoolBase);
+
+      const portico = new THREE.Mesh(new THREE.BoxGeometry(3.0, 4.2, 8.0), schoolNavyMat);
+      portico.position.set(129.5, 2.1, 74.0);
+      schoolGroup.add(portico);
+
+      const boardMat = new THREE.MeshLambertMaterial({ color: 0x0f172a });
+      const signBoard = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.2, 7.0), boardMat);
+      signBoard.position.set(131.1, 4.5, 74.0);
+      schoolGroup.add(signBoard);
+
+      const poleMat = new THREE.MeshLambertMaterial({ color: 0xd1d5db });
+      const pole1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6.0, 8), poleMat);
+      pole1.position.set(131.8, 3.0, 71.5);
+      schoolGroup.add(pole1);
+
+      const flagBr = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.9, 1.4), new THREE.MeshBasicMaterial({ color: 0x059669 }));
+      flagBr.position.set(131.8, 5.2, 72.2);
+      schoolGroup.add(flagBr);
+
+      const pole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6.0, 8), poleMat);
+      pole2.position.set(131.8, 3.0, 76.5);
+      schoolGroup.add(pole2);
+
+      const flagSp = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.9, 1.4), new THREE.MeshBasicMaterial({ color: 0x111827 }));
+      flagSp.position.set(131.8, 5.2, 77.2);
+      schoolGroup.add(flagSp);
+
+      // Sports Court (Quadra Poliesportiva) at Z = 66 to 82, X = 105 to 127
+      const courtGeo = new THREE.PlaneGeometry(22.0, 14.0);
+      const courtMat = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+      const court = new THREE.Mesh(courtGeo, courtMat);
+      court.rotation.x = -Math.PI / 2;
+      court.position.set(116.0, 0.02, 74.0);
+      schoolGroup.add(court);
+
+      const courtBorder = new THREE.Mesh(new THREE.PlaneGeometry(21.4, 13.4), new THREE.MeshBasicMaterial({ color: 0x047857 }));
+      courtBorder.rotation.x = -Math.PI / 2;
+      courtBorder.position.set(116.0, 0.025, 74.0);
+      schoolGroup.add(courtBorder);
+
+      const goalMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      [-10.0, 10.0].forEach(gx => {
+        const goalCross = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 3.0), goalMat);
+        goalCross.position.set(116.0 + gx, 1.6, 74.0);
+        schoolGroup.add(goalCross);
+
+        const goalL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6), goalMat);
+        goalL.position.set(116.0 + gx, 0.8, 72.5);
+        schoolGroup.add(goalL);
+
+        const goalR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6), goalMat);
+        goalR.position.set(116.0 + gx, 0.8, 75.5);
+        schoolGroup.add(goalR);
+      });
+
+      const fenceMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
+      const fenceN = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.2, 7.5), fenceMat);
+      fenceN.position.set(131.0, 1.6, 67.75);
+      schoolGroup.add(fenceN);
+
+      const fenceS = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.2, 31.5), fenceMat);
+      fenceS.position.set(131.0, 1.6, 92.25);
+      schoolGroup.add(fenceS);
+
+      const gatePostMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
+      const gp1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.8, 0.5), gatePostMat);
+      gp1.position.set(131.0, 1.9, 71.8);
+      schoolGroup.add(gp1);
+
+      const gp2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.8, 0.5), gatePostMat);
+      gp2.position.set(131.0, 1.9, 76.2);
+      schoolGroup.add(gp2);
+
+      this.scene.add(schoolGroup);
+
+      this.physics.addBoxCollider(new THREE.Vector3(104.0, 0, 78.0), new THREE.Vector3(130.0, 8.5, 106.0), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(130.8, 0, 64.0), new THREE.Vector3(131.4, 3.5, 71.6), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(130.8, 0, 76.4), new THREE.Vector3(131.4, 3.5, 108.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. WEST SIDE: BAR & ESPETINHO DA PETRÔNIO (Z = 118.0 to 142.0)
+    // -------------------------------------------------------------------------
+    {
+      const espetinhoGroup = new THREE.Group();
+
+      const barMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#b45309', 3, 2)
+      });
+      const barBuilding = new THREE.Mesh(new THREE.BoxGeometry(14.0, 5.0, 24.0), barMat);
+      barBuilding.position.set(121.0, 2.5, 130.0);
+      espetinhoGroup.add(barBuilding);
+
+      const awningMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createTelhaOndulada(3, 8)
+      });
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(5.0, 0.15, 18.0), awningMat);
+      awning.position.set(129.5, 3.5, 128.0);
+      awning.rotation.z = -0.08;
+      espetinhoGroup.add(awning);
+
+      const counterMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const counter = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 6.0), counterMat);
+      counter.position.set(129.5, 0.5, 125.0);
+      espetinhoGroup.add(counter);
+
+      const drumMat = new THREE.MeshLambertMaterial({ color: 0x18181b });
+      const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2, 12), drumMat);
+      drum.rotation.z = Math.PI / 2;
+      drum.position.set(129.5, 0.85, 122.2);
+      espetinhoGroup.add(drum);
+
+      const coalMat = new THREE.MeshBasicMaterial({ color: 0xff4500 });
+      const coals = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.1, 1.0), coalMat);
+      coals.position.set(129.5, 0.95, 122.2);
+      espetinhoGroup.add(coals);
+
+      const legMat = new THREE.MeshLambertMaterial({ color: 0x27272a });
+      [-0.45, 0.45].forEach(lz => {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.85, 6), legMat);
+        leg.position.set(129.5, 0.425, 122.2 + lz);
+        espetinhoGroup.add(leg);
+      });
+
+      const neonMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+      const espetinhoSign = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.0, 8.0), neonMat);
+      espetinhoSign.position.set(131.2, 3.8, 127.0);
+      espetinhoGroup.add(espetinhoSign);
+
+      this.scene.add(espetinhoGroup);
+
+      this.buildBotecoTableSet(133.5, 0.25, 120.5);
+      this.buildBotecoTableSet(133.5, 0.25, 128.5);
+      this.buildBotecoTableSet(133.5, 0.25, 134.5);
+      this.buildBeerCrateStack(128.5, 0.25, 137.0, '#f5b800', 3, 2);
+      this.buildBeerCrateStack(128.5, 0.25, 139.0, '#c92418', 2, 2);
+
+      this.physics.addBoxCollider(new THREE.Vector3(114.0, 0, 118.0), new THREE.Vector3(128.5, 5.5, 142.0), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(128.8, 0, 121.5), new THREE.Vector3(130.2, 1.2, 128.2), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. WEST SIDE: COMMERCIAL SOBRADOS (Z = 142.0 to 178.0)
+    // -------------------------------------------------------------------------
+    {
+      const sobradoMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createTijoloBaiano(4, 4)
+      });
+      const sobradoBlock = new THREE.Mesh(new THREE.BoxGeometry(18.0, 7.5, 36.0), sobradoMat);
+      sobradoBlock.position.set(122.0, 3.75, 160.0);
+      this.scene.add(sobradoBlock);
+
+      this.physics.addBoxCollider(new THREE.Vector3(113.0, 0, 142.0), new THREE.Vector3(131.0, 8.0, 178.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. EAST SIDE: PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA (Z = 62.0 to 125.0)
+    // -------------------------------------------------------------------------
+    {
+      const parkGroup = new THREE.Group();
+
+      const grassMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPitchGrass(6, 12)
+      });
+      const grass = new THREE.Mesh(new THREE.PlaneGeometry(27.0, 63.0), grassMat);
+      grass.rotation.x = -Math.PI / 2;
+      grass.position.set(172.5, 0.13, 93.5);
+      parkGroup.add(grass);
+
+      const pathMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createCalcadaPaulista(2, 14)
+      });
+      const path = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 60.0), pathMat);
+      path.rotation.x = -Math.PI / 2;
+      path.position.set(166.5, 0.14, 93.5);
+      parkGroup.add(path);
+
+      const atiMatY = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+      const atiMatB = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+
+      const atiPost1 = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.8, 8), atiMatB);
+      atiPost1.position.set(174.5, 0.9, 88.0);
+      parkGroup.add(atiPost1);
+
+      const atiPost2 = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.8, 8), atiMatB);
+      atiPost2.position.set(175.5, 0.9, 88.0);
+      parkGroup.add(atiPost2);
+
+      const atiBarTop = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.08, 0.08), atiMatY);
+      atiBarTop.position.set(175.0, 1.4, 88.0);
+      parkGroup.add(atiBarTop);
+
+      const barH1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.4, 8), atiMatB);
+      barH1.position.set(177.0, 1.2, 92.0);
+      parkGroup.add(barH1);
+
+      const barH2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.4, 8), atiMatB);
+      barH2.position.set(179.0, 1.2, 92.0);
+      parkGroup.add(barH2);
+
+      const barCross = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.0, 8), atiMatY);
+      barCross.rotation.z = Math.PI / 2;
+      barCross.position.set(178.0, 2.2, 92.0);
+      parkGroup.add(barCross);
+
+      const swingMat = new THREE.MeshLambertMaterial({ color: 0xef4444 });
+      const swingFrameL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.2, 6), swingMat);
+      swingFrameL.position.set(176.0, 1.6, 102.5);
+      parkGroup.add(swingFrameL);
+
+      const swingFrameR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.2, 6), swingMat);
+      swingFrameR.position.set(176.0, 1.6, 105.5);
+      parkGroup.add(swingFrameR);
+
+      const swingTop = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 3.2), swingMat);
+      swingTop.position.set(176.0, 3.1, 104.0);
+      parkGroup.add(swingTop);
+
+      const cartMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+      const cartBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 0.8), cartMat);
+      cartBody.position.set(160.5, 0.75, 72.0);
+      parkGroup.add(cartBody);
+
+      const glassMat = new THREE.MeshLambertMaterial({ color: 0xfef08a, transparent: true, opacity: 0.85 });
+      const cartGlass = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.8, 0.75), glassMat);
+      cartGlass.position.set(160.5, 1.65, 72.0);
+      parkGroup.add(cartGlass);
+
+      const umbrellaMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+      const umbrella = new THREE.Mesh(new THREE.ConeGeometry(1.4, 0.6, 12), umbrellaMat);
+      umbrella.position.set(160.5, 2.5, 72.0);
+      parkGroup.add(umbrella);
+
+      const benchMat = new THREE.MeshLambertMaterial({ color: 0x15803d });
+      [76.0, 86.0, 98.0, 112.0].forEach(bz => {
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 2.2), benchMat);
+        bench.position.set(164.2, 0.35, bz);
+        parkGroup.add(bench);
+      });
+
+      this.scene.add(parkGroup);
+
+      this.buildIpeTree(164.0, 0.25, 66.0);
+      this.buildIpeTree(176.0, 0.25, 78.0);
+      this.buildIpeTree(165.0, 0.25, 92.0);
+      this.buildIpeTree(178.0, 0.25, 108.0);
+      this.buildIpeTree(165.0, 0.25, 120.0);
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. EAST SIDE: PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO (Z = 132.0 to 168.0)
+    // -------------------------------------------------------------------------
+    {
+      const commGroup = new THREE.Group();
+
+      const commWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#f1f5f9', 3, 3)
+      });
+      const commBlock = new THREE.Mesh(new THREE.BoxGeometry(18.0, 6.0, 36.0), commWallMat);
+      commBlock.position.set(169.0, 3.0, 150.0);
+      commGroup.add(commBlock);
+
+      const papSignMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+      const papSign = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.1, 12.0), papSignMat);
+      papSign.position.set(159.9, 4.0, 141.0);
+      commGroup.add(papSign);
+
+      const autoSignMat = new THREE.MeshBasicMaterial({ color: 0x1e3a8a });
+      const autoSign = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.1, 12.0), autoSignMat);
+      autoSign.position.set(159.9, 4.0, 159.0);
+      commGroup.add(autoSign);
+
+      const carGroup = new THREE.Group();
+      const carMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      const carBody = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.9, 3.4), carMat);
+      carBody.position.set(0, 0.6, 0);
+      carGroup.add(carBody);
+
+      const carCabin = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.7, 1.8), new THREE.MeshLambertMaterial({ color: 0x38bdf8 }));
+      carCabin.position.set(0, 1.3, -0.2);
+      carGroup.add(carCabin);
+
+      const roofBoardMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+      const roofBoard = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.35, 1.2), roofBoardMat);
+      roofBoard.position.set(0, 1.8, -0.2);
+      carGroup.add(roofBoard);
+
+      carGroup.position.set(157.0, 0.25, 158.0);
+      commGroup.add(carGroup);
+
+      this.scene.add(commGroup);
+
+      this.physics.addBoxCollider(new THREE.Vector3(160.0, 0, 132.0), new THREE.Vector3(178.0, 6.5, 168.0), 'solid');
+      this.physics.addBoxCollider(new THREE.Vector3(156.0, 0, 156.0), new THREE.Vector3(158.2, 2.0, 160.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. EAST SIDE: COMMERCIAL SOBRADOS (Z = 168.0 to 178.0)
+    // -------------------------------------------------------------------------
+    {
+      const southSobradoMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createReboco('#94a3b8', 2, 2)
+      });
+      const southSobrado = new THREE.Mesh(new THREE.BoxGeometry(18.0, 6.5, 10.0), southSobradoMat);
+      southSobrado.position.set(169.0, 3.25, 173.0);
+      this.scene.add(southSobrado);
+
+      this.physics.addBoxCollider(new THREE.Vector3(160.0, 0, 168.0), new THREE.Vector3(178.0, 7.0, 178.0), 'solid');
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. WEST & EAST PERIMETER BOUNDARY COLLIDERS (Z = 58.0 to 180.0)
+    // -------------------------------------------------------------------------
+    this.physics.addBoxCollider(new THREE.Vector3(98.0, 0, 58.0), new THREE.Vector3(103.0, 12.0, 180.0), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(184.0, 0, 58.0), new THREE.Vector3(192.0, 12.0, 180.0), 'solid');
+  }
+
+  // =========================================================================
   // 24. Map Boundary Trompe-l'œil Illusion Walls & Construction Sites
   // "Desculpe pelo transtorno, estamos em Obras"
   // =========================================================================
@@ -19585,7 +20031,7 @@ class CityBuilder {
     }
 
     // -----------------------------------------------------------------------
-    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 58.0, Y = 0)
+    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 178.0, Y = 0)
     // -----------------------------------------------------------------------
     {
       const wallW = 22.0, wallH = 9.0;
@@ -19594,33 +20040,33 @@ class CityBuilder {
         new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
       );
       plane.rotation.y = Math.PI; // Faces -Z (towards player coming south)
-      plane.position.set(145.0, wallH / 2, 57.8);
+      plane.position.set(145.0, wallH / 2, 177.8);
       boundaryGroup.add(plane);
 
       const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(145.0, wallH / 2, 58.6);
+      back.position.set(145.0, wallH / 2, 178.6);
       boundaryGroup.add(back);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(134.0, 0, 57.5),
-        new THREE.Vector3(156.0, 11.0, 59.5),
+        new THREE.Vector3(134.0, 0, 177.5),
+        new THREE.Vector3(156.0, 11.0, 179.5),
         'solid'
       );
 
       this.illusionWalls.push({
         id: 'south_petronio',
         name: 'Muro Pintado Petrônio Portela (Sul)',
-        planePos: new THREE.Vector3(145.0, 0, 57.8),
+        planePos: new THREE.Vector3(145.0, 0, 177.8),
         normal: new THREE.Vector3(0, 0, -1),
-        bounds: { minX: 134.0, maxX: 156.0, minZ: 57.5, maxZ: 59.5, minY: 0, maxY: 11.0 }
+        bounds: { minX: 134.0, maxX: 156.0, minZ: 177.5, maxZ: 179.5, minY: 0, maxY: 11.0 }
       });
 
-      buildHugeObrasSign(145.0, 5.5, 53.5, Math.PI);
+      buildHugeObrasSign(145.0, 5.5, 173.5, Math.PI);
 
-      addCone(140.0, 0, 55.0);
-      addCone(145.0, 0, 55.0);
-      addCone(150.0, 0, 55.0);
-      addHeap(138.0, 0, 54.5, 2.5, 1.3, true);
+      addCone(140.0, 0, 175.0);
+      addCone(145.0, 0, 175.0);
+      addCone(150.0, 0, 175.0);
+      addHeap(138.0, 0, 174.5, 2.5, 1.3, true);
     }
 
     // -----------------------------------------------------------------------
@@ -20647,8 +21093,115 @@ const EN_ENCOUNTER_TEXTS = {
         outcome: 'Steaming broth with scallions and mild pepper that warms your core and restores vitality (+22% Stomach, +16% Sanity).'
       }
     }
+  },
+
+  ESCOLA_PUBLICA: {
+    title: '🏫 PROF. LOURENÇO FILHO PUBLIC SCHOOL',
+    intro: (state) => `
+      Tia Cida, the veteran hallway monitor in her blue smock with a ring of keys on her hip, spots you at the gate:<br>
+      <em>"— Look who showed up! You studied here, didn't you? Or did you come to ditch class in the square again?"</em><br>
+      The unforgettable scent of public school lunch drifts onto the sidewalk, and the thud of a futsal ball echoes from the court.<br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pedir_merenda: {
+        label: (state) => state.flags.merendaHoje
+          ? 'Ask for school lunch (Already ate school lunch today)'
+          : 'Ask for a plate of public school lunch (warm cinnamon rice pudding & manioc biscuits)',
+        costLabel: 'Free (School Lunch)',
+        outcome: 'Tia Cida lovingly serves you a deep plastic bowl of piping hot cinnamon rice pudding. Sweet childhood memories of Pirituba (+35% Stomach, +20% Sanity)!'
+      },
+      pelada_quadra: {
+        label: 'Step onto the cement court and join the neighborhood kids in a futsal scrimmage',
+        costLabel: '+10 Ginga (Energy Expense)',
+        outcome: 'You bolted across the rough cement court, nutmegged two kids, and drilled a screamer right into the top corner! The entire playground cheered (+10 Ginga, +16% Sanity, -10% Stomach).'
+      },
+      lembranca_boletim: {
+        label: 'Chat with Tia Cida and reminisce about old report card scares',
+        costLabel: '+12% Sanity (Nostalgia)',
+        outcome: 'Tia Cida laughs remembering when you hid your report card in the ceiling tiles from your mom: "— You were a handful, but you had a good heart!" (+12% Sanity, +4 Ginga).'
+      }
+    }
+  },
+
+  PARQUE_PETRONIO: {
+    title: '🌳 PETRÔNIO PORTELA LINEAR PARK & SQUARE',
+    intro: (state) => `
+      Golden trumpet trees shed bright yellow blossoms across the stone sidewalk. A gentle breeze sways the palm leaves as retirees exercise on outdoor gym machines.<br>
+      Seu Zico grins beside his striped popcorn cart:<br>
+      <em>"— Hot and fresh with crispy bacon bits and grated parmesan, boss! Want a loaded bag?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pipoca_bacon: {
+        label: 'Buy a large bag of fresh popcorn topped with crispy bacon cubes and grated cheese',
+        outcome: 'Crunchy, freshly popped corn loaded with golden bacon bits and salty parmesan. The timeless aroma of São Paulo public squares (+30% Stomach, +22% Sanity)!'
+      },
+      academia_ar_livre: {
+        label: 'Do a full workout set on the municipal outdoor gym walkers and pull-up bars',
+        costLabel: '+20% Sanity (Free Workout)',
+        outcome: 'You spend 15 minutes on the yellow walker and stretch your back on the bar. Blood flows freely and mental fatigue evaporates (+20% Sanity, +8 Ginga, -8% Stomach).'
+      },
+      descanso_ipe: {
+        label: 'Rest on a wooden bench beneath the shade of the blooming golden trumpet tree',
+        costLabel: '+15% Sanity (Peace of Mind)',
+        outcome: 'You sit on the park bench listening to thrushes sing amidst yellow blossoms. A rare moment of quiet serenity amidst São Paulo\'s hustle (+15% Sanity).'
+      }
+    }
+  },
+
+  ESPETINHO_PETRONIO: {
+    title: '🍢 PETRÔNIO STREET BBQ & CORNER PUB',
+    intro: (state) => `
+      The fragrant smoke of glowing charcoal and sizzling skewered meats draws neighbors to yellow sidewalk tables.<br>
+      Seu Toninho, wielding long barbecue tongs with a kitchen towel slung over his shoulder, turns the skewers with mastery:<br>
+      <em>"— Fresh garlic steak, squeaky cheese with molasses, and bacon-wrapped chicken! Ice-cold draft beer flowing from the tap!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      combo_espetinho: {
+        label: 'Combo of 2 artisan skewers with seasoned manioc flour, tomato vinaigrette, and garlic bread',
+        outcome: 'Tender, juicy flame-kissed steak skewers, crunchy farofa, and zesty fresh vinaigrette. A complete street food banquet (+50% Stomach, +25% Sanity)!'
+      },
+      chopp_artesanal: {
+        label: 'Frosty mug of draft beer with thick foam served at a sidewalk Skol table',
+        outcome: 'Crisp and refreshing brew going down smooth while the evening breeze rolls down Av. Petrônio Portela (+26% Sanity, +6 Ginga).'
+      },
+      queijo_coalho: {
+        label: 'Golden grilled coalho cheese skewer sprinkled with oregano and cane syrup',
+        outcome: 'Toasted crispy exterior with a warm, stretchy sweet-and-savory bite. A beloved Brazilian classic (+26% Stomach, +18% Sanity).'
+      }
+    }
+  },
+
+  PAPELARIA_BAZAR: {
+    title: '📚 PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL',
+    intro: (state) => `
+      Bright spiral notebooks, school backpacks, and poster boards fill the shop windows of Papelaria Pirituba.<br>
+      Next door, the backlit sign of Autoescola Petrônio highlights a white driving-school hatchback parked out front.<br>
+      The clerk behind the glass counter greets you with a warm smile:<br>
+      <em>"— Good afternoon! Need photocopies, school supplies, or to top up your SPTrans transit card?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      recarga_bilhete: {
+        label: (state) => state.flags.bilheteRecarregado
+          ? 'Recharge transit card (Already topped up today)'
+          : 'Top up R$ 20.00 on your SPTrans Bilhete Único bus pass',
+        outcome: 'Card tapped against the terminal, loud confirmation chime, and balance loaded to ride any city bus without hassle (+15% Sanity, Transit Card Loaded)!'
+      },
+      comprar_material: {
+        label: 'Buy a classic blue Bic ballpoint pen, pocket notepad, and cinnamon hard candies',
+        outcome: 'A shiny new pen to sign documents and a notepad in your pocket. Gives you that sharp feeling of professional organization (+12% Sanity, +4 Ginga).'
+      },
+      tirar_xerox: {
+        label: 'Make photocopies of identity documents and proof of residency at the counter',
+        outcome: 'The green scanner light runs across the glass bed and warm printed sheets slide into the tray. Everyday bureaucracy handled smoothly (+8% Sanity).'
+      }
+    }
   }
 };
+
 
 
 /**
@@ -20807,7 +21360,7 @@ const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'PADARIA ESTRELA DE PIRITUBA', prompt: 'ENTRAR NA PADOCA E PEDIR PÃO NA CHAPA' },
-      bar_sinuca: { name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)', prompt: 'JOGAR SINUCA OU PEDIR NO BALCÃO' },
+      bar_sinuca: { name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)', prompt: 'PEDIR NO BALCÃO DO SEU TIÃO OU JOGAR SINUCA' },
       adega: { name: 'ADEGA DO ZÉ (BEBIDAS & LITRÃO)', prompt: 'COMPRAR LITRÃO OU VENDER LATINHAS' },
       flanelinha: { name: 'FLANELINHA NO CRUZAMENTO', prompt: 'CONVERSAR COM O FLANELINHA' },
       posto: { name: 'POSTO PIRITUBA 24H', prompt: 'ABASTECER OU TOMAR ÁGUA NO BEBEDOURO' },
@@ -20829,7 +21382,11 @@ const TRANSLATIONS = {
       casa_do_norte: { name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)', prompt: 'PEDIR BAIÃO DE DOIS OU COMPRAR QUEIJO COALHO' },
       loterica_pirituba: { name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)', prompt: 'APOSTAR NA MEGA-SENA OU PAGAR CONTAS' },
       pastelaria_beto: { name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)', prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA' },
-      bar_peixe: { name: 'BAR & PETISCARIA CANTINHO DO PEIXE', prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO' }
+      bar_peixe: { name: 'BAR & PETISCARIA CANTINHO DO PEIXE', prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO' },
+      escola_publica: { name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)', prompt: 'FALAR COM A TIA CIDA NO PORTÃO DA ESCOLA' },
+      parque_petronio: { name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA', prompt: 'COMPRAR PIPOCA DO SEU ZICO OU USAR A PRAÇA' },
+      espetinho_petronio: { name: 'BAR & ESPETINHO DA PETRÔNIO', prompt: 'PEDIR ESPETINHO COM SEU TONINHO NA BRASA' },
+      papelaria_bazar: { name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO', prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS' }
     },
 
     npcs: {
@@ -21039,7 +21596,7 @@ const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'ESTRELA BAKERY OF PIRITUBA', prompt: 'ENTER BAKERY & ORDER TOASTED FRENCH BREAD' },
-      bar_sinuca: { name: 'TIÃO\'S CORNER PUB (POOL TABLE & BAR)', prompt: 'PLAY POOL OR ORDER AT THE COUNTER' },
+      bar_sinuca: { name: 'TIÃO\'S CORNER PUB (POOL TABLE & BAR)', prompt: 'ORDER AT SEU TIÃO\'S COUNTER OR PLAY POOL' },
       adega: { name: 'ZÉ\'S LIQUOR & BEVERAGE SHOP', prompt: 'BUY 1L BEER BOTTLE OR SELL CRUSHED CANS' },
       flanelinha: { name: 'UNOFFICIAL PARKING VALET', prompt: 'TALK TO THE PARKING HUSTLER' },
       posto: { name: 'PIRITUBA 24H GAS STATION', prompt: 'REFUEL OR DRINK FROM WATER FOUNTAIN' },
@@ -21061,7 +21618,11 @@ const TRANSLATIONS = {
       casa_do_norte: { name: 'ASA BRANCA NORTHEASTERN EMPORIUM', prompt: 'ORDER BAIÃO DE DOIS OR BUY COALHO CHEESE' },
       loterica_pirituba: { name: 'PIRITUBA LOTTERY & BANK AGENCY (CAIXA AQUI)', prompt: 'PLAY MEGA-SENA JACKPOT OR PAY BILLS' },
       pastelaria_beto: { name: 'BETO\'S PASTELARIA (GIANT PASTEL & CANE JUICE)', prompt: 'ORDER 30CM PASTEL & SUGARCANE JUICE' },
-      bar_peixe: { name: 'CANTINHO DO PEIXE SEAFOOD PUB', prompt: 'ORDER CRISPY TILAPIA TENDERS & COLD BEER' }
+      bar_peixe: { name: 'CANTINHO DO PEIXE SEAFOOD PUB', prompt: 'ORDER CRISPY TILAPIA TENDERS & COLD BEER' },
+      escola_publica: { name: 'PROF. LOURENÇO FILHO PUBLIC SCHOOL', prompt: 'TALK TO TIA CIDA AT THE SCHOOL GATE' },
+      parque_petronio: { name: 'PETRÔNIO PORTELA LINEAR PARK & SQUARE', prompt: 'BUY POPCORN FROM SEU ZICO OR WORK OUT IN THE PARK' },
+      espetinho_petronio: { name: 'PETRÔNIO STREET BBQ & CORNER PUB', prompt: 'ORDER STREET SKEWERS FROM SEU TONINHO' },
+      papelaria_bazar: { name: 'PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL', prompt: 'RECHARGE TRANSIT PASS OR BUY STATIONERY' }
     },
 
     npcs: {
@@ -24422,6 +24983,194 @@ const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  ESCOLA_PUBLICA: {
+    id: 'ESCOLA_PUBLICA',
+    title: '🏫 E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)',
+    getIntroText: (state) => `
+      Tia Cida, inspetora de longa data com seu avental azul e molho de chaves na cintura, te encara no portão:<br>
+      <em>"— Olha só quem apareceu! Você estudou aqui, né? Ou veio matar aula de novo na praça?"</em><br>
+      O cheiro inconfundível de merenda escolar invade a calçada e o som de uma bola de futsal quicando na quadra ecoa pelo pátio.<br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pedir_merenda',
+        label: 'Pedir prato de merenda escolar (arroz doce com canela & biscoito de polvilho)',
+        costLabel: 'Grátis (Merenda Escolar)',
+        disabled: Boolean(state.flags.merendaHoje),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ fome: 35, sanidade: 20, flags: { merendaHoje: true } }, 'Merenda da Tia Cida');
+          return 'Tia Cida te serve com carinho um prato fundo de arroz doce quentinho com canela polvilhada. Lembrança doce da infância em Pirituba (+35% Bucho, +20% Sanidade)!';
+        }
+      },
+      {
+        id: 'pelada_quadra',
+        label: 'Entrar na quadra poliesportiva e jogar uma pelada de futsal com a molecada',
+        costLabel: '+10 Ginga (Gasto de Energia)',
+        execute: (state, sound) => {
+          if (sound) {
+            if (typeof sound.playKickBall === 'function') sound.playKickBall();
+            else if (typeof sound.playKick === 'function') sound.playKick();
+          }
+          state.apply({ ginga: 10, sanidade: 16, fome: -10 }, 'Pelada na quadra da escola');
+          return 'Você correu na quadra de cimento áspero, driblou dois moleques e mandou um golaço de bico no ângulo! O recreio inteiro aplaudiu (+10 Ginga, +16% Sanidade, -10% Bucho).';
+        }
+      },
+      {
+        id: 'lembranca_boletim',
+        label: 'Conversar com a Tia Cida e lembrar das histórias do antigo boletim escolar',
+        costLabel: '+12% Sanidade (Nostalgia)',
+        execute: (state) => {
+          state.apply({ sanidade: 12, ginga: 4 }, 'Papo com a inspetora Tia Cida');
+          return 'Tia Cida dá risada lembrando de quando você escondia o boletim da sua mãe no forro do telhado: "— Você dava trabalho, mas tinha coração bom!" (+12% Sanidade, +4 Ginga).';
+        }
+      }
+    ]
+  },
+
+  PARQUE_PETRONIO: {
+    id: 'PARQUE_PETRONIO',
+    title: '🌳 PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA',
+    getIntroText: (state) => `
+      Os Ipês amarelos derramam flores douradas na calçada de pedra. O vento fresco balança as folhas enquanto aposentados se exercitam na academia ao ar livre.<br>
+      Seu Zico sorri ao lado do seu carrinho de pipoca com sombrinha listrada:<br>
+      <em>"— Pipoca quentinha com bacon crocante e queijo ralado, chefia! Vai um saco caprichado?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pipoca_bacon',
+        label: 'Comprar saquinho grande de pipoca com cubos de bacon crocante e queijo ralado',
+        costLabel: 'R$ 6,00',
+        costCentavos: 600,
+        disabled: !state.canAfford(600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -600, fome: 30, sanidade: 22 }, 'Pipoca com bacon do Seu Zico');
+          return 'Pipoca salgadinha estalando de fresca com cubinhos de bacon dourado e queijo parmesão. O aroma clássico das praças paulistanas (+30% Bucho, +22% Sanidade)!';
+        }
+      },
+      {
+        id: 'academia_ar_livre',
+        label: 'Fazer uma série completa no simulador de caminhada e barras da academia da prefeitura',
+        costLabel: '+20% Sanidade (Exercício Grátis)',
+        execute: (state) => {
+          state.apply({ sanidade: 20, ginga: 8, fome: -8 }, 'Academia ao ar livre');
+          return 'Você faz 15 minutos no aparelho de caminhada amarelo e alonga as costas na barra. O sangue circula e o cansaço mental vai embora (+20% Sanidade, +8 Ginga, -8% Bucho).';
+        }
+      },
+      {
+        id: 'descanso_ipe',
+        label: 'Sentar no banco de madeira sob a copa florida do Ipê amarelo para respirar',
+        costLabel: '+15% Sanidade (Paz de Espírito)',
+        execute: (state) => {
+          state.apply({ sanidade: 15 }, 'Descanso na sombra do Ipê');
+          return 'Você senta no banco de praça ouvindo o canto dos sabiás entre as flores amarelas. Um momento raro de calma e serenidade na correria de São Paulo (+15% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  ESPETINHO_PETRONIO: {
+    id: 'ESPETINHO_PETRONIO',
+    title: '🍢 BAR & ESPETINHO DA PETRÔNIO',
+    getIntroText: (state) => `
+      A fumaça perfumada de carvão vegetal com gordura chiando na brasa atrai a vizinhança para as mesas amarelas na calçada.<br>
+      Seu Toninho, de pinça longa e pano de prato no ombro, vira os espetos com maestria:<br>
+      <em>"— Saiu carne no capricho, queijo coalho com melaço e frango com bacon! Chopp gelado trincando saindo na bica!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'combo_espetinho',
+        label: 'Combo de 2 espetinhos artesanais com farofa crocante, vinagrete caseiro e pão de alho',
+        costLabel: 'R$ 16,00',
+        costCentavos: 1600,
+        disabled: !state.canAfford(1600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1600, fome: 50, sanidade: 25 }, 'Combo de espetinhos com farofa');
+          return 'Carne macia e suculenta assada na brasa, farofinha temperada e vinagrete fresquinho. Refeição completa de boteco (+50% Bucho, +25% Sanidade)!';
+        }
+      },
+      {
+        id: 'chopp_artesanal',
+        label: 'Caneca de chopp gelado com colarinho cremoso servido na mesa da calçada',
+        costLabel: 'R$ 9,00',
+        costCentavos: 900,
+        disabled: !state.canAfford(900),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -900, sanidade: 26, ginga: 6, fome: 6 }, 'Chopp gelado no espetinho');
+          return 'Chopp leve e refrescante descendo redondo enquanto a brisa da noite sopra pela Petrônio Portela (+26% Sanidade, +6 Ginga).';
+        }
+      },
+      {
+        id: 'queijo_coalho',
+        label: 'Espetinho de queijo coalho dourado com orégano e fio de melado',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -800, fome: 26, sanidade: 18 }, 'Queijo coalho com melaço');
+          return 'Queijo com casquinha tostada e recheio puxento doce e salgado. Delícia nordestina tradicional (+26% Bucho, +18% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  PAPELARIA_BAZAR: {
+    id: 'PAPELARIA_BAZAR',
+    title: '📚 PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO',
+    getIntroText: (state) => `
+      Cadernos espirais coloridos, mochilas escolares e cartolinas preenchem a vitrine da Papelaria Pirituba.<br>
+      Ao lado, a placa iluminada da Autoescola Petrônio exibe o Fiat Uno com teto de autoescola estacionado.<br>
+      A atendente no balcão de vidro te cumprimenta com um sorriso:<br>
+      <em>"— Boa tarde! Precisa tirar xerox, materiais ou recarregar o Bilhete Único?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'recarga_bilhete',
+        label: 'Recarregar R$ 20,00 no Bilhete Único para transporte público SPTrans',
+        costLabel: 'R$ 20,00',
+        costCentavos: 2000,
+        disabled: !state.canAfford(2000) || Boolean(state.flags.bilheteRecarregado),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -2000, sanidade: 15, flags: { bilheteRecarregado: true } }, 'Recarga Bilhete Único');
+          return 'Cartão encostado na máquina, bipe sonoro de confirmação e saldo liberado para pegar qualquer ônibus municipal sem perrengue (+15% Sanidade, Bilhete Carregado)!';
+        }
+      },
+      {
+        id: 'comprar_material',
+        label: 'Comprar caneta Bic azul, bloquinho de notas e balas de canela no caixa',
+        costLabel: 'R$ 5,00',
+        costCentavos: 500,
+        disabled: !state.canAfford(500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -500, sanidade: 12, ginga: 4 }, 'Materiais e balas de canela');
+          return 'Caneta nova para assinar documentos e o bloquinho de anotações no bolso. Dá uma sensação profissional de organização (+12% Sanidade, +4 Ginga).';
+        }
+      },
+      {
+        id: 'tirar_xerox',
+        label: 'Tirar xerox de documentos e comprovante de residência no balcão',
+        costLabel: 'R$ 2,00',
+        costCentavos: 200,
+        disabled: !state.canAfford(200),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -200, sanidade: 8 }, 'Xerox de documentos');
+          return 'Luz verde da máquina correndo no vidro e folha quente saindo na bandeja. Burocracia paulistana resolvida rápido (+8% Sanidade).';
+        }
+      }
+    ]
   }
 };
 
@@ -24451,6 +25200,7 @@ class NpcSystem {
     this.scene.add(this.npcGroup);
 
     this.npcs = [];
+    this.establishmentNpcs = [];
     this.activeTalkingNpc = null;
     this.blocoSpectatorGroup = null;
     this.campinhoSpectatorGroup = null;
@@ -24592,6 +25342,7 @@ class NpcSystem {
 
     this.initEventCrowds();
     this.initEventHosts();
+    this.initEstablishmentNpcs();
   }
 
   // Build articulated humanoid 3D mesh
@@ -24652,6 +25403,37 @@ class NpcSystem {
       const hairBun = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), hairMat);
       hairBun.position.set(0, 0.18, -0.12);
       headGroup.add(hairBun);
+    } else if (config.hasChefHat) {
+      const hatMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      const hatBand = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.1, 12), hatMat);
+      hatBand.position.y = 0.2;
+      headGroup.add(hatBand);
+      const hatCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 0.22, 12), hatMat);
+      hatCrown.name = 'npc_chef_hat';
+      hatCrown.position.y = 0.32;
+      headGroup.add(hatCrown);
+    } else if (config.hasHairnet) {
+      const netMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+      const netMesh = new THREE.Mesh(new THREE.SphereGeometry(0.19, 10, 10), netMat);
+      netMesh.name = 'npc_hairnet';
+      netMesh.position.set(0, 0.08, 0);
+      headGroup.add(netMesh);
+    }
+
+    // Facial features: glasses & boteco mustache
+    if (config.hasGlasses) {
+      const frameMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+      const glasses = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.07, 0.04), frameMat);
+      glasses.name = 'npc_glasses';
+      glasses.position.set(0, 0.02, 0.16);
+      headGroup.add(glasses);
+    }
+    if (config.hasMustache) {
+      const stacheMat = new THREE.MeshLambertMaterial({ color: 0x18181b });
+      const mustache = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 0.06), stacheMat);
+      mustache.name = 'npc_mustache';
+      mustache.position.set(0, -0.06, 0.16);
+      headGroup.add(mustache);
     }
     group.add(headGroup);
 
@@ -24689,7 +25471,56 @@ class NpcSystem {
     rightLeg.add(rLegMesh);
     group.add(rightLeg);
 
-    // 5. Props (Cooler Box or Shopping Bags)
+    // 5. Props (Cooler Box, Shopping Bags, Apron, Cloth, Tongs, Scoop, Lanyard)
+    if (config.hasApron) {
+      const apronMat = new THREE.MeshLambertMaterial({ color: config.apronColor || 0xffffff });
+      const apronBib = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.55, 0.04), apronMat);
+      apronBib.name = 'npc_apron';
+      apronBib.position.set(0, 1.05, 0.15);
+      group.add(apronBib);
+      const apronSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.45, 0.04), apronMat);
+      apronSkirt.position.set(0, 0.62, 0.15);
+      group.add(apronSkirt);
+    }
+
+    if (config.hasCloth) {
+      const clothMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+      const cloth = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 0.12), clothMat);
+      cloth.name = 'npc_cloth';
+      cloth.position.set(-0.24, 1.25, 0.08);
+      group.add(cloth);
+    }
+
+    if (config.hasTongs) {
+      const tongMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+      const tongs = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.36, 0.04), tongMat);
+      tongs.name = 'npc_tongs';
+      tongs.position.set(0, -0.38, 0.08);
+      rightArm.add(tongs);
+    }
+
+    if (config.hasScoop) {
+      const scoopMat = new THREE.MeshLambertMaterial({ color: 0xcbd5e1 });
+      const scoop = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.25, 0.1), scoopMat);
+      scoop.name = 'npc_scoop';
+      scoop.position.set(0, -0.35, 0.08);
+      rightArm.add(scoop);
+    }
+
+    if (config.hasLanyard) {
+      const strapMat = new THREE.MeshLambertMaterial({ color: 0xef4444 });
+      const strapL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.45, 0.02), strapMat);
+      strapL.position.set(-0.08, 1.15, 0.15);
+      group.add(strapL);
+      const strapR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.45, 0.02), strapMat);
+      strapR.position.set(0.08, 1.15, 0.15);
+      group.add(strapR);
+      const whistle = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.04), new THREE.MeshLambertMaterial({ color: 0xfacc15 }));
+      whistle.name = 'npc_lanyard';
+      whistle.position.set(0, 0.92, 0.16);
+      group.add(whistle);
+    }
+
     if (config.hasCoolerBox) {
       const boxGroup = new THREE.Group();
       boxGroup.position.set(0, 0.95, 0.32);
@@ -24753,6 +25584,7 @@ class NpcSystem {
     const startWp = config.waypoints[0];
     const startY = startWp.y != null ? startWp.y : (config.baseY != null ? config.baseY : 0);
     group.position.set(startWp.x, startY, startWp.z);
+    if (config.defaultYaw != null) group.rotation.y = config.defaultYaw;
     if (config.zoneId) group.visible = false;
     this.npcGroup.add(group);
 
@@ -24762,6 +25594,7 @@ class NpcSystem {
       prompt: config.prompt,
       encounterId: config.encounterId,
       group,
+      mesh: group,
       leftArm,
       rightArm,
       leftLeg,
@@ -24777,7 +25610,9 @@ class NpcSystem {
       interactable: config.interactable !== false,
       animationMode: config.animationMode || null,
       baseY: config.baseY != null ? config.baseY : startY,
-      costumeId: config.costumeId || null
+      costumeId: config.costumeId || null,
+      stationary: config.stationary || false,
+      defaultYaw: config.defaultYaw != null ? config.defaultYaw : 0
     };
   }
 
@@ -25018,7 +25853,32 @@ class NpcSystem {
         if (dist3 > EVENT_CULL_DISTANCE) continue;
       }
 
-      // 2. Waypoint navigation along streets and sidewalks
+      // 2. Distance to player
+      const distToPlayer = Math.sqrt(
+        (playerPos.x - npc.group.position.x) ** 2 +
+        (playerPos.z - npc.group.position.z) ** 2
+      );
+
+      // 3. Stationary establishment shopkeepers (Tião, Zé, Manuel, etc.)
+      if (npc.stationary) {
+        if (distToPlayer < 7.5) {
+          const lookAngle = Math.atan2(playerPos.x - npc.group.position.x, playerPos.z - npc.group.position.z);
+          let angleDiff = lookAngle - npc.group.rotation.y;
+          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+          while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+          npc.group.rotation.y += angleDiff * Math.min(1.0, delta * 3.5);
+        } else if (npc.defaultYaw != null) {
+          let angleDiff = npc.defaultYaw - npc.group.rotation.y;
+          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+          while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+          npc.group.rotation.y += angleDiff * Math.min(1.0, delta * 2.0);
+        }
+        npc.animTimer += delta;
+        this.animateNpc(npc, delta);
+        continue;
+      }
+
+      // 4. Waypoint navigation along streets and sidewalks
       let targetWp = npc.waypoints[npc.currentWpIndex];
       let dx = targetWp.x - npc.group.position.x;
       let dz = targetWp.z - npc.group.position.z;
@@ -25035,12 +25895,6 @@ class NpcSystem {
           distToWp = Math.sqrt(dx * dx + dz * dz);
         }
       }
-
-      // Check distance to player for conversational pauses
-      const distToPlayer = Math.sqrt(
-        (playerPos.x - npc.group.position.x) ** 2 +
-        (playerPos.z - npc.group.position.z) ** 2
-      );
 
       // Pause moving if active dialog is open and player is interacting nearby
       const isTalkingToThisNpc = isModalOpen && distToPlayer < 4.0;
@@ -25114,6 +25968,25 @@ class NpcSystem {
   // Animate character limbs based on type
   animateNpc(npc, delta) {
     const baseY = npc.baseY != null ? npc.baseY : 0;
+
+    if (npc.animationMode === 'WIPE') {
+      const wipe = Math.sin(npc.animTimer * 2.5) * 0.2;
+      npc.rightArm.rotation.x = -0.85 + wipe;
+      npc.rightArm.rotation.z = -0.25 + Math.cos(npc.animTimer * 2.5) * 0.15;
+      npc.leftArm.rotation.x = -0.2 + Math.sin(npc.animTimer * 1.2) * 0.05;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 0.8) * 0.12;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.02;
+      return;
+    }
+
+    if (npc.animationMode === 'IDLE_HOST') {
+      const breath = Math.sin(npc.animTimer * 1.6) * 0.04;
+      npc.rightArm.rotation.x = -0.25 + breath;
+      npc.leftArm.rotation.x = -0.25 - breath;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 0.6) * 0.15;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.6)) * 0.02;
+      return;
+    }
 
     if (npc.animationMode === 'DANCE') {
       const sway = Math.sin(npc.animTimer * 6.0) * 0.35;
@@ -25512,6 +26385,194 @@ class NpcSystem {
     this.campinhoSpectatorGroup.visible = false;
     this.npcGroup.add(this.campinhoSpectatorGroup);
   }
+
+  // Populate iconic local establishments with visible shopkeeper/character 3D meshes
+  initEstablishmentNpcs() {
+    this.establishmentNpcs = [
+      // 1. Tião do Bar (Barkeep of Bar do Tião)
+      this.createHumanoidNpc({
+        id: 'tiao_bar',
+        name: 'SEU TIÃO (BAR DO TIÃO)',
+        prompt: 'CONVERSAR COM SEU TIÃO NO BALCÃO',
+        encounterId: 'BAR_DO_TIAO',
+        shirtColor: 0x1e3a8a, // Classic blue polo shirt
+        skinColor: 0x94603d,
+        pantsColor: 0x1f2937,
+        hasApron: true,
+        apronColor: 0xffffff, // White boteco apron
+        hasMustache: true,
+        hasCloth: true,
+        stationary: true,
+        defaultYaw: Math.PI, // Facing front (-Z towards entrance)
+        waypoints: [{ x: 14.8, y: 0.25, z: 45.4 }],
+        interactable: false, // Handled authoritatively by bar_sinuca anchor in Interactables
+        animationMode: 'WIPE',
+        baseY: 0.25
+      }),
+
+      // 2. Seu Zé da Adega (Beverage Wholesaler)
+      this.createHumanoidNpc({
+        id: 'ze_adega',
+        name: 'SEU ZÉ (ADEGA DO ZÉ)',
+        prompt: 'FALAR COM SEU ZÉ DA ADEGA',
+        encounterId: 'ADEGA_DO_ZE',
+        shirtColor: 0x18181b, // Black tee
+        skinColor: 0x8a5832,
+        pantsColor: 0x27272a,
+        hasCap: true,
+        capColor: 0xdc2626, // Red cap
+        hasApron: true,
+        apronColor: 0x991b1b, // Dark red apron
+        stationary: true,
+        defaultYaw: Math.PI,
+        waypoints: [{ x: -12.2, y: 0.25, z: 44.8 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 3. Seu Manuel (Padeiro da Padaria Estrela)
+      this.createHumanoidNpc({
+        id: 'manuel_padeiro',
+        name: 'SEU MANUEL (PADARIA ESTRELA)',
+        prompt: 'PEDIR PÃO COM SEU MANUEL',
+        encounterId: 'PADARIA_ESTRELA',
+        shirtColor: 0xfef08a, // Cream baker shirt
+        skinColor: 0xae7d55,
+        pantsColor: 0xf5f5f5,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xffffff,
+        hasMustache: true,
+        stationary: true,
+        defaultYaw: Math.PI,
+        waypoints: [{ x: 33.2, y: 0.25, z: 44.6 }],
+        interactable: false,
+        animationMode: 'WIPE',
+        baseY: 0.25
+      }),
+
+      // 4. Dona Maria (Pasteleira da Feira)
+      this.createHumanoidNpc({
+        id: 'dona_maria_pastel',
+        name: 'DONA MARIA (PASTEL DA FEIRA)',
+        prompt: 'PEDIR PASTEL COM DONA MARIA',
+        encounterId: 'PASTEL_FEIRA',
+        shirtColor: 0xdc2626, // Red shirt
+        skinColor: 0xa86c43,
+        pantsColor: 0x475569,
+        hasHairnet: true,
+        hasApron: true,
+        apronColor: 0xf59e0b, // Yellow/golden apron
+        stationary: true,
+        defaultYaw: 0, // Facing street (+Z)
+        waypoints: [{ x: -3.5, y: 0.25, z: 37.0 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 5. Seu Mário (Banca de Jornal)
+      this.createHumanoidNpc({
+        id: 'mario_banca',
+        name: 'SEU MÁRIO (BANCA DE JORNAL)',
+        prompt: 'FALAR COM SEU MÁRIO NA BANCA',
+        encounterId: 'BANCA_JORNAL',
+        shirtColor: 0x15803d, // Green cardigan
+        skinColor: 0x92613d,
+        pantsColor: 0x374151,
+        hasGlasses: true,
+        stationary: true,
+        defaultYaw: 0, // Facing street (+Z)
+        waypoints: [{ x: 7.5, y: 0.25, z: 36.8 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 6. Frentista Tonho (Posto Pirituba 24H)
+      this.createHumanoidNpc({
+        id: 'frentista_tonho',
+        name: 'TONHO (FRENTISTA POSTO 24H)',
+        prompt: 'FALAR COM FRENTISTA TONHO',
+        encounterId: 'POSTO_PIRITUBA',
+        shirtColor: 0xeab308, // Yellow Petrobras uniform
+        skinColor: 0x7c4e2d,
+        pantsColor: 0x15803d, // Green pants
+        hasCap: true,
+        capColor: 0x15803d, // Green Petrobras cap
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing +X
+        waypoints: [{ x: -38.0, y: 0.25, z: 41.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 7. Tia Cida (Inspetora Escolar - E.E. Prof. Lourenço Filho)
+      this.createHumanoidNpc({
+        id: 'tia_cida',
+        name: 'TIA CIDA (INSPETORA ESCOLAR)',
+        prompt: 'FALAR COM TIA CIDA NA PORTARIA',
+        encounterId: 'ESCOLA_PUBLICA',
+        shirtColor: 0x2563eb, // Blue school uniform/smock
+        skinColor: 0x6e4325,
+        pantsColor: 0x334155,
+        hasGlasses: true,
+        hasLanyard: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East (+X towards sidewalk)
+        waypoints: [{ x: 131.5, y: 0.25, z: 74.0 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 8. Seu Zico (Pipoca & Algodão Doce - Praça Petrônio Portela)
+      this.createHumanoidNpc({
+        id: 'zico_pipoca',
+        name: 'SEU ZICO (PIPOCA & ALGODÃO DOCE)',
+        prompt: 'COMPRAR PIPOCA COM SEU ZICO',
+        encounterId: 'PARQUE_PETRONIO',
+        shirtColor: 0xffffff,
+        skinColor: 0x8a5832,
+        pantsColor: 0x1e293b,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xdc2626, // Red/white vendor apron
+        hasScoop: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West (-X towards sidewalk)
+        waypoints: [{ x: 160.5, y: 0.25, z: 72.0 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 9. Seu Toninho (Espeteiro & Bar da Petrônio)
+      this.createHumanoidNpc({
+        id: 'toninho_espetinho',
+        name: 'SEU TONINHO (BAR & ESPETINHO)',
+        prompt: 'PEDIR ESPETINHO COM SEU TONINHO',
+        encounterId: 'ESPETINHO_PETRONIO',
+        shirtColor: 0x1c1917, // Dark tee
+        skinColor: 0x9a653f,
+        pantsColor: 0x292524,
+        hasApron: true,
+        apronColor: 0x7f1d1d, // Barbecue apron
+        hasTongs: true,
+        hasCloth: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East (+X towards sidewalk)
+        waypoints: [{ x: 129.8, y: 0.25, z: 125.0 }],
+        interactable: false,
+        animationMode: 'WIPE',
+        baseY: 0.25
+      })
+    ];
+
+    this.establishmentNpcs.forEach(n => this.npcs.push(n));
+  }
 }
 
 /**
@@ -25578,7 +26639,7 @@ class InteractableSystem {
       {
         id: 'bar_sinuca',
         name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)',
-        prompt: 'JOGAR SINUCA OU PEDIR NO BALCÃO',
+        prompt: 'PEDIR NO BALCÃO DO SEU TIÃO OU JOGAR SINUCA',
         position: new THREE.Vector3(12.0, 1.2, 41.5),
         maxDist: 3.8,
         encounterId: 'BAR_DO_TIAO',
@@ -25781,6 +26842,42 @@ class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'BAR_DO_PEIXE',
         zoneId: 'BAR_DO_PEIXE'
+      },
+      {
+        id: 'escola_publica',
+        name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)',
+        prompt: 'FALAR COM A TIA CIDA NO PORTÃO DA ESCOLA',
+        position: new THREE.Vector3(131.5, 1.2, 74.0),
+        maxDist: 3.8,
+        encounterId: 'ESCOLA_PUBLICA',
+        zoneId: 'ESCOLA_LOURENCO_FILHO'
+      },
+      {
+        id: 'parque_petronio',
+        name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA',
+        prompt: 'COMPRAR PIPOCA DO SEU ZICO OU USAR A PRAÇA',
+        position: new THREE.Vector3(160.5, 1.2, 72.0),
+        maxDist: 3.8,
+        encounterId: 'PARQUE_PETRONIO',
+        zoneId: 'PARQUE_PETRONIO'
+      },
+      {
+        id: 'espetinho_petronio',
+        name: 'BAR & ESPETINHO DA PETRÔNIO',
+        prompt: 'PEDIR ESPETINHO COM SEU TONINHO NA BRASA',
+        position: new THREE.Vector3(129.8, 1.2, 125.0),
+        maxDist: 3.8,
+        encounterId: 'ESPETINHO_PETRONIO',
+        zoneId: 'ESPETINHO_PETRONIO'
+      },
+      {
+        id: 'papelaria_bazar',
+        name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO',
+        prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS',
+        position: new THREE.Vector3(159.0, 1.2, 145.0),
+        maxDist: 3.8,
+        encounterId: 'PAPELARIA_BAZAR',
+        zoneId: 'PAPELARIA_BAZAR'
       }
     ];
   }
