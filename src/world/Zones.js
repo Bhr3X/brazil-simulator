@@ -408,6 +408,51 @@ export const WORLD_ZONES = [
     openHour: 8.0,
     closeHour: 19.0,
     description: 'Centro comercial com Papelaria Pirituba (cópias, xerox, materiais) e Autoescola Petrônio (CFC A/B).'
+  },
+  {
+    id: 'IGREJA_DO_MORRO',
+    name: 'IGREJINHA DO MORRO & PRAÇA PANORÂMICA',
+    min: { x: 153.0, y: 0.0, z: 182.0 },
+    max: { x: 195.0, y: 15.0, z: 226.0 },
+    openHour: 6.0,
+    closeHour: 20.0,
+    description: 'Capela histórica no alto do morro com vista panorâmica para Pirituba, escadaria de pedra e sino colonial.'
+  },
+  {
+    id: 'COLEGIO_WELLINGTON',
+    name: 'COLÉGIO WELLINGTON (PETRÔNIO PORTELA)',
+    min: { x: 153.0, y: 0.0, z: 227.0 },
+    max: { x: 195.0, y: 12.0, z: 265.0 },
+    openHour: 7.0,
+    closeHour: 19.0,
+    description: 'Tradicional colégio da Av. Petrônio Portela com ensino fundamental, médio e quadra poliesportiva.'
+  },
+  {
+    id: 'MERCADO_PYRITUBA',
+    name: 'MERCADO MUNICIPAL DE PYRITUBA',
+    min: { x: 153.0, y: 0.0, z: 266.0 },
+    max: { x: 195.0, y: 10.0, z: 300.0 },
+    openHour: 6.0,
+    closeHour: 20.0,
+    description: 'Mercado Municipal de Pyrituba com hortifrúti fresco, banca de queijos artesanais de Minas e barraca de pastel com caldo de cana.'
+  },
+  {
+    id: 'RESTAURANTE_AMIGOS_DO_PICUI',
+    name: 'RESTAURANTE AMIGOS DO PICUÍ (CARNE DE SOL)',
+    min: { x: 153.0, y: 0.0, z: 301.0 },
+    max: { x: 195.0, y: 10.0, z: 335.0 },
+    openHour: 11.5,
+    closeHour: 23.5,
+    description: 'Famoso restaurante nordestino da região. Especialidade em carne de sol de Picuí na chapa com baião de dois, macaxeira e manteiga de garrafa.'
+  },
+  {
+    id: 'FARMACIA_PETRONIO',
+    name: 'DROGARIA & FARMÁCIA PETRÔNIO',
+    min: { x: 110.0, y: 0.0, z: 205.0 },
+    max: { x: 137.0, y: 8.0, z: 232.0 },
+    openHour: 7.0,
+    closeHour: 23.0,
+    description: 'Drogaria completa na Petrônio Portela com remédios de referência e genéricos, perfumaria e aferição de pressão arterial.'
   }
 ];
 

@@ -2322,6 +2322,247 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  IGREJA_DO_MORRO: {
+    id: 'IGREJA_DO_MORRO',
+    title: '⛪ IGREJINHA DO MORRO // PADRE BENTO',
+    getIntroText: (state) => `
+      A brisa suave sopra no alto do morro enquanto o sino de bronze repica no campanário.<br>
+      A vista panorâmica descortina toda a extensão da Av. Petrônio Portela e as colinas de Pirituba.<br>
+      O Padre Bento, de batina preta e olhar acolhedor, te recebe com a mão estendida:<br>
+      <em>"— A paz de Cristo, meu filho! Seja bem-vindo à nossa capela. O que traz ao seu coração hoje?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'acender_vela_bencao',
+        label: 'Acender uma vela votiva no altar e receber a bênção solene do Padre Bento',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -300, sanidade: 28, perigo: -15 }, 'Bênção do Padre Bento');
+          return 'O Padre traça o sinal da cruz na sua testa e profere palavras de conforto e serenidade. A chama da vela bruxuleia no altar de pedra (+28% Sanidade, -15% Perigo).';
+        }
+      },
+      {
+        id: 'admirar_mirante',
+        label: 'Apreciar o horizonte do mirante da igrejinha e respirar o ar puro do morro',
+        costLabel: '+20% Sanidade (Grátis)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 20, ginga: 4 }, 'Mirante da igrejinha do morro');
+          return 'Debruçado no parapeito de ferro colonial, você observa o trânsito lá embaixo e as árvores floridas balançando ao vento. Paz de espírito revigorante (+20% Sanidade, +4 Ginga).';
+        }
+      },
+      {
+        id: 'doacao_paroquia',
+        label: 'Fazer uma contribuição de R$ 10,00 para as obras sociais e sopa comunitária da paróquia',
+        costLabel: 'R$ 10,00',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -1000, sanidade: 35, ginga: 10 }, 'Doação para paróquia');
+          return 'Você deposita a cédula no cofre de madeira. O Padre Bento agradece comovido: "— Que Deus multiplique em sua vida!" O coração se enche de luz (+35% Sanidade, +10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  COLEGIO_WELLINGTON: {
+    id: 'COLEGIO_WELLINGTON',
+    title: '🏫 COLÉGIO WELLINGTON // PROF. MAURÍCIO',
+    getIntroText: (state) => `
+      O sinal da escola ecoa pelo pátio moderno e o burburinho animado dos estudantes invade a portaria.<br>
+      Na quadra de esportes, o som da bola quicando e gritos de incentivo marcam o intervalo.<br>
+      O Professor Maurício, com crachá no peito e livros didáticos sob o braço, cumprimenta na entrada:<br>
+      <em>"— Bom dia, jovem! Veio se informar sobre as matrículas, o simulado do Enem ou bater uma bola?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'conversa_professor',
+        label: 'Conversar com o Professor Maurício sobre atualidades e dicas de redação',
+        costLabel: '+18% Sanidade (Ideias & Cultura)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 18, ginga: 8 }, 'Dicas de estudo com Prof. Maurício');
+          return 'O professor compartilha análises brilhantes sobre literatura brasileira e pensamento crítico. Conhecimento que expande horizontes (+18% Sanidade, +8 Ginga).';
+        }
+      },
+      {
+        id: 'bater_bola_quadra',
+        label: 'Entrar na quadra poliesportiva para um bate-bola rápido de futsal com a turma',
+        costLabel: '+22% Sanidade / -10% Bucho',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 22, ginga: 12, fome: -10 }, 'Bate-bola no Wellington');
+          return 'Dribles rápidos na quadra de cimento azul, tabelinha na ala e chute no ângulo! O suor limpa a cabeça e traz de volta a alegria dos tempos de escola (+22% Sanidade, +12 Ginga, -10% Bucho).';
+        }
+      },
+      {
+        id: 'salgado_cantina',
+        label: 'Comprar esfiha folhada de carne e um suco de uva integral gelado na cantina',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -800, fome: 32, sanidade: 16 }, 'Lanche da cantina do Wellington');
+          return 'Esfiha quentinha com massa folhada dourada e recheio temperado com hortelã, acompanhado de suco gelado. Clássico recreio escolar (+32% Bucho, +16% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  MERCADO_PYRITUBA: {
+    id: 'MERCADO_PYRITUBA',
+    title: '🛒 MERCADO MUNICIPAL DE PYRITUBA // SEU BETO',
+    getIntroText: (state) => `
+      O galpão coberto vibra com o colorido de caixas de frutas, queijos da Canastra e temperos nordestinos.<br>
+      No corredor central, o chiado de óleo borbulhante anuncia os tradicionais pastéis de feira com caldo de cana.<br>
+      Seu Beto, de avental listrado e boné de feirante, ajeita um cacho de bananas-ouro e grita animado:<br>
+      <em>"— Olha a fruta fresquinha, freguês! Pastel sequinho na hora e o melhor queijo coalho da Petrônio!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pastel_caldo_mercado',
+        label: 'Pedir pastel crocante de carne seca com queijo coalho e copo de caldo de cana gelado com limão',
+        costLabel: 'R$ 13,00',
+        costCentavos: 1300,
+        disabled: !state.canAfford(1300),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1300, fome: 48, sanidade: 24 }, 'Pastel de carne seca e caldo de cana');
+          return 'Massa estaladiça com bolhas douradas, recheio farto de carne desfiada suculenta e caldo de cana geladinho que lava a alma (+48% Bucho, +24% Sanidade)!';
+        }
+      },
+      {
+        id: 'cesta_frutas',
+        label: 'Comprar uma cesta sortida de frutas frescas da época (bananas-ouro, laranjas-pera e mamão papaia)',
+        costLabel: 'R$ 10,00',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1000, fome: 35, sanidade: 20 }, 'Cesta de frutas do Seu Beto');
+          return 'Frutas doces, cheirosas e cheias de vitaminas direto da roça. Nutrição de primeira para aguentar o dia a dia (+35% Bucho, +20% Sanidade).';
+        }
+      },
+      {
+        id: 'queijo_manteiga',
+        label: 'Comprar uma peça de queijo meia cura artesanal e uma garrafa de manteiga de garrafa pura',
+        costLabel: 'R$ 18,00',
+        costCentavos: 1800,
+        disabled: !state.canAfford(1800),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -1800, sanidade: 28, ginga: 10, fome: 20 }, 'Queijo da Canastra e manteiga de garrafa');
+          return 'Iguarias da mais alta tradição empacotadas no papel pardo. Sabor autêntico que alegra a despensa e o paladar (+28% Sanidade, +20% Bucho, +10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  RESTAURANTE_AMIGOS_DO_PICUI: {
+    id: 'RESTAURANTE_AMIGOS_DO_PICUI',
+    title: '🥩 RESTAURANTE AMIGOS DO PICUÍ // MESTRE SEVERINO',
+    getIntroText: (state) => `
+      O aroma inconfundível de carne de sol grelhada na manteiga de garrafa e alho perfuma a varanda colonial.<br>
+      Mesas de madeira maciça com toalhas xadrez acolhem famílias saboreando generosas travessas de barro fumegantes.<br>
+      O chef Mestre Severino, de dólmã branco e lenço vermelho no pescoço, surge com uma chapa chiando alto:<br>
+      <em>"— Ô de casa! Aqui é o verdadeiro sabor de Picuí na Paraíba! Carne curada no ponto, macaxeira na brasa e baião caprichado!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'chapa_carne_sol',
+        label: 'Pedir a Famosa Chapa de Carne de Sol do Picuí com baião de dois, macaxeira dourada, queijo coalho e paçoca',
+        costLabel: 'R$ 38,00',
+        costCentavos: 3800,
+        disabled: !state.canAfford(3800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -3800, fome: 70, sanidade: 45, perigo: -20 }, 'Banquete Carne de Sol do Picuí');
+          return 'Um verdadeiro banquete dos deuses sertanejos! A carne desmancha na boca com o fio de manteiga dourada e o baião cremoso com nata. Você atinge o nirvana gastronômico (+70% Bucho, +45% Sanidade, -20% Perigo)!';
+        }
+      },
+      {
+        id: 'cachaca_torresmo',
+        label: 'Tomar uma dose de cachaça artesanal de umburana com porçãozinha de torresmo crocante e limão cravo',
+        costLabel: 'R$ 12,00',
+        costCentavos: 1200,
+        disabled: !state.canAfford(1200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1200, sanidade: 26, ginga: 16, fome: 15 }, 'Cachaça de umburana e torresmo');
+          return 'Cachaça aveludada e aromática aquecendo o peito, acompanhada de torresmo sequinho que estala nos dentes (+26% Sanidade, +16 Ginga, +15% Bucho).';
+        }
+      },
+      {
+        id: 'porcao_macaxeira',
+        label: 'Pedir porção de macaxeira cozida e frita na manteiga de garrafa com queijo gratinado',
+        costLabel: 'R$ 16,00',
+        costCentavos: 1600,
+        disabled: !state.canAfford(1600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1600, fome: 38, sanidade: 22 }, 'Macaxeira gratinada na manteiga');
+          return 'Mandioca macia por dentro e crocante por fora coberta com queijo tostado. Conforto e sabor sem igual (+38% Bucho, +22% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  FARMACIA_PETRONIO: {
+    id: 'FARMACIA_PETRONIO',
+    title: '💊 DROGARIA & FARMÁCIA PETRÔNIO // DRA. CAMILA',
+    getIntroText: (state) => `
+      O ambiente impecável, refrigerado e iluminado traz alívio imediato contra o calor da avenida.<br>
+      As prateleiras exibem medicamentos organizados, produtos de cuidados pessoais, vitaminas e fraldas.<br>
+      A farmacêutica Dra. Camila, de jaleco branco engomado e crachá profissional, te atende gentilmente no balcão:<br>
+      <em>"— Olá! Como posso te ajudar? Precisa de algum medicamento, primeiros socorros ou gostaria de aferir a pressão?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'kit_antiacido_remedios',
+        label: 'Comprar envelope de antiácido efervescente e cartela de analgésico para dor de cabeça',
+        costLabel: 'R$ 9,00',
+        costCentavos: 900,
+        disabled: !state.canAfford(900),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -900, sanidade: 30, perigo: -10 }, 'Antiácido e analgésico na farmácia');
+          return 'O efervescente borbulha no copinho d água e desce limpando a queimação do estômago. O analgésico alivia as têmporas e revigora seu foco (+30% Sanidade, -10% Perigo).';
+        }
+      },
+      {
+        id: 'aferir_pressao',
+        label: 'Aferir a pressão arterial e batimentos cardíacos no consultório com a Dra. Camila',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -300, sanidade: 18, ginga: 4 }, 'Aferição de pressão arterial');
+          return 'A braçadeira infla suavemente enquanto o manômetro mede seus batimentos: "— 12 por 8, coração de atleta!", sorri a farmacêutica. Alívio de saber que a saúde está em dia (+18% Sanidade, +4 Ginga).';
+        }
+      },
+      {
+        id: 'barra_cereal_isotonico',
+        label: 'Comprar garrafa de isotônico gelado de frutas cítricas e barra de cereais com castanhas',
+        costLabel: 'R$ 7,00',
+        costCentavos: 700,
+        disabled: !state.canAfford(700),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -700, fome: 24, sanidade: 18 }, 'Isotônico e barra de cereal');
+          return 'Hidratação rápida com eletrólitos e energia imediata das castanhas para seguir caminhando pelas ruas de São Paulo (+24% Bucho, +18% Sanidade).';
+        }
+      }
+    ]
   }
 };
 

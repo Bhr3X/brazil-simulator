@@ -52,6 +52,7 @@ export class CityBuilder {
     this.buildBlocoEdgarFaccoTrioPlaza();
     this.buildFavelaCampinho();
     this.buildPetronioPortelaSouthCorridor();
+    this.buildPetronioPortelaFurtherSouthExtension();
     this.buildMapBoundaryIllusionWallsAndConstructionSites();
   }
 
@@ -6188,6 +6189,617 @@ export class CityBuilder {
   }
 
   // =========================================================================
+  // 24.6 Av. Ministro Petrônio Portela Further South Extension (Z = 178 to 330)
+  // Hillside Igrejinha & Praça, Colégio Wellington, Mercado Pyrituba,
+  // Restaurante Amigos do Picuí, Drogaria & Farmácia Petrônio, Praça da Colina
+  // =========================================================================
+  buildPetronioPortelaFurtherSouthExtension() {
+    const roadMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createAsfalto(4, 30)
+    });
+    const sideMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(4, 30)
+    });
+    const yellowStripeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const whiteStripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const curbMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+    const grassMat = new THREE.MeshLambertMaterial({ color: 0x2e7d32 });
+    const cobblestoneMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(2, 2)
+    });
+    const colonialWallMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#fdfbf7', 2, 2)
+    });
+    const terracottaRoofMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createTelhasColoniais()
+    });
+    const woodMat = new THREE.MeshLambertMaterial({ color: 0x5c2c16 });
+    const brickMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createTijoloBaiano(3, 3)
+    });
+    const windowGlassMat = new THREE.MeshLambertMaterial({
+      color: 0x60a5fa,
+      transparent: true,
+      opacity: 0.6
+    });
+
+    // 1. Roadway Asphalt (X = 137.0 to 153.0, Z = 178.0 to 330.0, Length = 152m)
+    const roadGeo = new THREE.PlaneGeometry(16.0, 152.0);
+    const roadMesh = new THREE.Mesh(roadGeo, roadMat);
+    roadMesh.rotation.x = -Math.PI / 2;
+    roadMesh.position.set(145.0, 0.01, 254.0);
+    this.scene.add(roadMesh);
+
+    // Center dashed double yellow line (Faixa Amarela Dupla Pontilhada)
+    for (let z = 180.0; z < 328.0; z += 5.0) {
+      [-0.15, 0.15].forEach(dx => {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 2.8), yellowStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(145.0 + dx, 0.016, z);
+        this.scene.add(stripe);
+      });
+    }
+
+    // Pedestrian crosswalks at Z = 210.0, 270.0, 315.0
+    [210.0, 270.0, 315.0].forEach(crossZ => {
+      for (let x = 137.6; x <= 152.4; x += 1.6) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 4.0), whiteStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(x, 0.018, crossZ);
+        this.scene.add(stripe);
+      }
+    });
+
+    // 2. Sidewalks (West: X = 131 to 137, East: X = 153 to 159)
+    const westSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 152.0), sideMat);
+    westSide.position.set(134.0, 0.125, 254.0);
+    this.scene.add(westSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(131.0, 0, 178.0),
+      new THREE.Vector3(137.0, 0.25, 330.0),
+      'curb'
+    );
+
+    const eastSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 152.0), sideMat);
+    eastSide.position.set(156.0, 0.125, 254.0);
+    this.scene.add(eastSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(153.0, 0, 178.0),
+      new THREE.Vector3(159.0, 0.25, 330.0),
+      'curb'
+    );
+
+    // 3. Concrete Utility Poles with Street Lights along Petrônio Portela
+    [195.0, 222.0, 250.0, 278.0, 305.0, 325.0].forEach((pz, idx) => {
+      this.buildUtilityPole(136.5, 0.25, pz, idx % 2 === 0);
+      this.buildUtilityPole(153.5, 0.25, pz + 12.0, idx % 2 === 1);
+    });
+
+    // -------------------------------------------------------------------------
+    // 4. EAST SIDE: PRACINHA COM UMA IGREJINHA EM UM MORRO (Z = 185 to 225, X = 160 to 192)
+    // -------------------------------------------------------------------------
+    {
+      const churchHillGroup = new THREE.Group();
+      churchHillGroup.name = 'igrejinhaMorroGroup';
+
+      // Hill terrain mound (base Y = 0 to 4.5)
+      const hillBase = new THREE.Mesh(
+        new THREE.BoxGeometry(32.0, 4.5, 40.0),
+        grassMat
+      );
+      hillBase.position.set(176.0, 2.25, 205.0);
+      churchHillGroup.add(hillBase);
+
+      // Plateau plaza surface with Portuguese cobblestone (Y = 4.5)
+      const plazaFloor = new THREE.Mesh(
+        new THREE.PlaneGeometry(30.0, 38.0),
+        cobblestoneMat
+      );
+      plazaFloor.rotation.x = -Math.PI / 2;
+      plazaFloor.position.set(176.0, 4.51, 205.0);
+      churchHillGroup.add(plazaFloor);
+
+      // Stone retaining wall facing avenue
+      const wallFront = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 4.5, 40.0),
+        curbMat
+      );
+      wallFront.position.set(160.0, 2.25, 205.0);
+      churchHillGroup.add(wallFront);
+
+      // Plateau Walkable Collider
+      this.physics.addBoxCollider(
+        new THREE.Vector3(160.0, 0, 185.0),
+        new THREE.Vector3(192.0, 4.5, 225.0),
+        'solid'
+      );
+
+      // Stone Stairs / Escadaria leading from sidewalk (X = 159, Z = 202 to 206) up to Y = 4.5
+      const numSteps = 10;
+      const stepRise = 4.5 / numSteps;
+      for (let i = 0; i < numSteps; i++) {
+        const stepY = (i + 1) * stepRise;
+        const stepX = 160.0 + (i * 0.7);
+        const step = new THREE.Mesh(
+          new THREE.BoxGeometry(1.2, stepY, 4.0),
+          curbMat
+        );
+        step.position.set(stepX, stepY / 2, 204.0);
+        churchHillGroup.add(step);
+
+        // Stepped walk collider so player climbs smoothly
+        this.physics.addBoxCollider(
+          new THREE.Vector3(stepX - 0.6, 0, 202.0),
+          new THREE.Vector3(stepX + 0.6, stepY, 206.0),
+          'curb'
+        );
+      }
+
+      // Overlook railing along West edge of plateau (X = 160.5, Z = 186 to 224 except stairs)
+      const railMat = new THREE.MeshLambertMaterial({ color: 0x1f2937 });
+      const railNorth = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.9, 16.0), railMat);
+      railNorth.position.set(160.5, 4.95, 193.0);
+      churchHillGroup.add(railNorth);
+      const railSouth = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.9, 16.0), railMat);
+      railSouth.position.set(160.5, 4.95, 215.0);
+      churchHillGroup.add(railSouth);
+
+      // Park benches and ornamental lanterns on the church plaza
+      [-6.0, 6.0].forEach(dz => {
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 2.2), woodMat);
+        bench.position.set(164.0, 4.75, 205.0 + dz);
+        churchHillGroup.add(bench);
+      });
+
+      // Colonial Chapel / Igrejinha (at X = 180.0, Y = 4.5, Z = 205.0)
+      // Main Nave
+      const chapelNave = new THREE.Mesh(
+        new THREE.BoxGeometry(14.0, 7.0, 16.0),
+        colonialWallMat
+      );
+      chapelNave.position.set(180.0, 4.5 + 3.5, 205.0);
+      churchHillGroup.add(chapelNave);
+
+      // Peaked Tile Roof
+      const roofPeak = new THREE.Mesh(
+        new THREE.ConeGeometry(9.0, 3.5, 4),
+        terracottaRoofMat
+      );
+      roofPeak.rotation.y = Math.PI / 4;
+      roofPeak.position.set(180.0, 4.5 + 7.0 + 1.75, 205.0);
+      churchHillGroup.add(roofPeak);
+
+      // Front Facade Portico (West facing towards avenue)
+      const facade = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 9.0, 10.0),
+        colonialWallMat
+      );
+      facade.position.set(172.5, 4.5 + 4.5, 205.0);
+      churchHillGroup.add(facade);
+
+      // Wooden Double Church Doors
+      const churchDoor = new THREE.Mesh(
+        new THREE.BoxGeometry(0.2, 3.2, 2.4),
+        woodMat
+      );
+      churchDoor.position.set(171.7, 4.5 + 1.6, 205.0);
+      churchHillGroup.add(churchDoor);
+
+      // Chapel Sign Plaque
+      const plaqueMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createIgrejinhaMorroSign()
+      });
+      const plaque = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 1.8), plaqueMat);
+      plaque.position.set(171.6, 4.5 + 3.6, 202.2);
+      churchHillGroup.add(plaque);
+
+      // Bell Tower / Campanário (Top of facade)
+      const tower = new THREE.Mesh(
+        new THREE.BoxGeometry(3.0, 4.0, 3.0),
+        colonialWallMat
+      );
+      tower.position.set(173.0, 4.5 + 10.5, 205.0);
+      churchHillGroup.add(tower);
+
+      // Brass Bell
+      const bell = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.35, 0.55, 0.8, 12),
+        new THREE.MeshLambertMaterial({ color: 0xd97706 })
+      );
+      bell.position.set(173.0, 4.5 + 10.5, 205.0);
+      churchHillGroup.add(bell);
+
+      // Wooden Cross on Tower Peak
+      const crossMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.8, 0.18), crossMat);
+      crossV.position.set(173.0, 4.5 + 13.0, 205.0);
+      churchHillGroup.add(crossV);
+      const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 1.0), crossMat);
+      crossH.position.set(173.0, 4.5 + 13.4, 205.0);
+      churchHillGroup.add(crossH);
+
+      // Chapel Solid Colliders
+      this.physics.addBoxCollider(
+        new THREE.Vector3(172.0, 4.5, 196.0),
+        new THREE.Vector3(188.0, 18.0, 214.0),
+        'solid'
+      );
+
+      this.scene.add(churchHillGroup);
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. EAST SIDE: COLÉGIO WELLINGTON (Z = 230 to 265, X = 160 to 188)
+    // -------------------------------------------------------------------------
+    {
+      const schoolGroup = new THREE.Group();
+      schoolGroup.name = 'colegioWellingtonGroup';
+
+      const schoolBodyMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#f1f5f9', 4, 3)
+      });
+      const schoolNavyMat = new THREE.MeshLambertMaterial({ color: 0x1e3a8a });
+
+      // Main School Building (X = 174, Z = 254)
+      const schoolBody = new THREE.Mesh(new THREE.BoxGeometry(22.0, 9.0, 20.0), schoolBodyMat);
+      schoolBody.position.set(174.0, 4.5, 254.0);
+      schoolGroup.add(schoolBody);
+
+      // Navy Blue Base Skirting
+      const schoolBase = new THREE.Mesh(new THREE.BoxGeometry(22.2, 1.2, 20.2), schoolNavyMat);
+      schoolBase.position.set(174.0, 0.6, 254.0);
+      schoolGroup.add(schoolBase);
+
+      // Classroom Windows on West Facade
+      for (let wy = 3.2; wy <= 6.8; wy += 3.2) {
+        for (let wz = 247.0; wz <= 261.0; wz += 4.5) {
+          const win = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.8, 2.8), windowGlassMat);
+          win.position.set(162.9, wy, wz);
+          schoolGroup.add(win);
+        }
+      }
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createColegioWellingtonSign()
+      });
+      const schoolSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.5, 10.0), signMat);
+      schoolSign.position.set(162.8, 6.5, 254.0);
+      schoolGroup.add(schoolSign);
+
+      // Entrance Portico / Reception Porch
+      const porticoRoof = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.3, 4.5), schoolNavyMat);
+      porticoRoof.position.set(161.2, 3.2, 248.0);
+      schoolGroup.add(porticoRoof);
+
+      // Multi-sports court (Quadra Poliesportiva, Z = 232 to 244, X = 162 to 184)
+      const courtFloorMat = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+      const courtFloor = new THREE.Mesh(new THREE.PlaneGeometry(20.0, 12.0), courtFloorMat);
+      courtFloor.rotation.x = -Math.PI / 2;
+      courtFloor.position.set(173.0, 0.26, 238.0);
+      schoolGroup.add(courtFloor);
+
+      // Court Green Fence
+      const fenceMat = new THREE.MeshLambertMaterial({ color: 0x15803d });
+      const fenceW = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 12.0), fenceMat);
+      fenceW.position.set(162.0, 1.4, 238.0);
+      schoolGroup.add(fenceW);
+
+      // Basketball backboard & hoop
+      const hoopPole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.8, 6), curbMat);
+      hoopPole.position.set(182.5, 1.9, 238.0);
+      schoolGroup.add(hoopPole);
+      const backboard = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 1.6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      backboard.position.set(182.4, 3.2, 238.0);
+      schoolGroup.add(backboard);
+
+      this.scene.add(schoolGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(162.0, 0, 230.0),
+        new THREE.Vector3(188.0, 10.0, 265.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. EAST SIDE: MERCADO MUNICIPAL DE PYRITUBA (Z = 270 to 300, X = 160 to 188)
+    // -------------------------------------------------------------------------
+    {
+      const marketGroup = new THREE.Group();
+      marketGroup.name = 'mercadoPyritubaGroup';
+
+      // Brick Hall Base & Stucco Upper
+      const marketBase = new THREE.Mesh(new THREE.BoxGeometry(22.0, 3.0, 26.0), brickMat);
+      marketBase.position.set(174.0, 1.5, 285.0);
+      marketGroup.add(marketBase);
+
+      const marketUpperMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createReboco('#fef3c7', 3, 3)
+      });
+      const marketUpper = new THREE.Mesh(new THREE.BoxGeometry(22.0, 5.0, 26.0), marketUpperMat);
+      marketUpper.position.set(174.0, 5.5, 285.0);
+      marketGroup.add(marketUpper);
+
+      // Vaulted Arched Roof
+      const roofArch = new THREE.Mesh(
+        new THREE.CylinderGeometry(11.0, 11.0, 26.0, 16, 1, false, 0, Math.PI),
+        terracottaRoofMat
+      );
+      roofArch.rotation.z = Math.PI / 2;
+      roofArch.rotation.y = Math.PI / 2;
+      roofArch.position.set(174.0, 8.0, 285.0);
+      marketGroup.add(roofArch);
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createMercadoPyritubaSign()
+      });
+      const marketSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.5, 10.0), signMat);
+      marketSign.position.set(162.8, 6.8, 285.0);
+      marketGroup.add(marketSign);
+
+      // Entrance Opening & Awnings
+      const awningMat = new THREE.MeshLambertMaterial({ color: 0x16a34a });
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.2, 8.0), awningMat);
+      awning.position.set(161.5, 3.4, 285.0);
+      marketGroup.add(awning);
+
+      // Produce Display Crates (Oranges, Bananas, Melons)
+      const crateWoodMat = new THREE.MeshLambertMaterial({ color: 0xb45309 });
+      [-2.4, 0, 2.4].forEach((dz, idx) => {
+        const crate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.4), crateWoodMat);
+        crate.position.set(161.6, 0.4, 285.0 + dz);
+        marketGroup.add(crate);
+
+        // Colored fruit mounds
+        const fruitColor = idx === 0 ? 0xf97316 : (idx === 1 ? 0xfacc15 : 0x22c55e);
+        const fruitMound = new THREE.Mesh(
+          new THREE.SphereGeometry(0.5, 8, 8),
+          new THREE.MeshLambertMaterial({ color: fruitColor })
+        );
+        fruitMound.position.set(161.6, 0.9, 285.0 + dz);
+        marketGroup.add(fruitMound);
+      });
+
+      this.scene.add(marketGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(162.0, 0, 268.0),
+        new THREE.Vector3(188.0, 11.0, 300.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. EAST SIDE: RESTAURANTE AMIGOS DO PICUÍ (Z = 305 to 330, X = 160 to 188)
+    // -------------------------------------------------------------------------
+    {
+      const restGroup = new THREE.Group();
+      restGroup.name = 'amigosDoPicuiGroup';
+
+      const restWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createReboco('#78350f', 3, 3)
+      });
+
+      // Main Restaurant Building
+      const restBody = new THREE.Mesh(new THREE.BoxGeometry(22.0, 7.0, 22.0), restWallMat);
+      restBody.position.set(174.0, 3.5, 318.0);
+      restGroup.add(restBody);
+
+      // Overhanging Roof
+      const roofOverhang = new THREE.Mesh(new THREE.BoxGeometry(23.0, 0.8, 23.0), terracottaRoofMat);
+      roofOverhang.position.set(174.0, 7.2, 318.0);
+      restGroup.add(roofOverhang);
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createAmigosDoPicuiSign()
+      });
+      const restSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.5, 10.0), signMat);
+      restSign.position.set(162.8, 5.8, 318.0);
+      restGroup.add(restSign);
+
+      // Front Veranda with Wooden Tables and Checkered Cloths
+      const pergolaMat = new THREE.MeshLambertMaterial({ color: 0x451a03 });
+      const verandaRoof = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.2, 14.0), terracottaRoofMat);
+      verandaRoof.position.set(161.5, 3.5, 318.0);
+      restGroup.add(verandaRoof);
+
+      // Timber Support Posts
+      [-6.0, 0, 6.0].forEach(dz => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.5, 0.2), pergolaMat);
+        post.position.set(160.2, 1.75, 318.0 + dz);
+        restGroup.add(post);
+      });
+
+      // 3 Outdoor Tables
+      const tableWoodMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const clothMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 }); // Red checkered
+      [-4.5, 0, 4.5].forEach(dz => {
+        const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.75, 1.8), tableWoodMat);
+        table.position.set(161.4, 0.375, 318.0 + dz);
+        restGroup.add(table);
+
+        const cloth = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.04, 1.85), clothMat);
+        cloth.position.set(161.4, 0.77, 318.0 + dz);
+        restGroup.add(cloth);
+
+        // Clay Pepper Pot (Pimenta)
+        const pot = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.08, 0.12, 0.2, 8),
+          new THREE.MeshLambertMaterial({ color: 0xc2410c })
+        );
+        pot.position.set(161.4, 0.88, 318.0 + dz);
+        restGroup.add(pot);
+      });
+
+      this.scene.add(restGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(162.0, 0, 304.0),
+        new THREE.Vector3(188.0, 9.0, 330.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. WEST SIDE: DROGARIA & FARMÁCIA PETRÔNIO (Z = 205 to 230, X = 115 to 131)
+    // -------------------------------------------------------------------------
+    {
+      const farmGroup = new THREE.Group();
+      farmGroup.name = 'farmaciaPetronioGroup';
+
+      const farmWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#ffffff', 3, 3)
+      });
+      const farmBlueMat = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+
+      // Main Pharmacy Storefront Body
+      const farmBody = new THREE.Mesh(new THREE.BoxGeometry(16.0, 7.0, 22.0), farmWallMat);
+      farmBody.position.set(123.0, 3.5, 218.0);
+      farmGroup.add(farmBody);
+
+      // Blue Accent Border
+      const farmTrim = new THREE.Mesh(new THREE.BoxGeometry(16.2, 0.6, 22.2), farmBlueMat);
+      farmTrim.position.set(123.0, 6.8, 218.0);
+      farmGroup.add(farmTrim);
+
+      // Glass Display Window
+      const win = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 12.0), windowGlassMat);
+      win.position.set(131.1, 2.2, 218.0);
+      farmGroup.add(win);
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createFarmaciaPetronioSign()
+      });
+      const farmSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.2, 9.0), signMat);
+      farmSign.position.set(131.2, 5.2, 218.0);
+      farmGroup.add(farmSign);
+
+      // Illuminated Green Cross on Exterior Pole
+      const greenCrossMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+      const crossPost = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 4.5, 8), curbMat);
+      crossPost.position.set(131.5, 2.25, 210.0);
+      farmGroup.add(crossPost);
+
+      const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 0.35), greenCrossMat);
+      crossV.position.set(131.5, 4.2, 210.0);
+      farmGroup.add(crossV);
+      const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.35, 1.2), greenCrossMat);
+      crossH.position.set(131.5, 4.2, 210.0);
+      farmGroup.add(crossH);
+
+      this.scene.add(farmGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(115.0, 0, 205.0),
+        new THREE.Vector3(131.0, 8.0, 230.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. WEST SIDE: PARQUE LINEAR & PRAÇA DA COLINA (Z = 235 to 275, X = 110 to 131)
+    // -------------------------------------------------------------------------
+    {
+      const parkGroup = new THREE.Group();
+      parkGroup.name = 'pracaDaColinaGroup';
+
+      // Park Grass Lawn
+      const lawn = new THREE.Mesh(new THREE.PlaneGeometry(21.0, 40.0), grassMat);
+      lawn.rotation.x = -Math.PI / 2;
+      lawn.position.set(120.5, 0.26, 255.0);
+      parkGroup.add(lawn);
+
+      // Stone Walking Path
+      const pathMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+      const path = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 38.0), pathMat);
+      path.rotation.x = -Math.PI / 2;
+      path.position.set(125.0, 0.27, 255.0);
+      parkGroup.add(path);
+
+      // Park Benches
+      [242.0, 252.0, 262.0, 270.0].forEach(bz => {
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 2.0), woodMat);
+        bench.position.set(127.5, 0.5, bz);
+        parkGroup.add(bench);
+      });
+
+      // Trees in Park (Golden Ipê)
+      this.buildIpeTree(118.0, 0.25, 242.0);
+      this.buildIpeTree(115.0, 0.25, 255.0);
+      this.buildIpeTree(118.0, 0.25, 268.0);
+
+      // Playground: Swing Set (Balanço Infantil)
+      const swingFrameMat = new THREE.MeshLambertMaterial({ color: 0xfacc15 });
+      const swingBeam = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 3.2), swingFrameMat);
+      swingBeam.position.set(120.0, 2.4, 250.0);
+      parkGroup.add(swingBeam);
+
+      [-1.4, 1.4].forEach(dz => {
+        const legA = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), swingFrameMat);
+        legA.position.set(119.5, 1.2, 250.0 + dz);
+        legA.rotation.z = 0.2;
+        parkGroup.add(legA);
+        const legB = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), swingFrameMat);
+        legB.position.set(120.5, 1.2, 250.0 + dz);
+        legB.rotation.z = -0.2;
+        parkGroup.add(legB);
+      });
+
+      // Playground Slide (Escorregador Vermelho)
+      const slideMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+      const slideChute = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 2.8), slideMat);
+      slideChute.position.set(120.0, 1.0, 260.0);
+      slideChute.rotation.x = -0.4;
+      parkGroup.add(slideChute);
+
+      this.scene.add(parkGroup);
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. WEST SIDE: SOBRADOS COMERCIAIS DO SUL (Z = 280 to 330, X = 115 to 131)
+    // -------------------------------------------------------------------------
+    {
+      const southSobradoMat1 = new THREE.MeshLambertMaterial({
+        map: this.textures.createSobradoFacade('#d97706', '#1e293b')
+      });
+      const sobrado1 = new THREE.Mesh(new THREE.BoxGeometry(16.0, 7.5, 24.0), southSobradoMat1);
+      sobrado1.position.set(123.0, 3.75, 292.0);
+      this.scene.add(sobrado1);
+
+      const southSobradoMat2 = new THREE.MeshLambertMaterial({
+        map: this.textures.createSobradoFacade('#0284c7', '#0f172a')
+      });
+      const sobrado2 = new THREE.Mesh(new THREE.BoxGeometry(16.0, 7.5, 24.0), southSobradoMat2);
+      sobrado2.position.set(123.0, 3.75, 317.0);
+      this.scene.add(sobrado2);
+
+      // Rooftop Blue Water Tanks (Caixas d'água)
+      const waterTankMat = new THREE.MeshLambertMaterial({ color: 0x1d4ed8 });
+      [292.0, 317.0].forEach(tz => {
+        const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 1.2, 12), waterTankMat);
+        tank.position.set(121.0, 8.1, tz);
+        this.scene.add(tank);
+      });
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(115.0, 0, 280.0),
+        new THREE.Vector3(131.0, 9.0, 330.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 11. WEST & EAST PERIMETER BOUNDARY COLLIDERS (Z = 178.0 to 335.0)
+    // -------------------------------------------------------------------------
+    this.physics.addBoxCollider(new THREE.Vector3(98.0, 0, 178.0), new THREE.Vector3(103.0, 12.0, 335.0), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(188.0, 0, 178.0), new THREE.Vector3(195.0, 12.0, 335.0), 'solid');
+  }
+
+  // =========================================================================
   // 24. Map Boundary Trompe-l'œil Illusion Walls & Construction Sites
   // "Desculpe pelo transtorno, estamos em Obras"
   // =========================================================================
@@ -6456,7 +7068,7 @@ export class CityBuilder {
     }
 
     // -----------------------------------------------------------------------
-    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 178.0, Y = 0)
+    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 330.0, Y = 0)
     // -----------------------------------------------------------------------
     {
       const wallW = 22.0, wallH = 9.0;
@@ -6465,33 +7077,33 @@ export class CityBuilder {
         new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
       );
       plane.rotation.y = Math.PI; // Faces -Z (towards player coming south)
-      plane.position.set(145.0, wallH / 2, 177.8);
+      plane.position.set(145.0, wallH / 2, 329.8);
       boundaryGroup.add(plane);
 
       const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(145.0, wallH / 2, 178.6);
+      back.position.set(145.0, wallH / 2, 330.6);
       boundaryGroup.add(back);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(134.0, 0, 177.5),
-        new THREE.Vector3(156.0, 11.0, 179.5),
+        new THREE.Vector3(134.0, 0, 329.5),
+        new THREE.Vector3(156.0, 11.0, 331.5),
         'solid'
       );
 
       this.illusionWalls.push({
         id: 'south_petronio',
         name: 'Muro Pintado Petrônio Portela (Sul)',
-        planePos: new THREE.Vector3(145.0, 0, 177.8),
+        planePos: new THREE.Vector3(145.0, 0, 329.8),
         normal: new THREE.Vector3(0, 0, -1),
-        bounds: { minX: 134.0, maxX: 156.0, minZ: 177.5, maxZ: 179.5, minY: 0, maxY: 11.0 }
+        bounds: { minX: 134.0, maxX: 156.0, minZ: 329.5, maxZ: 331.5, minY: 0, maxY: 11.0 }
       });
 
-      buildHugeObrasSign(145.0, 5.5, 173.5, Math.PI);
+      buildHugeObrasSign(145.0, 5.5, 325.5, Math.PI);
 
-      addCone(140.0, 0, 175.0);
-      addCone(145.0, 0, 175.0);
-      addCone(150.0, 0, 175.0);
-      addHeap(138.0, 0, 174.5, 2.5, 1.3, true);
+      addCone(140.0, 0, 327.0);
+      addCone(145.0, 0, 327.0);
+      addCone(150.0, 0, 327.0);
+      addHeap(138.0, 0, 326.5, 2.5, 1.3, true);
     }
 
     // -----------------------------------------------------------------------

@@ -335,6 +335,40 @@ export class TextureGenerator {
     return texture;
   }
 
+  // 6.5 Colonial Terracotta Curved Clay Roof Tiles (Telhas Coloniais / Canal)
+  createTelhasColoniais(repeatX = 4, repeatY = 4) {
+    const key = `telha_colonial_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 128);
+
+    // Warm terracotta ceramic base
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(0, 0, 128, 128);
+
+    // Curved clay tile overlapping ridges
+    const tileW = 16;
+    for (let x = 0; x < 128; x += tileW) {
+      const grad = ctx.createLinearGradient(x, 0, x + tileW, 0);
+      grad.addColorStop(0, 'rgba(69, 26, 3, 0.7)');
+      grad.addColorStop(0.4, 'rgba(217, 119, 6, 0.6)');
+      grad.addColorStop(0.8, 'rgba(251, 191, 36, 0.3)');
+      grad.addColorStop(1, 'rgba(69, 26, 3, 0.8)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, 0, tileW, 128);
+    }
+
+    // Horizontal overlap shadow lines every 24px
+    ctx.fillStyle = 'rgba(40, 15, 5, 0.55)';
+    for (let y = 24; y < 128; y += 24) {
+      ctx.fillRect(0, y, 128, 4);
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
   // 7. Blue Plastic Water Tank (Caixa D'Água 1000L - Fortlev/Tigre style)
   createCaixaDagua() {
     const key = `caixa_dagua`;
@@ -3204,6 +3238,170 @@ export class TextureGenerator {
     ctx.fillRect(0, 160, 256, 12);
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.fillRect(0, 172, 256, 4);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 73. Colégio Wellington Official Sign
+  createColegioWellingtonSign() {
+    const key = 'colegio_wellington_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#1e3a8a'; // Deep navy blue
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#facc15'; // Gold border
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 36px "Arial Black", Impact, sans-serif';
+    ctx.fillText('COLÉGIO WELLINGTON', 256, 54);
+
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('EDUCAÇÃO INFANTIL • FUNDAMENTAL • ENSINO MÉDIO', 256, 88);
+
+    ctx.fillStyle = '#93c5fd';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('TRADIÇÃO EM PIRITUBA • UNIDADE PETRÔNIO PORTELA', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 74. Mercado Municipal de Pyrituba Sign
+  createMercadoPyritubaSign() {
+    const key = 'mercado_pyrituba_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#14532d'; // Dark market green
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#f59e0b'; // Amber border
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 32px "Arial Black", Impact, sans-serif';
+    ctx.fillText('MERCADO MUNICIPAL DE PYRITUBA', 256, 52);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 17px sans-serif';
+    ctx.fillText('HORTIFRÚTI • PASTEL & CALDO DE CANA • EMPÓRIO DE MINAS', 256, 86);
+
+    ctx.fillStyle = '#4ade80';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('PRODUTOS FRESCOS DIRETO DO PRODUTOR • DESDE 1978', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 75. Restaurante Amigos do Picuí Sign
+  createAmigosDoPicuiSign() {
+    const key = 'amigos_do_picui_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#78350f'; // Warm terracotta wood
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#f97316'; // Terracotta orange border
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    ctx.fillStyle = '#ffedd5';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 34px "Arial Black", Impact, sans-serif';
+    ctx.fillText('RESTAURANTE AMIGOS DO PICUÍ', 256, 52);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('CARNE DE SOL DE PICUÍ • BAIÃO DE DOIS • MACAXEIRA', 256, 86);
+
+    ctx.fillStyle = '#fed7aa';
+    ctx.font = 'italic 14px sans-serif';
+    ctx.fillText('O LEGÍTIMO SABOR DO NORDESTE NA ZONA NORTE', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 76. Drogaria & Farmácia Petrônio Sign
+  createFarmaciaPetronioSign() {
+    const key = 'farmacia_petronio_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#ffffff'; // Clean white
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#0284c7'; // Medical blue
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    // Green medical cross on left and right
+    const drawCross = (cx, cy) => {
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(cx - 8, cy - 24, 16, 48);
+      ctx.fillRect(cx - 24, cy - 8, 48, 16);
+    };
+    drawCross(48, 64);
+    drawCross(464, 64);
+
+    ctx.fillStyle = '#0369a1';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 32px "Arial Black", Impact, sans-serif';
+    ctx.fillText('DROGARIA & FARMÁCIA PETRÔNIO', 256, 52);
+
+    ctx.fillStyle = '#dc2626';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('MEDICAMENTOS • GENÉRICOS • PERFUMARIA', 256, 86);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('AFERIÇÃO DE PRESSÃO • ABERTO TODOS OS DIAS ATÉ ÀS 23H', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 77. Igrejinha do Morro Plaque
+  createIgrejinhaMorroSign() {
+    const key = 'igrejinha_morro_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#b45309';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, 244, 84);
+
+    ctx.fillStyle = '#1e293b';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px serif';
+    ctx.fillText('CAPELA SÃO FRANCISCO', 128, 38);
+
+    ctx.fillStyle = '#b45309';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('IGREJINHA DO MORRO • PIRITUBA', 128, 60);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'italic 11px sans-serif';
+    ctx.fillText('PAZ E BEM A TODOS QUE AQUI SOBEM', 128, 78);
 
     const texture = this.toThreeTexture(canvas, 1, 1);
     this.cache[key] = texture;

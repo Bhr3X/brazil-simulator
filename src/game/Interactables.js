@@ -304,6 +304,51 @@ export class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'PAPELARIA_BAZAR',
         zoneId: 'PAPELARIA_BAZAR'
+      },
+      {
+        id: 'igreja_morro',
+        name: 'IGREJINHA DO MORRO (PADRE BENTO)',
+        prompt: 'SUBIR A ESCADARIA DA IGREJINHA OU FALAR COM PADRE BENTO',
+        position: new THREE.Vector3(176.0, 4.5, 205.0),
+        maxDist: 4.2,
+        encounterId: 'IGREJA_DO_MORRO',
+        zoneId: 'IGREJA_DO_MORRO'
+      },
+      {
+        id: 'colegio_wellington',
+        name: 'COLÉGIO WELLINGTON (PROF. MAURÍCIO)',
+        prompt: 'FALAR COM PROF. MAURÍCIO NO PORTÃO OU ENTRAR NA QUADRA',
+        position: new THREE.Vector3(160.0, 1.2, 248.0),
+        maxDist: 3.8,
+        encounterId: 'COLEGIO_WELLINGTON',
+        zoneId: 'COLEGIO_WELLINGTON'
+      },
+      {
+        id: 'mercado_pyrituba',
+        name: 'MERCADO MUNICIPAL DE PYRITUBA (SEU BETO)',
+        prompt: 'COMPRAR PASTEL, CALDO DE CANA OU FRUTAS COM SEU BETO',
+        position: new THREE.Vector3(160.0, 1.2, 285.0),
+        maxDist: 3.8,
+        encounterId: 'MERCADO_PYRITUBA',
+        zoneId: 'MERCADO_PYRITUBA'
+      },
+      {
+        id: 'amigos_do_picui',
+        name: 'RESTAURANTE AMIGOS DO PICUÍ (MESTRE SEVERINO)',
+        prompt: 'SABOREAR CARNE DE SOL & BAIÃO DE DOIS COM MESTRE SEVERINO',
+        position: new THREE.Vector3(160.0, 1.2, 318.0),
+        maxDist: 3.8,
+        encounterId: 'RESTAURANTE_AMIGOS_DO_PICUI',
+        zoneId: 'RESTAURANTE_AMIGOS_DO_PICUI'
+      },
+      {
+        id: 'farmacia_petronio',
+        name: 'DROGARIA & FARMÁCIA PETRÔNIO (DRA. CAMILA)',
+        prompt: 'COMPRAR MEDICAMENTOS OU AFERIR PRESSÃO COM DRA. CAMILA',
+        position: new THREE.Vector3(131.0, 1.2, 218.0),
+        maxDist: 3.8,
+        encounterId: 'FARMACIA_PETRONIO',
+        zoneId: 'FARMACIA_PETRONIO'
       }
     ];
   }

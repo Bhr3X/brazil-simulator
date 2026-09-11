@@ -345,6 +345,68 @@ export class NpcSystem {
       group.add(whistle);
     }
 
+    if (config.hasCross) {
+      const crossMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+      const crossVert = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.03), crossMat);
+      crossVert.name = 'npc_cross';
+      crossVert.position.set(0, 1.15, 0.16);
+      group.add(crossVert);
+      const crossHoriz = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.04, 0.03), crossMat);
+      crossHoriz.position.set(0, 1.20, 0.16);
+      group.add(crossHoriz);
+    }
+
+    if (config.hasBook) {
+      const bookMat = new THREE.MeshLambertMaterial({ color: 0x1e3a8a });
+      const book = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.22), bookMat);
+      book.name = 'npc_book';
+      book.position.set(0.12, -0.28, 0.08);
+      leftArm.add(book);
+    }
+
+    if (config.hasCrate) {
+      const crateMat = new THREE.MeshLambertMaterial({ color: 0xb45309 });
+      const crate = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.22, 0.28), crateMat);
+      crate.name = 'npc_crate';
+      crate.position.set(0, 0.85, 0.25);
+      group.add(crate);
+    }
+
+    if (config.hasPlatter) {
+      const platterMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+      const platter = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.03, 12), platterMat);
+      platter.name = 'npc_platter';
+      platter.position.set(0, -0.32, 0.2);
+      rightArm.add(platter);
+      const meatMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const meat = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.06, 0.12), meatMat);
+      meat.position.set(0, 0.04, 0);
+      platter.add(meat);
+    }
+
+    if (config.hasLabCoat) {
+      const coatMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+      const coatTorso = new THREE.Mesh(new THREE.BoxGeometry(0.53, 0.68, 0.31), coatMat);
+      coatTorso.name = 'npc_labcoat';
+      coatTorso.position.y = 1.05;
+      group.add(coatTorso);
+      const coatSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.42, 0.3), coatMat);
+      coatSkirt.position.set(0, 0.62, 0);
+      group.add(coatSkirt);
+    }
+
+    if (config.hasClipboard) {
+      const boardMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const clipMat = new THREE.MeshLambertMaterial({ color: 0xcbd5e1 });
+      const board = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.3, 0.2), boardMat);
+      board.name = 'npc_clipboard';
+      board.position.set(0.12, -0.25, 0.08);
+      rightArm.add(board);
+      const clip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.04, 0.08), clipMat);
+      clip.position.set(0, 0.13, 0);
+      board.add(clip);
+    }
+
     if (config.hasCoolerBox) {
       const boxGroup = new THREE.Group();
       boxGroup.position.set(0, 0.95, 0.32);
@@ -1391,6 +1453,107 @@ export class NpcSystem {
         waypoints: [{ x: 129.8, y: 0.25, z: 125.0 }],
         interactable: false,
         animationMode: 'WIPE',
+        baseY: 0.25
+      }),
+
+      // 10. Padre Bento (Igrejinha do Morro)
+      this.createHumanoidNpc({
+        id: 'padre_bento',
+        name: 'PADRE BENTO (IGREJINHA DO MORRO)',
+        prompt: 'RECEBER BÊNÇÃO COM PADRE BENTO',
+        encounterId: 'IGREJA_DO_MORRO',
+        shirtColor: 0x111111, // Black cassock
+        skinColor: 0x9e6a45,
+        pantsColor: 0x111111,
+        hasCross: true,
+        hasGlasses: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards stairs / avenue
+        waypoints: [{ x: 176.0, y: 4.5, z: 203.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 4.5
+      }),
+
+      // 11. Professor Maurício (Colégio Wellington)
+      this.createHumanoidNpc({
+        id: 'prof_mauricio',
+        name: 'PROFESSOR MAURÍCIO (COLÉGIO WELLINGTON)',
+        prompt: 'CONVERSAR COM PROFESSOR MAURÍCIO',
+        encounterId: 'COLEGIO_WELLINGTON',
+        shirtColor: 0x1d4ed8, // Blue school polo
+        skinColor: 0x8a5530,
+        pantsColor: 0x334155,
+        hasGlasses: true,
+        hasLanyard: true,
+        hasBook: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards sidewalk
+        waypoints: [{ x: 160.0, y: 0.25, z: 246.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 12. Seu Beto do Mercado (Mercado Municipal de Pyrituba)
+      this.createHumanoidNpc({
+        id: 'beto_mercado',
+        name: 'SEU BETO (MERCADO MUNICIPAL)',
+        prompt: 'FALAR COM SEU BETO NO MERCADO',
+        encounterId: 'MERCADO_PYRITUBA',
+        shirtColor: 0xffffff,
+        skinColor: 0xa16843,
+        pantsColor: 0x1e293b,
+        hasCap: true,
+        capColor: 0x15803d, // Green market cap
+        hasApron: true,
+        apronColor: 0x16a34a, // Green merchant apron
+        hasCrate: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards entrance
+        waypoints: [{ x: 160.0, y: 0.25, z: 283.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 13. Mestre Severino (Restaurante Amigos do Picuí)
+      this.createHumanoidNpc({
+        id: 'mestre_severino',
+        name: 'MESTRE SEVERINO (AMIGOS DO PICUÍ)',
+        prompt: 'PEDIR CARNE DE SOL COM MESTRE SEVERINO',
+        encounterId: 'RESTAURANTE_AMIGOS_DO_PICUI',
+        shirtColor: 0xffffff, // Chef jacket
+        skinColor: 0x784421,
+        pantsColor: 0x1c1917,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xb91c1c, // Red apron
+        hasPlatter: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards veranda
+        waypoints: [{ x: 160.0, y: 0.25, z: 316.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 14. Dra. Camila (Farmácia Petrônio)
+      this.createHumanoidNpc({
+        id: 'farmaceutica_camila',
+        name: 'DRA. CAMILA (FARMÁCIA PETRÔNIO)',
+        prompt: 'FALAR COM DRA. CAMILA NA FARMÁCIA',
+        encounterId: 'FARMACIA_PETRONIO',
+        shirtColor: 0x059669, // Teal medical scrubs
+        skinColor: 0xa9714b,
+        pantsColor: 0x0f766e,
+        hasLabCoat: true,
+        hasClipboard: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East towards counter
+        waypoints: [{ x: 131.0, y: 0.25, z: 216.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
         baseY: 0.25
       })
     ];

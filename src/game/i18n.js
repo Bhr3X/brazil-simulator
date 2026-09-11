@@ -181,7 +181,12 @@ export const TRANSLATIONS = {
       escola_publica: { name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)', prompt: 'FALAR COM A TIA CIDA NO PORTÃO DA ESCOLA' },
       parque_petronio: { name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA', prompt: 'COMPRAR PIPOCA DO SEU ZICO OU USAR A PRAÇA' },
       espetinho_petronio: { name: 'BAR & ESPETINHO DA PETRÔNIO', prompt: 'PEDIR ESPETINHO COM SEU TONINHO NA BRASA' },
-      papelaria_bazar: { name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO', prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS' }
+      papelaria_bazar: { name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO', prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS' },
+      igreja_morro: { name: 'IGREJINHA DO MORRO (PADRE BENTO)', prompt: 'SUBIR A ESCADARIA DA IGREJINHA OU FALAR COM PADRE BENTO' },
+      colegio_wellington: { name: 'COLÉGIO WELLINGTON (PROF. MAURÍCIO)', prompt: 'FALAR COM PROF. MAURÍCIO NO PORTÃO OU ENTRAR NA QUADRA' },
+      mercado_pyrituba: { name: 'MERCADO MUNICIPAL DE PYRITUBA (SEU BETO)', prompt: 'COMPRAR PASTEL, CALDO DE CANA OU FRUTAS COM SEU BETO' },
+      amigos_do_picui: { name: 'RESTAURANTE AMIGOS DO PICUÍ (MESTRE SEVERINO)', prompt: 'SABOREAR CARNE DE SOL & BAIÃO DE DOIS COM MESTRE SEVERINO' },
+      farmacia_petronio: { name: 'DROGARIA & FARMÁCIA PETRÔNIO (DRA. CAMILA)', prompt: 'COMPRAR MEDICAMENTOS OU AFERIR PRESSÃO COM DRA. CAMILA' }
     },
 
     npcs: {
@@ -417,7 +422,12 @@ export const TRANSLATIONS = {
       escola_publica: { name: 'PROF. LOURENÇO FILHO PUBLIC SCHOOL', prompt: 'TALK TO TIA CIDA AT THE SCHOOL GATE' },
       parque_petronio: { name: 'PETRÔNIO PORTELA LINEAR PARK & SQUARE', prompt: 'BUY POPCORN FROM SEU ZICO OR WORK OUT IN THE PARK' },
       espetinho_petronio: { name: 'PETRÔNIO STREET BBQ & CORNER PUB', prompt: 'ORDER STREET SKEWERS FROM SEU TONINHO' },
-      papelaria_bazar: { name: 'PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL', prompt: 'RECHARGE TRANSIT PASS OR BUY STATIONERY' }
+      papelaria_bazar: { name: 'PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL', prompt: 'RECHARGE TRANSIT PASS OR BUY STATIONERY' },
+      igreja_morro: { name: 'HILLSIDE CHAPEL (FATHER BENTO)', prompt: 'CLIMB CHAPEL STAIRS OR TALK TO FATHER BENTO' },
+      colegio_wellington: { name: 'WELLINGTON COLLEGE (PROF. MAURÍCIO)', prompt: 'TALK TO PROF. MAURÍCIO AT THE GATE OR ENTER COURTS' },
+      mercado_pyrituba: { name: 'PYRITUBA MUNICIPAL MARKET (SEU BETO)', prompt: 'BUY PASTEL, CANE JUICE OR FRESH FRUIT FROM SEU BETO' },
+      amigos_do_picui: { name: 'AMIGOS DO PICUÍ RESTAURANT (CHEF SEVERINO)', prompt: 'ENJOY SUN-CURED BEEF & BAIÃO DE DOIS WITH CHEF SEVERINO' },
+      farmacia_petronio: { name: 'PETRÔNIO PHARMACY & DRUGSTORE (DR. CAMILA)', prompt: 'BUY MEDICATIONS OR CHECK BLOOD PRESSURE WITH DR. CAMILA' }
     },
 
     npcs: {

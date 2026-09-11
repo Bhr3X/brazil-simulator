@@ -4044,7 +4044,7 @@ async function runTestSuite(url) {
           const physics = app.physics;
           const interactables = (game && game.interactables) || app.interactables;
 
-          // 1. Check all 9 3D establishment NPCs exist in npcSystem.establishmentNpcs
+          // 1. Check all 14 3D establishment NPCs exist in npcSystem.establishmentNpcs
           const establishmentNpcs = (npcSystem && npcSystem.establishmentNpcs) || [];
           const expectedNpcIds = [
             'tiao_bar',
@@ -4055,7 +4055,12 @@ async function runTestSuite(url) {
             'frentista_tonho',
             'tia_cida',
             'zico_pipoca',
-            'toninho_espetinho'
+            'toninho_espetinho',
+            'padre_bento',
+            'prof_mauricio',
+            'beto_mercado',
+            'mestre_severino',
+            'farmaceutica_camila'
           ];
 
           const allNpcsExist = expectedNpcIds.every(id => establishmentNpcs.some(n => n.id === id));
@@ -4083,20 +4088,42 @@ async function runTestSuite(url) {
           const cida = establishmentNpcs.find(n => n.id === 'tia_cida');
           const hasCidaLanyard = !!(cida && cida.mesh && cida.mesh.getObjectByName('npc_lanyard'));
 
-          const accessoriesOk = !!(hasTiaoAccessories && hasManuelHat && hasMariaHairnet && hasToninhoTongs && hasZicoScoop && hasCidaLanyard);
+          const padre = establishmentNpcs.find(n => n.id === 'padre_bento');
+          const hasPadreCross = !!(padre && padre.mesh && padre.mesh.getObjectByName('npc_cross'));
+
+          const prof = establishmentNpcs.find(n => n.id === 'prof_mauricio');
+          const hasProfBook = !!(prof && prof.mesh && prof.mesh.getObjectByName('npc_book'));
+
+          const beto = establishmentNpcs.find(n => n.id === 'beto_mercado');
+          const hasBetoCrate = !!(beto && beto.mesh && beto.mesh.getObjectByName('npc_crate'));
+
+          const severino = establishmentNpcs.find(n => n.id === 'mestre_severino');
+          const hasSeverinoPlatter = !!(severino && severino.mesh && severino.mesh.getObjectByName('npc_platter'));
+
+          const camila = establishmentNpcs.find(n => n.id === 'farmaceutica_camila');
+          const hasCamilaLabCoat = !!(camila && camila.mesh && camila.mesh.getObjectByName('npc_labcoat'));
+
+          const accessoriesOk = !!(hasTiaoAccessories && hasManuelHat && hasMariaHairnet && hasToninhoTongs
+            && hasZicoScoop && hasCidaLanyard && hasPadreCross && hasProfBook && hasBetoCrate
+            && hasSeverinoPlatter && hasCamilaLabCoat);
 
           // Verify that establishment NPCs are not interactable via direct target raycast
           // so that Tests 33/34 invariants are strictly preserved
           const targetIds = npcSystem ? npcSystem.getInteractableTargets().map(t => t.id) : [];
           const shopkeepersExcludedFromDirectTargets = expectedNpcIds.every(id => !targetIds.includes(id));
 
-          // 2. Check Petrônio Portela new anchors
+          // 2. Check Petrônio Portela 9 anchors
           const anchors = (interactables && interactables.anchors) || [];
           const expectedPetronioAnchors = [
             'escola_publica',
             'parque_petronio',
             'espetinho_petronio',
-            'papelaria_bazar'
+            'papelaria_bazar',
+            'igreja_morro',
+            'colegio_wellington',
+            'mercado_pyrituba',
+            'amigos_do_picui',
+            'farmacia_petronio'
           ];
           const allPetronioAnchorsExist = expectedPetronioAnchors.every(id => {
             const a = anchors.find(x => x.id === id);
@@ -4137,7 +4164,12 @@ async function runTestSuite(url) {
             'ESCOLA_LOURENCO_FILHO',
             'PARQUE_PETRONIO',
             'ESPETINHO_PETRONIO',
-            'PAPELARIA_BAZAR'
+            'PAPELARIA_BAZAR',
+            'IGREJA_DO_MORRO',
+            'COLEGIO_WELLINGTON',
+            'MERCADO_PYRITUBA',
+            'RESTAURANTE_AMIGOS_DO_PICUI',
+            'FARMACIA_PETRONIO'
           ];
           const newZonesExist = expectedNewZones.every(zid => zonesList.some(z => z.id === zid));
 
@@ -4146,16 +4178,21 @@ async function runTestSuite(url) {
             'ESCOLA_PUBLICA',
             'PARQUE_PETRONIO',
             'ESPETINHO_PETRONIO',
-            'PAPELARIA_BAZAR'
+            'PAPELARIA_BAZAR',
+            'IGREJA_DO_MORRO',
+            'COLEGIO_WELLINGTON',
+            'MERCADO_PYRITUBA',
+            'RESTAURANTE_AMIGOS_DO_PICUI',
+            'FARMACIA_PETRONIO'
           ];
           const newEncountersExist = expectedNewEncounters.every(eid => {
             const enc = encountersDict && encountersDict[eid];
             return !!(enc && typeof enc.title === 'string' && typeof enc.getIntroText === 'function' && typeof enc.getOptions === 'function');
           });
 
-          // 5. Check south_petronio boundary wall is relocated to Z ~ 178
+          // 5. Check south_petronio boundary wall is relocated to Z ~ 330
           const southPetronioWall = (city.illusionWalls || []).find(w => w.id === 'south_petronio');
-          const wallRelocated = !!(southPetronioWall && southPetronioWall.bounds && southPetronioWall.bounds.minZ > 170.0);
+          const wallRelocated = !!(southPetronioWall && southPetronioWall.bounds && southPetronioWall.bounds.minZ > 320.0);
           const wallSolid = !!(southPetronioWall && physics.collidesWithSolids(
             new window.THREE.Vector3(
               (southPetronioWall.bounds.minX + southPetronioWall.bounds.maxX) / 2,
@@ -4166,11 +4203,14 @@ async function runTestSuite(url) {
             0.45
           ));
 
-          // 6. Check avenue corridor is walkable at Z = 60, 100, 140 (no false colliders blocking roadway)
+          // 6. Check avenue corridor is walkable at Z = 60, 100, 140, 200, 260, 300 (no false colliders blocking roadway)
           const roadWalkableAt60 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 60.0), 0.38, 0.8);
           const roadWalkableAt100 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 100.0), 0.38, 0.8);
           const roadWalkableAt140 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 140.0), 0.38, 0.8);
-          const roadWalkable = !!(roadWalkableAt60 && roadWalkableAt100 && roadWalkableAt140);
+          const roadWalkableAt200 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 200.0), 0.38, 0.8);
+          const roadWalkableAt260 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 260.0), 0.38, 0.8);
+          const roadWalkableAt300 = !physics.collidesWithSolids(new window.THREE.Vector3(145.0, 0.25, 300.0), 0.38, 0.8);
+          const roadWalkable = !!(roadWalkableAt60 && roadWalkableAt100 && roadWalkableAt140 && roadWalkableAt200 && roadWalkableAt260 && roadWalkableAt300);
 
           // 7. Check bilingual translations for new interactables and encounters
           const ptInteractablesOk = expectedPetronioAnchors.every(id => !!(transPt && transPt.interactables && transPt.interactables[id]));

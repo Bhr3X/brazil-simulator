@@ -3657,6 +3657,40 @@ class TextureGenerator {
     return texture;
   }
 
+  // 6.5 Colonial Terracotta Curved Clay Roof Tiles (Telhas Coloniais / Canal)
+  createTelhasColoniais(repeatX = 4, repeatY = 4) {
+    const key = `telha_colonial_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 128);
+
+    // Warm terracotta ceramic base
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(0, 0, 128, 128);
+
+    // Curved clay tile overlapping ridges
+    const tileW = 16;
+    for (let x = 0; x < 128; x += tileW) {
+      const grad = ctx.createLinearGradient(x, 0, x + tileW, 0);
+      grad.addColorStop(0, 'rgba(69, 26, 3, 0.7)');
+      grad.addColorStop(0.4, 'rgba(217, 119, 6, 0.6)');
+      grad.addColorStop(0.8, 'rgba(251, 191, 36, 0.3)');
+      grad.addColorStop(1, 'rgba(69, 26, 3, 0.8)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, 0, tileW, 128);
+    }
+
+    // Horizontal overlap shadow lines every 24px
+    ctx.fillStyle = 'rgba(40, 15, 5, 0.55)';
+    for (let y = 24; y < 128; y += 24) {
+      ctx.fillRect(0, y, 128, 4);
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
   // 7. Blue Plastic Water Tank (Caixa D'Água 1000L - Fortlev/Tigre style)
   createCaixaDagua() {
     const key = `caixa_dagua`;
@@ -6526,6 +6560,170 @@ class TextureGenerator {
     ctx.fillRect(0, 160, 256, 12);
     ctx.fillStyle = 'rgba(0,0,0,0.15)';
     ctx.fillRect(0, 172, 256, 4);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 73. Colégio Wellington Official Sign
+  createColegioWellingtonSign() {
+    const key = 'colegio_wellington_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#1e3a8a'; // Deep navy blue
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#facc15'; // Gold border
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 36px "Arial Black", Impact, sans-serif';
+    ctx.fillText('COLÉGIO WELLINGTON', 256, 54);
+
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('EDUCAÇÃO INFANTIL • FUNDAMENTAL • ENSINO MÉDIO', 256, 88);
+
+    ctx.fillStyle = '#93c5fd';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('TRADIÇÃO EM PIRITUBA • UNIDADE PETRÔNIO PORTELA', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 74. Mercado Municipal de Pyrituba Sign
+  createMercadoPyritubaSign() {
+    const key = 'mercado_pyrituba_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#14532d'; // Dark market green
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#f59e0b'; // Amber border
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 32px "Arial Black", Impact, sans-serif';
+    ctx.fillText('MERCADO MUNICIPAL DE PYRITUBA', 256, 52);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 17px sans-serif';
+    ctx.fillText('HORTIFRÚTI • PASTEL & CALDO DE CANA • EMPÓRIO DE MINAS', 256, 86);
+
+    ctx.fillStyle = '#4ade80';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('PRODUTOS FRESCOS DIRETO DO PRODUTOR • DESDE 1978', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 75. Restaurante Amigos do Picuí Sign
+  createAmigosDoPicuiSign() {
+    const key = 'amigos_do_picui_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#78350f'; // Warm terracotta wood
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#f97316'; // Terracotta orange border
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    ctx.fillStyle = '#ffedd5';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 34px "Arial Black", Impact, sans-serif';
+    ctx.fillText('RESTAURANTE AMIGOS DO PICUÍ', 256, 52);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('CARNE DE SOL DE PICUÍ • BAIÃO DE DOIS • MACAXEIRA', 256, 86);
+
+    ctx.fillStyle = '#fed7aa';
+    ctx.font = 'italic 14px sans-serif';
+    ctx.fillText('O LEGÍTIMO SABOR DO NORDESTE NA ZONA NORTE', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 76. Drogaria & Farmácia Petrônio Sign
+  createFarmaciaPetronioSign() {
+    const key = 'farmacia_petronio_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = '#ffffff'; // Clean white
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = '#0284c7'; // Medical blue
+    ctx.lineWidth = 6;
+    ctx.strokeRect(8, 8, 496, 112);
+
+    // Green medical cross on left and right
+    const drawCross = (cx, cy) => {
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(cx - 8, cy - 24, 16, 48);
+      ctx.fillRect(cx - 24, cy - 8, 48, 16);
+    };
+    drawCross(48, 64);
+    drawCross(464, 64);
+
+    ctx.fillStyle = '#0369a1';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 32px "Arial Black", Impact, sans-serif';
+    ctx.fillText('DROGARIA & FARMÁCIA PETRÔNIO', 256, 52);
+
+    ctx.fillStyle = '#dc2626';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('MEDICAMENTOS • GENÉRICOS • PERFUMARIA', 256, 86);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('AFERIÇÃO DE PRESSÃO • ABERTO TODOS OS DIAS ATÉ ÀS 23H', 256, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 77. Igrejinha do Morro Plaque
+  createIgrejinhaMorroSign() {
+    const key = 'igrejinha_morro_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#b45309';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, 244, 84);
+
+    ctx.fillStyle = '#1e293b';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px serif';
+    ctx.fillText('CAPELA SÃO FRANCISCO', 128, 38);
+
+    ctx.fillStyle = '#b45309';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('IGREJINHA DO MORRO • PIRITUBA', 128, 60);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'italic 11px sans-serif';
+    ctx.fillText('PAZ E BEM A TODOS QUE AQUI SOBEM', 128, 78);
 
     const texture = this.toThreeTexture(canvas, 1, 1);
     this.cache[key] = texture;
@@ -9817,6 +10015,51 @@ const WORLD_ZONES = [
     openHour: 8.0,
     closeHour: 19.0,
     description: 'Centro comercial com Papelaria Pirituba (cópias, xerox, materiais) e Autoescola Petrônio (CFC A/B).'
+  },
+  {
+    id: 'IGREJA_DO_MORRO',
+    name: 'IGREJINHA DO MORRO & PRAÇA PANORÂMICA',
+    min: { x: 153.0, y: 0.0, z: 182.0 },
+    max: { x: 195.0, y: 15.0, z: 226.0 },
+    openHour: 6.0,
+    closeHour: 20.0,
+    description: 'Capela histórica no alto do morro com vista panorâmica para Pirituba, escadaria de pedra e sino colonial.'
+  },
+  {
+    id: 'COLEGIO_WELLINGTON',
+    name: 'COLÉGIO WELLINGTON (PETRÔNIO PORTELA)',
+    min: { x: 153.0, y: 0.0, z: 227.0 },
+    max: { x: 195.0, y: 12.0, z: 265.0 },
+    openHour: 7.0,
+    closeHour: 19.0,
+    description: 'Tradicional colégio da Av. Petrônio Portela com ensino fundamental, médio e quadra poliesportiva.'
+  },
+  {
+    id: 'MERCADO_PYRITUBA',
+    name: 'MERCADO MUNICIPAL DE PYRITUBA',
+    min: { x: 153.0, y: 0.0, z: 266.0 },
+    max: { x: 195.0, y: 10.0, z: 300.0 },
+    openHour: 6.0,
+    closeHour: 20.0,
+    description: 'Mercado Municipal de Pyrituba com hortifrúti fresco, banca de queijos artesanais de Minas e barraca de pastel com caldo de cana.'
+  },
+  {
+    id: 'RESTAURANTE_AMIGOS_DO_PICUI',
+    name: 'RESTAURANTE AMIGOS DO PICUÍ (CARNE DE SOL)',
+    min: { x: 153.0, y: 0.0, z: 301.0 },
+    max: { x: 195.0, y: 10.0, z: 335.0 },
+    openHour: 11.5,
+    closeHour: 23.5,
+    description: 'Famoso restaurante nordestino da região. Especialidade em carne de sol de Picuí na chapa com baião de dois, macaxeira e manteiga de garrafa.'
+  },
+  {
+    id: 'FARMACIA_PETRONIO',
+    name: 'DROGARIA & FARMÁCIA PETRÔNIO',
+    min: { x: 110.0, y: 0.0, z: 205.0 },
+    max: { x: 137.0, y: 8.0, z: 232.0 },
+    openHour: 7.0,
+    closeHour: 23.0,
+    description: 'Drogaria completa na Petrônio Portela com remédios de referência e genéricos, perfumaria e aferição de pressão arterial.'
   }
 ];
 
@@ -13627,6 +13870,7 @@ class CityBuilder {
     this.buildBlocoEdgarFaccoTrioPlaza();
     this.buildFavelaCampinho();
     this.buildPetronioPortelaSouthCorridor();
+    this.buildPetronioPortelaFurtherSouthExtension();
     this.buildMapBoundaryIllusionWallsAndConstructionSites();
   }
 
@@ -19763,6 +20007,617 @@ class CityBuilder {
   }
 
   // =========================================================================
+  // 24.6 Av. Ministro Petrônio Portela Further South Extension (Z = 178 to 330)
+  // Hillside Igrejinha & Praça, Colégio Wellington, Mercado Pyrituba,
+  // Restaurante Amigos do Picuí, Drogaria & Farmácia Petrônio, Praça da Colina
+  // =========================================================================
+  buildPetronioPortelaFurtherSouthExtension() {
+    const roadMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createAsfalto(4, 30)
+    });
+    const sideMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(4, 30)
+    });
+    const yellowStripeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const whiteStripeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const curbMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+    const grassMat = new THREE.MeshLambertMaterial({ color: 0x2e7d32 });
+    const cobblestoneMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(2, 2)
+    });
+    const colonialWallMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#fdfbf7', 2, 2)
+    });
+    const terracottaRoofMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createTelhasColoniais()
+    });
+    const woodMat = new THREE.MeshLambertMaterial({ color: 0x5c2c16 });
+    const brickMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createTijoloBaiano(3, 3)
+    });
+    const windowGlassMat = new THREE.MeshLambertMaterial({
+      color: 0x60a5fa,
+      transparent: true,
+      opacity: 0.6
+    });
+
+    // 1. Roadway Asphalt (X = 137.0 to 153.0, Z = 178.0 to 330.0, Length = 152m)
+    const roadGeo = new THREE.PlaneGeometry(16.0, 152.0);
+    const roadMesh = new THREE.Mesh(roadGeo, roadMat);
+    roadMesh.rotation.x = -Math.PI / 2;
+    roadMesh.position.set(145.0, 0.01, 254.0);
+    this.scene.add(roadMesh);
+
+    // Center dashed double yellow line (Faixa Amarela Dupla Pontilhada)
+    for (let z = 180.0; z < 328.0; z += 5.0) {
+      [-0.15, 0.15].forEach(dx => {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 2.8), yellowStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(145.0 + dx, 0.016, z);
+        this.scene.add(stripe);
+      });
+    }
+
+    // Pedestrian crosswalks at Z = 210.0, 270.0, 315.0
+    [210.0, 270.0, 315.0].forEach(crossZ => {
+      for (let x = 137.6; x <= 152.4; x += 1.6) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 4.0), whiteStripeMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(x, 0.018, crossZ);
+        this.scene.add(stripe);
+      }
+    });
+
+    // 2. Sidewalks (West: X = 131 to 137, East: X = 153 to 159)
+    const westSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 152.0), sideMat);
+    westSide.position.set(134.0, 0.125, 254.0);
+    this.scene.add(westSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(131.0, 0, 178.0),
+      new THREE.Vector3(137.0, 0.25, 330.0),
+      'curb'
+    );
+
+    const eastSide = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.25, 152.0), sideMat);
+    eastSide.position.set(156.0, 0.125, 254.0);
+    this.scene.add(eastSide);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(153.0, 0, 178.0),
+      new THREE.Vector3(159.0, 0.25, 330.0),
+      'curb'
+    );
+
+    // 3. Concrete Utility Poles with Street Lights along Petrônio Portela
+    [195.0, 222.0, 250.0, 278.0, 305.0, 325.0].forEach((pz, idx) => {
+      this.buildUtilityPole(136.5, 0.25, pz, idx % 2 === 0);
+      this.buildUtilityPole(153.5, 0.25, pz + 12.0, idx % 2 === 1);
+    });
+
+    // -------------------------------------------------------------------------
+    // 4. EAST SIDE: PRACINHA COM UMA IGREJINHA EM UM MORRO (Z = 185 to 225, X = 160 to 192)
+    // -------------------------------------------------------------------------
+    {
+      const churchHillGroup = new THREE.Group();
+      churchHillGroup.name = 'igrejinhaMorroGroup';
+
+      // Hill terrain mound (base Y = 0 to 4.5)
+      const hillBase = new THREE.Mesh(
+        new THREE.BoxGeometry(32.0, 4.5, 40.0),
+        grassMat
+      );
+      hillBase.position.set(176.0, 2.25, 205.0);
+      churchHillGroup.add(hillBase);
+
+      // Plateau plaza surface with Portuguese cobblestone (Y = 4.5)
+      const plazaFloor = new THREE.Mesh(
+        new THREE.PlaneGeometry(30.0, 38.0),
+        cobblestoneMat
+      );
+      plazaFloor.rotation.x = -Math.PI / 2;
+      plazaFloor.position.set(176.0, 4.51, 205.0);
+      churchHillGroup.add(plazaFloor);
+
+      // Stone retaining wall facing avenue
+      const wallFront = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 4.5, 40.0),
+        curbMat
+      );
+      wallFront.position.set(160.0, 2.25, 205.0);
+      churchHillGroup.add(wallFront);
+
+      // Plateau Walkable Collider
+      this.physics.addBoxCollider(
+        new THREE.Vector3(160.0, 0, 185.0),
+        new THREE.Vector3(192.0, 4.5, 225.0),
+        'solid'
+      );
+
+      // Stone Stairs / Escadaria leading from sidewalk (X = 159, Z = 202 to 206) up to Y = 4.5
+      const numSteps = 10;
+      const stepRise = 4.5 / numSteps;
+      for (let i = 0; i < numSteps; i++) {
+        const stepY = (i + 1) * stepRise;
+        const stepX = 160.0 + (i * 0.7);
+        const step = new THREE.Mesh(
+          new THREE.BoxGeometry(1.2, stepY, 4.0),
+          curbMat
+        );
+        step.position.set(stepX, stepY / 2, 204.0);
+        churchHillGroup.add(step);
+
+        // Stepped walk collider so player climbs smoothly
+        this.physics.addBoxCollider(
+          new THREE.Vector3(stepX - 0.6, 0, 202.0),
+          new THREE.Vector3(stepX + 0.6, stepY, 206.0),
+          'curb'
+        );
+      }
+
+      // Overlook railing along West edge of plateau (X = 160.5, Z = 186 to 224 except stairs)
+      const railMat = new THREE.MeshLambertMaterial({ color: 0x1f2937 });
+      const railNorth = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.9, 16.0), railMat);
+      railNorth.position.set(160.5, 4.95, 193.0);
+      churchHillGroup.add(railNorth);
+      const railSouth = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.9, 16.0), railMat);
+      railSouth.position.set(160.5, 4.95, 215.0);
+      churchHillGroup.add(railSouth);
+
+      // Park benches and ornamental lanterns on the church plaza
+      [-6.0, 6.0].forEach(dz => {
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 2.2), woodMat);
+        bench.position.set(164.0, 4.75, 205.0 + dz);
+        churchHillGroup.add(bench);
+      });
+
+      // Colonial Chapel / Igrejinha (at X = 180.0, Y = 4.5, Z = 205.0)
+      // Main Nave
+      const chapelNave = new THREE.Mesh(
+        new THREE.BoxGeometry(14.0, 7.0, 16.0),
+        colonialWallMat
+      );
+      chapelNave.position.set(180.0, 4.5 + 3.5, 205.0);
+      churchHillGroup.add(chapelNave);
+
+      // Peaked Tile Roof
+      const roofPeak = new THREE.Mesh(
+        new THREE.ConeGeometry(9.0, 3.5, 4),
+        terracottaRoofMat
+      );
+      roofPeak.rotation.y = Math.PI / 4;
+      roofPeak.position.set(180.0, 4.5 + 7.0 + 1.75, 205.0);
+      churchHillGroup.add(roofPeak);
+
+      // Front Facade Portico (West facing towards avenue)
+      const facade = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5, 9.0, 10.0),
+        colonialWallMat
+      );
+      facade.position.set(172.5, 4.5 + 4.5, 205.0);
+      churchHillGroup.add(facade);
+
+      // Wooden Double Church Doors
+      const churchDoor = new THREE.Mesh(
+        new THREE.BoxGeometry(0.2, 3.2, 2.4),
+        woodMat
+      );
+      churchDoor.position.set(171.7, 4.5 + 1.6, 205.0);
+      churchHillGroup.add(churchDoor);
+
+      // Chapel Sign Plaque
+      const plaqueMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createIgrejinhaMorroSign()
+      });
+      const plaque = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 1.8), plaqueMat);
+      plaque.position.set(171.6, 4.5 + 3.6, 202.2);
+      churchHillGroup.add(plaque);
+
+      // Bell Tower / Campanário (Top of facade)
+      const tower = new THREE.Mesh(
+        new THREE.BoxGeometry(3.0, 4.0, 3.0),
+        colonialWallMat
+      );
+      tower.position.set(173.0, 4.5 + 10.5, 205.0);
+      churchHillGroup.add(tower);
+
+      // Brass Bell
+      const bell = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.35, 0.55, 0.8, 12),
+        new THREE.MeshLambertMaterial({ color: 0xd97706 })
+      );
+      bell.position.set(173.0, 4.5 + 10.5, 205.0);
+      churchHillGroup.add(bell);
+
+      // Wooden Cross on Tower Peak
+      const crossMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.18, 1.8, 0.18), crossMat);
+      crossV.position.set(173.0, 4.5 + 13.0, 205.0);
+      churchHillGroup.add(crossV);
+      const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 1.0), crossMat);
+      crossH.position.set(173.0, 4.5 + 13.4, 205.0);
+      churchHillGroup.add(crossH);
+
+      // Chapel Solid Colliders
+      this.physics.addBoxCollider(
+        new THREE.Vector3(172.0, 4.5, 196.0),
+        new THREE.Vector3(188.0, 18.0, 214.0),
+        'solid'
+      );
+
+      this.scene.add(churchHillGroup);
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. EAST SIDE: COLÉGIO WELLINGTON (Z = 230 to 265, X = 160 to 188)
+    // -------------------------------------------------------------------------
+    {
+      const schoolGroup = new THREE.Group();
+      schoolGroup.name = 'colegioWellingtonGroup';
+
+      const schoolBodyMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#f1f5f9', 4, 3)
+      });
+      const schoolNavyMat = new THREE.MeshLambertMaterial({ color: 0x1e3a8a });
+
+      // Main School Building (X = 174, Z = 254)
+      const schoolBody = new THREE.Mesh(new THREE.BoxGeometry(22.0, 9.0, 20.0), schoolBodyMat);
+      schoolBody.position.set(174.0, 4.5, 254.0);
+      schoolGroup.add(schoolBody);
+
+      // Navy Blue Base Skirting
+      const schoolBase = new THREE.Mesh(new THREE.BoxGeometry(22.2, 1.2, 20.2), schoolNavyMat);
+      schoolBase.position.set(174.0, 0.6, 254.0);
+      schoolGroup.add(schoolBase);
+
+      // Classroom Windows on West Facade
+      for (let wy = 3.2; wy <= 6.8; wy += 3.2) {
+        for (let wz = 247.0; wz <= 261.0; wz += 4.5) {
+          const win = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.8, 2.8), windowGlassMat);
+          win.position.set(162.9, wy, wz);
+          schoolGroup.add(win);
+        }
+      }
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createColegioWellingtonSign()
+      });
+      const schoolSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.5, 10.0), signMat);
+      schoolSign.position.set(162.8, 6.5, 254.0);
+      schoolGroup.add(schoolSign);
+
+      // Entrance Portico / Reception Porch
+      const porticoRoof = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.3, 4.5), schoolNavyMat);
+      porticoRoof.position.set(161.2, 3.2, 248.0);
+      schoolGroup.add(porticoRoof);
+
+      // Multi-sports court (Quadra Poliesportiva, Z = 232 to 244, X = 162 to 184)
+      const courtFloorMat = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+      const courtFloor = new THREE.Mesh(new THREE.PlaneGeometry(20.0, 12.0), courtFloorMat);
+      courtFloor.rotation.x = -Math.PI / 2;
+      courtFloor.position.set(173.0, 0.26, 238.0);
+      schoolGroup.add(courtFloor);
+
+      // Court Green Fence
+      const fenceMat = new THREE.MeshLambertMaterial({ color: 0x15803d });
+      const fenceW = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 12.0), fenceMat);
+      fenceW.position.set(162.0, 1.4, 238.0);
+      schoolGroup.add(fenceW);
+
+      // Basketball backboard & hoop
+      const hoopPole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.8, 6), curbMat);
+      hoopPole.position.set(182.5, 1.9, 238.0);
+      schoolGroup.add(hoopPole);
+      const backboard = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 1.6), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      backboard.position.set(182.4, 3.2, 238.0);
+      schoolGroup.add(backboard);
+
+      this.scene.add(schoolGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(162.0, 0, 230.0),
+        new THREE.Vector3(188.0, 10.0, 265.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. EAST SIDE: MERCADO MUNICIPAL DE PYRITUBA (Z = 270 to 300, X = 160 to 188)
+    // -------------------------------------------------------------------------
+    {
+      const marketGroup = new THREE.Group();
+      marketGroup.name = 'mercadoPyritubaGroup';
+
+      // Brick Hall Base & Stucco Upper
+      const marketBase = new THREE.Mesh(new THREE.BoxGeometry(22.0, 3.0, 26.0), brickMat);
+      marketBase.position.set(174.0, 1.5, 285.0);
+      marketGroup.add(marketBase);
+
+      const marketUpperMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createReboco('#fef3c7', 3, 3)
+      });
+      const marketUpper = new THREE.Mesh(new THREE.BoxGeometry(22.0, 5.0, 26.0), marketUpperMat);
+      marketUpper.position.set(174.0, 5.5, 285.0);
+      marketGroup.add(marketUpper);
+
+      // Vaulted Arched Roof
+      const roofArch = new THREE.Mesh(
+        new THREE.CylinderGeometry(11.0, 11.0, 26.0, 16, 1, false, 0, Math.PI),
+        terracottaRoofMat
+      );
+      roofArch.rotation.z = Math.PI / 2;
+      roofArch.rotation.y = Math.PI / 2;
+      roofArch.position.set(174.0, 8.0, 285.0);
+      marketGroup.add(roofArch);
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createMercadoPyritubaSign()
+      });
+      const marketSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.5, 10.0), signMat);
+      marketSign.position.set(162.8, 6.8, 285.0);
+      marketGroup.add(marketSign);
+
+      // Entrance Opening & Awnings
+      const awningMat = new THREE.MeshLambertMaterial({ color: 0x16a34a });
+      const awning = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.2, 8.0), awningMat);
+      awning.position.set(161.5, 3.4, 285.0);
+      marketGroup.add(awning);
+
+      // Produce Display Crates (Oranges, Bananas, Melons)
+      const crateWoodMat = new THREE.MeshLambertMaterial({ color: 0xb45309 });
+      [-2.4, 0, 2.4].forEach((dz, idx) => {
+        const crate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 1.4), crateWoodMat);
+        crate.position.set(161.6, 0.4, 285.0 + dz);
+        marketGroup.add(crate);
+
+        // Colored fruit mounds
+        const fruitColor = idx === 0 ? 0xf97316 : (idx === 1 ? 0xfacc15 : 0x22c55e);
+        const fruitMound = new THREE.Mesh(
+          new THREE.SphereGeometry(0.5, 8, 8),
+          new THREE.MeshLambertMaterial({ color: fruitColor })
+        );
+        fruitMound.position.set(161.6, 0.9, 285.0 + dz);
+        marketGroup.add(fruitMound);
+      });
+
+      this.scene.add(marketGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(162.0, 0, 268.0),
+        new THREE.Vector3(188.0, 11.0, 300.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. EAST SIDE: RESTAURANTE AMIGOS DO PICUÍ (Z = 305 to 330, X = 160 to 188)
+    // -------------------------------------------------------------------------
+    {
+      const restGroup = new THREE.Group();
+      restGroup.name = 'amigosDoPicuiGroup';
+
+      const restWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createReboco('#78350f', 3, 3)
+      });
+
+      // Main Restaurant Building
+      const restBody = new THREE.Mesh(new THREE.BoxGeometry(22.0, 7.0, 22.0), restWallMat);
+      restBody.position.set(174.0, 3.5, 318.0);
+      restGroup.add(restBody);
+
+      // Overhanging Roof
+      const roofOverhang = new THREE.Mesh(new THREE.BoxGeometry(23.0, 0.8, 23.0), terracottaRoofMat);
+      roofOverhang.position.set(174.0, 7.2, 318.0);
+      restGroup.add(roofOverhang);
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createAmigosDoPicuiSign()
+      });
+      const restSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.5, 10.0), signMat);
+      restSign.position.set(162.8, 5.8, 318.0);
+      restGroup.add(restSign);
+
+      // Front Veranda with Wooden Tables and Checkered Cloths
+      const pergolaMat = new THREE.MeshLambertMaterial({ color: 0x451a03 });
+      const verandaRoof = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.2, 14.0), terracottaRoofMat);
+      verandaRoof.position.set(161.5, 3.5, 318.0);
+      restGroup.add(verandaRoof);
+
+      // Timber Support Posts
+      [-6.0, 0, 6.0].forEach(dz => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.5, 0.2), pergolaMat);
+        post.position.set(160.2, 1.75, 318.0 + dz);
+        restGroup.add(post);
+      });
+
+      // 3 Outdoor Tables
+      const tableWoodMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const clothMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 }); // Red checkered
+      [-4.5, 0, 4.5].forEach(dz => {
+        const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.75, 1.8), tableWoodMat);
+        table.position.set(161.4, 0.375, 318.0 + dz);
+        restGroup.add(table);
+
+        const cloth = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.04, 1.85), clothMat);
+        cloth.position.set(161.4, 0.77, 318.0 + dz);
+        restGroup.add(cloth);
+
+        // Clay Pepper Pot (Pimenta)
+        const pot = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.08, 0.12, 0.2, 8),
+          new THREE.MeshLambertMaterial({ color: 0xc2410c })
+        );
+        pot.position.set(161.4, 0.88, 318.0 + dz);
+        restGroup.add(pot);
+      });
+
+      this.scene.add(restGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(162.0, 0, 304.0),
+        new THREE.Vector3(188.0, 9.0, 330.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. WEST SIDE: DROGARIA & FARMÁCIA PETRÔNIO (Z = 205 to 230, X = 115 to 131)
+    // -------------------------------------------------------------------------
+    {
+      const farmGroup = new THREE.Group();
+      farmGroup.name = 'farmaciaPetronioGroup';
+
+      const farmWallMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createPaintedWall('#ffffff', 3, 3)
+      });
+      const farmBlueMat = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+
+      // Main Pharmacy Storefront Body
+      const farmBody = new THREE.Mesh(new THREE.BoxGeometry(16.0, 7.0, 22.0), farmWallMat);
+      farmBody.position.set(123.0, 3.5, 218.0);
+      farmGroup.add(farmBody);
+
+      // Blue Accent Border
+      const farmTrim = new THREE.Mesh(new THREE.BoxGeometry(16.2, 0.6, 22.2), farmBlueMat);
+      farmTrim.position.set(123.0, 6.8, 218.0);
+      farmGroup.add(farmTrim);
+
+      // Glass Display Window
+      const win = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 12.0), windowGlassMat);
+      win.position.set(131.1, 2.2, 218.0);
+      farmGroup.add(win);
+
+      // Large Official Signboard
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createFarmaciaPetronioSign()
+      });
+      const farmSign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.2, 9.0), signMat);
+      farmSign.position.set(131.2, 5.2, 218.0);
+      farmGroup.add(farmSign);
+
+      // Illuminated Green Cross on Exterior Pole
+      const greenCrossMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+      const crossPost = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 4.5, 8), curbMat);
+      crossPost.position.set(131.5, 2.25, 210.0);
+      farmGroup.add(crossPost);
+
+      const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 0.35), greenCrossMat);
+      crossV.position.set(131.5, 4.2, 210.0);
+      farmGroup.add(crossV);
+      const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.35, 1.2), greenCrossMat);
+      crossH.position.set(131.5, 4.2, 210.0);
+      farmGroup.add(crossH);
+
+      this.scene.add(farmGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(115.0, 0, 205.0),
+        new THREE.Vector3(131.0, 8.0, 230.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. WEST SIDE: PARQUE LINEAR & PRAÇA DA COLINA (Z = 235 to 275, X = 110 to 131)
+    // -------------------------------------------------------------------------
+    {
+      const parkGroup = new THREE.Group();
+      parkGroup.name = 'pracaDaColinaGroup';
+
+      // Park Grass Lawn
+      const lawn = new THREE.Mesh(new THREE.PlaneGeometry(21.0, 40.0), grassMat);
+      lawn.rotation.x = -Math.PI / 2;
+      lawn.position.set(120.5, 0.26, 255.0);
+      parkGroup.add(lawn);
+
+      // Stone Walking Path
+      const pathMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+      const path = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 38.0), pathMat);
+      path.rotation.x = -Math.PI / 2;
+      path.position.set(125.0, 0.27, 255.0);
+      parkGroup.add(path);
+
+      // Park Benches
+      [242.0, 252.0, 262.0, 270.0].forEach(bz => {
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 2.0), woodMat);
+        bench.position.set(127.5, 0.5, bz);
+        parkGroup.add(bench);
+      });
+
+      // Trees in Park (Golden Ipê)
+      this.buildIpeTree(118.0, 0.25, 242.0);
+      this.buildIpeTree(115.0, 0.25, 255.0);
+      this.buildIpeTree(118.0, 0.25, 268.0);
+
+      // Playground: Swing Set (Balanço Infantil)
+      const swingFrameMat = new THREE.MeshLambertMaterial({ color: 0xfacc15 });
+      const swingBeam = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 3.2), swingFrameMat);
+      swingBeam.position.set(120.0, 2.4, 250.0);
+      parkGroup.add(swingBeam);
+
+      [-1.4, 1.4].forEach(dz => {
+        const legA = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), swingFrameMat);
+        legA.position.set(119.5, 1.2, 250.0 + dz);
+        legA.rotation.z = 0.2;
+        parkGroup.add(legA);
+        const legB = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), swingFrameMat);
+        legB.position.set(120.5, 1.2, 250.0 + dz);
+        legB.rotation.z = -0.2;
+        parkGroup.add(legB);
+      });
+
+      // Playground Slide (Escorregador Vermelho)
+      const slideMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+      const slideChute = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 2.8), slideMat);
+      slideChute.position.set(120.0, 1.0, 260.0);
+      slideChute.rotation.x = -0.4;
+      parkGroup.add(slideChute);
+
+      this.scene.add(parkGroup);
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. WEST SIDE: SOBRADOS COMERCIAIS DO SUL (Z = 280 to 330, X = 115 to 131)
+    // -------------------------------------------------------------------------
+    {
+      const southSobradoMat1 = new THREE.MeshLambertMaterial({
+        map: this.textures.createSobradoFacade('#d97706', '#1e293b')
+      });
+      const sobrado1 = new THREE.Mesh(new THREE.BoxGeometry(16.0, 7.5, 24.0), southSobradoMat1);
+      sobrado1.position.set(123.0, 3.75, 292.0);
+      this.scene.add(sobrado1);
+
+      const southSobradoMat2 = new THREE.MeshLambertMaterial({
+        map: this.textures.createSobradoFacade('#0284c7', '#0f172a')
+      });
+      const sobrado2 = new THREE.Mesh(new THREE.BoxGeometry(16.0, 7.5, 24.0), southSobradoMat2);
+      sobrado2.position.set(123.0, 3.75, 317.0);
+      this.scene.add(sobrado2);
+
+      // Rooftop Blue Water Tanks (Caixas d'água)
+      const waterTankMat = new THREE.MeshLambertMaterial({ color: 0x1d4ed8 });
+      [292.0, 317.0].forEach(tz => {
+        const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 1.2, 12), waterTankMat);
+        tank.position.set(121.0, 8.1, tz);
+        this.scene.add(tank);
+      });
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(115.0, 0, 280.0),
+        new THREE.Vector3(131.0, 9.0, 330.0),
+        'solid'
+      );
+    }
+
+    // -------------------------------------------------------------------------
+    // 11. WEST & EAST PERIMETER BOUNDARY COLLIDERS (Z = 178.0 to 335.0)
+    // -------------------------------------------------------------------------
+    this.physics.addBoxCollider(new THREE.Vector3(98.0, 0, 178.0), new THREE.Vector3(103.0, 12.0, 335.0), 'solid');
+    this.physics.addBoxCollider(new THREE.Vector3(188.0, 0, 178.0), new THREE.Vector3(195.0, 12.0, 335.0), 'solid');
+  }
+
+  // =========================================================================
   // 24. Map Boundary Trompe-l'œil Illusion Walls & Construction Sites
   // "Desculpe pelo transtorno, estamos em Obras"
   // =========================================================================
@@ -20031,7 +20886,7 @@ class CityBuilder {
     }
 
     // -----------------------------------------------------------------------
-    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 178.0, Y = 0)
+    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 330.0, Y = 0)
     // -----------------------------------------------------------------------
     {
       const wallW = 22.0, wallH = 9.0;
@@ -20040,33 +20895,33 @@ class CityBuilder {
         new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
       );
       plane.rotation.y = Math.PI; // Faces -Z (towards player coming south)
-      plane.position.set(145.0, wallH / 2, 177.8);
+      plane.position.set(145.0, wallH / 2, 329.8);
       boundaryGroup.add(plane);
 
       const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(145.0, wallH / 2, 178.6);
+      back.position.set(145.0, wallH / 2, 330.6);
       boundaryGroup.add(back);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(134.0, 0, 177.5),
-        new THREE.Vector3(156.0, 11.0, 179.5),
+        new THREE.Vector3(134.0, 0, 329.5),
+        new THREE.Vector3(156.0, 11.0, 331.5),
         'solid'
       );
 
       this.illusionWalls.push({
         id: 'south_petronio',
         name: 'Muro Pintado Petrônio Portela (Sul)',
-        planePos: new THREE.Vector3(145.0, 0, 177.8),
+        planePos: new THREE.Vector3(145.0, 0, 329.8),
         normal: new THREE.Vector3(0, 0, -1),
-        bounds: { minX: 134.0, maxX: 156.0, minZ: 177.5, maxZ: 179.5, minY: 0, maxY: 11.0 }
+        bounds: { minX: 134.0, maxX: 156.0, minZ: 329.5, maxZ: 331.5, minY: 0, maxY: 11.0 }
       });
 
-      buildHugeObrasSign(145.0, 5.5, 173.5, Math.PI);
+      buildHugeObrasSign(145.0, 5.5, 325.5, Math.PI);
 
-      addCone(140.0, 0, 175.0);
-      addCone(145.0, 0, 175.0);
-      addCone(150.0, 0, 175.0);
-      addHeap(138.0, 0, 174.5, 2.5, 1.3, true);
+      addCone(140.0, 0, 327.0);
+      addCone(145.0, 0, 327.0);
+      addCone(150.0, 0, 327.0);
+      addHeap(138.0, 0, 326.5, 2.5, 1.3, true);
     }
 
     // -----------------------------------------------------------------------
@@ -21199,6 +22054,134 @@ const EN_ENCOUNTER_TEXTS = {
         outcome: 'The green scanner light runs across the glass bed and warm printed sheets slide into the tray. Everyday bureaucracy handled smoothly (+8% Sanity).'
       }
     }
+  },
+
+  IGREJA_DO_MORRO: {
+    title: '⛪ HILLSIDE CHAPEL // FATHER BENTO',
+    intro: (state) => `
+      A gentle breeze sweeps over the hilltop while the antique bronze bell chimes in the tower.<br>
+      The panoramic overlook reveals the entire expanse of Av. Petrônio Portela and the rolling hills of Pirituba.<br>
+      Father Bento, wearing a black cassock with a warm, welcoming gaze, greets you with an outstretched hand:<br>
+      <em>"— The peace of Christ, my child! Welcome to our chapel. What brings you up the hill today?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      acender_vela_bencao: {
+        label: 'Light a votive candle at the altar and receive Father Bento\'s solemn blessing',
+        outcome: 'The priest traces the sign of the cross on your forehead, speaking words of peace and reassurance. The candle flame flickers gently on the stone altar (+28% Sanity, -15% Danger).'
+      },
+      admirar_mirante: {
+        label: 'Take in the horizon from the chapel viewpoint and breathe the fresh hilltop air',
+        costLabel: '+20% Sanity (Free)',
+        outcome: 'Leaning against the colonial wrought-iron railing, you watch the traffic below and flowering trees swaying in the wind. Deep, restorative serenity (+20% Sanity, +4 Ginga).'
+      },
+      doacao_paroquia: {
+        label: 'Make a R$ 10.00 charitable donation to the parish food drive and community kitchen',
+        outcome: 'You drop the bill into the wooden offering box. Father Bento expresses heartfelt thanks: "— May God multiply your kindness tenfold!" Your spirit is lifted (+35% Sanity, +10 Ginga).'
+      }
+    }
+  },
+
+  COLEGIO_WELLINGTON: {
+    title: '🏫 WELLINGTON COLLEGE // PROF. MAURÍCIO',
+    intro: (state) => `
+      The school bell rings across the modern courtyard as the energetic chatter of students fills the entryway.<br>
+      On the sports court, the rhythmic bounce of basketballs and cheerful cheers announce recess.<br>
+      Professor Maurício, wearing a teacher ID badge and textbooks tucked under his arm, welcomes you at the gate:<br>
+      <em>"— Good morning! Are you here to check on enrollments, college exam tips, or shoot some hoops?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      conversa_professor: {
+        label: 'Chat with Professor Maurício about current events and college essay techniques',
+        costLabel: '+18% Sanity (Ideas & Culture)',
+        outcome: 'The professor shares sharp insights on Brazilian literature, critical thinking, and history. True knowledge that broadens horizons (+18% Sanity, +8 Ginga).'
+      },
+      bater_bola_quadra: {
+        label: 'Step onto the sports court for a quick pickup futsal match with the students',
+        costLabel: '+22% Sanity / -10% Stomach',
+        outcome: 'Quick stepovers on the blue painted concrete court, a crisp one-two pass, and a top-corner strike! Working up a sweat clears your mind (+22% Sanity, +12 Ginga, -10% Stomach).'
+      },
+      salgado_cantina: {
+        label: 'Buy a flaky baked beef pastry (esfiha) and chilled Concord grape juice at the snack bar',
+        outcome: 'Warm pastry with golden flaky crust filled with spiced minced meat, washed down with sweet chilled grape juice. Pure school recess nostalgia (+32% Stomach, +16% Sanity).'
+      }
+    }
+  },
+
+  MERCADO_PYRITUBA: {
+    title: '🛒 PYRITUBA MUNICIPAL MARKET // SEU BETO',
+    intro: (state) => `
+      The covered market hall is alive with colorful fruit displays, Canastra farm cheeses, and northeastern spices.<br>
+      Down the central aisle, the sizzle of hot oil announces golden fried pastéis served with fresh sugarcane juice.<br>
+      Seu Beto, sporting a striped merchant apron and flat cap, arranges ripe bananas and calls out cheerfully:<br>
+      <em>"— Fresh fruit straight from the farm! Crispy hot pastéis and the finest coalho cheese in town!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pastel_caldo_mercado: {
+        label: 'Order a crispy jerked beef & coalho cheese pastel with fresh ice-cold sugarcane juice with lime',
+        outcome: 'Crispy blistered golden crust, brimming with savory shredded beef and melted cheese, paired with refreshing sugarcane juice that washes away fatigue (+48% Stomach, +24% Sanity)!'
+      },
+      cesta_frutas: {
+        label: 'Buy an assorted basket of fresh seasonal fruit (apple bananas, sweet oranges, and ripe papaya)',
+        outcome: 'Sweet, fragrant, vitamin-packed farm fruits. Top-tier natural nourishment to power through the city bustle (+35% Stomach, +20% Sanity).'
+      },
+      queijo_manteiga: {
+        label: 'Buy a whole wheel of artisanal cured Minas cheese and a bottle of pure clarified butter',
+        outcome: 'Time-honored delicacies wrapped in brown butcher paper. Authentic Brazilian culinary heritage that enriches your pantry and palate (+28% Sanity, +20% Stomach, +10 Ginga).'
+      }
+    }
+  },
+
+  RESTAURANTE_AMIGOS_DO_PICUI: {
+    title: '🥩 AMIGOS DO PICUÍ RESTAURANT // CHEF SEVERINO',
+    intro: (state) => `
+      The intoxicating aroma of sun-cured beef sizzling in clarified butter and garlic wafts through the veranda.<br>
+      Heavy hardwood tables draped in red checkered cloths host families enjoying steaming earthenware platters.<br>
+      Chef Mestre Severino, dressed in a crisp white jacket and red neckerchief, steps out with a smoking skillet:<br>
+      <em>"— Welcome home! Right here is authentic flavor from Picuí, Paraíba! Tender cured beef, roasted cassava, and creamy baião de dois!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      chapa_carne_sol: {
+        label: 'Order the Famous Picuí Carne de Sol Sizzler with baião de dois, golden yucca, grilled cheese, and paçoca',
+        outcome: 'A monumental feast worthy of northeastern legends! The cured beef melts in your mouth with golden butter and creamy rice and beans. Gastronomic bliss (+70% Stomach, +40% Sanity, -20% Danger)!'
+      },
+      cachaca_torresmo: {
+        label: 'Sip a shot of artisanal amburana-aged cachaça served with crispy pork cracklings and lime',
+        outcome: 'Smooth, woody amber rum warming your chest, paired with crunchy cracklings that snap with every bite (+26% Sanity, +16 Ginga, +15% Stomach).'
+      },
+      porcao_macaxeira: {
+        label: 'Order a side of tender boiled yucca pan-fried in clarified butter with toasted cheese',
+        outcome: 'Pillowy soft on the inside with a crunchy golden crust and browned melted cheese. Irresistible comfort food (+38% Stomach, +22% Sanity).'
+      }
+    }
+  },
+
+  FARMACIA_PETRONIO: {
+    title: '💊 PETRÔNIO PHARMACY & DRUGSTORE // DR. CAMILA',
+    intro: (state) => `
+      The clean, bright, air-conditioned interior offers instant relief from the avenue\'s humidity.<br>
+      Aisles are neatly stocked with medicines, personal care essentials, first-aid kits, and vitamins.<br>
+      The pharmacist Dr. Camila, in an immaculate white lab coat with professional credentials, greets you with care:<br>
+      <em>"— Hello! How may I assist you today? Looking for medications, first aid, or would you like your blood pressure checked?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      kit_antiacido_remedios: {
+        label: 'Buy an effervescent antacid packet and a blister pack of tension headache painkillers',
+        outcome: 'The fizzing antacid quickly neutralizes street heartburn, while the painkiller soothes headache tension. Your mind feels clear and revitalized (+30% Sanity, -10% Danger).'
+      },
+      aferir_pressao: {
+        label: 'Have your blood pressure and heart rate checked in the consultation room by Dr. Camila',
+        outcome: 'The cuff gently inflates as the gauge ticks: "— 120 over 80, the heart of an athlete!", smiles the pharmacist. Peace of mind knowing you are in good health (+18% Sanity, +4 Ginga).'
+      },
+      barra_cereal_isotonico: {
+        label: 'Buy a chilled citrus electrolyte sports drink and a whole-grain nut snack bar',
+        outcome: 'Rapid hydration packed with minerals and steady stamina from wholesome nuts to keep walking through São Paulo (+24% Stomach, +18% Sanity).'
+      }
+    }
   }
 };
 
@@ -21386,7 +22369,12 @@ const TRANSLATIONS = {
       escola_publica: { name: 'E.E. PROF. LOURENÇO FILHO (ESCOLA ESTADUAL)', prompt: 'FALAR COM A TIA CIDA NO PORTÃO DA ESCOLA' },
       parque_petronio: { name: 'PRAÇA & PARQUE LINEAR PETRÔNIO PORTELA', prompt: 'COMPRAR PIPOCA DO SEU ZICO OU USAR A PRAÇA' },
       espetinho_petronio: { name: 'BAR & ESPETINHO DA PETRÔNIO', prompt: 'PEDIR ESPETINHO COM SEU TONINHO NA BRASA' },
-      papelaria_bazar: { name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO', prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS' }
+      papelaria_bazar: { name: 'PAPELARIA, BAZAR & AUTOESCOLA PETRÔNIO', prompt: 'RECARREGAR BILHETE ÚNICO OU COMPRAR MATERIAIS' },
+      igreja_morro: { name: 'IGREJINHA DO MORRO (PADRE BENTO)', prompt: 'SUBIR A ESCADARIA DA IGREJINHA OU FALAR COM PADRE BENTO' },
+      colegio_wellington: { name: 'COLÉGIO WELLINGTON (PROF. MAURÍCIO)', prompt: 'FALAR COM PROF. MAURÍCIO NO PORTÃO OU ENTRAR NA QUADRA' },
+      mercado_pyrituba: { name: 'MERCADO MUNICIPAL DE PYRITUBA (SEU BETO)', prompt: 'COMPRAR PASTEL, CALDO DE CANA OU FRUTAS COM SEU BETO' },
+      amigos_do_picui: { name: 'RESTAURANTE AMIGOS DO PICUÍ (MESTRE SEVERINO)', prompt: 'SABOREAR CARNE DE SOL & BAIÃO DE DOIS COM MESTRE SEVERINO' },
+      farmacia_petronio: { name: 'DROGARIA & FARMÁCIA PETRÔNIO (DRA. CAMILA)', prompt: 'COMPRAR MEDICAMENTOS OU AFERIR PRESSÃO COM DRA. CAMILA' }
     },
 
     npcs: {
@@ -21622,7 +22610,12 @@ const TRANSLATIONS = {
       escola_publica: { name: 'PROF. LOURENÇO FILHO PUBLIC SCHOOL', prompt: 'TALK TO TIA CIDA AT THE SCHOOL GATE' },
       parque_petronio: { name: 'PETRÔNIO PORTELA LINEAR PARK & SQUARE', prompt: 'BUY POPCORN FROM SEU ZICO OR WORK OUT IN THE PARK' },
       espetinho_petronio: { name: 'PETRÔNIO STREET BBQ & CORNER PUB', prompt: 'ORDER STREET SKEWERS FROM SEU TONINHO' },
-      papelaria_bazar: { name: 'PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL', prompt: 'RECHARGE TRANSIT PASS OR BUY STATIONERY' }
+      papelaria_bazar: { name: 'PETRÔNIO STATIONERY, BAZAAR & DRIVING SCHOOL', prompt: 'RECHARGE TRANSIT PASS OR BUY STATIONERY' },
+      igreja_morro: { name: 'HILLSIDE CHAPEL (FATHER BENTO)', prompt: 'CLIMB CHAPEL STAIRS OR TALK TO FATHER BENTO' },
+      colegio_wellington: { name: 'WELLINGTON COLLEGE (PROF. MAURÍCIO)', prompt: 'TALK TO PROF. MAURÍCIO AT THE GATE OR ENTER COURTS' },
+      mercado_pyrituba: { name: 'PYRITUBA MUNICIPAL MARKET (SEU BETO)', prompt: 'BUY PASTEL, CANE JUICE OR FRESH FRUIT FROM SEU BETO' },
+      amigos_do_picui: { name: 'AMIGOS DO PICUÍ RESTAURANT (CHEF SEVERINO)', prompt: 'ENJOY SUN-CURED BEEF & BAIÃO DE DOIS WITH CHEF SEVERINO' },
+      farmacia_petronio: { name: 'PETRÔNIO PHARMACY & DRUGSTORE (DR. CAMILA)', prompt: 'BUY MEDICATIONS OR CHECK BLOOD PRESSURE WITH DR. CAMILA' }
     },
 
     npcs: {
@@ -25171,6 +26164,247 @@ const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  IGREJA_DO_MORRO: {
+    id: 'IGREJA_DO_MORRO',
+    title: '⛪ IGREJINHA DO MORRO // PADRE BENTO',
+    getIntroText: (state) => `
+      A brisa suave sopra no alto do morro enquanto o sino de bronze repica no campanário.<br>
+      A vista panorâmica descortina toda a extensão da Av. Petrônio Portela e as colinas de Pirituba.<br>
+      O Padre Bento, de batina preta e olhar acolhedor, te recebe com a mão estendida:<br>
+      <em>"— A paz de Cristo, meu filho! Seja bem-vindo à nossa capela. O que traz ao seu coração hoje?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'acender_vela_bencao',
+        label: 'Acender uma vela votiva no altar e receber a bênção solene do Padre Bento',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -300, sanidade: 28, perigo: -15 }, 'Bênção do Padre Bento');
+          return 'O Padre traça o sinal da cruz na sua testa e profere palavras de conforto e serenidade. A chama da vela bruxuleia no altar de pedra (+28% Sanidade, -15% Perigo).';
+        }
+      },
+      {
+        id: 'admirar_mirante',
+        label: 'Apreciar o horizonte do mirante da igrejinha e respirar o ar puro do morro',
+        costLabel: '+20% Sanidade (Grátis)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 20, ginga: 4 }, 'Mirante da igrejinha do morro');
+          return 'Debruçado no parapeito de ferro colonial, você observa o trânsito lá embaixo e as árvores floridas balançando ao vento. Paz de espírito revigorante (+20% Sanidade, +4 Ginga).';
+        }
+      },
+      {
+        id: 'doacao_paroquia',
+        label: 'Fazer uma contribuição de R$ 10,00 para as obras sociais e sopa comunitária da paróquia',
+        costLabel: 'R$ 10,00',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -1000, sanidade: 35, ginga: 10 }, 'Doação para paróquia');
+          return 'Você deposita a cédula no cofre de madeira. O Padre Bento agradece comovido: "— Que Deus multiplique em sua vida!" O coração se enche de luz (+35% Sanidade, +10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  COLEGIO_WELLINGTON: {
+    id: 'COLEGIO_WELLINGTON',
+    title: '🏫 COLÉGIO WELLINGTON // PROF. MAURÍCIO',
+    getIntroText: (state) => `
+      O sinal da escola ecoa pelo pátio moderno e o burburinho animado dos estudantes invade a portaria.<br>
+      Na quadra de esportes, o som da bola quicando e gritos de incentivo marcam o intervalo.<br>
+      O Professor Maurício, com crachá no peito e livros didáticos sob o braço, cumprimenta na entrada:<br>
+      <em>"— Bom dia, jovem! Veio se informar sobre as matrículas, o simulado do Enem ou bater uma bola?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'conversa_professor',
+        label: 'Conversar com o Professor Maurício sobre atualidades e dicas de redação',
+        costLabel: '+18% Sanidade (Ideias & Cultura)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 18, ginga: 8 }, 'Dicas de estudo com Prof. Maurício');
+          return 'O professor compartilha análises brilhantes sobre literatura brasileira e pensamento crítico. Conhecimento que expande horizontes (+18% Sanidade, +8 Ginga).';
+        }
+      },
+      {
+        id: 'bater_bola_quadra',
+        label: 'Entrar na quadra poliesportiva para um bate-bola rápido de futsal com a turma',
+        costLabel: '+22% Sanidade / -10% Bucho',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 22, ginga: 12, fome: -10 }, 'Bate-bola no Wellington');
+          return 'Dribles rápidos na quadra de cimento azul, tabelinha na ala e chute no ângulo! O suor limpa a cabeça e traz de volta a alegria dos tempos de escola (+22% Sanidade, +12 Ginga, -10% Bucho).';
+        }
+      },
+      {
+        id: 'salgado_cantina',
+        label: 'Comprar esfiha folhada de carne e um suco de uva integral gelado na cantina',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -800, fome: 32, sanidade: 16 }, 'Lanche da cantina do Wellington');
+          return 'Esfiha quentinha com massa folhada dourada e recheio temperado com hortelã, acompanhado de suco gelado. Clássico recreio escolar (+32% Bucho, +16% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  MERCADO_PYRITUBA: {
+    id: 'MERCADO_PYRITUBA',
+    title: '🛒 MERCADO MUNICIPAL DE PYRITUBA // SEU BETO',
+    getIntroText: (state) => `
+      O galpão coberto vibra com o colorido de caixas de frutas, queijos da Canastra e temperos nordestinos.<br>
+      No corredor central, o chiado de óleo borbulhante anuncia os tradicionais pastéis de feira com caldo de cana.<br>
+      Seu Beto, de avental listrado e boné de feirante, ajeita um cacho de bananas-ouro e grita animado:<br>
+      <em>"— Olha a fruta fresquinha, freguês! Pastel sequinho na hora e o melhor queijo coalho da Petrônio!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pastel_caldo_mercado',
+        label: 'Pedir pastel crocante de carne seca com queijo coalho e copo de caldo de cana gelado com limão',
+        costLabel: 'R$ 13,00',
+        costCentavos: 1300,
+        disabled: !state.canAfford(1300),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1300, fome: 48, sanidade: 24 }, 'Pastel de carne seca e caldo de cana');
+          return 'Massa estaladiça com bolhas douradas, recheio farto de carne desfiada suculenta e caldo de cana geladinho que lava a alma (+48% Bucho, +24% Sanidade)!';
+        }
+      },
+      {
+        id: 'cesta_frutas',
+        label: 'Comprar uma cesta sortida de frutas frescas da época (bananas-ouro, laranjas-pera e mamão papaia)',
+        costLabel: 'R$ 10,00',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1000, fome: 35, sanidade: 20 }, 'Cesta de frutas do Seu Beto');
+          return 'Frutas doces, cheirosas e cheias de vitaminas direto da roça. Nutrição de primeira para aguentar o dia a dia (+35% Bucho, +20% Sanidade).';
+        }
+      },
+      {
+        id: 'queijo_manteiga',
+        label: 'Comprar uma peça de queijo meia cura artesanal e uma garrafa de manteiga de garrafa pura',
+        costLabel: 'R$ 18,00',
+        costCentavos: 1800,
+        disabled: !state.canAfford(1800),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -1800, sanidade: 28, ginga: 10, fome: 20 }, 'Queijo da Canastra e manteiga de garrafa');
+          return 'Iguarias da mais alta tradição empacotadas no papel pardo. Sabor autêntico que alegra a despensa e o paladar (+28% Sanidade, +20% Bucho, +10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  RESTAURANTE_AMIGOS_DO_PICUI: {
+    id: 'RESTAURANTE_AMIGOS_DO_PICUI',
+    title: '🥩 RESTAURANTE AMIGOS DO PICUÍ // MESTRE SEVERINO',
+    getIntroText: (state) => `
+      O aroma inconfundível de carne de sol grelhada na manteiga de garrafa e alho perfuma a varanda colonial.<br>
+      Mesas de madeira maciça com toalhas xadrez acolhem famílias saboreando generosas travessas de barro fumegantes.<br>
+      O chef Mestre Severino, de dólmã branco e lenço vermelho no pescoço, surge com uma chapa chiando alto:<br>
+      <em>"— Ô de casa! Aqui é o verdadeiro sabor de Picuí na Paraíba! Carne curada no ponto, macaxeira na brasa e baião caprichado!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'chapa_carne_sol',
+        label: 'Pedir a Famosa Chapa de Carne de Sol do Picuí com baião de dois, macaxeira dourada, queijo coalho e paçoca',
+        costLabel: 'R$ 38,00',
+        costCentavos: 3800,
+        disabled: !state.canAfford(3800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -3800, fome: 70, sanidade: 45, perigo: -20 }, 'Banquete Carne de Sol do Picuí');
+          return 'Um verdadeiro banquete dos deuses sertanejos! A carne desmancha na boca com o fio de manteiga dourada e o baião cremoso com nata. Você atinge o nirvana gastronômico (+70% Bucho, +45% Sanidade, -20% Perigo)!';
+        }
+      },
+      {
+        id: 'cachaca_torresmo',
+        label: 'Tomar uma dose de cachaça artesanal de umburana com porçãozinha de torresmo crocante e limão cravo',
+        costLabel: 'R$ 12,00',
+        costCentavos: 1200,
+        disabled: !state.canAfford(1200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1200, sanidade: 26, ginga: 16, fome: 15 }, 'Cachaça de umburana e torresmo');
+          return 'Cachaça aveludada e aromática aquecendo o peito, acompanhada de torresmo sequinho que estala nos dentes (+26% Sanidade, +16 Ginga, +15% Bucho).';
+        }
+      },
+      {
+        id: 'porcao_macaxeira',
+        label: 'Pedir porção de macaxeira cozida e frita na manteiga de garrafa com queijo gratinado',
+        costLabel: 'R$ 16,00',
+        costCentavos: 1600,
+        disabled: !state.canAfford(1600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1600, fome: 38, sanidade: 22 }, 'Macaxeira gratinada na manteiga');
+          return 'Mandioca macia por dentro e crocante por fora coberta com queijo tostado. Conforto e sabor sem igual (+38% Bucho, +22% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  FARMACIA_PETRONIO: {
+    id: 'FARMACIA_PETRONIO',
+    title: '💊 DROGARIA & FARMÁCIA PETRÔNIO // DRA. CAMILA',
+    getIntroText: (state) => `
+      O ambiente impecável, refrigerado e iluminado traz alívio imediato contra o calor da avenida.<br>
+      As prateleiras exibem medicamentos organizados, produtos de cuidados pessoais, vitaminas e fraldas.<br>
+      A farmacêutica Dra. Camila, de jaleco branco engomado e crachá profissional, te atende gentilmente no balcão:<br>
+      <em>"— Olá! Como posso te ajudar? Precisa de algum medicamento, primeiros socorros ou gostaria de aferir a pressão?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'kit_antiacido_remedios',
+        label: 'Comprar envelope de antiácido efervescente e cartela de analgésico para dor de cabeça',
+        costLabel: 'R$ 9,00',
+        costCentavos: 900,
+        disabled: !state.canAfford(900),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -900, sanidade: 30, perigo: -10 }, 'Antiácido e analgésico na farmácia');
+          return 'O efervescente borbulha no copinho d água e desce limpando a queimação do estômago. O analgésico alivia as têmporas e revigora seu foco (+30% Sanidade, -10% Perigo).';
+        }
+      },
+      {
+        id: 'aferir_pressao',
+        label: 'Aferir a pressão arterial e batimentos cardíacos no consultório com a Dra. Camila',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -300, sanidade: 18, ginga: 4 }, 'Aferição de pressão arterial');
+          return 'A braçadeira infla suavemente enquanto o manômetro mede seus batimentos: "— 12 por 8, coração de atleta!", sorri a farmacêutica. Alívio de saber que a saúde está em dia (+18% Sanidade, +4 Ginga).';
+        }
+      },
+      {
+        id: 'barra_cereal_isotonico',
+        label: 'Comprar garrafa de isotônico gelado de frutas cítricas e barra de cereais com castanhas',
+        costLabel: 'R$ 7,00',
+        costCentavos: 700,
+        disabled: !state.canAfford(700),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -700, fome: 24, sanidade: 18 }, 'Isotônico e barra de cereal');
+          return 'Hidratação rápida com eletrólitos e energia imediata das castanhas para seguir caminhando pelas ruas de São Paulo (+24% Bucho, +18% Sanidade).';
+        }
+      }
+    ]
   }
 };
 
@@ -25519,6 +26753,68 @@ class NpcSystem {
       whistle.name = 'npc_lanyard';
       whistle.position.set(0, 0.92, 0.16);
       group.add(whistle);
+    }
+
+    if (config.hasCross) {
+      const crossMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+      const crossVert = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.03), crossMat);
+      crossVert.name = 'npc_cross';
+      crossVert.position.set(0, 1.15, 0.16);
+      group.add(crossVert);
+      const crossHoriz = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.04, 0.03), crossMat);
+      crossHoriz.position.set(0, 1.20, 0.16);
+      group.add(crossHoriz);
+    }
+
+    if (config.hasBook) {
+      const bookMat = new THREE.MeshLambertMaterial({ color: 0x1e3a8a });
+      const book = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.22), bookMat);
+      book.name = 'npc_book';
+      book.position.set(0.12, -0.28, 0.08);
+      leftArm.add(book);
+    }
+
+    if (config.hasCrate) {
+      const crateMat = new THREE.MeshLambertMaterial({ color: 0xb45309 });
+      const crate = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.22, 0.28), crateMat);
+      crate.name = 'npc_crate';
+      crate.position.set(0, 0.85, 0.25);
+      group.add(crate);
+    }
+
+    if (config.hasPlatter) {
+      const platterMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+      const platter = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.03, 12), platterMat);
+      platter.name = 'npc_platter';
+      platter.position.set(0, -0.32, 0.2);
+      rightArm.add(platter);
+      const meatMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const meat = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.06, 0.12), meatMat);
+      meat.position.set(0, 0.04, 0);
+      platter.add(meat);
+    }
+
+    if (config.hasLabCoat) {
+      const coatMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+      const coatTorso = new THREE.Mesh(new THREE.BoxGeometry(0.53, 0.68, 0.31), coatMat);
+      coatTorso.name = 'npc_labcoat';
+      coatTorso.position.y = 1.05;
+      group.add(coatTorso);
+      const coatSkirt = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.42, 0.3), coatMat);
+      coatSkirt.position.set(0, 0.62, 0);
+      group.add(coatSkirt);
+    }
+
+    if (config.hasClipboard) {
+      const boardMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const clipMat = new THREE.MeshLambertMaterial({ color: 0xcbd5e1 });
+      const board = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.3, 0.2), boardMat);
+      board.name = 'npc_clipboard';
+      board.position.set(0.12, -0.25, 0.08);
+      rightArm.add(board);
+      const clip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.04, 0.08), clipMat);
+      clip.position.set(0, 0.13, 0);
+      board.add(clip);
     }
 
     if (config.hasCoolerBox) {
@@ -26568,6 +27864,107 @@ class NpcSystem {
         interactable: false,
         animationMode: 'WIPE',
         baseY: 0.25
+      }),
+
+      // 10. Padre Bento (Igrejinha do Morro)
+      this.createHumanoidNpc({
+        id: 'padre_bento',
+        name: 'PADRE BENTO (IGREJINHA DO MORRO)',
+        prompt: 'RECEBER BÊNÇÃO COM PADRE BENTO',
+        encounterId: 'IGREJA_DO_MORRO',
+        shirtColor: 0x111111, // Black cassock
+        skinColor: 0x9e6a45,
+        pantsColor: 0x111111,
+        hasCross: true,
+        hasGlasses: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards stairs / avenue
+        waypoints: [{ x: 176.0, y: 4.5, z: 203.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 4.5
+      }),
+
+      // 11. Professor Maurício (Colégio Wellington)
+      this.createHumanoidNpc({
+        id: 'prof_mauricio',
+        name: 'PROFESSOR MAURÍCIO (COLÉGIO WELLINGTON)',
+        prompt: 'CONVERSAR COM PROFESSOR MAURÍCIO',
+        encounterId: 'COLEGIO_WELLINGTON',
+        shirtColor: 0x1d4ed8, // Blue school polo
+        skinColor: 0x8a5530,
+        pantsColor: 0x334155,
+        hasGlasses: true,
+        hasLanyard: true,
+        hasBook: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards sidewalk
+        waypoints: [{ x: 160.0, y: 0.25, z: 246.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 12. Seu Beto do Mercado (Mercado Municipal de Pyrituba)
+      this.createHumanoidNpc({
+        id: 'beto_mercado',
+        name: 'SEU BETO (MERCADO MUNICIPAL)',
+        prompt: 'FALAR COM SEU BETO NO MERCADO',
+        encounterId: 'MERCADO_PYRITUBA',
+        shirtColor: 0xffffff,
+        skinColor: 0xa16843,
+        pantsColor: 0x1e293b,
+        hasCap: true,
+        capColor: 0x15803d, // Green market cap
+        hasApron: true,
+        apronColor: 0x16a34a, // Green merchant apron
+        hasCrate: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards entrance
+        waypoints: [{ x: 160.0, y: 0.25, z: 283.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 13. Mestre Severino (Restaurante Amigos do Picuí)
+      this.createHumanoidNpc({
+        id: 'mestre_severino',
+        name: 'MESTRE SEVERINO (AMIGOS DO PICUÍ)',
+        prompt: 'PEDIR CARNE DE SOL COM MESTRE SEVERINO',
+        encounterId: 'RESTAURANTE_AMIGOS_DO_PICUI',
+        shirtColor: 0xffffff, // Chef jacket
+        skinColor: 0x784421,
+        pantsColor: 0x1c1917,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xb91c1c, // Red apron
+        hasPlatter: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West towards veranda
+        waypoints: [{ x: 160.0, y: 0.25, z: 316.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
+      }),
+
+      // 14. Dra. Camila (Farmácia Petrônio)
+      this.createHumanoidNpc({
+        id: 'farmaceutica_camila',
+        name: 'DRA. CAMILA (FARMÁCIA PETRÔNIO)',
+        prompt: 'FALAR COM DRA. CAMILA NA FARMÁCIA',
+        encounterId: 'FARMACIA_PETRONIO',
+        shirtColor: 0x059669, // Teal medical scrubs
+        skinColor: 0xa9714b,
+        pantsColor: 0x0f766e,
+        hasLabCoat: true,
+        hasClipboard: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East towards counter
+        waypoints: [{ x: 131.0, y: 0.25, z: 216.5 }],
+        interactable: false,
+        animationMode: 'IDLE_HOST',
+        baseY: 0.25
       })
     ];
 
@@ -26878,6 +28275,51 @@ class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'PAPELARIA_BAZAR',
         zoneId: 'PAPELARIA_BAZAR'
+      },
+      {
+        id: 'igreja_morro',
+        name: 'IGREJINHA DO MORRO (PADRE BENTO)',
+        prompt: 'SUBIR A ESCADARIA DA IGREJINHA OU FALAR COM PADRE BENTO',
+        position: new THREE.Vector3(176.0, 4.5, 205.0),
+        maxDist: 4.2,
+        encounterId: 'IGREJA_DO_MORRO',
+        zoneId: 'IGREJA_DO_MORRO'
+      },
+      {
+        id: 'colegio_wellington',
+        name: 'COLÉGIO WELLINGTON (PROF. MAURÍCIO)',
+        prompt: 'FALAR COM PROF. MAURÍCIO NO PORTÃO OU ENTRAR NA QUADRA',
+        position: new THREE.Vector3(160.0, 1.2, 248.0),
+        maxDist: 3.8,
+        encounterId: 'COLEGIO_WELLINGTON',
+        zoneId: 'COLEGIO_WELLINGTON'
+      },
+      {
+        id: 'mercado_pyrituba',
+        name: 'MERCADO MUNICIPAL DE PYRITUBA (SEU BETO)',
+        prompt: 'COMPRAR PASTEL, CALDO DE CANA OU FRUTAS COM SEU BETO',
+        position: new THREE.Vector3(160.0, 1.2, 285.0),
+        maxDist: 3.8,
+        encounterId: 'MERCADO_PYRITUBA',
+        zoneId: 'MERCADO_PYRITUBA'
+      },
+      {
+        id: 'amigos_do_picui',
+        name: 'RESTAURANTE AMIGOS DO PICUÍ (MESTRE SEVERINO)',
+        prompt: 'SABOREAR CARNE DE SOL & BAIÃO DE DOIS COM MESTRE SEVERINO',
+        position: new THREE.Vector3(160.0, 1.2, 318.0),
+        maxDist: 3.8,
+        encounterId: 'RESTAURANTE_AMIGOS_DO_PICUI',
+        zoneId: 'RESTAURANTE_AMIGOS_DO_PICUI'
+      },
+      {
+        id: 'farmacia_petronio',
+        name: 'DROGARIA & FARMÁCIA PETRÔNIO (DRA. CAMILA)',
+        prompt: 'COMPRAR MEDICAMENTOS OU AFERIR PRESSÃO COM DRA. CAMILA',
+        position: new THREE.Vector3(131.0, 1.2, 218.0),
+        maxDist: 3.8,
+        encounterId: 'FARMACIA_PETRONIO',
+        zoneId: 'FARMACIA_PETRONIO'
       }
     ];
   }

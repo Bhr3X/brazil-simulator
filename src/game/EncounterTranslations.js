@@ -1041,6 +1041,134 @@ export const EN_ENCOUNTER_TEXTS = {
         outcome: 'The green scanner light runs across the glass bed and warm printed sheets slide into the tray. Everyday bureaucracy handled smoothly (+8% Sanity).'
       }
     }
+  },
+
+  IGREJA_DO_MORRO: {
+    title: '⛪ HILLSIDE CHAPEL // FATHER BENTO',
+    intro: (state) => `
+      A gentle breeze sweeps over the hilltop while the antique bronze bell chimes in the tower.<br>
+      The panoramic overlook reveals the entire expanse of Av. Petrônio Portela and the rolling hills of Pirituba.<br>
+      Father Bento, wearing a black cassock with a warm, welcoming gaze, greets you with an outstretched hand:<br>
+      <em>"— The peace of Christ, my child! Welcome to our chapel. What brings you up the hill today?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      acender_vela_bencao: {
+        label: 'Light a votive candle at the altar and receive Father Bento\'s solemn blessing',
+        outcome: 'The priest traces the sign of the cross on your forehead, speaking words of peace and reassurance. The candle flame flickers gently on the stone altar (+28% Sanity, -15% Danger).'
+      },
+      admirar_mirante: {
+        label: 'Take in the horizon from the chapel viewpoint and breathe the fresh hilltop air',
+        costLabel: '+20% Sanity (Free)',
+        outcome: 'Leaning against the colonial wrought-iron railing, you watch the traffic below and flowering trees swaying in the wind. Deep, restorative serenity (+20% Sanity, +4 Ginga).'
+      },
+      doacao_paroquia: {
+        label: 'Make a R$ 10.00 charitable donation to the parish food drive and community kitchen',
+        outcome: 'You drop the bill into the wooden offering box. Father Bento expresses heartfelt thanks: "— May God multiply your kindness tenfold!" Your spirit is lifted (+35% Sanity, +10 Ginga).'
+      }
+    }
+  },
+
+  COLEGIO_WELLINGTON: {
+    title: '🏫 WELLINGTON COLLEGE // PROF. MAURÍCIO',
+    intro: (state) => `
+      The school bell rings across the modern courtyard as the energetic chatter of students fills the entryway.<br>
+      On the sports court, the rhythmic bounce of basketballs and cheerful cheers announce recess.<br>
+      Professor Maurício, wearing a teacher ID badge and textbooks tucked under his arm, welcomes you at the gate:<br>
+      <em>"— Good morning! Are you here to check on enrollments, college exam tips, or shoot some hoops?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      conversa_professor: {
+        label: 'Chat with Professor Maurício about current events and college essay techniques',
+        costLabel: '+18% Sanity (Ideas & Culture)',
+        outcome: 'The professor shares sharp insights on Brazilian literature, critical thinking, and history. True knowledge that broadens horizons (+18% Sanity, +8 Ginga).'
+      },
+      bater_bola_quadra: {
+        label: 'Step onto the sports court for a quick pickup futsal match with the students',
+        costLabel: '+22% Sanity / -10% Stomach',
+        outcome: 'Quick stepovers on the blue painted concrete court, a crisp one-two pass, and a top-corner strike! Working up a sweat clears your mind (+22% Sanity, +12 Ginga, -10% Stomach).'
+      },
+      salgado_cantina: {
+        label: 'Buy a flaky baked beef pastry (esfiha) and chilled Concord grape juice at the snack bar',
+        outcome: 'Warm pastry with golden flaky crust filled with spiced minced meat, washed down with sweet chilled grape juice. Pure school recess nostalgia (+32% Stomach, +16% Sanity).'
+      }
+    }
+  },
+
+  MERCADO_PYRITUBA: {
+    title: '🛒 PYRITUBA MUNICIPAL MARKET // SEU BETO',
+    intro: (state) => `
+      The covered market hall is alive with colorful fruit displays, Canastra farm cheeses, and northeastern spices.<br>
+      Down the central aisle, the sizzle of hot oil announces golden fried pastéis served with fresh sugarcane juice.<br>
+      Seu Beto, sporting a striped merchant apron and flat cap, arranges ripe bananas and calls out cheerfully:<br>
+      <em>"— Fresh fruit straight from the farm! Crispy hot pastéis and the finest coalho cheese in town!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pastel_caldo_mercado: {
+        label: 'Order a crispy jerked beef & coalho cheese pastel with fresh ice-cold sugarcane juice with lime',
+        outcome: 'Crispy blistered golden crust, brimming with savory shredded beef and melted cheese, paired with refreshing sugarcane juice that washes away fatigue (+48% Stomach, +24% Sanity)!'
+      },
+      cesta_frutas: {
+        label: 'Buy an assorted basket of fresh seasonal fruit (apple bananas, sweet oranges, and ripe papaya)',
+        outcome: 'Sweet, fragrant, vitamin-packed farm fruits. Top-tier natural nourishment to power through the city bustle (+35% Stomach, +20% Sanity).'
+      },
+      queijo_manteiga: {
+        label: 'Buy a whole wheel of artisanal cured Minas cheese and a bottle of pure clarified butter',
+        outcome: 'Time-honored delicacies wrapped in brown butcher paper. Authentic Brazilian culinary heritage that enriches your pantry and palate (+28% Sanity, +20% Stomach, +10 Ginga).'
+      }
+    }
+  },
+
+  RESTAURANTE_AMIGOS_DO_PICUI: {
+    title: '🥩 AMIGOS DO PICUÍ RESTAURANT // CHEF SEVERINO',
+    intro: (state) => `
+      The intoxicating aroma of sun-cured beef sizzling in clarified butter and garlic wafts through the veranda.<br>
+      Heavy hardwood tables draped in red checkered cloths host families enjoying steaming earthenware platters.<br>
+      Chef Mestre Severino, dressed in a crisp white jacket and red neckerchief, steps out with a smoking skillet:<br>
+      <em>"— Welcome home! Right here is authentic flavor from Picuí, Paraíba! Tender cured beef, roasted cassava, and creamy baião de dois!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      chapa_carne_sol: {
+        label: 'Order the Famous Picuí Carne de Sol Sizzler with baião de dois, golden yucca, grilled cheese, and paçoca',
+        outcome: 'A monumental feast worthy of northeastern legends! The cured beef melts in your mouth with golden butter and creamy rice and beans. Gastronomic bliss (+70% Stomach, +40% Sanity, -20% Danger)!'
+      },
+      cachaca_torresmo: {
+        label: 'Sip a shot of artisanal amburana-aged cachaça served with crispy pork cracklings and lime',
+        outcome: 'Smooth, woody amber rum warming your chest, paired with crunchy cracklings that snap with every bite (+26% Sanity, +16 Ginga, +15% Stomach).'
+      },
+      porcao_macaxeira: {
+        label: 'Order a side of tender boiled yucca pan-fried in clarified butter with toasted cheese',
+        outcome: 'Pillowy soft on the inside with a crunchy golden crust and browned melted cheese. Irresistible comfort food (+38% Stomach, +22% Sanity).'
+      }
+    }
+  },
+
+  FARMACIA_PETRONIO: {
+    title: '💊 PETRÔNIO PHARMACY & DRUGSTORE // DR. CAMILA',
+    intro: (state) => `
+      The clean, bright, air-conditioned interior offers instant relief from the avenue\'s humidity.<br>
+      Aisles are neatly stocked with medicines, personal care essentials, first-aid kits, and vitamins.<br>
+      The pharmacist Dr. Camila, in an immaculate white lab coat with professional credentials, greets you with care:<br>
+      <em>"— Hello! How may I assist you today? Looking for medications, first aid, or would you like your blood pressure checked?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      kit_antiacido_remedios: {
+        label: 'Buy an effervescent antacid packet and a blister pack of tension headache painkillers',
+        outcome: 'The fizzing antacid quickly neutralizes street heartburn, while the painkiller soothes headache tension. Your mind feels clear and revitalized (+30% Sanity, -10% Danger).'
+      },
+      aferir_pressao: {
+        label: 'Have your blood pressure and heart rate checked in the consultation room by Dr. Camila',
+        outcome: 'The cuff gently inflates as the gauge ticks: "— 120 over 80, the heart of an athlete!", smiles the pharmacist. Peace of mind knowing you are in good health (+18% Sanity, +4 Ginga).'
+      },
+      barra_cereal_isotonico: {
+        label: 'Buy a chilled citrus electrolyte sports drink and a whole-grain nut snack bar',
+        outcome: 'Rapid hydration packed with minerals and steady stamina from wholesome nuts to keep walking through São Paulo (+24% Stomach, +18% Sanity).'
+      }
+    }
   }
 };
 
