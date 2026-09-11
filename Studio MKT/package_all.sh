@@ -16,10 +16,11 @@ if [ -f "/Users/bhreno/code/game.md/submission-packs/v1.11.2-itch/game-md-v1.11.
 fi
 
 echo "==> Packaging 2: Brazil Simulator"
-cd "/Users/bhreno/First Person Engine"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
 node build.js
 rm -rf /tmp/brazil_bundle && mkdir -p /tmp/brazil_bundle
-cp "/Users/bhreno/First Person Engine/pirituba_standalone.html" /tmp/brazil_bundle/index.html
+cp "$PROJECT_ROOT/pirituba_standalone.html" /tmp/brazil_bundle/index.html
 cd /tmp/brazil_bundle && zip -q -9 "$BUNDLES_DIR/brazil-simulator.zip" index.html
 rm -rf /tmp/brazil_bundle
 echo "    Packaged brazil-simulator.zip"

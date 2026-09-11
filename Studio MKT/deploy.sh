@@ -23,8 +23,12 @@ log_err() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 check_butler() {
   if [ ! -x "$BUTLER" ]; then
-    log_err "Butler binary not found or not executable at: $BUTLER"
-    exit 1
+    if command -v butler >/dev/null 2>&1; then
+      BUTLER="$(command -v butler)"
+    else
+      log_err "Butler binary not found or not executable at: $BUTLER"
+      exit 1
+    fi
   fi
 }
 
@@ -65,19 +69,22 @@ cmd_push() {
   local user="${1:-$DEFAULT_USER}"
   local target_game="${2:-all}"
 
-  declare -A GAME_FILES=(
-    ["game-md"]="game-md.zip"
-    ["brazil-simulator"]="brazil-simulator.zip"
-    ["rogue-chronicles"]="rogue-reborn.zip"
-    ["rogue-reborn"]="rogue-reborn.zip"
-    ["vegan-t-rex"]="vegan-t-rex.zip"
-    ["mythocondria"]="mythocondria.zip"
-    ["1894-airstrip-one"]="1894.zip"
-  )
+  get_game_file() {
+    case "$1" in
+      game-md) echo "game-md.zip" ;;
+      brazil-simulator) echo "brazil-simulator.zip" ;;
+      rogue-chronicles|rogue-reborn) echo "rogue-reborn.zip" ;;
+      vegan-t-rex) echo "vegan-t-rex.zip" ;;
+      mythocondria) echo "mythocondria.zip" ;;
+      1894-airstrip-one) echo "1894.zip" ;;
+      *) echo "" ;;
+    esac
+  }
 
   push_single() {
     local slug="$1"
-    local file="${GAME_FILES[$slug]:-}"
+    local file
+    file="$(get_game_file "$slug")"
     if [ -z "$file" ]; then
       log_err "Unknown game slug: $slug"
       return 1
