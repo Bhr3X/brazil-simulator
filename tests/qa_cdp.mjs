@@ -2361,6 +2361,201 @@ async function runTestSuite(url) {
       throw new Error(`TEST 30 FAILED: failed vinheta and busy NewsDesk must resume the radio program instead of stalling the intermission. ${JSON.stringify(intermissionRecoveryTested)}`);
     }
 
+    // TEST 31: Carnival plaza + favela campinho zones, geometry, connector, and world bound
+    const carnivalCampinhoTested = await evaluate(`
+      (async () => {
+        const zoneApi = await (async () => {
+          if (typeof ZoneManager !== 'undefined') {
+            return {
+              getZoneAt: ZoneManager.getZoneAt.bind(ZoneManager),
+              isZoneOpen: ZoneManager.isZoneOpen.bind(ZoneManager),
+              WORLD_ZONES
+            };
+          }
+          const mod = await import('/src/world/Zones.js');
+          return {
+            getZoneAt: mod.ZoneManager.getZoneAt.bind(mod.ZoneManager),
+            isZoneOpen: mod.ZoneManager.isZoneOpen.bind(mod.ZoneManager),
+            WORLD_ZONES: mod.WORLD_ZONES
+          };
+        })();
+
+        const preservedHours = {
+          BAR_DO_TIAO: [16, 2],
+          ADEGA_DO_ZE: [8, 24],
+          PADARIA_ESTRELA: [5, 20],
+          POSTO_PIRITUBA: [0, 24],
+          PONTO_ONIBUS_SPTRANS: [4, 24],
+          CRUZAMENTO_EDGAR_FACCO: [0, 24],
+          PORTICO_CET: [0, 24],
+          RADAR_50KM: [0, 24],
+          CORREDOR_BUS: [0, 24],
+          AV_EDGAR_FACCO: [0, 24],
+          LAJE_MIRANTE: [0, 24],
+          ESCADAO_CENTRAL: [0, 24],
+          BECO_DO_SOSSEGO: [0, 24],
+          BANCA_JORNAL: [6, 20],
+          BARRACA_PASTEL: [6.5, 14],
+          BAILE_LAJE: [1.5, 5.5],
+          SEMAFORO_BICO: [7, 22],
+          FLANELINHA_PAULA_FERREIRA: [7, 21],
+          BANCO_PIRITUBA: [0, 24],
+          RUA_BENTO_BICUDO: [0, 24],
+          RUA_EMILIO_LESSORE: [0, 24],
+          AUTO_MECANICA_BETO: [7.5, 19.5],
+          CASA_CLASSE_C: [0, 24],
+          EDIFICIO_PENTHOUSE: [0, 24],
+          EDIFICIO_PORTARIA: [0, 24],
+          LARGO_DA_MATRIZ: [0, 24],
+          BAR_FRANGO: [11, 24],
+          IGREJA_MATRIZ_O: [6, 20],
+          RUA_SETE_BARRAS: [0, 24],
+          PAULA_FERREIRA_FREGUESIA: [0, 24],
+          CRUZAMENTO_PETRONIO_PORTELA: [0, 24]
+        };
+
+        const zoneById = {};
+        (zoneApi.WORLD_ZONES || []).forEach((z) => { zoneById[z.id] = z; });
+        const preservedHoursOk = Object.entries(preservedHours).every(([id, hours]) => {
+          const z = zoneById[id];
+          return !!z && z.openHour === hours[0] && z.closeHour === hours[1];
+        });
+
+        const bloco = zoneApi.getZoneAt({ x: 146, y: 2, z: 43 });
+        const campinho = zoneApi.getZoneAt({ x: 0, y: 10, z: -99 });
+        const petronio = zoneApi.getZoneAt({ x: 145, y: 1, z: 20 });
+        const avenueEast = zoneApi.getZoneAt({ x: 90, y: 1, z: 12 });
+
+        const blocoHours = {
+          openAtOpen: zoneApi.isZoneOpen(bloco, 10),
+          closedBefore: zoneApi.isZoneOpen(bloco, 9.99),
+          openBeforeClose: zoneApi.isZoneOpen(bloco, 15.99),
+          closedAtClose: zoneApi.isZoneOpen(bloco, 16)
+        };
+        const campinhoHours = {
+          openAtOpen: zoneApi.isZoneOpen(campinho, 11),
+          closedBefore: zoneApi.isZoneOpen(campinho, 10.99),
+          openBeforeClose: zoneApi.isZoneOpen(campinho, 19.99),
+          closedAtClose: zoneApi.isZoneOpen(campinho, 20)
+        };
+
+        const blocoBounds = bloco && bloco.min && bloco.max ? {
+          minX: bloco.min.x, maxX: bloco.max.x,
+          minY: bloco.min.y, maxY: bloco.max.y,
+          minZ: bloco.min.z, maxZ: bloco.max.z,
+          openHour: bloco.openHour, closeHour: bloco.closeHour
+        } : null;
+        const campinhoBounds = campinho && campinho.min && campinho.max ? {
+          minX: campinho.min.x, maxX: campinho.max.x,
+          minY: campinho.min.y, maxY: campinho.max.y,
+          minZ: campinho.min.z, maxZ: campinho.max.z,
+          openHour: campinho.openHour, closeHour: campinho.closeHour
+        } : null;
+
+        const city = window.app.city;
+        const physics = window.app.physics;
+        const trioGroup = city && city.blocoTrioGroup;
+        const campGroup = city && city.campinhoGroup;
+
+        let trioWorldBox = null;
+        let trioOnLiveRoad = true;
+        if (trioGroup && THREE && THREE.Box3) {
+          trioGroup.updateWorldMatrix(true, true);
+          const box = new THREE.Box3().setFromObject(trioGroup);
+          trioWorldBox = {
+            minX: box.min.x, maxX: box.max.x,
+            minY: box.min.y, maxY: box.max.y,
+            minZ: box.min.z, maxZ: box.max.z
+          };
+          const overlapsRoad = box.max.z > 8 && box.min.z < 32;
+          trioOnLiveRoad = overlapsRoad;
+        }
+
+        const pitchGround = physics.getGroundHeight(0, -99, 9.5);
+        const pitchWalkable = physics.colliders.some((c) =>
+          (c.type === 'walkable' || c.type === 'stair' || c.type === 'curb')
+          && c.min.x <= -14 && c.max.x >= 14
+          && c.min.z <= -106 && c.max.z >= -92
+          && Math.abs(c.max.y - 9.5) <= 0.15
+        );
+
+        let walkPos = new THREE.Vector3(0, 8.5, -78);
+        const connectorSamples = [];
+        for (let i = 0; i < 22; i++) {
+          const target = walkPos.clone();
+          target.z -= 0.45;
+          walkPos = physics.resolveMovement(walkPos, target, 0.38, 0.5);
+          connectorSamples.push({ x: walkPos.x, y: walkPos.y, z: walkPos.z });
+        }
+        const connectorReached = walkPos.z <= -86.5 && walkPos.y >= 9.2 && walkPos.y <= 10.2;
+
+        const avZone = zoneById.AV_EDGAR_FACCO;
+        const busZone = zoneById.CORREDOR_BUS;
+        const doorCount = window.app.game && window.app.game.interactables && window.app.game.interactables.doors
+          ? window.app.game.interactables.doors.length
+          : 0;
+
+        const ok = bloco.id === 'BLOCO_EDGAR_FACCO'
+          && blocoBounds
+          && blocoBounds.minX === 132 && blocoBounds.maxX === 160
+          && blocoBounds.minY === 0 && blocoBounds.maxY === 8
+          && blocoBounds.minZ === 34 && blocoBounds.maxZ === 52
+          && blocoBounds.openHour === 10 && blocoBounds.closeHour === 16
+          && blocoHours.openAtOpen === true
+          && blocoHours.closedBefore === false
+          && blocoHours.openBeforeClose === true
+          && blocoHours.closedAtClose === false
+          && campinho.id === 'CAMPINHO_CHURRASCO'
+          && campinhoBounds
+          && campinhoBounds.minX === -22 && campinhoBounds.maxX === 22
+          && campinhoBounds.minY === 8.5 && campinhoBounds.maxY === 15
+          && campinhoBounds.minZ === -112 && campinhoBounds.maxZ === -86
+          && campinhoBounds.openHour === 11 && campinhoBounds.closeHour === 20
+          && campinhoHours.openAtOpen === true
+          && campinhoHours.closedBefore === false
+          && campinhoHours.openBeforeClose === true
+          && campinhoHours.closedAtClose === false
+          && petronio.id === 'CRUZAMENTO_PETRONIO_PORTELA'
+          && avenueEast.id === 'AV_EDGAR_FACCO'
+          && avZone && avZone.max.x === 165
+          && busZone && busZone.max.x === 165
+          && preservedHoursOk
+          && !!trioGroup && trioGroup.children && trioGroup.children.length > 0
+          && !!campGroup && campGroup.children && campGroup.children.length > 0
+          && trioOnLiveRoad === false
+          && Math.abs(pitchGround - 9.5) <= 0.15
+          && pitchWalkable === true
+          && connectorReached === true
+          && physics.worldBounds.minZ === -120
+          && doorCount >= 20;
+
+        return {
+          ok,
+          bloco: { id: bloco.id, bounds: blocoBounds, hours: blocoHours },
+          campinho: { id: campinho.id, bounds: campinhoBounds, hours: campinhoHours },
+          petronioId: petronio.id,
+          avenueEastId: avenueEast.id,
+          avenueMaxX: avZone && avZone.max.x,
+          busMaxX: busZone && busZone.max.x,
+          preservedHoursOk,
+          hasTrioGroup: !!(trioGroup && trioGroup.children && trioGroup.children.length > 0),
+          hasCampinhoGroup: !!(campGroup && campGroup.children && campGroup.children.length > 0),
+          trioWorldBox,
+          trioOnLiveRoad,
+          pitchGround,
+          pitchWalkable,
+          connectorReached,
+          connectorEnd: { x: walkPos.x, y: walkPos.y, z: walkPos.z },
+          minZ: physics.worldBounds.minZ,
+          doorCount
+        };
+      })()
+    `);
+    console.log(`[TEST 31] Carnival plaza and favela campinho:`, carnivalCampinhoTested);
+    if (!carnivalCampinhoTested.ok) {
+      throw new Error(`TEST 31 FAILED: carnival plaza and favela campinho must expose authoritative zones, named geometry, a walkable pitch/connector, a truck off the live road, minZ -120, and preserved doors. ${JSON.stringify(carnivalCampinhoTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

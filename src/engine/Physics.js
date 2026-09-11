@@ -11,7 +11,7 @@ export class PhysicsEngine {
     this.dynamicBodies = []; // Array of physical interactable bodies (soccer ball, cans, crates)
     this.worldBounds = {
       minX: -70, maxX: 180,
-      minZ: -88, maxZ: 250
+      minZ: -120, maxZ: 250
     };
   }
 

@@ -16,6 +16,8 @@ export class CityBuilder {
     this.kites = [];
     this.beaconLights = [];
     this.interactiveDoors = [];
+    this.blocoTrioGroup = null;
+    this.campinhoGroup = null;
 
     // Lighting fixtures
     this.sunLight = null;
@@ -43,6 +45,8 @@ export class CityBuilder {
     this.buildSeteBarrasSector();
     this.buildEdgarFaccoPetronioPortelaExtension();
     this.buildLargoDaMatrizFreguesia();
+    this.buildBlocoEdgarFaccoTrioPlaza();
+    this.buildFavelaCampinho();
   }
 
   // 1. Scene Lighting & Atmospherics
@@ -3886,10 +3890,10 @@ export class CityBuilder {
       new THREE.Vector3(58.0, 10, 0.0),
       'solid'
     );
-    // North Crest Boundary (behind Favela Mirante & Jaraguá base)
+    // North Crest Boundary (behind favela campinho plateau)
     this.physics.addBoxCollider(
-      new THREE.Vector3(-60.0, 0, -88.0),
-      new THREE.Vector3(175.0, 15, -82.0),
+      new THREE.Vector3(-60.0, 0, -118.0),
+      new THREE.Vector3(175.0, 15, -114.0),
       'solid'
     );
   }
@@ -4702,6 +4706,331 @@ export class CityBuilder {
     this.physics.addBoxCollider(new THREE.Vector3(-42.0, 8.5, 155.0), new THREE.Vector3(-35.0, 18.5, 240.0), 'solid'); // West
     this.physics.addBoxCollider(new THREE.Vector3(38.0, 8.5, 155.0), new THREE.Vector3(46.0, 18.5, 240.0), 'solid');  // East
     this.physics.addBoxCollider(new THREE.Vector3(-42.0, 8.5, 235.0), new THREE.Vector3(46.0, 18.5, 245.0), 'solid'); // South
+  }
+
+  // Parked carnival trio plaza on the south flank of Edgar Facó (outside live road z 8..32)
+  buildBlocoEdgarFaccoTrioPlaza() {
+    const group = new THREE.Group();
+    group.name = 'blocoTrioGroup';
+    this.blocoTrioGroup = group;
+
+    const plazaMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(8, 4)
+    });
+    const plaza = new THREE.Mesh(new THREE.PlaneGeometry(28, 18), plazaMat);
+    plaza.rotation.x = -Math.PI / 2;
+    plaza.position.set(146, 0.03, 43);
+    group.add(plaza);
+
+    const truckMat = new THREE.MeshLambertMaterial({ color: 0x1d4ed8 });
+    const cabinMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+    const blackMat = new THREE.MeshLambertMaterial({ color: 0x111113 });
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0x9aa3ad });
+    const speakerMat = new THREE.MeshLambertMaterial({ color: 0x111115 });
+    const coneMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+
+    // Bus-scale trio chassis, east/west, centered near x=146, z=43
+    const chassis = new THREE.Mesh(new THREE.BoxGeometry(12.0, 1.1, 2.6), truckMat);
+    chassis.position.set(146, 1.15, 43);
+    group.add(chassis);
+
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(11.6, 0.12, 2.5), chromeMat);
+    deck.position.set(146, 1.76, 43);
+    group.add(deck);
+
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.5, 2.4), cabinMat);
+    cabin.position.set(140.6, 2.55, 43);
+    group.add(cabin);
+
+    const glass = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 0.9, 2.1),
+      new THREE.MeshLambertMaterial({ color: 0x1e3a5f, transparent: true, opacity: 0.7 })
+    );
+    glass.position.set(139.35, 2.65, 43);
+    group.add(glass);
+
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(12.2, 0.12, 2.7), truckMat);
+    roof.position.set(146, 3.35, 43);
+    group.add(roof);
+
+    [-4.2, 0, 4.2].forEach((ox) => {
+      [-1.2, 1.2].forEach((oz) => {
+        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.32, 10), blackMat);
+        wheel.rotation.z = Math.PI / 2;
+        wheel.position.set(146 + ox, 0.48, 43 + oz);
+        group.add(wheel);
+      });
+    });
+
+    // Speaker wall on the south face, facing the plaza (not the live avenue)
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 5; col++) {
+        const box = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.45), speakerMat);
+        box.position.set(143.2 + col * 0.85, 2.15 + row * 0.75, 44.45);
+        group.add(box);
+        const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.14, 0.05, 10), coneMat);
+        cone.rotation.x = Math.PI / 2;
+        cone.position.set(143.2 + col * 0.85, 2.15 + row * 0.75, 44.72);
+        group.add(cone);
+      }
+    }
+
+    this.physics.addBoxCollider(
+      new THREE.Vector3(140.0, 0, 41.6),
+      new THREE.Vector3(152.0, 3.5, 44.5),
+      'solid'
+    );
+
+    const barrierMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+    const addJersey = (x, z) => {
+      const barrier = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.85, 0.38), barrierMat);
+      barrier.position.set(x, 0.42, z);
+      group.add(barrier);
+      this.physics.addBoxCollider(
+        new THREE.Vector3(x - 0.9, 0, z - 0.2),
+        new THREE.Vector3(x + 0.9, 0.85, z + 0.2),
+        'solid'
+      );
+    };
+    // Road-edge barriers stay south of live lane z=32, with pedestrian gaps
+    [133.2, 135.2, 141.2, 150.8, 156.8, 158.8].forEach((x) => addJersey(x, 34.25));
+    [34.9, 37.2, 48.6, 51.2].forEach((z) => {
+      addJersey(132.4, z);
+      addJersey(159.6, z);
+    });
+
+    const buntingTex = this.textures.createCarnivalBunting();
+    const buntingMat = new THREE.MeshBasicMaterial({
+      map: buntingTex,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const streamerMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createCarnivalStreamer(),
+      side: THREE.DoubleSide
+    });
+
+    const poles = [
+      [133.5, 51.0], [146.0, 51.4], [158.5, 51.0],
+      [133.5, 35.1], [158.5, 35.1]
+    ];
+    poles.forEach(([px, pz]) => {
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 4.2, 8), chromeMat);
+      pole.position.set(px, 2.1, pz);
+      group.add(pole);
+    });
+
+    const stringBunting = (x1, z1, x2, z2, y = 3.6) => {
+      const dx = x2 - x1;
+      const dz = z2 - z1;
+      const len = Math.hypot(dx, dz);
+      const banner = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.55), buntingMat);
+      banner.position.set((x1 + x2) / 2, y, (z1 + z2) / 2);
+      banner.rotation.y = -Math.atan2(dz, dx);
+      group.add(banner);
+    };
+    stringBunting(133.5, 51.0, 146.0, 51.4);
+    stringBunting(146.0, 51.4, 158.5, 51.0);
+    stringBunting(133.5, 35.1, 158.5, 35.1, 3.8);
+
+    const streamer = new THREE.Mesh(new THREE.PlaneGeometry(10.5, 0.18), streamerMat);
+    streamer.position.set(146, 3.55, 45.1);
+    group.add(streamer);
+
+    const confettiColors = [0xe11d48, 0xf59e0b, 0x22c55e, 0x2563eb, 0xf5d90a];
+    for (let i = 0; i < 10; i++) {
+      const bit = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.22, 0.28),
+        new THREE.MeshBasicMaterial({ color: confettiColors[i % confettiColors.length], side: THREE.DoubleSide })
+      );
+      bit.position.set(138 + (i % 5) * 2.1, 2.4 + (i % 3) * 0.25, 47.2 + (i % 2) * 1.4);
+      bit.rotation.y = 0.4;
+      group.add(bit);
+    }
+
+    this.scene.add(group);
+  }
+
+  // Favela crest campinho, churrasco plateau, and walkable connector from the mirante
+  buildFavelaCampinho() {
+    const group = new THREE.Group();
+    group.name = 'campinhoGroup';
+    this.campinhoGroup = group;
+
+    const dirtMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPitchDirt(8, 5)
+    });
+    const grassMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPitchGrass(6, 3)
+    });
+    const markMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createPitchMarkings(),
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const wallMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createReboco('#7d776f', 6, 3)
+    });
+    const railMat = new THREE.MeshLambertMaterial({ color: 0x226bb3 });
+
+    // Crest plateau x -20..20, z -111..-87, top y=9.5
+    const plateau = new THREE.Mesh(new THREE.BoxGeometry(40, 0.35, 24), dirtMat);
+    plateau.position.set(0, 9.325, -99);
+    group.add(plateau);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-20, 9.35, -111),
+      new THREE.Vector3(20, 9.5, -87),
+      'walkable'
+    );
+
+    // Playing surface exactly 28×14 m at y=9.5
+    const pitch = new THREE.Mesh(new THREE.BoxGeometry(28, 0.08, 14), grassMat);
+    pitch.position.set(0, 9.54, -99);
+    group.add(pitch);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-14, 9.42, -106),
+      new THREE.Vector3(14, 9.5, -92),
+      'walkable'
+    );
+
+    const markings = new THREE.Mesh(new THREE.PlaneGeometry(28, 14), markMat);
+    markings.rotation.x = -Math.PI / 2;
+    markings.position.set(0, 9.59, -99);
+    group.add(markings);
+
+    const postMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+    const netMat = new THREE.MeshLambertMaterial({ color: 0xd1d5db, transparent: true, opacity: 0.35 });
+    const addGoal = (x, facing) => {
+      const postL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.0, 0.12), postMat);
+      postL.position.set(x, 10.5, -99 - 2.0);
+      group.add(postL);
+      const postR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.0, 0.12), postMat);
+      postR.position.set(x, 10.5, -99 + 2.0);
+      group.add(postR);
+      const cross = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 4.12), postMat);
+      cross.position.set(x, 11.5, -99);
+      group.add(cross);
+      const net = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.9, 4.0), netMat);
+      net.position.set(x + facing * 0.6, 10.45, -99);
+      group.add(net);
+      this.physics.addBoxCollider(
+        new THREE.Vector3(x - 0.15, 9.5, -101.15),
+        new THREE.Vector3(x + 0.15, 11.55, -100.85),
+        'solid'
+      );
+      this.physics.addBoxCollider(
+        new THREE.Vector3(x - 0.15, 9.5, -97.15),
+        new THREE.Vector3(x + 0.15, 11.55, -96.85),
+        'solid'
+      );
+    };
+    addGoal(-14, -1);
+    addGoal(14, 1);
+
+    // Fixed churrasqueira and simple wood tables off the pitch
+    const brickMat = new THREE.MeshLambertMaterial({ map: this.textures.createTijoloBaiano(1, 1) });
+    const grill = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.0, 0.85), brickMat);
+    grill.position.set(-18.0, 10.0, -88.5);
+    group.add(grill);
+    const hood = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.5, 0.75, 4), new THREE.MeshLambertMaterial({ color: 0x5a2d18 }));
+    hood.rotation.y = Math.PI / 4;
+    hood.position.set(-18.0, 10.85, -88.5);
+    group.add(hood);
+    const grate = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.05, 0.6), new THREE.MeshLambertMaterial({ color: 0x1a1a1a }));
+    grate.position.set(-18.0, 10.48, -88.5);
+    group.add(grate);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-18.7, 9.5, -89.1),
+      new THREE.Vector3(-17.3, 11.2, -87.9),
+      'solid'
+    );
+
+    const woodMat = new THREE.MeshLambertMaterial({ color: 0x6b4a2b });
+    [[-17.2, -91.2], [17.4, -88.8], [17.6, -91.4]].forEach(([tx, tz]) => {
+      const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.08, 0.7), woodMat);
+      table.position.set(tx, 10.22, tz);
+      group.add(table);
+      [[-0.45, -0.25], [0.45, -0.25], [-0.45, 0.25], [0.45, 0.25]].forEach(([lx, lz]) => {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.08), woodMat);
+        leg.position.set(tx + lx, 9.85, tz + lz);
+        group.add(leg);
+      });
+      this.physics.addBoxCollider(
+        new THREE.Vector3(tx - 0.6, 9.5, tz - 0.35),
+        new THREE.Vector3(tx + 0.6, 10.3, tz + 0.35),
+        'solid'
+      );
+    });
+
+    // Retaining walls around the plateau; south opening keeps the connector
+    const northWall = new THREE.Mesh(new THREE.BoxGeometry(44, 4.2, 1.2), wallMat);
+    northWall.position.set(0, 7.6, -116);
+    group.add(northWall);
+
+    const westWall = new THREE.Mesh(new THREE.BoxGeometry(1.1, 5.2, 28), wallMat);
+    westWall.position.set(-21.4, 7.1, -99);
+    group.add(westWall);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-22.0, 4.5, -113),
+      new THREE.Vector3(-20.8, 12.0, -86.5),
+      'solid'
+    );
+
+    const eastWall = new THREE.Mesh(new THREE.BoxGeometry(1.1, 5.2, 28), wallMat);
+    eastWall.position.set(21.4, 7.1, -99);
+    group.add(eastWall);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(20.8, 4.5, -113),
+      new THREE.Vector3(22.0, 12.0, -86.5),
+      'solid'
+    );
+
+    [[-18.5, -86.4], [18.5, -86.4]].forEach(([wx, wz]) => {
+      const southWing = new THREE.Mesh(new THREE.BoxGeometry(7.0, 3.2, 0.8), wallMat);
+      southWing.position.set(wx, 8.1, wz);
+      group.add(southWing);
+      this.physics.addBoxCollider(
+        new THREE.Vector3(wx - 3.5, 6.5, wz - 0.4),
+        new THREE.Vector3(wx + 3.5, 10.5, wz + 0.4),
+        'solid'
+      );
+    });
+
+    // Walkable connector from mirante/escadão approach (z≈-78, y≈8.5) to plateau (z=-87, y=9.5)
+    const rampLen = Math.hypot(9, 1.0);
+    const rampAngle = Math.atan2(1.0, 9);
+    const ramp = new THREE.Mesh(new THREE.BoxGeometry(12, 0.28, rampLen), dirtMat);
+    ramp.rotation.x = -rampAngle;
+    ramp.position.set(0, 9.0, -82.5);
+    group.add(ramp);
+
+    this.physics.addSlope(-10, 10, -87, -78, 9.5, 8.5);
+    const stepCount = 9;
+    for (let i = 0; i < stepCount; i++) {
+      const t0 = i / stepCount;
+      const t1 = (i + 1) / stepCount;
+      const z0 = -78 - t0 * 9;
+      const z1 = -78 - t1 * 9;
+      const y1 = 8.5 + t1 * 1.0;
+      this.physics.addBoxCollider(
+        new THREE.Vector3(-8, y1 - 0.12, Math.min(z0, z1)),
+        new THREE.Vector3(8, y1, Math.max(z0, z1)),
+        'stair'
+      );
+    }
+
+    const railL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, rampLen), railMat);
+    railL.rotation.x = -rampAngle;
+    railL.position.set(-6.1, 9.55, -82.5);
+    group.add(railL);
+    const railR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, rampLen), railMat);
+    railR.rotation.x = -rampAngle;
+    railR.position.set(6.1, 9.55, -82.5);
+    group.add(railR);
+
+    this.scene.add(group);
   }
 }
 

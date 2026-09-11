@@ -77,10 +77,37 @@ export const WORLD_ZONES = [
     description: 'Radar de velocidade operado pela CET com câmeras infravermelhas.'
   },
   {
+    id: 'CRUZAMENTO_PETRONIO_PORTELA',
+    name: 'CRUZAMENTO: EDGAR FACÓ X AV. MIN. PETRÔNIO PORTELA',
+    min: { x: 125.0, y: 0.0, z: 6.0 },
+    max: { x: 165.0, y: 8.0, z: 34.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Movimentada bifurcação arterial da Zona Noroeste, com tráfego intenso em direção à Ponte do Piqueri e Marginal Tietê.'
+  },
+  {
+    id: 'BLOCO_EDGAR_FACCO',
+    name: 'BLOCO DE CARNAVAL (AV. GEN. EDGAR FACÓ)',
+    min: { x: 132.0, y: 0.0, z: 34.0 },
+    max: { x: 160.0, y: 8.0, z: 52.0 },
+    openHour: 10.0,
+    closeHour: 16.0,
+    description: 'Praça do trio elétrico estacionado no flanco sul da Edgar Facó, fora da via expressa.'
+  },
+  {
+    id: 'CAMPINHO_CHURRASCO',
+    name: 'CAMPINHO DO CHURRASCO (CREST DA FAVELA)',
+    min: { x: -22.0, y: 8.5, z: -112.0 },
+    max: { x: 22.0, y: 15.0, z: -86.0 },
+    openHour: 11.0,
+    closeHour: 20.0,
+    description: 'Platô de terra e grama no alto da favela, com campo 28×14 e churrasqueira fixa.'
+  },
+  {
     id: 'CORREDOR_BUS',
     name: 'CORREDOR CENTRAL SPTRANS (FAIXA EXCLUSIVA)',
     min: { x: -60.0, y: 0.0, z: 17.8 },
-    max: { x: 60.0, y: 4.0, z: 22.2 },
+    max: { x: 165.0, y: 4.0, z: 22.2 },
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Faixa exclusiva central de asfalto vermelho para ônibus municipais.'
@@ -89,7 +116,7 @@ export const WORLD_ZONES = [
     id: 'AV_EDGAR_FACCO',
     name: 'AVENIDA GENERAL EDGAR FACÓ',
     min: { x: -60.0, y: 0.0, z: 8.0 },
-    max: { x: 60.0, y: 4.0, z: 32.0 },
+    max: { x: 165.0, y: 4.0, z: 32.0 },
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Principal via expressa ligando a Marginal Tietê a Pirituba.'
@@ -273,15 +300,6 @@ export const WORLD_ZONES = [
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Subida íngreme e charmosa que atravessa a Edgar Facó e conecta Pirituba ao coração histórico da Freguesia do Ó.'
-  },
-  {
-    id: 'CRUZAMENTO_PETRONIO_PORTELA',
-    name: 'CRUZAMENTO: EDGAR FACÓ X AV. MIN. PETRÔNIO PORTELA',
-    min: { x: 125.0, y: 0.0, z: 6.0 },
-    max: { x: 165.0, y: 8.0, z: 34.0 },
-    openHour: 0.0,
-    closeHour: 24.0,
-    description: 'Movimentada bifurcação arterial da Zona Noroeste, com tráfego intenso em direção à Ponte do Piqueri e Marginal Tietê.'
   }
 ];
 
@@ -314,4 +332,9 @@ export class ZoneManager {
     // Crosses midnight (e.g. 16:00 to 02:00)
     return hour >= zone.openHour || hour < zone.closeHour;
   }
+}
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.ZoneManager = ZoneManager;
+  globalThis.WORLD_ZONES = WORLD_ZONES;
 }

@@ -2134,5 +2134,148 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // Pitch grass (grama batida de campinho)
+  createPitchGrass(repeatX = 6, repeatY = 3) {
+    const key = `pitch_grass_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#3d7a2e';
+    ctx.fillRect(0, 0, 256, 256);
+
+    for (let i = 0; i < 9000; i++) {
+      const shade = Math.random();
+      ctx.fillStyle = shade > 0.55
+        ? 'rgba(90, 160, 55, 0.35)'
+        : 'rgba(20, 70, 25, 0.35)';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 3);
+    }
+
+    for (let y = 0; y < 256; y += 32) {
+      ctx.fillStyle = y % 64 === 0 ? 'rgba(55, 110, 40, 0.25)' : 'rgba(70, 140, 50, 0.18)';
+      ctx.fillRect(0, y, 256, 16);
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Beaten dirt around a favela pitch
+  createPitchDirt(repeatX = 8, repeatY = 5) {
+    const key = `pitch_dirt_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    ctx.fillStyle = '#8a6a3d';
+    ctx.fillRect(0, 0, 256, 256);
+
+    for (let i = 0; i < 7000; i++) {
+      ctx.fillStyle = Math.random() > 0.5
+        ? 'rgba(120, 90, 45, 0.4)'
+        : 'rgba(60, 42, 22, 0.35)';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 3, 2);
+    }
+
+    for (let i = 0; i < 18; i++) {
+      ctx.strokeStyle = 'rgba(50, 35, 18, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * 256, Math.random() * 256);
+      ctx.lineTo(Math.random() * 256, Math.random() * 256);
+      ctx.stroke();
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // White soccer markings for a 28×14 campinho
+  createPitchMarkings() {
+    const key = 'pitch_markings';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 256);
+    ctx.clearRect(0, 0, 512, 256);
+    ctx.strokeStyle = '#f4f4f0';
+    ctx.lineWidth = 4;
+
+    ctx.strokeRect(10, 10, 492, 236);
+    ctx.beginPath();
+    ctx.moveTo(256, 10);
+    ctx.lineTo(256, 246);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(256, 128, 36, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = '#f4f4f0';
+    ctx.beginPath();
+    ctx.arc(256, 128, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeRect(10, 58, 70, 140);
+    ctx.strokeRect(432, 58, 70, 140);
+    ctx.strokeRect(10, 88, 32, 80);
+    ctx.strokeRect(470, 88, 32, 80);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Logo-free carnival bunting (bandeirinhas)
+  createCarnivalBunting() {
+    const key = 'carnival_bunting';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 64);
+    ctx.clearRect(0, 0, 256, 64);
+    const colors = ['#e11d48', '#f59e0b', '#22c55e', '#2563eb', '#f5d90a', '#ec4899'];
+    const flags = 8;
+    const flagW = 256 / flags;
+    for (let i = 0; i < flags; i++) {
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.beginPath();
+      ctx.moveTo(i * flagW + 2, 4);
+      ctx.lineTo((i + 1) * flagW - 2, 4);
+      ctx.lineTo(i * flagW + flagW / 2, 58);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.fillStyle = '#1f2933';
+    ctx.fillRect(0, 0, 256, 5);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Logo-free carnival streamer / paper roll
+  createCarnivalStreamer() {
+    const key = 'carnival_streamer';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 32);
+    const colors = ['#f43f5e', '#fbbf24', '#22c55e', '#38bdf8'];
+    for (let x = 0; x < 256; x += 16) {
+      ctx.fillStyle = colors[(x / 16) % colors.length];
+      ctx.fillRect(x, 0, 16, 32);
+    }
+    for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(Math.random() * 256, Math.random() * 32, 3, 2);
+    }
+
+    const texture = this.toThreeTexture(canvas, 4, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 
