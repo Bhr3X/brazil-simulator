@@ -2280,6 +2280,87 @@ async function runTestSuite(url) {
       throw new Error(`TEST 29 FAILED: all 13 TRACKS_CATALOGUE URLs and both VINHETAS_CATALOGUE URLs must return successful non-empty responses. ${JSON.stringify(catalogueFetchTested)}`);
     }
 
+    // TEST 30: Intermission must recover from failed vinheta load and busy NewsDesk
+    const intermissionRecoveryTested = await evaluate(`
+      (() => {
+        const radio = window.app.sound && window.app.sound.radioBroadcast;
+        const desk = radio && radio.newsDesk;
+        if (!radio || !radio.audioElement || !desk) {
+          return { ok: false, reason: 'radioBroadcast or newsDesk missing' };
+        }
+
+        const origPlayNext = radio.playNextSong.bind(radio);
+        const origBroadcast = desk.broadcastBreakingNews.bind(desk);
+        const origPlayingNews = desk.isPlayingNews;
+        let playNextCalls = 0;
+        radio.playNextSong = (...args) => { playNextCalls++; return origPlayNext(...args); };
+
+        try {
+          desk.broadcastBreakingNews = (state, cb) => { if (typeof cb === 'function') cb(); };
+          desk.isPlayingNews = false;
+          radio.songsPlayedInBlock = 0;
+          radio.isBroadcastingNews = false;
+          radio.pendingEndedCallback = null;
+          playNextCalls = 0;
+          radio.startRadioIntermission();
+          const duckedBeforeError = radio.isBroadcastingNews === true;
+          radio.audioElement.dispatchEvent(new Event('error'));
+          const afterVinhetaError = {
+            duckedBeforeError,
+            isBroadcastingNews: radio.isBroadcastingNews,
+            playNextCalls,
+            pendingEndedCallback: radio.pendingEndedCallback !== null
+          };
+
+          desk.broadcastBreakingNews = origBroadcast;
+          desk.isPlayingNews = true;
+          radio.songsPlayedInBlock = 0;
+          radio.isBroadcastingNews = false;
+          radio.pendingEndedCallback = null;
+          playNextCalls = 0;
+          radio.startRadioIntermission();
+          radio.audioElement.dispatchEvent(new Event('ended'));
+          const afterBusyNews = {
+            isBroadcastingNews: radio.isBroadcastingNews,
+            playNextCalls,
+            newsStillMarkedPlaying: desk.isPlayingNews === true
+          };
+
+          desk.isPlayingNews = true;
+          radio.songsPlayedInBlock = 0;
+          playNextCalls = 0;
+          radio.startRadioIntermission();
+          const secondIntermissionStarted = radio.isBroadcastingNews === true;
+          radio.audioElement.dispatchEvent(new Event('ended'));
+          const afterSecondBusyNews = {
+            secondIntermissionStarted,
+            isBroadcastingNews: radio.isBroadcastingNews,
+            playNextCalls
+          };
+
+          const ok = afterVinhetaError.duckedBeforeError === true
+            && afterVinhetaError.isBroadcastingNews === false
+            && afterVinhetaError.playNextCalls >= 1
+            && afterVinhetaError.pendingEndedCallback === false
+            && afterBusyNews.isBroadcastingNews === false
+            && afterBusyNews.playNextCalls >= 1
+            && afterSecondBusyNews.secondIntermissionStarted === true
+            && afterSecondBusyNews.isBroadcastingNews === false
+            && afterSecondBusyNews.playNextCalls >= 1;
+
+          return { ok, afterVinhetaError, afterBusyNews, afterSecondBusyNews };
+        } finally {
+          radio.playNextSong = origPlayNext;
+          desk.broadcastBreakingNews = origBroadcast;
+          desk.isPlayingNews = origPlayingNews;
+        }
+      })()
+    `);
+    console.log(`[TEST 30] Intermission stall recovery:`, intermissionRecoveryTested);
+    if (!intermissionRecoveryTested.ok) {
+      throw new Error(`TEST 30 FAILED: failed vinheta and busy NewsDesk must resume the radio program instead of stalling the intermission. ${JSON.stringify(intermissionRecoveryTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

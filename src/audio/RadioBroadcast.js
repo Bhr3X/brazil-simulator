@@ -82,6 +82,7 @@ export class RadioBroadcast {
     this.audioElement.addEventListener('error', (e) => {
       console.warn('[RadioBroadcast] Track load error, using procedural fallback:', e);
       if (this.fallback) this.fallback.start();
+      this.handleAudioEnded();
     });
   }
 
@@ -233,7 +234,7 @@ export class RadioBroadcast {
         this.playNextSong();
       };
       // 2. Broadcast Breaking News with dual journalists & Weather
-      if (this.newsDesk) {
+      if (this.newsDesk && !this.newsDesk.isPlayingNews) {
         this.newsDesk.broadcastBreakingNews(window.__BS_GAME_STATE__ || null, finishIntermission);
       } else {
         finishIntermission();
