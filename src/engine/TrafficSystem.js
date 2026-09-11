@@ -182,6 +182,57 @@ export class TrafficSystem {
       length: 3.8
     });
 
+    // Vehicle 6: Second Fiat Uno on Eastbound lane
+    const uno2 = this.createFiatUno();
+    this.vehicles.push({
+      mesh: uno2.mesh,
+      type: 'uno',
+      lane: 'east',
+      speed: 10.0,
+      currentSpeed: 10.0,
+      x: 75,
+      z: 23.0,
+      y: 0.1,
+      targetAngle: 0,
+      brakeLights: uno2.brakeLights,
+      headlights: uno2.headlights,
+      length: 3.8
+    });
+
+    // Vehicle 7: Additional Motoboy on Westbound lane
+    const motoboy2 = this.createMotoboy();
+    this.vehicles.push({
+      mesh: motoboy2.mesh,
+      type: 'motoboy',
+      lane: 'west',
+      speed: 13.0,
+      currentSpeed: 13.0,
+      x: 120,
+      z: 16.2,
+      y: 0.1,
+      targetAngle: Math.PI,
+      brakeLights: motoboy2.brakeLights,
+      headlights: motoboy2.headlights,
+      length: 2.2
+    });
+
+    // Vehicle 8: SPTrans Bus returning Eastbound
+    const bus2 = this.createSPTransBus();
+    this.vehicles.push({
+      mesh: bus2.mesh,
+      type: 'bus',
+      lane: 'bus',
+      speed: 8.5,
+      currentSpeed: 8.5,
+      x: 140,
+      z: 20.0,
+      y: 0.1,
+      targetAngle: Math.PI,
+      brakeLights: bus2.brakeLights,
+      headlights: bus2.headlights,
+      length: 9.5
+    });
+
     this.vehicles.forEach(v => this.trafficGroup.add(v.mesh));
   }
 
@@ -670,12 +721,12 @@ export class TrafficSystem {
         v.x -= v.currentSpeed * delta;
         // Wrap around when reaching far west
         if (v.x < -58) {
-          v.x = 56;
+          v.x = 162;
         }
       } else {
         v.x += v.currentSpeed * delta;
         // Wrap around when reaching far east
-        if (v.x > 58) {
+        if (v.x > 162) {
           v.x = -56;
         }
       }

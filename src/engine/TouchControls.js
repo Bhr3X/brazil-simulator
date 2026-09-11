@@ -116,7 +116,32 @@ export class TouchController {
   }
 
   bindEvents() {
-    // 1. Fullscreen / Canvas Touch Routing
+    // 1. Direct Touchstart on Joystick Base (guarantees stick never misses touch start)
+    if (this.joystickBase) {
+      this.joystickBase.addEventListener('touchstart', (e) => {
+        if (!this.isEnabled) this.enable();
+        if (this.controls && typeof this.controls.refreshFreeze === 'function') {
+          this.controls.refreshFreeze();
+        }
+        if (this.controls && this.controls.freeze) return;
+
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          if (this.moveTouchId === null) {
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+            this.moveTouchId = touch.identifier;
+            const anchor = this.getStickAnchorCenter();
+            this.joystickOrigin = { x: anchor.x, y: anchor.y };
+            this.isFloating = false;
+            this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
+            break;
+          }
+        }
+      }, { passive: false });
+    }
+
+    // 2. Fullscreen / Window Touch Routing
     window.addEventListener('touchstart', (e) => {
       // Auto-enable on very first touch gesture if not already active
       if (!this.isEnabled) {
@@ -125,7 +150,13 @@ export class TouchController {
       this.handleTouchStart(e);
     }, { passive: false });
 
-    window.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+    window.addEventListener('touchmove', (e) => {
+      if (this.moveTouchId !== null || this.lookTouchId !== null) {
+        if (e.cancelable) e.preventDefault();
+      }
+      this.handleTouchMove(e);
+    }, { passive: false });
+
     window.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
     window.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
 
@@ -253,6 +284,9 @@ export class TouchController {
 
   handleTouchStart(e) {
     if (!this.isEnabled) return;
+    if (this.controls && typeof this.controls.refreshFreeze === 'function') {
+      this.controls.refreshFreeze();
+    }
     if (this.controls && this.controls.freeze) return;
 
     const screenWidth = window.innerWidth;
@@ -266,11 +300,11 @@ export class TouchController {
       if (this.isInteractiveElement(target)) continue;
 
       // Left Zone: Virtual Thumbstick ("Stick to Walk")
-      // Left 46% of screen and lower 70% of screen height
-      const isLeftZone = touch.clientX < Math.max(220, screenWidth * 0.46) && touch.clientY > screenHeight * 0.28;
+      // Left 48% of screen and lower 75% of screen height
+      const isLeftZone = touch.clientX < Math.max(240, screenWidth * 0.48) && touch.clientY > screenHeight * 0.25;
 
       if (isLeftZone && this.moveTouchId === null) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         this.moveTouchId = touch.identifier;
 
         const anchor = this.getStickAnchorCenter();
@@ -294,8 +328,8 @@ export class TouchController {
         this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
       }
       // Right Zone: Camera Orbit Drag-to-Look
-      else if (touch.clientX >= screenWidth * 0.46 && this.lookTouchId === null) {
-        e.preventDefault();
+      else if (touch.clientX >= screenWidth * 0.48 && this.lookTouchId === null) {
+        if (e.cancelable) e.preventDefault();
         this.lookTouchId = touch.identifier;
         this.lastLookX = touch.clientX;
         this.lastLookY = touch.clientY;
@@ -305,7 +339,12 @@ export class TouchController {
 
   handleTouchMove(e) {
     if (!this.isEnabled) return;
-    if (this.controls && this.controls.freeze) return;
+    if (this.controls && this.controls.freeze) {
+      if (typeof this.controls.refreshFreeze === 'function') {
+        this.controls.refreshFreeze();
+      }
+      if (this.controls.freeze) return;
+    }
 
     // Multi-touch sanity check: verify active touches still present
     if (this.moveTouchId !== null && e.touches) {

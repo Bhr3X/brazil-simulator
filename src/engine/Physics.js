@@ -10,8 +10,8 @@ export class PhysicsEngine {
     this.slopes = [];    // Sloped terrain ramps { minX, maxX, minZ, maxZ, baseY, slopeY_Z }
     this.dynamicBodies = []; // Array of physical interactable bodies (soccer ball, cans, crates)
     this.worldBounds = {
-      minX: -70, maxX: 70,
-      minZ: -85, maxZ: 115
+      minX: -70, maxX: 180,
+      minZ: -88, maxZ: 250
     };
   }
 
@@ -101,7 +101,7 @@ export class PhysicsEngine {
       pos.z += body.velocity.z * delta;
 
       // 3. Ground collision and bouncing
-      const floorY = this.getGroundHeight(pos.x, pos.z) + body.radius;
+      const floorY = this.getGroundHeight(pos.x, pos.z, pos.y) + body.radius;
       if (pos.y <= floorY) {
         pos.y = floorY;
         if (body.velocity.y < 0) {
@@ -154,11 +154,24 @@ export class PhysicsEngine {
 
   // Register a static box collider
   addBoxCollider(min, max, type = 'solid') {
-    this.colliders.push({
+    const col = {
       min: min.clone(),
       max: max.clone(),
       type: type // 'solid', 'stair', 'curb'
-    });
+    };
+    this.colliders.push(col);
+    return col;
+  }
+
+  // Remove a static box collider
+  removeBoxCollider(collider) {
+    if (!collider) return false;
+    const idx = this.colliders.indexOf(collider);
+    if (idx !== -1) {
+      this.colliders.splice(idx, 1);
+      return true;
+    }
+    return false;
   }
 
   // Register a static box by center and dimensions
@@ -166,7 +179,7 @@ export class PhysicsEngine {
     const halfX = sizeX / 2;
     const halfY = sizeY / 2;
     const halfZ = sizeZ / 2;
-    this.addBoxCollider(
+    return this.addBoxCollider(
       new THREE.Vector3(cx - halfX, cy - halfY, cz - halfZ),
       new THREE.Vector3(cx + halfX, cy + halfY, cz + halfZ),
       type
@@ -180,8 +193,11 @@ export class PhysicsEngine {
     });
   }
 
-  // Get ground/floor height beneath a given position
-  getGroundHeight(x, z) {
+  // Get ground/floor height beneath a given position.
+  // When currentY is specified, only surfaces at or below (currentY + 0.6) are eligible,
+  // preventing upper multi-floor levels (e.g. 12th floor penthouse at Y=32) from snapping
+  // players who are walking on ground level (Y=0.25).
+  getGroundHeight(x, z, currentY = null) {
     let groundY = 0; // Default street level
 
     // Check sloped hills
@@ -189,8 +205,10 @@ export class PhysicsEngine {
       if (x >= slope.minX && x <= slope.maxX && z >= slope.minZ && z <= slope.maxZ) {
         const factor = (z - slope.minZ) / (slope.maxZ - slope.minZ);
         const yOnSlope = slope.startY + factor * (slope.endY - slope.startY);
-        if (yOnSlope > groundY) {
-          groundY = yOnSlope;
+        if (currentY === null || currentY === undefined || yOnSlope <= currentY + 0.6) {
+          if (yOnSlope > groundY) {
+            groundY = yOnSlope;
+          }
         }
       }
     }
@@ -199,8 +217,10 @@ export class PhysicsEngine {
     for (const box of this.colliders) {
       if (box.type === 'stair' || box.type === 'walkable' || box.type === 'curb') {
         if (x >= box.min.x && x <= box.max.x && z >= box.min.z && z <= box.max.z) {
-          if (box.max.y > groundY) {
-            groundY = box.max.y;
+          if (currentY === null || currentY === undefined || box.max.y <= currentY + 0.6) {
+            if (box.max.y > groundY) {
+              groundY = box.max.y;
+            }
           }
         }
       }
@@ -229,8 +249,8 @@ export class PhysicsEngine {
       resolved.z = oldPos.z; // Block Z movement
     }
 
-    // 4. Ground height check
-    const floorY = this.getGroundHeight(resolved.x, resolved.z);
+    // 4. Ground height check (respecting current vertical position for multi-floor buildings)
+    const floorY = this.getGroundHeight(resolved.x, resolved.z, oldPos.y);
     if (resolved.y < floorY) {
       resolved.y = floorY;
     }

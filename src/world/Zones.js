@@ -228,6 +228,60 @@ export const WORLD_ZONES = [
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Saguão principal e portaria do edifício residencial de luxo com elevador de alta velocidade para a cobertura.'
+  },
+  {
+    id: 'LARGO_DA_MATRIZ',
+    name: 'LARGO DA MATRIZ DE NOSSA SENHORA DO Ó',
+    min: { x: -35.0, y: 7.0, z: 155.0 },
+    max: { x: 38.0, y: 16.0, z: 235.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Praça histórica fundada em 1580 no alto da colina da Freguesia do Ó. Calçadão de pedras portuguesas, coreto, casarões coloniais e botecos tradicionais.'
+  },
+  {
+    id: 'BAR_FRANGO',
+    name: 'O LENDÁRIO BAR FRANGÓ (DESDE 1987)',
+    min: { x: 12.0, y: 8.0, z: 172.0 },
+    max: { x: 32.0, y: 15.0, z: 198.0 },
+    openHour: 11.0,
+    closeHour: 24.0,
+    description: 'Templo gastronômico da Zona Noroeste. Famoso pelas coxinhas crocantes de frango com catupiry, lousa de cervejas artesanais e mesas de madeira sob a varanda colonial.'
+  },
+  {
+    id: 'IGREJA_MATRIZ_O',
+    name: 'PARÓQUIA NOSSA SENHORA DO Ó (1580)',
+    min: { x: -30.0, y: 8.0, z: 180.0 },
+    max: { x: -6.0, y: 24.0, z: 220.0 },
+    openHour: 6.0,
+    closeHour: 20.0,
+    description: 'Patrimônio histórico e colonial de São Paulo. Fachada amarela e branca, torre sineira com sino de bronze e santuário colonial acolhedor.'
+  },
+  {
+    id: 'RUA_SETE_BARRAS',
+    name: 'RUA SETE BARRAS (7 BARRAS)',
+    min: { x: -45.0, y: 0.0, z: 46.0 },
+    max: { x: 35.0, y: 6.0, z: 78.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Tradicional enclave de sobrados paulistanos, oficinas mecânicas, serralherias e comércio de bairro entre a Edgar Facó e a Freguesia.'
+  },
+  {
+    id: 'PAULA_FERREIRA_FREGUESIA',
+    name: 'RUA PAULA FERREIRA (SUBIDA DA FREGUESIA)',
+    min: { x: -8.0, y: 0.0, z: 32.0 },
+    max: { x: 12.0, y: 12.0, z: 160.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Subida íngreme e charmosa que atravessa a Edgar Facó e conecta Pirituba ao coração histórico da Freguesia do Ó.'
+  },
+  {
+    id: 'CRUZAMENTO_PETRONIO_PORTELA',
+    name: 'CRUZAMENTO: EDGAR FACÓ X AV. MIN. PETRÔNIO PORTELA',
+    min: { x: 125.0, y: 0.0, z: 6.0 },
+    max: { x: 165.0, y: 8.0, z: 34.0 },
+    openHour: 0.0,
+    closeHour: 24.0,
+    description: 'Movimentada bifurcação arterial da Zona Noroeste, com tráfego intenso em direção à Ponte do Piqueri e Marginal Tietê.'
   }
 ];
 

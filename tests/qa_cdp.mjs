@@ -21,19 +21,19 @@ async function runTestSuite(url) {
   const consoleErrors = [];
 
   try {
-    // Wait for Chrome CDP endpoint with retry
-    let listRes = null;
-    for (let retry = 0; retry < 15; retry++) {
+    let pageTarget = null;
+    for (let retry = 0; retry < 25; retry++) {
       try {
         await new Promise(r => setTimeout(r, 400));
-        listRes = await fetch(`http://127.0.0.1:${port}/json`);
-        if (listRes.ok) break;
+        const listRes = await fetch(`http://127.0.0.1:${port}/json`);
+        if (listRes.ok) {
+          const targets = await listRes.json();
+          pageTarget = targets.find(t => t.type === 'page');
+          if (pageTarget) break;
+        }
       } catch (e) {}
     }
-    if (!listRes || !listRes.ok) throw new Error(`Chrome CDP not reachable on port ${port}`);
-    const targets = await listRes.json();
-    const pageTarget = targets.find(t => t.type === 'page' && t.url.includes(url));
-    if (!pageTarget) throw new Error(`Target page not found for ${url}`);
+    if (!pageTarget) throw new Error(`Chrome CDP page target not reachable on port ${port}`);
 
     const ws = new WebSocket(pageTarget.webSocketDebuggerUrl);
     await new Promise((resolve, reject) => {
@@ -76,6 +76,7 @@ async function runTestSuite(url) {
 
     await send('Runtime.enable');
     await send('Page.enable');
+    await send('Page.navigate', { url });
 
     // Helper to evaluate JS in page
     async function evaluate(expression) {
@@ -1295,13 +1296,15 @@ async function runTestSuite(url) {
             const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
             if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
           } else if (classId === 'CLASSE_DE') {
-            // Work 2nd semáforo shift (+R$ 11,00) and clean windshields (2x) to guarantee R$ 40 target across any seed
-            const optBala2 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'vender_balas');
-            if (optBala2 && !optBala2.disabled) optBala2.execute(state, sound);
-            const optRodo1 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'limpar_parabrisa');
-            if (optRodo1 && !optRodo1.disabled) optRodo1.execute(state, sound);
-            const optRodo2 = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'limpar_parabrisa');
-            if (optRodo2 && !optRodo2.disabled) optRodo2.execute(state, sound);
+            // Work semáforo shifts (up to quota of 2 sales and 2 windshield cleanings) to ensure R$ 40 target
+            for (let a = 0; a < 4; a++) {
+              const optBala = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'vender_balas');
+              if (optBala && !optBala.disabled) optBala.execute(state, sound);
+            }
+            for (let a = 0; a < 4; a++) {
+              const optRodo = encs.SEMAFORO_BICO.getOptions(state).find(o => o.id === 'limpar_parabrisa');
+              if (optRodo && !optRodo.disabled) optRodo.execute(state, sound);
+            }
             // Buy coxinha at padaria to maintain stamina
             const optCoxinha = encs.PADARIA_ESTRELA.getOptions(state).find(o => o.id === 'coxinha_estufa');
             if (optCoxinha && !optCoxinha.disabled) optCoxinha.execute(state, sound);
@@ -1882,6 +1885,196 @@ async function runTestSuite(url) {
     console.log(`[TEST 24] Post-Interaction Pointer Lock Reacquisition:`, pointerLockTest);
     if (!pointerLockTest.ok) {
       throw new Error(`TEST 24 FAILED: Pointer lock reacquisition failed: ${JSON.stringify(pointerLockTest)}`);
+    }
+
+    // -------------------------------------------------------------
+    // TEST 25: Elevator Transit, Multi-Floor Physics & FPS Hands Dual-Wield
+    // -------------------------------------------------------------
+    const elevatorHandsTest = await evaluate(`
+      (function() {
+        const app = window.app;
+        if (!app) return { ok: false, reason: 'app not available' };
+
+        // 1. Dismiss roulette and start run as CLASSE_AB (Faria Limer in Penthouse)
+        document.getElementById('roulette-modal')?.classList.add('modal-hidden');
+        if (app.controls.refreshFreeze) app.controls.refreshFreeze();
+        app.controls.hasStarted = true;
+        app.game.startRun('CLASSE_AB');
+
+        const startY = app.controls.position.y;
+        const abHands = app.game.hands ? app.game.hands.getHandStatus() : null;
+        const hasIphone = abHands?.right?.id === 'IPHONE' && abHands?.left === null;
+
+        // Position in front of Penthouse elevator doors
+        app.controls.teleport(31.5, 32.25, 4.0, 0);
+        app.game.interactables.update(app.controls.position, app.controls.getForwardVector(), app.game.clock, app.game.state);
+        const penthouseTarget = app.game.interactables.currentTarget?.anchor?.id;
+
+        // Trigger elevator descent
+        app.game.handleInteract();
+
+        // Advance physics to verify no snap-back to 32.05
+        for (let i = 0; i < 15; i++) {
+          app.controls.update(0.016);
+        }
+        const postDescentY = app.controls.position.y;
+        const postDescentUnfrozen = !app.controls.freeze;
+        const noModalOpen = !app.game.dialog?.isOpen;
+
+        // Walk inside lobby
+        app.controls.moveForward = true;
+        for (let i = 0; i < 15; i++) {
+          app.controls.update(0.016);
+        }
+        app.controls.moveForward = false;
+        const lobbyWalkY = app.controls.position.y;
+
+        // Trigger ground elevator to ascend back up
+        app.controls.teleport(31.5, 0.25, 4.0, 0);
+        app.game.interactables.update(app.controls.position, app.controls.getForwardVector(), app.game.clock, app.game.state);
+        const groundTarget = app.game.interactables.currentTarget?.anchor?.id;
+        app.game.handleInteract();
+
+        for (let i = 0; i < 15; i++) {
+          app.controls.update(0.016);
+        }
+        const postAscentY = app.controls.position.y;
+        const postAscentUnfrozen = !app.controls.freeze;
+
+        // 2. Test Quebrada starting loadout (JBL)
+        app.game.startRun('CLASSE_DE');
+        const deHands = app.game.hands ? app.game.hands.getHandStatus() : null;
+        const hasJbl = deHands?.right?.id === 'JBL_SOUNDBOX' && deHands?.left === null;
+
+        // 3. Test CLT starting loadout (Bilhete Único) & Hands mechanics
+        app.game.startRun('CLASSE_C');
+        const cltHands = app.game.hands ? app.game.hands.getHandStatus() : null;
+        const hasBu = cltHands?.right?.id === 'CARTAO_ONIBUS' && cltHands?.left === null;
+
+        // Bare left hand punch
+        app.game.hands.useLeftHand(app.game.state);
+        const leftPunched = app.game.hands.isLeftPunching;
+
+        // Use Bilhete Único
+        const sanidadeBefore = app.game.state.sanidade;
+        const itemMsg = app.game.hands.useRightHand(app.game.state);
+        const sanidadeAfter = app.game.state.sanidade;
+
+        // Drop item
+        app.game.hands.dropRightHand();
+        const droppedHands = app.game.hands.getHandStatus();
+        const bothHandsEmpty = droppedHands.left === null && droppedHands.right === null;
+
+        // Bare right hand punch
+        app.game.hands.useRightHand(app.game.state);
+        const rightPunched = app.game.hands.isRightPunching;
+
+        const ok = (
+          startY >= 32.0 &&
+          hasIphone &&
+          penthouseTarget === 'elevador_penthouse' &&
+          postDescentY < 1.0 &&
+          postDescentUnfrozen &&
+          noModalOpen &&
+          lobbyWalkY < 1.0 &&
+          groundTarget === 'elevador_terreo' &&
+          postAscentY >= 32.0 &&
+          postAscentUnfrozen &&
+          hasJbl &&
+          hasBu &&
+          leftPunched &&
+          sanidadeAfter > sanidadeBefore &&
+          bothHandsEmpty &&
+          rightPunched
+        );
+
+        return {
+          ok,
+          startY,
+          hasIphone,
+          penthouseTarget,
+          postDescentY,
+          postDescentUnfrozen,
+          noModalOpen,
+          lobbyWalkY,
+          groundTarget,
+          postAscentY,
+          postAscentUnfrozen,
+          hasJbl,
+          hasBu,
+          leftPunched,
+          sanidadeBefore,
+          sanidadeAfter,
+          bothHandsEmpty,
+          rightPunched
+        };
+      })()
+    `);
+    console.log(`[TEST 25] Elevator Transit, Multi-Floor Physics & FPS Hands Dual-Wield:`, elevatorHandsTest);
+    if (!elevatorHandsTest.ok) {
+      throw new Error(`TEST 25 FAILED: Elevator transit or hands dual-wield test failed: ${JSON.stringify(elevatorHandsTest)}`);
+    }
+
+    // TEST 26: 100% Walkable Interiors, Punchable House Doors & BRAHM.AI Boteco Furniture
+    const walkableInteriorsTest = await evaluate(`
+      (() => {
+        const game = window.app.game;
+        const physics = window.app.physics;
+        const controls = window.app.controls;
+        const interactables = game.interactables;
+
+        // 1. Verify Padaria Estrela walkable floor collider at X=32, Z=42
+        const padariaWalkable = physics.colliders.some(c =>
+          c.type === 'walkable' && c.min.x <= 32 && c.max.x >= 32 && c.min.z <= 42 && c.max.z >= 42
+        );
+
+        // 2. Verify Borracharia walkable floor collider at X=-34, Z=42
+        const borrachariaWalkable = physics.colliders.some(c =>
+          c.type === 'walkable' && c.min.x <= -34 && c.max.x >= -34 && c.min.z <= 42 && c.max.z >= 42
+        );
+
+        // 3. Verify Banco Pirituba walkable floor collider at X=48, Z=42
+        const bancoWalkable = physics.colliders.some(c =>
+          c.type === 'walkable' && c.min.x <= 48 && c.max.x >= 48 && c.min.z <= 42 && c.max.z >= 42
+        );
+
+        // 4. Verify Interactive Doors registered across houses
+        const doorCount = interactables.doors ? interactables.doors.length : 0;
+        const hasDoors = doorCount >= 20;
+
+        // 5. Test Door Punch-to-Open Action
+        const testDoor = interactables.doors ? interactables.doors[0] : null;
+        let doorPunchedOpen = false;
+        let doorColliderRemoved = false;
+
+        if (testDoor) {
+          const colliderRef = testDoor.collider;
+          const colliderPresentBefore = physics.colliders.includes(colliderRef);
+
+          // Punch / Bash door open
+          interactables.triggerDoor(testDoor);
+
+          doorPunchedOpen = testDoor.isOpen === true;
+          doorColliderRemoved = colliderPresentBefore && !physics.colliders.includes(colliderRef);
+        }
+
+        const ok = padariaWalkable && borrachariaWalkable && bancoWalkable && hasDoors && doorPunchedOpen && doorColliderRemoved;
+
+        return {
+          ok,
+          padariaWalkable,
+          borrachariaWalkable,
+          bancoWalkable,
+          doorCount,
+          hasDoors,
+          doorPunchedOpen,
+          doorColliderRemoved
+        };
+      })()
+    `);
+    console.log(`[TEST 26] Walkable Interiors, Punchable Doors & BRAHM.AI Furniture:`, walkableInteriorsTest);
+    if (!walkableInteriorsTest.ok) {
+      throw new Error(`TEST 26 FAILED: Walkable interiors or door punch test failed: ${JSON.stringify(walkableInteriorsTest)}`);
     }
 
     // Check Console Errors

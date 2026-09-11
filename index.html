@@ -120,6 +120,32 @@
   <!-- Center Reticle Contextual Interaction Prompt [E] -->
   <div id="interact-prompt" class="modal-hidden"></div>
 
+  <!-- Seamless NPC Quick Action Dock (3 Action Options) -->
+  <div id="npc-quick-dock" class="modal-hidden">
+    <div class="npc-quick-header">
+      <div class="npc-quick-title-group">
+        <span class="npc-quick-avatar" id="npc-quick-avatar">👤</span>
+        <span class="npc-quick-name" id="npc-quick-name">NPC</span>
+      </div>
+      <div class="npc-quick-hint">[1] [2] [3] AÇÕES RÁPIDAS (SEM TRAVAR)</div>
+    </div>
+    <div class="npc-quick-options" id="npc-quick-options"></div>
+  </div>
+
+  <!-- FPS Hands Dual-Wield HUD Slots -->
+  <div id="hud-hands">
+    <div class="hand-slot hand-left" id="hand-left-slot">
+      <div class="hand-key">[Q] MÃO ESQUERDA</div>
+      <div class="hand-item-name" id="hand-left-name">👊 SOCO (JAB)</div>
+      <div class="hand-drop-hint" id="hand-left-drop" style="display:none;">[Z] Largar no chão</div>
+    </div>
+    <div class="hand-slot hand-right" id="hand-right-slot">
+      <div class="hand-key">[E] MÃO DIREITA</div>
+      <div class="hand-item-name" id="hand-right-name">👊 SOCO (DIRETO)</div>
+      <div class="hand-drop-hint" id="hand-right-drop" style="display:none;">[C] Largar no chão</div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="hud-toast-container"></div>
 
@@ -141,19 +167,154 @@
   </div>
 
   <!-- Social Class Roulette Modal (Initial Choice / Spawn) -->
+  <!-- Social Class Roulette & Character Customizer Modal (Initial Spawn) -->
   <div id="roulette-modal" class="modal-hidden">
     <div class="modal-backdrop"></div>
-    <div class="roulette-window">
+    <div class="roulette-window customizer-window">
       <div class="roulette-header">
         <div class="roulette-top-row">
-          <div class="roulette-title" data-i18n="ui.roulette_title">🇧🇷 SOBREVIVÊNCIA BR // ROLETA SOCIAL DE NASCIMENTO</div>
+          <div class="roulette-title" data-i18n="ui.roulette_title">🇧🇷 SOBREVIVÊNCIA BR // CRIAÇÃO DE PERSONAGEM & ROLETA SOCIAL</div>
           <div class="lang-selector-group" id="roulette-lang-group">
             <button type="button" class="lang-btn active" data-lang="pt" title="Português">🇧🇷 PT</button>
             <button type="button" class="lang-btn" data-lang="en" title="English">🇺🇸 EN</button>
           </div>
         </div>
-        <div class="roulette-subtitle" data-i18n="ui.roulette_subtitle">Você tem exatamente 15 minutos reais (24h de um dia paulistano). Onde você nasceu?</div>
+        <div class="roulette-subtitle" data-i18n="ui.roulette_subtitle">Personalize seu avatar de quebrada da cabeça aos pés. Toda vez que você abre o jogo, um novo cria é gerado!</div>
       </div>
+
+      <!-- Main Customizer Body: Left = 3D Viewport, Right = Slots Steppers -->
+      <div class="customizer-layout">
+        <!-- 3D Pedestal Rotating Preview -->
+        <div class="customizer-preview-col">
+          <div class="preview-canvas-wrapper">
+            <canvas id="char-preview-canvas" width="320" height="380"></canvas>
+            <div class="preview-drag-hint">🔄 Arraste para girar 360°</div>
+          </div>
+          <div class="customizer-preset-actions">
+            <button id="btn-char-random" type="button" class="cust-action-btn btn-rnd" title="Gerar visual de cria aleatório">🎲 NOVO ALEATÓRIO</button>
+            <button id="btn-char-load-saved" type="button" class="cust-action-btn btn-load" title="Carregar meu personagem salvo">📂 MEU SALVO</button>
+            <button id="btn-char-save" type="button" class="cust-action-btn btn-save" title="Salvar este visual personalizado">💾 SALVAR BONECO</button>
+          </div>
+        </div>
+
+        <!-- Head to Toes Customizer Sliders / Steppers -->
+        <div class="customizer-slots-col">
+          <div class="customizer-slots-grid">
+            <!-- 1. Gênero / Identidade -->
+            <div class="cust-slot-card">
+              <span class="slot-label">👤 Identidade / Gênero</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="genders" data-slot="gender" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-gender">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="genders" data-slot="gender" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 2. Biotipo Físico -->
+            <div class="cust-slot-card">
+              <span class="slot-label">💪 Biotipo / Físico</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="bodyTypes" data-slot="bodyType" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-bodyType">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="bodyTypes" data-slot="bodyType" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 3. Tom de Pele -->
+            <div class="cust-slot-card">
+              <span class="slot-label">🎨 Tom de Pele</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="skinTones" data-slot="skinTone" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-skinTone">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="skinTones" data-slot="skinTone" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 4. Acessório de Cabeça -->
+            <div class="cust-slot-card">
+              <span class="slot-label">🧢 Acessório de Cabeça</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="headAccessories" data-slot="headAccessory" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-headAccessory">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="headAccessories" data-slot="headAccessory" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 5. Estilo de Cabelo -->
+            <div class="cust-slot-card">
+              <span class="slot-label">✂️ Corte / Cabelo</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="hairStyles" data-slot="hairStyle" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-hairStyle">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="hairStyles" data-slot="hairStyle" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 6. Cor do Cabelo -->
+            <div class="cust-slot-card">
+              <span class="slot-label">🌈 Cor do Cabelo</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="hairColors" data-slot="hairColor" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-hairColor">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="hairColors" data-slot="hairColor" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 7. Barba & Bigode -->
+            <div class="cust-slot-card">
+              <span class="slot-label">🧔 Barba & Bigode</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="facialHairs" data-slot="facialHair" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-facialHair">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="facialHairs" data-slot="facialHair" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 8. Óculos / Rosto -->
+            <div class="cust-slot-card">
+              <span class="slot-label">🕶️ Óculos / Rosto</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="eyewears" data-slot="eyewear" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-eyewear">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="eyewears" data-slot="eyewear" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 9. Camisa / Tronco (Sem Camisa 35°C!) -->
+            <div class="cust-slot-card highlight-slot">
+              <span class="slot-label">👕 Camisa / Tronco</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="shirts" data-slot="shirt" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-shirt">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="shirts" data-slot="shirt" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 10. Bermuda / Calça (Shorts Tactel!) -->
+            <div class="cust-slot-card highlight-slot">
+              <span class="slot-label">🩳 Bermuda / Calça</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="pants" data-slot="pants" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-pants">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="pants" data-slot="pants" data-dir="1">►</button>
+              </div>
+            </div>
+
+            <!-- 11. Calçado / Pés (Havaianas Brancas!) -->
+            <div class="cust-slot-card highlight-slot">
+              <span class="slot-label">🩴 Calçado / Pés</span>
+              <div class="slot-stepper">
+                <button type="button" class="slot-nav-btn" data-cat="shoes" data-slot="shoes" data-dir="-1">◄</button>
+                <span class="slot-value" id="val-slot-shoes">...</span>
+                <button type="button" class="slot-nav-btn" data-cat="shoes" data-slot="shoes" data-dir="1">►</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Class Birth Cards -->
+      <div class="roulette-section-title">Onde seu boneco vai nascer em Pirituba? (15 min reais = 24h paulistano)</div>
       <div class="roulette-grid">
         <div class="class-card" id="card-classe-de">
           <div class="class-badge-pill" data-i18n="ui.roulette_pill_de">60% POPULAÇÃO</div>
@@ -178,7 +339,7 @@
         </div>
       </div>
       <div class="roulette-footer">
-        <button id="btn-spin-roulette" class="roulette-spin-btn" data-i18n="ui.roulette_spin_btn">🎲 GIRAR ROLETA SOCIAL ALEATÓRIA</button>
+        <button id="btn-spin-roulette" class="roulette-spin-btn" data-i18n="ui.roulette_spin_btn">🎲 JOGAR AGORA COM ESTE PERSONAGEM</button>
       </div>
     </div>
   </div>

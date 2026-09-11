@@ -32,6 +32,7 @@ function bundle() {
   const music = cleanModule(read('src/audio/BrazilianMusic.js'));
   const audio = cleanModule(read('src/audio/SoundEngine.js'));
   const zones = cleanModule(read('src/world/Zones.js'));
+  const customizer = cleanModule(read('src/game/CharacterCustomizer.js'));
 
   // 2. Engine & Controls
   const controls = cleanModule(read('src/engine/Controls.js'));
@@ -53,6 +54,7 @@ function bundle() {
   const npcs = cleanModule(read('src/game/NpcSystem.js'));
   const interactables = cleanModule(read('src/game/Interactables.js'));
   const hud = cleanModule(read('src/game/HudGame.js'));
+  const handsSystem = cleanModule(read('src/game/HandsSystem.js'));
   const gameManager = cleanModule(read('src/game/GameManager.js'));
 
   // 4. Main Application Entry Point
@@ -92,6 +94,7 @@ ${radioBroadcast}
 ${music}
 ${audio}
 ${zones}
+${customizer}
 ${controls}
 ${touch}
 ${renderer}
@@ -109,6 +112,7 @@ ${encounters}
 ${npcs}
 ${interactables}
 ${hud}
+${handsSystem}
 ${gameManager}
 ${main}
   </script>

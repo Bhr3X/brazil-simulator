@@ -13,6 +13,7 @@ import { DialogSystem } from './Dialog.js';
 import { InteractableSystem } from './Interactables.js';
 import { NpcSystem } from './NpcSystem.js';
 import { HudGame } from './HudGame.js';
+import { HandsSystem } from './HandsSystem.js';
 import { BRAZILIAN_ENCOUNTERS } from './Encounters.js';
 import { WORLD_ZONES } from '../world/Zones.js';
 import { t, getLanguage } from './i18n.js';
@@ -37,7 +38,14 @@ export class GameManager {
     this.dialog = new DialogSystem(this.controls);
     this.npcs = new NpcSystem(this.scene, this.sound, this.rng, this.textures);
     this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound, this.traffic, this.npcs);
+    if (this.city && this.city.interactiveDoors) {
+      this.interactables.setDoors(this.city.interactiveDoors);
+    }
     this.hud = new HudGame();
+    this.hands = new HandsSystem(this.scene, this.camera, this.sound);
+    if (this.controls) {
+      this.controls.handsSystem = this.hands;
+    }
     this.props = new GameProps(this.scene, this.physics, this.textures, this.sound);
     this.encounters = BRAZILIAN_ENCOUNTERS;
     this.socialClasses = SOCIAL_CLASSES;
@@ -85,6 +93,11 @@ export class GameManager {
     // Teleport player to class spawn point
     if (classConfig.spawn && this.controls) {
       this.controls.teleport(classConfig.spawn.x, classConfig.spawn.y, classConfig.spawn.z);
+    }
+
+    // Equip starting items on FPS hands according to social class
+    if (this.hands) {
+      this.hands.equipStartingLoadout(chosenKey);
     }
 
     // Initialize Audio on this first user interaction gesture
@@ -269,14 +282,29 @@ export class GameManager {
       this.handleRunEnd(false, defeat);
     }
 
-    // 10. Update HUD
+    // 10. Update FPS hands viewmodel & item status
+    if (this.hands) {
+      const isMoving = this.controls ? (this.controls.moveForward || this.controls.moveBackward || this.controls.moveLeft || this.controls.moveRight) : false;
+      const isSprinting = this.controls ? this.controls.isSprinting : false;
+      const is3rd = this.controls ? this.controls.isThirdPerson : false;
+      this.hands.update(delta, this.controls?.position, isMoving, isSprinting, is3rd);
+      if (this.hud && typeof this.hud.updateHands === 'function') {
+        this.hud.updateHands(this.hands.getHandStatus());
+      }
+    }
+
+    // 11. Update HUD
     this.hud.update(this.clock, this.state);
   }
 
   // Handle [E] key interaction press (Invariant I6: forbidden during active dialog)
   handleInteract() {
     if (!this.isRunActive || !this.interactables || (this.dialog && this.dialog.isOpen)) return;
-    this.interactables.trigger(this.state);
+    if (this.interactables.currentTarget && this.interactables.currentTarget.isOpen) {
+      this.interactables.trigger(this.state);
+    } else if (this.hands) {
+      this.hands.useRightHand(this.state);
+    }
   }
 
   // Check if player gets hit by speeding car or bus on Edgar Facó (Data-Driven via WORLD_ZONES)

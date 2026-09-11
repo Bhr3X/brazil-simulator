@@ -60,6 +60,7 @@ export class FirstPersonControls {
     this.physics = physics;
     this.sound = soundEngine;
     this.scene = scene;
+    this.handsSystem = null;
 
     // Movement state
     this.moveForward = false;
@@ -307,9 +308,41 @@ export class FirstPersonControls {
       case 'ShiftRight':
         this.isSprinting = true;
         break;
+      case 'KeyQ':
+        if (this.handsSystem) {
+          this.handsSystem.useLeftHand(window.app?.game?.state);
+        }
+        break;
+      case 'KeyZ':
+        if (this.handsSystem) {
+          this.handsSystem.dropLeftHand(window.app?.game?.state);
+        }
+        break;
       case 'KeyC':
+        // If holding item in right hand, drop it. If empty, toggle crouch.
+        if (this.handsSystem && this.handsSystem.rightHand) {
+          this.handsSystem.dropRightHand(window.app?.game?.state);
+        } else {
+          this.isCrouching = true;
+        }
+        break;
       case 'ControlLeft':
         this.isCrouching = true;
+        break;
+      case 'Digit1':
+        if (window.app?.game?.interactables?.activeQuickOptions?.length >= 1) {
+          window.app.game.interactables.executeQuickAction(0);
+        }
+        break;
+      case 'Digit2':
+        if (window.app?.game?.interactables?.activeQuickOptions?.length >= 2) {
+          window.app.game.interactables.executeQuickAction(1);
+        }
+        break;
+      case 'Digit3':
+        if (window.app?.game?.interactables?.activeQuickOptions?.length >= 3) {
+          window.app.game.interactables.executeQuickAction(2);
+        }
         break;
       case 'Space':
         if (this.canJump) {
@@ -448,10 +481,30 @@ export class FirstPersonControls {
     }
   }
 
-  teleport(x, y, z) {
+  get yaw() {
+    return this.euler.y;
+  }
+
+  set yaw(val) {
+    if (typeof val === 'number' && !isNaN(val)) {
+      this.euler.y = val;
+      this.camera.quaternion.setFromEuler(this.euler);
+    }
+  }
+
+  teleport(x, y, z, yaw = null) {
     this.position.set(x, y, z);
     this.velocity.set(0, 0, 0);
     this.camera.position.set(x, y + this.eyeHeight, z);
+    if (yaw !== null && typeof yaw === 'number' && !isNaN(yaw)) {
+      this.euler.y = yaw;
+      this.euler.x = 0;
+      this.camera.quaternion.setFromEuler(this.euler);
+    }
+  }
+
+  getForwardVector() {
+    return new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.euler.y);
   }
 
   setTouchMovement(vx, vy) {
@@ -561,7 +614,7 @@ export class FirstPersonControls {
 
     // 5. Resolve collision with world & stairs
     const resolved = this.physics.resolveMovement(this.position, targetPos, this.playerRadius, 0.45);
-    const groundY = this.physics.getGroundHeight(resolved.x, resolved.z);
+    const groundY = this.physics.getGroundHeight(resolved.x, resolved.z, this.position.y);
 
     if (resolved.y <= groundY + 0.01) {
       resolved.y = groundY;
@@ -630,8 +683,53 @@ export class FirstPersonControls {
     }
   }
 
-  createPlayerAvatar() {
+  setAvatarCustomization(config) {
+    if (this.avatarMesh && this.scene) {
+      this.scene.remove(this.avatarMesh);
+      this.avatarMesh.traverse((child) => {
+        if (child.isMesh && child.geometry) child.geometry.dispose();
+      });
+      this.avatarMesh = null;
+    }
+
+    if (window.app && window.app.customizer) {
+      const avatar = window.app.customizer.buildAvatarRig(config || window.app.customizer.currentConfig);
+      if (avatar) {
+        avatar.visible = this.isThirdPerson;
+        if (this.scene) this.scene.add(avatar);
+        this.avatarMesh = avatar;
+        this.avatarTorso = avatar.avatarTorso;
+        this.avatarHead = avatar.avatarHead;
+        this.avatarLeftArm = avatar.avatarLeftArm;
+        this.avatarRightArm = avatar.avatarRightArm;
+        this.avatarLeftLeg = avatar.avatarLeftLeg;
+        this.avatarRightLeg = avatar.avatarRightLeg;
+        this.avatarMaterials = avatar.avatarMaterials || [];
+        return avatar;
+      }
+    }
+    return this.createPlayerAvatar();
+  }
+
+  createPlayerAvatar(config) {
     if (typeof THREE === 'undefined') return null;
+
+    if (window.app && window.app.customizer) {
+      const avatar = window.app.customizer.buildAvatarRig(config || window.app.customizer.currentConfig);
+      if (avatar) {
+        avatar.visible = this.isThirdPerson;
+        if (this.scene) this.scene.add(avatar);
+        this.avatarMesh = avatar;
+        this.avatarTorso = avatar.avatarTorso;
+        this.avatarHead = avatar.avatarHead;
+        this.avatarLeftArm = avatar.avatarLeftArm;
+        this.avatarRightArm = avatar.avatarRightArm;
+        this.avatarLeftLeg = avatar.avatarLeftLeg;
+        this.avatarRightLeg = avatar.avatarRightLeg;
+        this.avatarMaterials = avatar.avatarMaterials || [];
+        return avatar;
+      }
+    }
 
     const avatar = new THREE.Group();
     avatar.name = 'player_avatar';
@@ -891,7 +989,7 @@ export class FirstPersonControls {
       .add(new THREE.Vector3(0, heightOffset * distFactor, 0));
 
     // Ensure camera does not go below ground
-    const groundY = this.physics ? this.physics.getGroundHeight(camPos.x, camPos.z) : 0;
+    const groundY = this.physics ? this.physics.getGroundHeight(camPos.x, camPos.z, camPos.y) : 0;
     if (camPos.y < groundY + 0.35) {
       camPos.y = groundY + 0.35;
     }

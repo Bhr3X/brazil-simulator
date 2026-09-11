@@ -166,7 +166,10 @@ export const TRANSLATIONS = {
       semaforo_bico: { name: 'SEMÁFORO DA EDGAR FACÓ', prompt: 'VENDER PAÇOCA OU LIMPAR PÁRA-BRISA NO SINAL' },
       banco: { name: 'BANCO PIRITUBA (AGÊNCIA 0086 & CAIXA 24H)', prompt: 'ACESSAR CAIXA ELETRÔNICO DO BANCO' },
       elevador_penthouse: { name: 'ELEVADOR DA COBERTURA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (DESCER PARA A PORTARIA / TÉRREO)' },
-      elevador_terreo: { name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)' }
+      elevador_terreo: { name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)' },
+      bar_frango: { name: 'O LENDÁRIO BAR FRANGÓ (DESDE 1987)', prompt: 'PEDIR FAMOSA COXINHA COM CATUPIRY & CHOPP ARTESANAL' },
+      igreja_matriz: { name: 'PARÓQUIA NOSSA SENHORA DO Ó (1580)', prompt: 'ENTRAR NA IGREJA HISTÓRICA, REZAR OU ACENDER UMA VELA' },
+      boteco_sete_barras: { name: 'BOTECO DAS 7 BARRAS (SINUCA & TUBAÍNA)', prompt: 'TOMAR UMA TUBAÍNA GELADA OU JOGAR UMA PARTIDA DE SINUCA' }
     },
 
     npcs: {
@@ -367,7 +370,10 @@ export const TRANSLATIONS = {
       semaforo_bico: { name: 'EDGAR FACÓ TRAFFIC LIGHT', prompt: 'SELL PEANUT CANDY OR WIPE WINDSHIELDS' },
       banco: { name: 'BANCO PIRITUBA (BRANCH 0086 & 24H ATM)', prompt: 'ACCESS BANK 24H ATM TERMINAL' },
       elevador_penthouse: { name: 'PENTHOUSE ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (GO DOWN TO GROUND FLOOR LOBBY)' },
-      elevador_terreo: { name: 'LOBBY ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (RIDE UP TO 12TH FLOOR PENTHOUSE)' }
+      elevador_terreo: { name: 'LOBBY ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (RIDE UP TO 12TH FLOOR PENTHOUSE)' },
+      bar_frango: { name: 'THE LEGENDARY BAR FRANGÓ (SINCE 1987)', prompt: 'ORDER FAMOUS CHICKEN COXINHA & CRAFT BEER' },
+      igreja_matriz: { name: 'OUR LADY OF Ó HISTORIC CHURCH (1580)', prompt: 'ENTER HISTORIC CHURCH, PRAY OR LIGHT A CANDLE' },
+      boteco_sete_barras: { name: 'SETE BARRAS CORNER PUB (SNOOKER & SODA)', prompt: 'DRINK AN ICE-COLD TUBAÍNA OR PLAY SNOOKER' }
     },
 
     npcs: {

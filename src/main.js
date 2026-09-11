@@ -14,6 +14,7 @@ import { GameManager } from './game/GameManager.js';
 import { ZoneManager } from './world/Zones.js';
 import { TouchController } from './engine/TouchControls.js';
 import { initLanguage, getLanguage, setLanguage, toggleLanguage, updateDomTranslations } from './game/i18n.js';
+import { CharacterCustomizer, CharacterPreview } from './game/CharacterCustomizer.js';
 
 class GameApp {
   constructor() {
@@ -59,6 +60,13 @@ class GameApp {
       initialSeed
     );
     console.log('[Sobrevivência BR] Active Seed:', this.game.seed);
+
+    // Character Customizer Subsystem (Head-to-Toes Brazilian Customizer)
+    this.customizer = new CharacterCustomizer();
+    // Auto-generate random character on startup per user specification
+    this.customizer.currentConfig = this.customizer.getRandomConfig();
+    this.preview = null;
+    this.customizerEventsInitialized = false;
 
     // Touch Controls Subsystem (Virtual Thumbstick & Mobile Action Buttons)
     this.touch = new TouchController(this.controls, this);
@@ -136,13 +144,34 @@ class GameApp {
     }
     if (this.controls && this.controls.refreshFreeze) this.controls.refreshFreeze();
 
+    // Initialize 3D Live Character Viewport on Pedestal
+    const previewCanvas = document.getElementById('char-preview-canvas');
+    if (previewCanvas && !this.preview) {
+      this.preview = new CharacterPreview(previewCanvas, this.customizer);
+    }
+    this.initCustomizerEvents();
+    this.updateCustomizerDOM();
+
     const startWithClass = (classKey) => {
+      // Auto-save this character configuration as the player's choice
+      if (this.customizer) {
+        this.customizer.savePreset(this.customizer.currentConfig);
+      }
+
       if (rouletteModal) rouletteModal.classList.add('modal-hidden');
       if (clickOverlay) clickOverlay.style.display = 'none';
       if (this.controls && this.controls.refreshFreeze) this.controls.refreshFreeze();
 
       this.controls.hasStarted = true;
       this.game.startRun(classKey);
+
+      // Apply character customizer to avatar and hands
+      if (this.controls && this.customizer) {
+        this.controls.setAvatarCustomization(this.customizer.currentConfig);
+      }
+      if (this.game && this.game.hands && this.customizer) {
+        this.game.hands.setCustomization(this.customizer.currentConfig);
+      }
 
       try {
         const target = document.body;
@@ -174,6 +203,132 @@ class GameApp {
         setLanguage(lang, this);
       });
     });
+  }
+
+  initCustomizerEvents() {
+    if (this.customizerEventsInitialized) return;
+    this.customizerEventsInitialized = true;
+
+    // 1. Stepper arrow navigation buttons
+    const navBtns = document.querySelectorAll('.slot-nav-btn');
+    navBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cat = btn.getAttribute('data-cat');
+        const slot = btn.getAttribute('data-slot');
+        const dir = parseInt(btn.getAttribute('data-dir'), 10) || 1;
+        if (cat && slot && this.customizer) {
+          const currentId = this.customizer.currentConfig[slot];
+          const nextId = this.customizer.cycleProperty(cat, currentId, dir);
+          this.customizer.currentConfig[slot] = nextId;
+          this.updateCustomizerDOM();
+          if (this.preview) this.preview.updatePreview(this.customizer.currentConfig);
+        }
+      });
+    });
+
+    // 2. Click on slot value text to cycle forward
+    const slotVals = document.querySelectorAll('.slot-value');
+    slotVals.forEach((elem) => {
+      elem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const parentCard = elem.closest('.cust-slot-card');
+        const nextBtn = parentCard?.querySelector('.slot-nav-btn[data-dir="1"]');
+        if (nextBtn) nextBtn.click();
+      });
+    });
+
+    // 3. Random Character Generator Button
+    const btnRnd = document.getElementById('btn-char-random');
+    if (btnRnd) {
+      btnRnd.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.customizer) {
+          this.customizer.currentConfig = this.customizer.getRandomConfig();
+          this.updateCustomizerDOM();
+          if (this.preview) this.preview.updatePreview(this.customizer.currentConfig);
+        }
+      });
+    }
+
+    // 4. Save Custom Character Preset Button
+    const btnSave = document.getElementById('btn-char-save');
+    if (btnSave) {
+      btnSave.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.customizer) {
+          this.customizer.savePreset(this.customizer.currentConfig);
+          const orig = btnSave.textContent;
+          btnSave.textContent = '✓ SALVO!';
+          btnSave.style.borderColor = '#00ff66';
+          setTimeout(() => {
+            btnSave.textContent = orig;
+            btnSave.style.borderColor = '';
+            this.updateCustomizerDOM();
+          }, 1400);
+        }
+      });
+    }
+
+    // 5. Load Previously Saved Preset Button
+    const btnLoad = document.getElementById('btn-char-load-saved');
+    if (btnLoad) {
+      btnLoad.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.customizer) {
+          const saved = this.customizer.loadPreset();
+          if (saved) {
+            this.customizer.currentConfig = Object.assign({}, this.customizer.getDefaultConfig(), saved);
+            this.updateCustomizerDOM();
+            if (this.preview) this.preview.updatePreview(this.customizer.currentConfig);
+            const orig = btnLoad.textContent;
+            btnLoad.textContent = '✓ CARREGADO!';
+            setTimeout(() => {
+              btnLoad.textContent = orig;
+            }, 1200);
+          } else {
+            btnLoad.textContent = 'NENHUM SALVO!';
+            setTimeout(() => {
+              this.updateCustomizerDOM();
+            }, 1200);
+          }
+        }
+      });
+    }
+  }
+
+  updateCustomizerDOM() {
+    if (!this.customizer) return;
+    const cfg = this.customizer.currentConfig;
+
+    const slotMap = {
+      gender: { cat: 'genders', elem: 'val-slot-gender' },
+      bodyType: { cat: 'bodyTypes', elem: 'val-slot-bodyType' },
+      skinTone: { cat: 'skinTones', elem: 'val-slot-skinTone' },
+      headAccessory: { cat: 'headAccessories', elem: 'val-slot-headAccessory' },
+      hairStyle: { cat: 'hairStyles', elem: 'val-slot-hairStyle' },
+      hairColor: { cat: 'hairColors', elem: 'val-slot-hairColor' },
+      facialHair: { cat: 'facialHairs', elem: 'val-slot-facialHair' },
+      eyewear: { cat: 'eyewears', elem: 'val-slot-eyewear' },
+      shirt: { cat: 'shirts', elem: 'val-slot-shirt' },
+      pants: { cat: 'pants', elem: 'val-slot-pants' },
+      shoes: { cat: 'shoes', elem: 'val-slot-shoes' }
+    };
+
+    for (const [slotKey, info] of Object.entries(slotMap)) {
+      const elem = document.getElementById(info.elem);
+      if (elem) {
+        const item = this.customizer.getItem(info.cat, cfg[slotKey]);
+        elem.textContent = item ? item.name : cfg[slotKey];
+      }
+    }
+
+    const btnLoad = document.getElementById('btn-char-load-saved');
+    if (btnLoad) {
+      const hasSaved = !!this.customizer.loadPreset();
+      btnLoad.style.opacity = hasSaved ? '1.0' : '0.65';
+      btnLoad.title = hasSaved ? 'Carregar visual salvo anteriormente' : 'Nenhum visual salvo ainda no navegador';
+    }
   }
 
   toggleStreetView(forceState) {

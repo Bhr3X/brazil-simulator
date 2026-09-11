@@ -1450,5 +1450,148 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  BAR_FRANGO: {
+    id: 'BAR_FRANGO',
+    title: '🍗 O LENDÁRIO BAR FRANGÓ (DESDE 1987)',
+    getIntroText: (state) => `
+      O aroma irresistível de coxinhas douradas crocantes com Catupiry frita na hora perfuma o casarão colonial.<br>
+      A lousa ostenta mais de 400 rótulos de cervejas artesanais paulistanas e do mundo.<br>
+      O garçom de colete clássico sorri do balcão de madeira nobre:<br>
+      <em>"— Bem-vindo à Freguesia! Vai querer a premiada de frango com catupiry ou o chopp da casa?"</em><br>
+      <small style="color:#ffcc00">Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'coxinha_frango',
+        label: 'Porção da famosa Coxinha de Frango com Catupiry autêntica',
+        costLabel: 'R$ 14,00',
+        costCentavos: 1400,
+        disabled: !state.canAfford(1400),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1400, fome: 50, sanidade: 35 }, 'Saboreou a lendária coxinha do Frangó');
+          return 'A massa finíssima crocante e o recheio cremoso e fumegante de peito de frango desfiado com Catupiry legítimo explodem na boca! Bucho satisfeito (+50%) e Sanidade renovada (+35%). Uma obra de arte gastronômica!';
+        }
+      },
+      {
+        id: 'chopp_artesanal',
+        label: 'Tulipa de Chopp Artesanal Paulistânia estupidamente gelada',
+        costLabel: 'R$ 16,00',
+        costCentavos: 1600,
+        disabled: !state.canAfford(1600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBeerOpen ? sound.playBeerOpen() : sound.playGulp(); }
+          state.apply({ grana: -1600, sanidade: 30, ginga: 8 }, 'Tomou Chopp Artesanal no Frangó');
+          return 'O colarinho denso e cremoso desce suave e refrescante. Sentado na varanda do Frangó com vista para a Praça da Matriz, o estresse paulistano evapora (+30% Sanidade, +8 Ginga).';
+        }
+      },
+      {
+        id: 'conversa_garcom',
+        label: 'Conversar com o garçom sobre a história centenária do Largo da Matriz',
+        costLabel: 'Trocar Ideia (Grátis)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 12 }, 'Conversou sobre a história da Freguesia');
+          return 'O veterano da casa conta histórias de 1987, de quando o bairro ainda preservava ares de interior caipira. Uma boa prosa revigora o ânimo (+12% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  IGREJA_MATRIZ: {
+    id: 'IGREJA_MATRIZ',
+    title: '⛪ PARÓQUIA NOSSA SENHORA DO Ó (1580)',
+    getIntroText: (state) => `
+      A paz e o silêncio reverente preenchem a nave histórica construída há mais de 400 anos.<br>
+      A luz do sol matutino filtra-se através dos vitrais coloridos, banhando os bancos de jacarandá e o altar barroco dourado.<br>
+      O aroma suave de cera e incenso acolhe quem busca um refúgio da agitação urbana.<br>
+      <small style="color:#00f5d4">Patrimônio Histórico de São Paulo • Fundada em 1580</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'acender_vela',
+        label: 'Acender uma vela votiva no velário e pedir proteção',
+        costLabel: 'R$ 2,00 (Oferta)',
+        costCentavos: 200,
+        disabled: !state.canAfford(200),
+        execute: (state, sound) => {
+          if (sound && sound.playCoin) sound.playCoin();
+          state.apply({ grana: -200, sanidade: 30, perigo: -25 }, 'Acendeu vela na Matriz do Ó');
+          return 'A chama amarela tremula no castiçal de ferro. Você fecha os olhos e sente uma profunda serenidade. Toda a perseguição e tensão do dia se dissolvem (+30% Sanidade, -25% Perigo).';
+        }
+      },
+      {
+        id: 'oracao_silenciosa',
+        label: 'Sentar no banco de madeira para uma oração e momento de paz',
+        costLabel: 'Momento de Paz (Grátis)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 20 }, 'Oração silenciosa na Matriz');
+          return 'O eco distante dos sinos de bronze e o frescor da pedra colonial acalmam sua respiração. Sua mente se clareia (+20% Sanidade).';
+        }
+      },
+      {
+        id: 'contemplar_altar',
+        label: 'Contemplar o retábulo e a arquitetura barroca colonial',
+        costLabel: 'Contemplação (Grátis)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 15, ginga: 5 }, 'Contemplou arte sacra histórica');
+          return 'Os entalhes em folha de ouro e a imagem barroca de Nossa Senhora da Esperança revelam séculos de história paulistana (+15% Sanidade, +5 Ginga).';
+        }
+      }
+    ]
+  },
+
+  BOTECO_SETE_BARRAS: {
+    id: 'BOTECO_SETE_BARRAS',
+    title: '🍺 BOTECO DAS 7 BARRAS',
+    getIntroText: (state) => `
+      O bar raiz da Rua Sete Barras está a todo vapor.<br>
+      Um rádio de pilha sintonizado no futebol transmite o lance enquanto bolas de sinuca estalam na mesa verde.<br>
+      O dono do boteco bate com um abridor na garrafa de Tubaína:<br>
+      <em>"— Chega mais campeão! Vai uma Tubaína retrô trincando ou vai arriscar um jogo na sinuca?"</em><br>
+      <small style="color:#ffcc00">Saldo: ${state.formattedGrana} | Bucho: ${state.fome}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'tubaina_pastel',
+        label: 'Tubaína Retrô em garrafa de vidro 600ml + Pastel de carne',
+        costLabel: 'R$ 7,00',
+        costCentavos: 700,
+        disabled: !state.canAfford(700),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -700, fome: 35, sanidade: 20 }, 'Tubaína com pastel no Boteco 7 Barras');
+          return 'O sabor clássico de tutti-frutti com gás na medida e o pastel frito na hora deram aquela energia que faltava (+35% Bucho, +20% Sanidade)!';
+        }
+      },
+      {
+        id: 'partida_sinuca',
+        label: 'Jogar uma partida de sinuca valendo aposta (Ficha R$ 5,00)',
+        costLabel: 'R$ 5,00 (Aposta)',
+        costCentavos: 500,
+        disabled: !state.canAfford(500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const win = state.rng.chance(0.65 + (state.ginga / 300));
+          if (win) {
+            state.apply({ grana: 1500, sanidade: 18, ginga: 10 }, 'Ganhou aposta na sinuca das 7 Barras');
+            return 'Você encaçapou a bola 8 no canto com uma tacada de efeito com três tabelas! A galera bateu palma e você faturou R$ 15,00 limpos (+10 Ginga)!';
+          } else {
+            state.apply({ grana: -500, sanidade: -5, ginga: 4 }, 'Perdeu ficha na sinuca');
+            return 'A bola branca deu azar e caiu junto na caçapa do meio. Perdeu a aposta de R$ 5,00, mas ganhou respeito da rapaziada (+4 Ginga).';
+          }
+        }
+      },
+      {
+        id: 'papo_mecanica',
+        label: 'Puxar assunto sobre mecânica de carros e o trânsito da Edgar Facó',
+        costLabel: 'Papo Furado (Grátis)',
+        execute: (state, sound) => {
+          state.apply({ sanidade: 10 }, 'Conversou sobre motores no boteco');
+          return 'O papo rolou solto sobre carburador de Uno, troca de óleo e os radares novos da Petrônio Portela (+10% Sanidade).';
+        }
+      }
+    ]
   }
 };

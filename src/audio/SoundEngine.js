@@ -748,5 +748,295 @@ export class SoundEngine {
       this.ambientGain.gain.setValueAtTime(isDay ? 0.32 : 0.18, this.ctx.currentTime);
     }
   }
+
+  // 19. Punch Whoosh (Golpe no ar / Jab / Direto)
+  playPunchWhoosh() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.14, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(600, t);
+      filter.frequency.exponentialRampToValueAtTime(180, t + 0.12);
+      filter.Q.setValueAtTime(2.5, t);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.35, t + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      noise.start(t);
+    } catch (e) {}
+  }
+
+  // 20. Punch Hit Impact (Impacto de soco / Porrada)
+  playPunchHit() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(160, t);
+      osc.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+
+      gain.gain.setValueAtTime(0.45, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.15);
+    } catch (e) {}
+  }
+
+  // 21. Item Pickup Click (Coleta de objeto no chão)
+  playItemPickup() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, t);
+      osc.frequency.exponentialRampToValueAtTime(1760, t + 0.08);
+
+      gain.gain.setValueAtTime(0.2, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.1);
+    } catch (e) {}
+  }
+
+  // 22. Item Drop Clatter (Descarte de objeto na calçada / asfalto)
+  playItemDrop() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(320, t);
+      osc.frequency.exponentialRampToValueAtTime(110, t + 0.1);
+
+      gain.gain.setValueAtTime(0.22, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.13);
+    } catch (e) {}
+  }
+
+  // 23. Drink Gulp (Gole refrescante de cerveja / água)
+  playDrinkGulp() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(340, t);
+      osc.frequency.exponentialRampToValueAtTime(520, t + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(280, t + 0.22);
+
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.25, t + 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    } catch (e) {}
+  }
+
+  // 24. Food Bite (Mordida crocante de pão na chapa / pastel de feira)
+  playFoodBite() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.16, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1400, t);
+      filter.frequency.exponentialRampToValueAtTime(800, t + 0.14);
+      filter.Q.setValueAtTime(3.5, t);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      noise.start(t);
+    } catch (e) {}
+  }
+
+  // 25. JBL Soundbox Beat Snippet (Batidão da caixinha portátil)
+  playJblSnippet() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      // 808 sub kick
+      const kick = this.ctx.createOscillator();
+      const kickGain = this.ctx.createGain();
+      kick.type = 'sine';
+      kick.frequency.setValueAtTime(140, t);
+      kick.frequency.exponentialRampToValueAtTime(42, t + 0.18);
+      kickGain.gain.setValueAtTime(0.4, t);
+      kickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      kick.connect(kickGain);
+      kickGain.connect(this.masterGain);
+      kick.start(t);
+      kick.stop(t + 0.25);
+
+      // Clave / Cowbell accent
+      const bell = this.ctx.createOscillator();
+      const bellGain = this.ctx.createGain();
+      bell.type = 'square';
+      bell.frequency.setValueAtTime(840, t + 0.08);
+      bellGain.gain.setValueAtTime(0.18, t + 0.08);
+      bellGain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+      bell.connect(bellGain);
+      bellGain.connect(this.masterGain);
+      bell.start(t + 0.08);
+      bell.stop(t + 0.26);
+    } catch (e) {}
+  }
+
+  // 26. iPhone Alert Tone (Notificação de Faria Limer)
+  playPhoneChirp() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      [0, 0.09].forEach((delay, idx) => {
+        const startT = t + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(idx === 0 ? 1174.66 : 1567.98, startT); // D6 -> G6
+        gain.gain.setValueAtTime(0.2, startT);
+        gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.15);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(startT);
+        osc.stop(startT + 0.16);
+      });
+    } catch (e) {}
+  }
+
+  // 27. Wooden Door Creak & Bash Open (Arrombamento de Porta)
+  playDoorOpen() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      // Wooden hinge creak
+      const creakOsc = this.ctx.createOscillator();
+      const creakGain = this.ctx.createGain();
+      const creakFilter = this.ctx.createBiquadFilter();
+
+      creakOsc.type = 'sawtooth';
+      creakOsc.frequency.setValueAtTime(140, t);
+      creakOsc.frequency.linearRampToValueAtTime(320, t + 0.18);
+      creakOsc.frequency.exponentialRampToValueAtTime(90, t + 0.38);
+
+      creakFilter.type = 'bandpass';
+      creakFilter.frequency.setValueAtTime(450, t);
+      creakFilter.Q.setValueAtTime(4.0, t);
+
+      creakGain.gain.setValueAtTime(0.01, t);
+      creakGain.gain.linearRampToValueAtTime(0.35, t + 0.08);
+      creakGain.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+
+      creakOsc.connect(creakFilter);
+      creakFilter.connect(creakGain);
+      creakGain.connect(this.masterGain);
+
+      creakOsc.start(t);
+      creakOsc.stop(t + 0.45);
+
+      // Wood latch pop / door swing slam
+      const popOsc = this.ctx.createOscillator();
+      const popGain = this.ctx.createGain();
+      popOsc.type = 'triangle';
+      popOsc.frequency.setValueAtTime(80, t + 0.05);
+      popOsc.frequency.exponentialRampToValueAtTime(35, t + 0.22);
+      popGain.gain.setValueAtTime(0.4, t + 0.05);
+      popGain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+      popOsc.connect(popGain);
+      popGain.connect(this.masterGain);
+
+      popOsc.start(t + 0.05);
+      popOsc.stop(t + 0.26);
+    } catch (e) {}
+  }
+
+  // 28. Domestic Cat Meow ("Miau!")
+  playCatMeow() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(450, t);
+      osc.frequency.linearRampToValueAtTime(780, t + 0.14);
+      osc.frequency.exponentialRampToValueAtTime(320, t + 0.45);
+
+      gain.gain.setValueAtTime(0.01, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.48);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.5);
+    } catch (e) {}
+  }
+
+  // 29. Backyard Hen Cluck ("Có-có-có!")
+  playChickenCluck() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      [0, 0.08, 0.16].forEach((delay, i) => {
+        const startT = t + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(420 + i * 40, startT);
+        osc.frequency.exponentialRampToValueAtTime(220, startT + 0.06);
+
+        gain.gain.setValueAtTime(0.15, startT);
+        gain.gain.exponentialRampToValueAtTime(0.001, startT + 0.07);
+
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start(startT);
+        osc.stop(startT + 0.08);
+      });
+    } catch (e) {}
+  }
 }
 

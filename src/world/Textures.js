@@ -1556,6 +1556,32 @@ export class TextureGenerator {
     return texture;
   }
 
+  // Generic Storefront Banner Sign
+  createStoreSign(text, bgColor = '#8a3c20', textColor = '#ffe89e') {
+    const key = `store_sign_${text}_${bgColor}_${textColor}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 128);
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, 512, 128);
+
+    ctx.strokeStyle = textColor;
+    ctx.lineWidth = 6;
+    ctx.strokeRect(6, 6, 500, 116);
+
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 28px "Arial Black", Impact, sans-serif';
+    ctx.fillText(text, 256, 62);
+
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('PIRITUBA • SÃO PAULO', 256, 95);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
   // 55. Suburban Parquet Wooden Floor (Taco de Madeira Envernizado)
   createParquetTexture(repeatX = 2, repeatY = 2) {
     const key = `parquet_${repeatX}_${repeatY}`;
@@ -1680,6 +1706,429 @@ export class TextureGenerator {
     ctx.textAlign = 'center';
     ctx.font = 'bold 20px monospace';
     ctx.fillText(`▲ ${label} ▲`, 128, 40);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 59. Boteco Satirical AI Beer Brand ("BRAHM.AI // Desce Redonda na Matrix")
+  createBeerBrandTexture(brand = 'BRAHM.AI') {
+    const key = `beer_brand_${brand}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Boteco iconic red background
+    ctx.fillStyle = '#c92418';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Outer golden border
+    ctx.strokeStyle = '#f5c518';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(10, 10, 236, 236);
+
+    // Inner white oval shield
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(128, 128, 105, 75, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#c92418';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Red ribbon banner across center
+    ctx.fillStyle = '#b71c1c';
+    ctx.fillRect(20, 105, 216, 48);
+
+    // Brand Name Typography
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = '900 28px "Arial Black", Impact, sans-serif';
+    ctx.fillText(brand, 128, 138);
+
+    // Taglines
+    ctx.fillStyle = '#b71c1c';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('★ CHOPP DA SIMULAÇÃO ★', 128, 88);
+    ctx.fillText('100% MALTE SINTÉTICO', 128, 100);
+
+    ctx.fillStyle = '#f5c518';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('DESCE REDONDA NA MATRIX', 128, 172);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText('PIRITUBA • SP • 0 BUGS', 128, 190);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 60. Brazilian Padoca Snack Warmer (Estufa de Coxinha, Pastel & Pão de Queijo)
+  createPadariaEstufaTexture() {
+    const key = 'padaria_estufa';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Warm tungsten heated interior glow
+    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#ffe89e');
+    grad.addColorStop(0.5, '#f5ba42');
+    grad.addColorStop(1, '#b86214');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Metal rack wire grids
+    ctx.strokeStyle = '#555555';
+    ctx.lineWidth = 3;
+    [64, 128, 192].forEach(y => {
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(256, y);
+      ctx.stroke();
+    });
+
+    // Coxinhas (Tear-shaped golden fried snacks)
+    ctx.fillStyle = '#b85c0a';
+    for (let i = 0; i < 4; i++) {
+      const cx = 35 + i * 62;
+      const cy = 52;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 20);
+      ctx.quadraticCurveTo(cx + 16, cy + 10, cx, cy + 12);
+      ctx.quadraticCurveTo(cx - 16, cy + 10, cx, cy - 20);
+      ctx.fill();
+    }
+
+    // Pães de Queijo (Golden round puffs)
+    ctx.fillStyle = '#e8a938';
+    for (let i = 0; i < 5; i++) {
+      const px = 26 + i * 50;
+      const py = 116;
+      ctx.beginPath();
+      ctx.arc(px, py, 15, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Pastéis & Empadas
+    ctx.fillStyle = '#c77816';
+    for (let i = 0; i < 4; i++) {
+      const ex = 32 + i * 62;
+      const ey = 178;
+      ctx.fillRect(ex - 18, ey - 10, 36, 16);
+    }
+
+    // Glass reflection gleam across front
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(100, 0); ctx.lineTo(20, 256); ctx.lineTo(0, 256);
+    ctx.fill();
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61. Padaria Blackboard Chalk Menu (Quadro de Preços da Padoca)
+  createPadariaMenuBoardTexture() {
+    const key = 'padaria_menu_board';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Slate blackboard background with dusty chalk smudges
+    ctx.fillStyle = '#1c2224';
+    ctx.fillRect(0, 0, 256, 256);
+
+    ctx.strokeStyle = '#8a532d'; // Wooden frame
+    ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, 246, 246);
+
+    // Chalk Typography
+    ctx.fillStyle = '#fce592';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 16px "Comic Sans MS", cursive, sans-serif';
+    ctx.fillText('★ PADARIA ESTRELA ★', 128, 35);
+    ctx.font = 'italic 11px sans-serif';
+    ctx.fillText('Café & Pão Quentinho a Toda Hora', 128, 52);
+
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillStyle = '#ffffff';
+
+    const items = [
+      ['PINGADO C/ LEITE', 'R$ 4,50'],
+      ['PÃO NA CHAPA', 'R$ 6,00'],
+      ['COXINHA CATUPIRY', 'R$ 8,00'],
+      ['MISTO QUENTE', 'R$ 11,00'],
+      ['SUCO DE LARANJA', 'R$ 7,50'],
+      ['PUDIM DE LEITE', 'R$ 7,00']
+    ];
+
+    items.forEach(([name, price], idx) => {
+      const y = 82 + idx * 24;
+      ctx.fillText(name, 22, y);
+      ctx.fillText(price, 175, y);
+    });
+
+    // Bottom note
+    ctx.fillStyle = '#81e69b';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ACEITAMOS VR, VA & PIX', 128, 235);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 62. Wooden House Door with Weathered Planks & Metal Knob
+  createWoodenHouseDoorTexture() {
+    const key = 'wooden_house_door';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 256);
+    // Dark weathered wood
+    ctx.fillStyle = '#5c3922';
+    ctx.fillRect(0, 0, 128, 256);
+
+    // Vertical plank gaps
+    ctx.strokeStyle = '#321c0e';
+    ctx.lineWidth = 2;
+    for (let x = 32; x < 128; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0); ctx.lineTo(x, 256);
+      ctx.stroke();
+    }
+
+    // Wood grain lines
+    ctx.strokeStyle = '#432815';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 20; i++) {
+      const rx = Math.random() * 128;
+      ctx.beginPath();
+      ctx.moveTo(rx, 0);
+      ctx.lineTo(rx + (Math.random() - 0.5) * 10, 256);
+      ctx.stroke();
+    }
+
+    // Horizontal reinforcement battens
+    ctx.fillStyle = '#4c2e19';
+    ctx.fillRect(6, 20, 116, 22);
+    ctx.fillRect(6, 117, 116, 22);
+    ctx.fillRect(6, 214, 116, 22);
+
+    // Metal doorknob and keyhole
+    ctx.fillStyle = '#d4af37';
+    ctx.beginPath();
+    ctx.arc(106, 128, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#111111';
+    ctx.fillRect(104, 138, 4, 8);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 42. Classic Portuguese Cobblestone (Calçada de Pedras Portuguesas - Largo da Matriz)
+  createPedraPortuguesa(repeatX = 12, repeatY = 12) {
+    const key = `pedra_portuguesa_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Warm stone off-white base
+    ctx.fillStyle = '#dcd7cd';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Black wave mosaic bands (Mar Largo / Calçadão Paulista)
+    ctx.fillStyle = '#26292b';
+    for (let y = 0; y < 256; y += 64) {
+      ctx.beginPath();
+      ctx.moveTo(0, y + 16);
+      ctx.bezierCurveTo(64, y - 16, 128, y + 48, 192, y + 16);
+      ctx.bezierCurveTo(224, y, 240, y + 8, 256, y + 16);
+      ctx.lineTo(256, y + 42);
+      ctx.bezierCurveTo(240, y + 34, 224, y + 26, 192, y + 42);
+      ctx.bezierCurveTo(128, y + 74, 64, y + 10, 0, y + 42);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Individual mosaic pebble tessellation
+    for (let py = 4; py < 256; py += 8) {
+      for (let px = 4; px < 256; px += 8) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(px - 3 + (Math.random() - 0.5) * 2, py - 3 + (Math.random() - 0.5) * 2, 6, 6);
+      }
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 43. Historic Colonial Plaster (Casarões Históricos do Largo da Matriz)
+  createColonialWall(baseColor = '#e8c96b', repeatX = 2, repeatY = 2) {
+    const key = `colonial_wall_${baseColor}_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Rich colonial plaster base (ochre/yellow or pastel)
+    ctx.fillStyle = baseColor;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Weathered aging & patina
+    for (let i = 0; i < 400; i++) {
+      const px = Math.random() * 256;
+      const py = Math.random() * 256;
+      const size = Math.random() * 6 + 2;
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+      ctx.fillRect(px, py, size, size);
+    }
+
+    // Fine masonry lines and vintage stucco grain
+    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+    ctx.lineWidth = 1;
+    for (let y = 0; y < 256; y += 48) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(256, y);
+      ctx.stroke();
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 44. O Lendário Bar Frangó - Placa Rústica e Fachada
+  createFrangoSign() {
+    const key = 'sign_frango_bar';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+
+    // Deep mahogany wood plank
+    ctx.fillStyle = '#2e180d';
+    ctx.fillRect(0, 0, 256, 96);
+
+    // Carved gold border
+    ctx.strokeStyle = '#d4af37';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, 244, 84);
+
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(10, 10, 236, 76);
+
+    // "FRANGÓ"
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 36px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('FRANGÓ', 128, 48);
+
+    // Subtitle
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('BAR & ROTISSERIE • DESDE 1987', 128, 70);
+
+    // Small coxinha & beer icon
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = '16px monospace';
+    ctx.fillText('🍗 🍺', 128, 86);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 45. Igreja Matriz - Altar Colonial e Retábulo
+  createMatrizAltar() {
+    const key = 'matriz_altar';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Dark carved wood and gold leaf
+    ctx.fillStyle = '#3b2010';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Golden baroque arch
+    ctx.strokeStyle = '#d4af37';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.arc(128, 120, 90, Math.PI, 0);
+    ctx.lineTo(218, 256);
+    ctx.lineTo(38, 256);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Sacred cross in gold
+    ctx.fillStyle = '#ffd700';
+    ctx.fillRect(122, 60, 12, 70);
+    ctx.fillRect(100, 80, 56, 12);
+
+    // Candles at altar base
+    const candleX = [60, 85, 171, 196];
+    candleX.forEach(cx => {
+      ctx.fillStyle = '#fffbeb';
+      ctx.fillRect(cx - 3, 200, 6, 40);
+      ctx.fillStyle = '#ffaa00';
+      ctx.beginPath();
+      ctx.arc(cx, 194, 5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 46. Igreja Matriz - Vitral Colonial
+  createMatrizWindow() {
+    const key = 'matriz_window';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 256);
+
+    // Stone wall surrounding
+    ctx.fillStyle = '#e8dcb8';
+    ctx.fillRect(0, 0, 128, 256);
+
+    // Arched stained glass window
+    ctx.fillStyle = '#1e3a8a';
+    ctx.beginPath();
+    ctx.arc(64, 70, 50, Math.PI, 0);
+    ctx.lineTo(114, 230);
+    ctx.lineTo(14, 230);
+    ctx.closePath();
+    ctx.fill();
+
+    // Stained glass facets (blue, crimson, amber, emerald)
+    const colors = ['#dc2626', '#2563eb', '#f59e0b', '#059669', '#7c3aed'];
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 3; col++) {
+        ctx.fillStyle = colors[(row * 3 + col) % colors.length];
+        ctx.globalAlpha = 0.75;
+        ctx.fillRect(20 + col * 30, 80 + row * 28, 28, 26);
+        ctx.globalAlpha = 1.0;
+      }
+    }
+
+    // Lead came grid
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(64, 70, 50, Math.PI, 0);
+    ctx.lineTo(114, 230);
+    ctx.lineTo(14, 230);
+    ctx.closePath();
+    ctx.stroke();
 
     const texture = this.toThreeTexture(canvas, 1, 1);
     this.cache[key] = texture;

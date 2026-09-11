@@ -83,4 +83,32 @@ export class HudGame {
       setTimeout(() => toast.remove(), 400);
     }, duration);
   }
+
+  updateHands(handStatus) {
+    if (!handStatus) return;
+    const leftName = document.getElementById('hand-left-name');
+    const rightName = document.getElementById('hand-right-name');
+    const leftDrop = document.getElementById('hand-left-drop');
+    const rightDrop = document.getElementById('hand-right-drop');
+
+    if (leftName) {
+      if (handStatus.left) {
+        leftName.innerHTML = `${handStatus.left.icon} ${handStatus.left.name.toUpperCase()}`;
+        if (leftDrop) leftDrop.style.display = 'block';
+      } else {
+        leftName.innerHTML = `👊 SOCO (JAB)`;
+        if (leftDrop) leftDrop.style.display = 'none';
+      }
+    }
+
+    if (rightName) {
+      if (handStatus.right) {
+        rightName.innerHTML = `${handStatus.right.icon} ${handStatus.right.name.toUpperCase()}`;
+        if (rightDrop) rightDrop.style.display = 'block';
+      } else {
+        rightName.innerHTML = `👊 SOCO (DIRETO)`;
+        if (rightDrop) rightDrop.style.display = 'none';
+      }
+    }
+  }
 }
