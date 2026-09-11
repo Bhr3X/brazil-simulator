@@ -5,7 +5,6 @@
  */
 
 import { ZoneManager, WORLD_ZONES } from '../world/Zones.js';
-import { Rng } from './Rng.js';
 
 const EVENT_CULL_DISTANCE = 70;
 const BLOCO_ZONE_ID = 'BLOCO_EDGAR_FACCO';
@@ -17,8 +16,8 @@ export class NpcSystem {
     this.scene = scene;
     this.sound = soundEngine;
     this.rng = rng;
-    this.crowdRng = new Rng((((rng && rng.seed) ? rng.seed : 1) ^ 0xC4A111) >>> 0);
     this.textures = textures;
+    this.currentHour = 6;
 
     this.npcGroup = new THREE.Group();
     this.npcGroup.name = 'roaming_npcs';
@@ -571,6 +570,7 @@ export class NpcSystem {
   // Update NPC navigation, motion, and visual animations
   update(delta, playerPos, isModalOpen, gameState = null) {
     const hour = (gameState && typeof gameState.currentHour === 'number') ? gameState.currentHour : 6;
+    this.currentHour = hour;
     this.updateEventVisibility(hour);
 
     for (const npc of this.npcs) {
@@ -596,13 +596,16 @@ export class NpcSystem {
       let dz = targetWp.z - npc.group.position.z;
       let distToWp = Math.sqrt(dx * dx + dz * dz);
 
-      // Advance to next waypoint if reached, then steer toward the new target this frame
+      // Advance to next waypoint if reached. Only event NPCs steer to the new
+      // target this frame; the original six keep the arrival-frame stall.
       if (distToWp < 1.0) {
         npc.currentWpIndex = (npc.currentWpIndex + 1) % npc.waypoints.length;
-        targetWp = npc.waypoints[npc.currentWpIndex];
-        dx = targetWp.x - npc.group.position.x;
-        dz = targetWp.z - npc.group.position.z;
-        distToWp = Math.sqrt(dx * dx + dz * dz);
+        if (npc.zoneId) {
+          targetWp = npc.waypoints[npc.currentWpIndex];
+          dx = targetWp.x - npc.group.position.x;
+          dz = targetWp.z - npc.group.position.z;
+          distToWp = Math.sqrt(dx * dx + dz * dz);
+        }
       }
 
       // Check distance to player for conversational pauses
@@ -630,6 +633,11 @@ export class NpcSystem {
 
         npc.group.position.x += dirX * moveDist;
         npc.group.position.z += dirZ * moveDist;
+        if (npc.zoneId && targetWp.y != null) {
+          const fromY = npc.baseY != null ? npc.baseY : 0;
+          const frac = distToWp > 0 ? Math.min(1, moveDist / distToWp) : 1;
+          npc.baseY = fromY + (targetWp.y - fromY) * frac;
+        }
 
         // Orient heading along movement trajectory
         const targetYaw = Math.atan2(dirX, dirZ);
@@ -752,7 +760,12 @@ export class NpcSystem {
 
   // Expose dynamic targets for raycast interaction in InteractableSystem
   getInteractableTargets() {
-    return this.npcs.filter((npc) => npc.interactable !== false).map(npc => ({
+    const hour = typeof this.currentHour === 'number' ? this.currentHour : 6;
+    return this.npcs.filter((npc) => {
+      if (npc.interactable === false) return false;
+      if (npc.zoneId && !this.isZoneNpcActive(npc, hour)) return false;
+      return true;
+    }).map(npc => ({
       id: npc.id,
       name: npc.name,
       prompt: npc.prompt,
@@ -785,7 +798,7 @@ export class NpcSystem {
 
   shuffleInPlace(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
-      const j = this.crowdRng.int(0, i);
+      const j = this.rng.int(0, i);
       const tmp = arr[i];
       arr[i] = arr[j];
       arr[j] = tmp;
@@ -861,6 +874,7 @@ export class NpcSystem {
   }
 
   initEventCrowds() {
+    const savedState = this.rng.state;
     const costumes = this.shuffleInPlace(CARNIVAL_COSTUMES.slice());
     const costumeColors = {
       spider: { shirt: 0x1a0508, pants: 0x111111, skin: 0x8d5524 },
@@ -904,7 +918,7 @@ export class NpcSystem {
         animationMode: 'DANCE',
         baseY: 0,
         costumeId,
-        animTimer: this.crowdRng.range(0, Math.PI * 2),
+        animTimer: this.rng.range(0, Math.PI * 2),
         animSpeed: 6.0
       }));
     }
@@ -921,13 +935,13 @@ export class NpcSystem {
         skinColor: pal.skin,
         pantsColor: pal.pants,
         speed: 3.1,
-        waypoints: runnerLoops[this.crowdRng.int(0, runnerLoops.length - 1)],
+        waypoints: runnerLoops[this.rng.int(0, runnerLoops.length - 1)],
         zoneId: BLOCO_ZONE_ID,
         interactable: false,
         animationMode: 'RUN',
         baseY: 0,
         costumeId,
-        animTimer: this.crowdRng.range(0, Math.PI * 2),
+        animTimer: this.rng.range(0, Math.PI * 2),
         animSpeed: 10.0
       }));
     }
@@ -952,7 +966,7 @@ export class NpcSystem {
     ];
 
     for (let i = 0; i < 6; i++) {
-      const kit = kits[this.crowdRng.int(0, kits.length - 1)];
+      const kit = kits[this.rng.int(0, kits.length - 1)];
       this.npcs.push(this.createHumanoidNpc({
         id: `campinho_player_${i}`,
         name: 'JOGADOR DO CAMPINHO',
@@ -967,12 +981,13 @@ export class NpcSystem {
         interactable: false,
         animationMode: 'FOOTBALL',
         baseY: 9.5,
-        animTimer: this.crowdRng.range(0, Math.PI * 2),
+        animTimer: this.rng.range(0, Math.PI * 2),
         animSpeed: 8.0
       }));
     }
 
     this.initEventSpectators();
+    this.rng.state = savedState;
   }
 
   initEventSpectators() {
@@ -987,11 +1002,11 @@ export class NpcSystem {
       for (let i = 0; i < 16; i++) {
         const spot = spots[i];
         dummy.position.set(
-          spot.x + this.crowdRng.range(-0.15, 0.15),
+          spot.x + this.rng.range(-0.15, 0.15),
           baseY + 0.55,
-          spot.z + this.crowdRng.range(-0.15, 0.15)
+          spot.z + this.rng.range(-0.15, 0.15)
         );
-        dummy.rotation.set(0, this.crowdRng.range(0, Math.PI * 2), 0);
+        dummy.rotation.set(0, this.rng.range(0, Math.PI * 2), 0);
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
       }

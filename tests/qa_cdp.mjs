@@ -2927,32 +2927,121 @@ async function runTestSuite(url) {
         const runner = carnival.find((n) => n.animationMode === 'RUN');
         const dancer = carnival.find((n) => n.animationMode === 'DANCE');
         const campNpc = campinho[0];
-        const snap = (n) => n && n.group ? { x: n.group.position.x, y: n.group.position.y, z: n.group.position.z, anim: n.animTimer } : null;
+        const snap = (n) => n && n.group ? {
+          x: n.group.position.x, y: n.group.position.y, z: n.group.position.z,
+          anim: n.animTimer,
+          armX: n.leftArm ? n.leftArm.rotation.x : 0,
+          armZ: n.leftArm ? n.leftArm.rotation.z : 0,
+          legX: n.leftLeg ? n.leftLeg.rotation.x : 0
+        } : null;
+        const xzChanged = (a, b) => !!(a && b && (a.x !== b.x || a.z !== b.z));
+        const limbsChanged = (a, b) => !!(a && b && (a.armX !== b.armX || a.armZ !== b.armZ || a.legX !== b.legX));
+
+        const parkOnWp0 = (n) => {
+          if (!n || !n.waypoints || !n.waypoints[0]) return;
+          const wp = n.waypoints[0];
+          n.currentWpIndex = 0;
+          n.group.position.x = wp.x;
+          n.group.position.z = wp.z;
+          if (wp.y != null) n.group.position.y = wp.y;
+        };
+
+        const streetWp0 = clodoaldo && clodoaldo.waypoints[0];
+        const savedStreet = clodoaldo ? {
+          x: clodoaldo.group.position.x, y: clodoaldo.group.position.y, z: clodoaldo.group.position.z,
+          idx: clodoaldo.currentWpIndex
+        } : null;
+        parkOnWp0(clodoaldo);
+        const streetArrival0 = snap(clodoaldo);
+        npcs.update(1.0, { x: streetWp0 ? streetWp0.x : 0, y: 1.2, z: streetWp0 ? streetWp0.z : 0 }, false, hourState(12));
+        const streetArrival1 = snap(clodoaldo);
+        const streetArrivalHeld = !!(streetArrival0 && streetArrival1
+          && streetArrival0.x === streetArrival1.x && streetArrival0.z === streetArrival1.z);
+        if (clodoaldo && savedStreet) {
+          clodoaldo.group.position.set(savedStreet.x, savedStreet.y, savedStreet.z);
+          clodoaldo.currentWpIndex = savedStreet.idx;
+        }
+
+        const savedRunner = runner ? {
+          x: runner.group.position.x, y: runner.group.position.y, z: runner.group.position.z,
+          idx: runner.currentWpIndex
+        } : null;
+        parkOnWp0(runner);
+        const eventArrival0 = snap(runner);
+        const eventNear = runner ? { x: runner.group.position.x, y: 1.2, z: runner.group.position.z } : farStreet;
+        npcs.update(1.0, eventNear, false, hourState(12));
+        const eventArrival1 = snap(runner);
+        const eventArrivalSteers = xzChanged(eventArrival0, eventArrival1);
+        if (runner && savedRunner) {
+          runner.group.position.set(savedRunner.x, savedRunner.y, savedRunner.z);
+          runner.currentWpIndex = savedRunner.idx;
+        }
+
         const runnerFar0 = snap(runner);
         applyHour(12.0, farStreet);
         npcs.update(1.0, farStreet, false, hourState(12));
         const runnerFar1 = snap(runner);
-        const farCulled = !!(runnerFar0 && runnerFar1
+        const runnerFarFixed = !!(runnerFar0 && runnerFar1
           && runnerFar0.x === runnerFar1.x && runnerFar0.z === runnerFar1.z && runnerFar0.anim === runnerFar1.anim);
+        const farCulled = runnerFarFixed;
 
         const nearRunner = runner ? { x: runner.group.position.x, y: 1.2, z: runner.group.position.z } : farStreet;
         const runnerNear0 = snap(runner);
         npcs.update(1.0, nearRunner, false, hourState(12));
         const runnerNear1 = snap(runner);
-        const nearMoved = !!(runnerNear0 && runnerNear1
-          && (runnerNear0.x !== runnerNear1.x || runnerNear0.z !== runnerNear1.z || runnerNear0.anim !== runnerNear1.anim));
+        const runnerNearMoved = xzChanged(runnerNear0, runnerNear1);
+        const nearMoved = runnerNearMoved;
 
+        const dance0 = snap(dancer);
         if (dancer) {
-          npcs.update(0.5, { x: dancer.group.position.x, y: 1.2, z: dancer.group.position.z }, false, hourState(12));
+          npcs.update(0.45, { x: dancer.group.position.x, y: 1.2, z: dancer.group.position.z }, false, hourState(12));
         }
+        const dance1 = snap(dancer);
+        const danceLimbsChanged = limbsChanged(dance0, dance1);
+        const danceNoPathDrift = !!(dance0 && dance1
+          && Math.hypot(dance1.x - dance0.x, dance1.z - dance0.z) <= 0.55);
+        const dancerStreetYOk = !dancer || Math.abs(dancer.group.position.y) <= 0.2;
+
+        const foot0 = snap(campNpc);
         if (campNpc) {
           const nearCamp = { x: campNpc.group.position.x, y: 9.5, z: campNpc.group.position.z };
           for (let i = 0; i < 24; i++) npcs.update(0.05, nearCamp, false, hourState(12));
         }
+        const foot1 = snap(campNpc);
         const campYAfter = campNpc && campNpc.group ? campNpc.group.position.y : null;
         const campYOk = campYAfter != null && Math.abs(campYAfter - 9.5) <= 0.2;
-        const dancerStreetYOk = !dancer || Math.abs(dancer.group.position.y) <= 0.2;
+        const footballMoved = xzChanged(foot0, foot1);
+        const footballLimbsChanged = limbsChanged(foot0, foot1);
+        const footballElevated = campYOk && footballMoved && footballLimbsChanged;
 
+        let waypointYFollows = false;
+        if (campNpc) {
+          const savedCamp = {
+            wps: campNpc.waypoints,
+            idx: campNpc.currentWpIndex,
+            baseY: campNpc.baseY,
+            x: campNpc.group.position.x,
+            y: campNpc.group.position.y,
+            z: campNpc.group.position.z
+          };
+          campNpc.waypoints = [
+            { x: savedCamp.x, y: 9.5, z: savedCamp.z },
+            { x: savedCamp.x + 3.0, y: 11.0, z: savedCamp.z }
+          ];
+          campNpc.currentWpIndex = 0;
+          campNpc.baseY = 9.5;
+          campNpc.group.position.set(savedCamp.x, 9.5, savedCamp.z);
+          const climbNear = { x: savedCamp.x, y: 9.5, z: savedCamp.z };
+          for (let i = 0; i < 20; i++) npcs.update(0.1, climbNear, false, hourState(12));
+          waypointYFollows = campNpc.group.position.y > 9.75 && campNpc.group.position.y <= 11.25;
+          campNpc.waypoints = savedCamp.wps;
+          campNpc.currentWpIndex = savedCamp.idx;
+          campNpc.baseY = savedCamp.baseY;
+          campNpc.group.position.set(savedCamp.x, savedCamp.y, savedCamp.z);
+        }
+        const streetYFlat = !clodoaldo || Math.abs(clodoaldo.group.position.y) <= 0.2;
+
+        applyHour(12.0, farStreet);
         const targetsOpen = npcs.getInteractableTargets();
         const targetIdsOpen = targetsOpen.map((t) => t.id).sort();
         const expectedTargets = originalIds.slice().sort();
@@ -2966,6 +3055,21 @@ async function runTestSuite(url) {
         const eventNeverTargeted = [...carnival, ...campinho].every((n) =>
           !targetsOpen.some((t) => t.id === n.id) && !targetsClosed.some((t) => t.id === n.id)
         );
+
+        const hostProbe = carnival[0];
+        let hostOpenTargeted = false;
+        let hostClosedExcluded = false;
+        if (hostProbe) {
+          const savedInteractable = hostProbe.interactable;
+          hostProbe.interactable = true;
+          applyHour(12.0, farStreet);
+          hostOpenTargeted = npcs.getInteractableTargets().some((t) => t.id === hostProbe.id);
+          applyHour(8.0, farStreet);
+          hostClosedExcluded = !npcs.getInteractableTargets().some((t) => t.id === hostProbe.id);
+          hostProbe.interactable = savedInteractable;
+          applyHour(12.0, farStreet);
+        }
+        const hostScheduleContract = hostOpenTargeted && hostClosedExcluded;
 
         const pagePath = window.location.pathname;
         const isEsmBuild = pagePath.endsWith('index.html') || pagePath === '/' || pagePath === '';
@@ -2984,13 +3088,12 @@ async function runTestSuite(url) {
           ctorSource = 'classic-lexical';
         }
 
-        const crowdSignature = (system) => (system.npcs || [])
+        const cosmeticSignature = (system) => (system.npcs || [])
           .filter((n) => n.zoneId === 'BLOCO_EDGAR_FACCO' || n.zoneId === 'CAMPINHO_CHURRASCO')
           .map((n) => [
             n.id,
             n.costumeId || '',
             n.animationMode || '',
-            Number(n.animTimer || 0).toFixed(4),
             (n.waypoints || []).map((wp) => [wp.x, wp.y, wp.z].join(',')).join('/')
           ].join('|'))
           .join(';');
@@ -2998,13 +3101,16 @@ async function runTestSuite(url) {
         let sameSeed = false;
         let differentSeed = false;
         let sigA = '';
+        let usedDirectRng = false;
+        let rngStateRestored = false;
+        let noCrowdRng = false;
         if (NpcCtor && RngCtor && game.scene) {
           const sysA = new NpcCtor(game.scene, game.sound, new RngCtor(424242), game.textures);
           const sysB = new NpcCtor(game.scene, game.sound, new RngCtor(424242), game.textures);
           const sysC = new NpcCtor(game.scene, game.sound, new RngCtor(999001), game.textures);
-          sigA = crowdSignature(sysA);
-          const sigB = crowdSignature(sysB);
-          const sigC = crowdSignature(sysC);
+          sigA = cosmeticSignature(sysA);
+          const sigB = cosmeticSignature(sysB);
+          const sigC = cosmeticSignature(sysC);
           sameSeed = sigA.length > 0 && sigA === sigB;
           differentSeed = sigA.length > 0 && sigA !== sigC;
           [sysA, sysB, sysC].forEach((sys) => {
@@ -3012,6 +3118,27 @@ async function runTestSuite(url) {
             if (sys.blocoSpectatorGroup && sys.blocoSpectatorGroup.parent) sys.blocoSpectatorGroup.parent.remove(sys.blocoSpectatorGroup);
             if (sys.campinhoSpectatorGroup && sys.campinhoSpectatorGroup.parent) sys.campinhoSpectatorGroup.parent.remove(sys.campinhoSpectatorGroup);
           });
+
+          const probeRng = new RngCtor(777001);
+          const stateBefore = probeRng.state;
+          let draws = 0;
+          const origRandom = probeRng.random.bind(probeRng);
+          probeRng.random = function wrappedRandom() {
+            draws += 1;
+            return origRandom();
+          };
+          const sysProbe = new NpcCtor(game.scene, game.sound, probeRng, game.textures);
+          probeRng.random = origRandom;
+          usedDirectRng = draws > 0;
+          rngStateRestored = probeRng.state === stateBefore;
+          noCrowdRng = !sysProbe.crowdRng;
+          if (sysProbe.npcGroup && sysProbe.npcGroup.parent) sysProbe.npcGroup.parent.remove(sysProbe.npcGroup);
+          if (sysProbe.blocoSpectatorGroup && sysProbe.blocoSpectatorGroup.parent) {
+            sysProbe.blocoSpectatorGroup.parent.remove(sysProbe.blocoSpectatorGroup);
+          }
+          if (sysProbe.campinhoSpectatorGroup && sysProbe.campinhoSpectatorGroup.parent) {
+            sysProbe.campinhoSpectatorGroup.parent.remove(sysProbe.campinhoSpectatorGroup);
+          }
         }
 
         const ok = originalsPresent && originalsIntact
@@ -3021,9 +3148,15 @@ async function runTestSuite(url) {
           && carnivalPlaced && runnersOffRoad && campPlaced
           && spectatorCountsOk && spectatorsLightweight && hasPointLight === false
           && scheduleOk && streetMoved && farCulled && nearMoved
-          && campYOk && dancerStreetYOk
+          && streetArrivalHeld && eventArrivalSteers
+          && runnerFarFixed && runnerNearMoved
+          && danceLimbsChanged && danceNoPathDrift && dancerStreetYOk
+          && footballElevated && campYOk
+          && waypointYFollows && streetYFlat
           && targetsExactWhenOpen && targetsExactWhenClosed && eventNeverTargeted
+          && hostScheduleContract
           && sameSeed && differentSeed
+          && usedDirectRng && rngStateRestored && noCrowdRng
           && (ctorSource === 'esm-import' || ctorSource === 'classic-lexical');
 
         return {
@@ -3052,19 +3185,36 @@ async function runTestSuite(url) {
           },
           scheduleOk,
           streetMoved,
+          streetArrivalHeld,
+          eventArrivalSteers,
           farCulled,
+          runnerFarFixed,
           nearMoved,
+          runnerNearMoved,
+          danceLimbsChanged,
+          danceNoPathDrift,
+          dancerStreetYOk,
+          footballMoved,
+          footballLimbsChanged,
+          footballElevated,
           campYAfter,
           campYOk,
-          dancerStreetYOk,
+          waypointYFollows,
+          streetYFlat,
           targetsOpenCount: targetsOpen.length,
           targetsClosedCount: targetsClosed.length,
           targetIdsOpen,
           targetsExactWhenOpen,
           targetsExactWhenClosed,
           eventNeverTargeted,
+          hostOpenTargeted,
+          hostClosedExcluded,
+          hostScheduleContract,
           sameSeed,
           differentSeed,
+          usedDirectRng,
+          rngStateRestored,
+          noCrowdRng,
           ctorSource,
           sigLen: sigA.length
         };
@@ -3072,7 +3222,7 @@ async function runTestSuite(url) {
     `);
     console.log(`[TEST 33] Scheduled carnival and campinho crowds:`, carnivalCrowdTested);
     if (!carnivalCrowdTested.ok) {
-      throw new Error(`TEST 33 FAILED: scheduled carnival/campinho crowds must preserve the original six NPCs, add 6+6 articulated event NPCs with exact modes, elevate campinho to y≈9.5, honor zone hours, instance 16+16 spectators, cull far motion, keep event NPCs out of interaction targets, and stay seed-deterministic. ${JSON.stringify(carnivalCrowdTested)}`);
+      throw new Error(`TEST 33 FAILED: scheduled carnival/campinho crowds must preserve original arrival-frame steering, hide inactive interactable zone NPCs, draw costumes/paths from this.rng with restored state, differ by costume/path across seeds, and interpolate event waypoint y. ${JSON.stringify(carnivalCrowdTested)}`);
     }
 
     // Check Console Errors
