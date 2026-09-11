@@ -1038,5 +1038,58 @@ export class SoundEngine {
       });
     } catch (e) {}
   }
+
+  // 31. Cartoon Head Bonk on Solid Illusion Wall (Bater a testa no muro de obra)
+  playHeadBonk() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+
+      // 1. Pitch-dropping hollow thud oscillator (Bonk resonance)
+      const osc = this.ctx.createOscillator();
+      const oscGain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(340, t);
+      osc.frequency.exponentialRampToValueAtTime(75, t + 0.16);
+
+      oscGain.gain.setValueAtTime(0.60, t);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+      osc.connect(oscGain);
+      oscGain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.20);
+
+      // 2. Forehead impact dull thud transient
+      const thud = this.ctx.createOscillator();
+      const thudGain = this.ctx.createGain();
+      thud.type = 'triangle';
+      thud.frequency.setValueAtTime(150, t);
+      thud.frequency.exponentialRampToValueAtTime(40, t + 0.09);
+
+      thudGain.gain.setValueAtTime(0.65, t);
+      thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+
+      thud.connect(thudGain);
+      thudGain.connect(this.masterGain);
+      thud.start(t);
+      thud.stop(t + 0.12);
+
+      // 3. Subtle comical high ping ring (slapstick stars effect)
+      const ping = this.ctx.createOscillator();
+      const pingGain = this.ctx.createGain();
+      ping.type = 'sine';
+      ping.frequency.setValueAtTime(780, t + 0.02);
+      ping.frequency.exponentialRampToValueAtTime(520, t + 0.25);
+
+      pingGain.gain.setValueAtTime(0.20, t + 0.02);
+      pingGain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+
+      ping.connect(pingGain);
+      pingGain.connect(this.masterGain);
+      ping.start(t + 0.02);
+      ping.stop(t + 0.30);
+    } catch (e) {}
+  }
 }
 

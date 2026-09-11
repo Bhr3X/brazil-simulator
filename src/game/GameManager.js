@@ -45,6 +45,25 @@ export class GameManager {
     this.hands = new HandsSystem(this.scene, this.camera, this.sound);
     if (this.controls) {
       this.controls.handsSystem = this.hands;
+      this.controls.onHeadBonk = (wall) => {
+        const bonkMsg = t(
+          'toasts.head_bonk',
+          '💥 <strong>POFT!</strong> Você deu com a cara no muro! A rua era só uma pintura na parede...<br><span style="font-size:11px;color:#fcd34d;">🚧 Desculpe pelo transtorno, estamos em obras!</span>'
+        );
+        if (this.hud) {
+          this.hud.showToast(bonkMsg, 4000);
+        }
+        if (this.sound && this.sound.newsDesk) {
+          this.sound.newsDesk.recordAction(
+            'HEAD_BONK',
+            'Bateu com a cara no muro pintado de obra achando que a rua continuava',
+            { wallId: wall ? wall.id : 'unknown' }
+          );
+        }
+        if (this.isRunActive && this.state) {
+          this.state.apply({ sanidade: -1 }, 'news.head_bonk');
+        }
+      };
     }
     this.props = new GameProps(this.scene, this.physics, this.textures, this.sound);
     this.encounters = BRAZILIAN_ENCOUNTERS;

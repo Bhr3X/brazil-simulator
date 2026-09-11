@@ -41,6 +41,9 @@ class GameApp {
       this.sound,
       this.renderer.scene
     );
+    if (this.city && this.city.illusionWalls) {
+      this.controls.setIllusionWalls(this.city.illusionWalls);
+    }
 
     const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
     const seedParam = urlParams ? urlParams.get('seed') : null;

@@ -137,11 +137,21 @@ export class FirstPersonControls {
       { pos: new THREE.Vector3(1.0, 9.8, -70), look: new THREE.Vector3(28, 45, -190) }
     ];
 
+    // Illusion boundary walls & head bonk
+    this.illusionWalls = [];
+    this.onHeadBonk = null;
+    this.lastBonkTime = 0;
+    this.headBonkOffset = 0;
+
     if (this.scene) {
       this.createPlayerAvatar();
     }
 
     this.initListeners();
+  }
+
+  setIllusionWalls(walls) {
+    this.illusionWalls = Array.isArray(walls) ? walls : [];
   }
 
   initListeners() {
@@ -632,6 +642,43 @@ export class FirstPersonControls {
     const actualMoveDist = Math.hypot(resolved.x - this.position.x, resolved.z - this.position.z);
     this.position.copy(resolved);
 
+    // 5.5 Check collision against painted illusion walls (Wile E. Coyote head bonk)
+    if (this.illusionWalls && this.illusionWalls.length > 0 && isMoving) {
+      const now = performance.now();
+      if (now - this.lastBonkTime > 1200) {
+        for (let i = 0; i < this.illusionWalls.length; i++) {
+          const wall = this.illusionWalls[i];
+          const b = wall.bounds;
+          if (!b) continue;
+          if (
+            this.position.x >= b.minX - 0.75 && this.position.x <= b.maxX + 0.75 &&
+            this.position.z >= b.minZ - 0.75 && this.position.z <= b.maxZ + 0.75 &&
+            this.position.y >= b.minY - 0.5 && this.position.y <= b.maxY + 1.0
+          ) {
+            const dot = moveDir.x * wall.normal.x + moveDir.z * wall.normal.z;
+            if (dot < -0.25) {
+              this.lastBonkTime = now;
+              this.headBonkOffset = 0.16;
+
+              // Push player back away from solid wall
+              this.position.x += wall.normal.x * 0.35;
+              this.position.z += wall.normal.z * 0.35;
+              this.velocity.set(wall.normal.x * 2.5, 0.6, wall.normal.z * 2.5);
+
+              if (this.sound && typeof this.sound.playHeadBonk === 'function') {
+                this.sound.playHeadBonk();
+              }
+
+              if (typeof this.onHeadBonk === 'function') {
+                this.onHeadBonk(wall);
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+
     // 6. Head bobbing & footsteps
     let bobOffsetY = 0;
     if (isMoving && this.canJump) {
@@ -650,6 +697,12 @@ export class FirstPersonControls {
       }
     } else {
       this.bobTimer = 0;
+    }
+
+    // Smoothly decay head bonk camera jar
+    if (this.headBonkOffset > 0.001) {
+      this.headBonkOffset = Math.max(0, this.headBonkOffset - delta * 0.65);
+      bobOffsetY += Math.sin(this.headBonkOffset * 35) * this.headBonkOffset * 0.5;
     }
 
     // 7. Update player avatar animations & 3rd person camera
