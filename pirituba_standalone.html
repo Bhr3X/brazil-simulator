@@ -19169,42 +19169,66 @@ class GameProps {
     this.sound = sound;
 
     this.ballBody = null;
+    this.campinhoBallBody = null;
+    this.ballBodies = [];
     this.canBodies = [];
 
-    this.initSoccerBall();
+    this.initSoccerBalls();
     this.initBeerCans();
   }
 
-  // 1. Kickable Soccer Ball ("Bola Dente-de-Leite")
-  initSoccerBall() {
-    const radius = 0.26;
-    const ballGeo = new THREE.SphereGeometry(radius, 16, 12);
-    const ballTex = this.textures.createSoccerBallTexture();
-    const ballMat = new THREE.MeshLambertMaterial({
-      map: ballTex
-    });
-
-    const ballMesh = new THREE.Mesh(ballGeo, ballMat);
-    // Placed on street near the sidewalk curb
-    ballMesh.position.set(0.0, 0.4, 14.5);
+  createSoccerBall({ id, x, y, z, kickDescription, geometry, material, radius }) {
+    const ballMesh = new THREE.Mesh(geometry, material);
+    ballMesh.position.set(x, y, z);
     this.scene.add(ballMesh);
 
-    this.ballBody = this.physics.addDynamicBody({
-      id: 'soccer_ball',
+    const body = this.physics.addDynamicBody({
+      id,
       mesh: ballMesh,
-      radius: radius,
+      radius,
       mass: 0.45,
       restitution: 0.72, // Bouncy
       friction: 0.982,
       isKickable: true,
-      onKick: (body, force) => {
+      onKick: () => {
         if (this.sound) {
           this.sound.playKickBall();
           if (this.sound.newsDesk) {
-            this.sound.newsDesk.recordAction('KICK', 'Chutou a bola dente-de-leite na calçada');
+            this.sound.newsDesk.recordAction('KICK', kickDescription);
           }
         }
       }
+    });
+    this.ballBodies.push(body);
+    return body;
+  }
+
+  initSoccerBalls() {
+    const radius = 0.26;
+    const geometry = new THREE.SphereGeometry(radius, 16, 12);
+    const material = new THREE.MeshLambertMaterial({
+      map: this.textures.createSoccerBallTexture()
+    });
+
+    this.ballBody = this.createSoccerBall({
+      id: 'soccer_ball',
+      x: 0.0,
+      y: 0.4,
+      z: 14.5,
+      kickDescription: 'Chutou a bola dente-de-leite na calçada',
+      geometry,
+      material,
+      radius
+    });
+    this.campinhoBallBody = this.createSoccerBall({
+      id: 'soccer_ball_campinho',
+      x: 0,
+      y: 9.8,
+      z: -99,
+      kickDescription: 'Chutou a bola no campinho da favela',
+      geometry,
+      material,
+      radius
     });
   }
 

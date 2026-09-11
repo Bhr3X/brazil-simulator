@@ -2617,6 +2617,185 @@ async function runTestSuite(url) {
       throw new Error(`TEST 31 FAILED: carnival plaza and favela campinho must seal world-bound north edges, walk a hillside-to-plateau connector, close reachable floor gaps, and keep the original zone/geometry contracts. ${JSON.stringify(carnivalCampinhoTested)}`);
     }
 
+    // TEST 32: Street + campinho soccer balls on the I9 dynamic-body path
+    const carnivalBallsTested = await evaluate(`
+      (() => {
+        const physics = window.app.physics;
+        const props = window.app.game && window.app.game.props;
+        const sound = (window.app.game && window.app.game.sound) || window.app.sound;
+        const news = sound && sound.newsDesk;
+        const bodies = physics.dynamicBodies || [];
+        const ids = bodies.map((b) => b.id);
+        const countId = (id) => ids.filter((x) => x === id).length;
+        const street = bodies.find((b) => b.id === 'soccer_ball');
+        const camp = bodies.find((b) => b.id === 'soccer_ball_campinho');
+        const beerOk = ['beer_can_0', 'beer_can_1', 'beer_can_2'].every((id) => countId(id) === 1);
+
+        const streetOnce = countId('soccer_ball') === 1;
+        const campOnce = countId('soccer_ball_campinho') === 1;
+        const ballBodyIsStreet = !!(props && street && props.ballBody === street);
+        const campBodyIsCamp = !!(props && camp && props.campinhoBallBody === camp);
+        const ballBodiesOk = !!(props && Array.isArray(props.ballBodies)
+          && props.ballBodies.length === 2
+          && street && camp
+          && props.ballBodies.includes(street)
+          && props.ballBodies.includes(camp));
+
+        const sharedPhysOk = !!(street && camp
+          && street.radius === 0.26 && camp.radius === 0.26
+          && street.mass === 0.45 && camp.mass === 0.45
+          && street.restitution === 0.72 && camp.restitution === 0.72
+          && street.friction === 0.982 && camp.friction === 0.982
+          && street.isKickable === true && camp.isKickable === true
+          && typeof street.onKick === 'function' && typeof camp.onKick === 'function');
+
+        const resetBody = (body, x, y, z) => {
+          if (!body) return;
+          body.mesh.position.set(x, y, z);
+          body.velocity.set(0, 0, 0);
+          body.angularVelocity.set(0, 0, 0);
+        };
+        resetBody(street, 0, 0.4, 14.5);
+        resetBody(camp, 0, 9.8, -99);
+        if (street || camp) {
+          for (let i = 0; i < 180; i++) physics.updateDynamicBodies(1 / 60);
+        }
+
+        const readPos = (body) => body ? {
+          x: body.mesh.position.x,
+          y: body.mesh.position.y,
+          z: body.mesh.position.z
+        } : null;
+        const streetPos = readPos(street);
+        const campPos = readPos(camp);
+        const streetFloor = streetPos ? physics.getGroundHeight(streetPos.x, streetPos.z, streetPos.y) : null;
+        const campFloor = campPos ? physics.getGroundHeight(campPos.x, campPos.z, campPos.y) : null;
+
+        const streetSettled = !!(street && streetPos
+          && Math.abs(streetPos.y - (streetFloor + street.radius)) <= 0.08
+          && Math.abs(streetPos.x - 0) <= 0.35
+          && Math.abs(streetPos.z - 14.5) <= 0.35
+          && streetPos.y < 2);
+        const campSettled = !!(camp && campPos
+          && Math.abs(campPos.y - (campFloor + camp.radius)) <= 0.08
+          && Math.abs(campPos.x - 0) <= 0.35
+          && Math.abs(campPos.z + 99) <= 0.35
+          && campPos.y > 9.5);
+        const bounds = physics.worldBounds;
+        const campInBounds = !!(campPos
+          && campPos.x >= bounds.minX && campPos.x <= bounds.maxX
+          && campPos.z >= bounds.minZ && campPos.z <= bounds.maxZ
+          && campPos.y > 9.5);
+
+        let kickCalls = 0;
+        const origKick = sound && sound.playKickBall ? sound.playKickBall.bind(sound) : null;
+        if (sound && sound.playKickBall) {
+          sound.playKickBall = function wrappedPlayKickBall() {
+            kickCalls += 1;
+            return origKick ? origKick() : undefined;
+          };
+        }
+
+        const lastKick = (afterLen) => {
+          if (!news) return null;
+          const kicks = news.events.filter((e) => e.category === 'KICK');
+          return kicks.length > afterLen ? kicks[kicks.length - 1] : null;
+        };
+        const zeroBody = (body) => {
+          if (!body) return;
+          body.velocity.set(0, 0, 0);
+          body.angularVelocity.set(0, 0, 0);
+        };
+        const horiz = (body) => body ? Math.hypot(body.velocity.x, body.velocity.z) : 0;
+
+        const streetNewsBefore = news ? news.events.filter((e) => e.category === 'KICK').length : 0;
+        if (street) street.lastKickTime = 0;
+        zeroBody(street);
+        const streetKicked = street
+          ? physics.checkPlayerKick({ x: 0, y: streetPos ? streetPos.y : 0.4, z: 15.3 }, new THREE.Vector3(0, 0, -1), 4)
+          : null;
+        const streetKickOk = !!(streetKicked === street && street && horiz(street) > 0 && street.velocity.y > 0);
+        const streetNews = lastKick(streetNewsBefore);
+        const streetNewsOk = !!(streetNews && streetNews.desc === 'Chutou a bola dente-de-leite na calçada');
+        const streetSoundOk = kickCalls === 1;
+
+        zeroBody(street);
+        const streetCooldownKick = street
+          ? physics.checkPlayerKick({ x: 0, y: streetPos ? streetPos.y : 0.4, z: 15.3 }, new THREE.Vector3(0, 0, -1), 4)
+          : 'skipped';
+        const streetCooldownOk = streetCooldownKick === null && street && horiz(street) === 0 && street.velocity.y === 0;
+
+        zeroBody(street);
+        zeroBody(camp);
+        const farKick = physics.checkPlayerKick({ x: 40, y: 1, z: 40 }, new THREE.Vector3(0, 0, -1), 4);
+        const rangeGuardOk = farKick === null
+          && (!street || (horiz(street) === 0 && street.velocity.y === 0))
+          && (!camp || (horiz(camp) === 0 && camp.velocity.y === 0));
+
+        if (camp) camp.lastKickTime = 0;
+        zeroBody(camp);
+        const heightKick = camp
+          ? physics.checkPlayerKick({ x: 0, y: 0.4, z: -99 }, new THREE.Vector3(0, 0, -1), 4)
+          : 'skipped';
+        const heightGuardOk = heightKick === null && camp && horiz(camp) === 0 && camp.velocity.y === 0;
+
+        const campNewsBefore = news ? news.events.filter((e) => e.category === 'KICK').length : 0;
+        const soundsBeforeCamp = kickCalls;
+        if (camp) camp.lastKickTime = 0;
+        zeroBody(camp);
+        const campKicked = camp
+          ? physics.checkPlayerKick({ x: 0, y: campPos ? campPos.y : 9.8, z: -98.2 }, new THREE.Vector3(0, 0, -1), 4)
+          : null;
+        const campKickOk = !!(campKicked === camp && camp && horiz(camp) > 0 && camp.velocity.y > 0);
+        const campNews = lastKick(campNewsBefore);
+        const campNewsOk = !!(campNews && typeof campNews.desc === 'string' && campNews.desc.length > 0
+          && campNews.desc !== 'Chutou a bola dente-de-leite na calçada');
+        const campSoundOk = kickCalls === soundsBeforeCamp + 1;
+
+        if (sound && origKick) sound.playKickBall = origKick;
+
+        const ok = streetOnce && campOnce && ballBodyIsStreet && campBodyIsCamp && ballBodiesOk
+          && sharedPhysOk && beerOk && streetSettled && campSettled && campInBounds
+          && streetKickOk && streetNewsOk && streetSoundOk && streetCooldownOk
+          && rangeGuardOk && heightGuardOk && campKickOk && campNewsOk && campSoundOk;
+
+        return {
+          ok,
+          streetOnce,
+          campOnce,
+          ballBodyIsStreet,
+          campBodyIsCamp,
+          ballBodiesOk,
+          ballBodiesLen: props && props.ballBodies ? props.ballBodies.length : null,
+          sharedPhysOk,
+          beerOk,
+          streetSettled,
+          campSettled,
+          campInBounds,
+          streetPos,
+          campPos,
+          streetFloor,
+          campFloor,
+          streetKickOk,
+          streetNewsOk,
+          streetNews: streetNews ? streetNews.desc : null,
+          streetSoundOk,
+          streetCooldownOk,
+          rangeGuardOk,
+          heightGuardOk,
+          campKickOk,
+          campNewsOk,
+          campNews: campNews ? campNews.desc : null,
+          campSoundOk,
+          kickCalls
+        };
+      })()
+    `);
+    console.log(`[TEST 32] Street and campinho soccer balls:`, carnivalBallsTested);
+    if (!carnivalBallsTested.ok) {
+      throw new Error(`TEST 32 FAILED: both soccer balls must exist once on the I9 path, keep ballBody as the street body, settle on their real surfaces, stay in bounds above the 9.5 pitch, and take real kicks with distinct NewsDesk/sound callbacks under cooldown and range guards. ${JSON.stringify(carnivalBallsTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {
