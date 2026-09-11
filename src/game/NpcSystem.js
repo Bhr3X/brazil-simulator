@@ -164,6 +164,7 @@ export class NpcSystem {
     this.npcs.push(menorCorre);
 
     this.initEventCrowds();
+    this.initEventHosts();
   }
 
   // Build articulated humanoid 3D mesh
@@ -988,6 +989,44 @@ export class NpcSystem {
 
     this.initEventSpectators();
     this.rng.state = savedState;
+  }
+
+  initEventHosts() {
+    this.npcs.push(this.createHumanoidNpc({
+      id: 'mestre_bloco',
+      name: 'MESTRE DO BLOCO',
+      prompt: 'FALAR COM O MESTRE DO BLOCO',
+      encounterId: 'BLOCO_CARNAVAL',
+      shirtColor: 0xf59e0b,
+      skinColor: 0x8d5524,
+      pantsColor: 0x1f2937,
+      capColor: 0xdc2626,
+      hasCap: true,
+      speed: 0.35,
+      waypoints: [{ x: 137.2, z: 42.4 }],
+      zoneId: BLOCO_ZONE_ID,
+      interactable: true,
+      animationMode: 'DANCE',
+      baseY: 0
+    }));
+
+    this.npcs.push(this.createHumanoidNpc({
+      id: 'churrasqueiro_campo',
+      name: 'CHURRASQUEIRO DO CAMPINHO',
+      prompt: 'FALAR COM O CHURRASQUEIRO',
+      encounterId: 'CHURRASCO_CAMPO',
+      shirtColor: 0x7f1d1d,
+      skinColor: 0x6b4423,
+      pantsColor: 0x111827,
+      capColor: 0xf8fafc,
+      hasCap: true,
+      speed: 0.3,
+      waypoints: [{ x: -19.4, y: 9.5, z: -89.6 }],
+      zoneId: CAMPINHO_ZONE_ID,
+      interactable: true,
+      animationMode: null,
+      baseY: 9.5
+    }));
   }
 
   initEventSpectators() {
