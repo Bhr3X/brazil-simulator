@@ -1545,17 +1545,30 @@ async function runTestSuite(url) {
         simulateTouch('handleTouchEnd', 101, 120, 210);
         const moveReset = controls.touchMoveVector.y === 0 && touch.moveTouchId === null;
 
-        // 2. Test Swipe-to-Look Simulation (Right Zone)
+        // 2. Test Independent Swipe-to-Look Simulation (Right Zone without Left Stick)
         const initialPitch = controls.euler.x;
         const initialYaw = controls.euler.y;
         const lookStartX = window.innerWidth - 80;
         simulateTouch('handleTouchStart', 102, lookStartX, 200);
+        const lookAcquiredSolo = touch.lookTouchId === 102 && touch.moveTouchId === null;
         simulateTouch('handleTouchMove', 102, lookStartX - 60, 170);
         const yawChanged = controls.euler.y !== initialYaw;
         const pitchChanged = controls.euler.x !== initialPitch;
         simulateTouch('handleTouchEnd', 102, lookStartX - 60, 170);
+        const lookReleased = touch.lookTouchId === null;
 
-        // 3. Test Action Buttons: Jump, Crouch, Camera, Menu
+        // 3. Test Interactive Elements Whitelist (NPC action card, prompt, buttons)
+        const mockCard = document.createElement('button');
+        mockCard.className = 'npc-action-card';
+        document.body.appendChild(mockCard);
+        const isCardInteractive = touch.isInteractiveElement(mockCard);
+        const isPromptInteractive = touch.isInteractiveElement(document.getElementById('interact-prompt'));
+        mockCard.remove();
+
+        // 4. Test Absence of Obsolete Landscape Banner
+        const orientationBannerAbsent = document.getElementById('orientation-banner') === null;
+
+        // 5. Test Action Buttons: Jump, Crouch, Camera, Menu
         controls.canJump = true;
         touch.btnJump.dispatchEvent(new Event('touchstart'));
         const jumpTriggered = controls.velocity.y > 0;
@@ -1586,7 +1599,9 @@ async function runTestSuite(url) {
 
         return {
           ok: isEnabled && containerVisible && bodyClass && baseDisplayed && hasMoveVector && moveReset &&
-              yawChanged && pitchChanged && jumpTriggered && crouchToggled && camToggled && drawerOpen && drawerClosed &&
+              lookAcquiredSolo && yawChanged && pitchChanged && lookReleased &&
+              isCardInteractive && isPromptInteractive && orientationBannerAbsent &&
+              jumpTriggered && crouchToggled && camToggled && drawerOpen && drawerClosed &&
               hasTicks && hasBase && disabledDisplayNone,
           isEnabled,
           containerVisible,
@@ -1594,8 +1609,13 @@ async function runTestSuite(url) {
           baseDisplayed,
           hasMoveVector,
           moveReset,
+          lookAcquiredSolo,
           yawChanged,
           pitchChanged,
+          lookReleased,
+          isCardInteractive,
+          isPromptInteractive,
+          orientationBannerAbsent,
           jumpTriggered,
           crouchToggled,
           camToggled,

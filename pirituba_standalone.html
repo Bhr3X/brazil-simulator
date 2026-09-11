@@ -580,22 +580,34 @@ html, body {
 /* Center Reticle Interaction Prompt */
 #interact-prompt {
   position: fixed;
-  top: 60%;
+  top: 56%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 35;
-  background: rgba(5, 10, 7, 0.94);
+  z-index: 55;
+  background: rgba(5, 10, 7, 0.95);
   border: 2px solid #ffcc00;
   color: #ffcc00;
   padding: 8px 18px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 13px;
   font-weight: bold;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   text-shadow: 0 0 8px rgba(255, 204, 0, 0.6);
-  box-shadow: 0 0 20px rgba(255, 204, 0, 0.35);
-  pointer-events: none;
+  box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  max-width: 90vw;
+  text-align: center;
   animation: promptPulse 1.2s infinite alternate;
+}
+
+#interact-prompt:active {
+  transform: translate(-50%, -50%) scale(0.96);
+  background: rgba(255, 204, 0, 0.35);
+  color: #ffffff;
 }
 
 @keyframes promptPulse {
@@ -686,6 +698,11 @@ html, body {
   gap: 5px;
   transition: all 0.12s ease;
   user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
 }
 
 .npc-action-card:hover {
@@ -693,6 +710,11 @@ html, body {
   border-color: #00ff88;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 255, 136, 0.25);
+}
+
+.npc-action-card:active {
+  background: rgba(0, 255, 136, 0.28);
+  transform: scale(0.97);
 }
 
 .npc-action-card.disabled {
@@ -1989,8 +2011,15 @@ body.mobile-touch-active canvas#c {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  opacity: 0.38;
+  transition: opacity 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   will-change: transform, left, top;
+}
+
+#touch-joystick-base.active,
+#touch-joystick-base.floating,
+#touch-joystick-base.sprinting {
+  opacity: 0.95;
 }
 
 #touch-joystick-base.floating {
@@ -2297,87 +2326,129 @@ body.mobile-touch-active canvas#c {
   color: #ffffff;
 }
 
-/* Orientation Tip Banner */
-#orientation-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: linear-gradient(90deg, #ff0055, #ff5500);
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 6px 10px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-}
-
-/* Clean mobile layout overrides whenever touch controls are active */
+/* Clean portrait-first mobile layout overrides whenever touch controls are active */
 body.mobile-touch-active #hud-top-right {
   display: none !important;
 }
 
-body.mobile-touch-active #touch-btn-menu {
-  display: block !important;
-}
-
 body.mobile-touch-active #hud-top-left {
-  top: 8px;
-  left: 8px;
-  padding: 5px 10px;
-  max-width: 220px;
-  pointer-events: none;
+  display: none !important;
 }
 
-body.mobile-touch-active #hud-top-left .terminal-meta {
-  display: none;
+body.mobile-touch-active #hud-hands {
+  display: none !important;
+}
+
+body.mobile-touch-active #touch-btn-menu {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  top: max(8px, env(safe-area-inset-top, 8px)) !important;
+  right: 8px !important;
+  padding: 5px 10px !important;
+  font-size: 10.5px !important;
+  z-index: 95 !important;
 }
 
 body.mobile-touch-active #hud-survival-bar {
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  gap: 5px;
-  padding: 3px 8px;
-  pointer-events: none;
+  position: fixed !important;
+  top: max(8px, env(safe-area-inset-top, 8px)) !important;
+  left: 8px !important;
+  right: 78px !important;
+  width: auto !important;
+  max-width: none !important;
+  transform: none !important;
+  display: flex !important;
+  gap: 3px !important;
+  padding: 2px 4px !important;
+  background: rgba(4, 10, 7, 0.88) !important;
+  border: 1px solid rgba(0, 255, 102, 0.35) !important;
+  border-radius: 4px !important;
+  backdrop-filter: blur(6px) !important;
+  z-index: 25 !important;
+  pointer-events: none !important;
 }
 
 body.mobile-touch-active .survival-stat-box {
-  min-width: 78px;
-  padding: 3px 6px;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  padding: 2px 3px !important;
+  border-radius: 3px !important;
+  background: rgba(10, 20, 14, 0.55) !important;
+  border: 1px solid rgba(0, 255, 102, 0.2) !important;
+  text-align: center !important;
 }
 
 body.mobile-touch-active .stat-label {
-  font-size: 8.5px;
+  font-size: 8px !important;
+  letter-spacing: 0px !important;
+  margin-bottom: 1px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: flex !important;
+  justify-content: center !important;
 }
 
 body.mobile-touch-active .stat-value {
-  font-size: 11.5px;
+  font-size: 10.5px !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
 }
 
 body.mobile-touch-active .stat-bar-container {
-  height: 4px;
+  height: 3px !important;
+  margin-top: 1px !important;
 }
 
 body.mobile-touch-active #hud-objective-bar {
-  top: auto !important;
-  bottom: 12px !important;
+  position: fixed !important;
+  top: calc(max(8px, env(safe-area-inset-top, 8px)) + 38px) !important;
+  bottom: auto !important;
   height: auto !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  max-width: min(520px, 50vw);
-  font-size: 10.5px;
-  padding: 4px 12px;
-  pointer-events: none;
+  left: 8px !important;
+  right: 8px !important;
+  width: auto !important;
+  max-width: none !important;
+  transform: none !important;
+  font-size: 9.5px !important;
+  padding: 3px 8px !important;
+  background: rgba(4, 10, 7, 0.82) !important;
+  border: 1px solid rgba(0, 255, 102, 0.3) !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 6px !important;
+  z-index: 25 !important;
+  pointer-events: none !important;
+}
+
+body.mobile-touch-active #hud-class-badge {
+  font-size: 8.5px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+body.mobile-touch-active #hud-objective {
+  font-size: 9px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body.mobile-touch-active #touch-actions-cluster {
+  position: fixed !important;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 14px !important;
+  z-index: 60 !important;
 }
 
 /* =========================================================
-   RESPONSIVE MEDIA QUERIES
+   RESPONSIVE MEDIA QUERIES (PORTRAIT FIRST)
    ========================================================= */
 
-@media (max-width: 768px), (max-height: 500px), (pointer: coarse) {
+@media (max-width: 768px), (pointer: coarse) {
   /* Hide desktop right sidebar buttons on mobile screen */
   #hud-top-right {
     display: none !important;
@@ -2385,72 +2456,9 @@ body.mobile-touch-active #hud-objective-bar {
 
   /* Show mobile menu button */
   #touch-btn-menu {
-    display: block;
-  }
-
-  /* Compact Top Left Terminal HUD */
-  #hud-top-left {
-    top: 8px;
-    left: 8px;
-    max-width: 44vw;
-    pointer-events: none;
-  }
-
-  .terminal-header {
-    font-size: 10px;
-  }
-
-  #hud-location {
-    font-size: 11px;
-  }
-
-  .terminal-meta {
-    font-size: 9px;
-  }
-
-  /* Compact Survival Dashboard */
-  #hud-survival-bar {
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    gap: 4px;
-    padding: 3px 6px;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 4px;
-    pointer-events: none;
-  }
-
-  .survival-stat-box {
-    padding: 2px 4px;
-  }
-
-  .stat-label {
-    font-size: 9px;
-  }
-
-  .stat-value {
-    font-size: 11px;
-  }
-
-  .stat-bar-container {
-    width: 38px;
-    height: 4px;
-  }
-
-  /* Objective Bar on Mobile: Centered at bottom in landscape */
-  #hud-objective-bar {
-    top: auto;
-    bottom: 12px;
-    height: auto;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-    padding: 3px 10px;
-    max-width: min(520px, 50vw);
-    pointer-events: none;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Modals on Mobile */
@@ -2482,17 +2490,44 @@ body.mobile-touch-active #hud-objective-bar {
     min-height: auto !important;
     padding: 12px !important;
   }
+
+  /* NPC Quick Action Dock on Mobile */
+  #npc-quick-dock {
+    bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
+    width: calc(100vw - 16px) !important;
+    max-width: 440px !important;
+    z-index: 75 !important;
+  }
+
+  .npc-quick-options {
+    flex-direction: column !important;
+    gap: 6px !important;
+    padding: 6px 8px !important;
+  }
+
+  .npc-action-card {
+    width: 100% !important;
+    padding: 8px 10px !important;
+    min-height: 42px !important;
+  }
+
+  .npc-card-key {
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+  }
+
+  .npc-card-verb {
+    font-size: 12px !important;
+  }
 }
 
-/* Show orientation banner and adjust objective bar in portrait */
 @media (orientation: portrait) and (max-width: 768px) {
-  #hud-objective-bar {
-    top: 48px !important;
-    bottom: auto !important;
-    max-width: 92vw !important;
+  #hud-top-left {
+    display: none !important;
   }
-  #orientation-banner:not(.modal-hidden) {
-    display: block;
+  #hud-hands {
+    display: none !important;
+  }
 }
 
 /* Language Switcher Styling */
@@ -2630,11 +2665,6 @@ body.mobile-touch-active #hud-objective-bar {
     <a class="hud-btn" id="btn-studio" href="https://bhr3x.github.io/game.md/" target="_blank" rel="noopener noreferrer" style="text-decoration:none; border-color:#38bdf8; color:#38bdf8;" title="Visitar estúdio game.md">
       <span>👾 ESTÚDIO: game.md ↗</span>
     </a>
-  </div>
-
-  <!-- Mobile Landscape Orientation Tip Banner -->
-  <div id="orientation-banner" class="modal-hidden">
-    <span>📱 Gire o celular para o modo <strong>Paisagem (Horizontal)</strong> para melhor jogabilidade 🔄</span>
   </div>
 
   <!-- Mobile Menu Button (Visible on Touch screens) -->
@@ -10988,9 +11018,7 @@ class FirstPersonControls {
     this.euler.y += rotY;
     const maxPitch = Math.PI / 2 - 0.05;
     this.euler.x = Math.max(-maxPitch, Math.min(maxPitch, this.euler.x));
-    if (!this.isThirdPerson) {
-      this.camera.quaternion.setFromEuler(this.euler);
-    }
+    this.updateCameraPosition(0);
   }
 
   update(delta) {
@@ -11803,7 +11831,7 @@ class TouchController {
   isInteractiveElement(target) {
     if (!target) return false;
     return !!target.closest(
-      'button, a, input, select, .touch-action-btn, #mobile-menu-drawer, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, .hud-btn'
+      'button, a, input, select, .touch-action-btn, .npc-action-card, #npc-quick-dock, #interact-prompt, #mobile-menu-drawer, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, .hud-btn, .interactive-touch, [role="button"]'
     );
   }
 
@@ -11833,11 +11861,11 @@ class TouchController {
       // Ignore touches on HUD buttons, active modals or action buttons
       if (this.isInteractiveElement(target)) continue;
 
-      // Left Zone: Virtual Thumbstick ("Stick to Walk")
-      // Left 48% of screen and lower 75% of screen height
-      const isLeftZone = touch.clientX < Math.max(240, screenWidth * 0.48) && touch.clientY > screenHeight * 0.25;
+      // Movement Zone: Virtual Thumbstick ("Stick to Walk")
+      // Confined strictly to bottom-left quadrant (left 45% of width, bottom 75% of height)
+      const isMoveZone = touch.clientX < screenWidth * 0.45 && touch.clientY > screenHeight * 0.25;
 
-      if (isLeftZone && this.moveTouchId === null) {
+      if (isMoveZone && this.moveTouchId === null) {
         if (e.cancelable) e.preventDefault();
         this.moveTouchId = touch.identifier;
 
@@ -11858,11 +11886,15 @@ class TouchController {
             this.joystickBase.classList.add('floating');
           }
         }
+        if (this.joystickBase) {
+          this.joystickBase.classList.add('active');
+        }
 
         this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
       }
-      // Right Zone: Camera Orbit Drag-to-Look
-      else if (touch.clientX >= screenWidth * 0.48 && this.lookTouchId === null) {
+      // Camera Look Drag Zone: Independent Right Thumb / Look Zone
+      // Any touch outside the movement zone (or subsequent touch if move is active)
+      else if (this.lookTouchId === null) {
         if (e.cancelable) e.preventDefault();
         this.lookTouchId = touch.identifier;
         this.lastLookX = touch.clientX;
@@ -11991,7 +12023,7 @@ class TouchController {
       // Clear floating coordinate overrides to smoothly return to home anchor
       this.joystickBase.style.left = '';
       this.joystickBase.style.top = '';
-      this.joystickBase.classList.remove('floating', 'sprinting');
+      this.joystickBase.classList.remove('floating', 'sprinting', 'active');
     }
 
     if (this.joystickKnob) {
@@ -21964,18 +21996,30 @@ class DialogSystem {
 
   initEvents() {
     if (this.btnClose) {
-      this.btnClose.addEventListener('click', () => {
+      const doClose = (e) => {
+        if (e) {
+          e.stopPropagation();
+          if (e.cancelable) e.preventDefault();
+        }
         this.close();
         this.reacquirePointerLock();
-      });
+      };
+      this.btnClose.addEventListener('click', doClose);
+      this.btnClose.addEventListener('touchend', doClose);
     }
 
     const backdrop = this.modalElem ? this.modalElem.querySelector('.modal-backdrop') : null;
     if (backdrop) {
-      backdrop.addEventListener('click', () => {
+      const doBackdropClose = (e) => {
+        if (e) {
+          e.stopPropagation();
+          if (e.cancelable) e.preventDefault();
+        }
         this.close();
         this.reacquirePointerLock();
-      });
+      };
+      backdrop.addEventListener('click', doBackdropClose);
+      backdrop.addEventListener('touchend', doBackdropClose);
     }
 
     window.addEventListener('keydown', (e) => {
@@ -22094,7 +22138,19 @@ class DialogSystem {
         const visualBadges = this.formatActionBadges(opt);
         btn.innerHTML = `${keyBadge} <span class="dialog-option-label">${opt.label}</span> ${visualBadges}`;
 
-        btn.addEventListener('click', () => this.selectOption(idx));
+        let optFired = false;
+        const onSelect = (e) => {
+          if (opt.disabled || optFired) return;
+          optFired = true;
+          if (e) {
+            e.stopPropagation();
+            if (e.cancelable) e.preventDefault();
+          }
+          setTimeout(() => { optFired = false; }, 350);
+          this.selectOption(idx);
+        };
+        btn.addEventListener('click', onSelect);
+        btn.addEventListener('touchend', onSelect);
         this.optionsElem.appendChild(btn);
       });
     }
@@ -25484,6 +25540,21 @@ class InteractableSystem {
 
     this.currentTarget = null;
     this.promptElem = document.getElementById('interact-prompt');
+    if (this.promptElem) {
+      let promptFired = false;
+      const onPromptTrigger = (e) => {
+        if (promptFired) return;
+        promptFired = true;
+        e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        setTimeout(() => { promptFired = false; }, 350);
+        if (this.game && typeof this.game.handleInteract === 'function') {
+          this.game.handleInteract();
+        }
+      };
+      this.promptElem.addEventListener('click', onPromptTrigger);
+      this.promptElem.addEventListener('touchend', onPromptTrigger);
+    }
 
     this.activeQuickNpc = null;
     this.activeQuickOptions = [];
@@ -25852,7 +25923,12 @@ class InteractableSystem {
 
   showPrompt(text) {
     if (!this.promptElem) return;
-    this.promptElem.textContent = text;
+    const isTouch = 'ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0);
+    let displayText = text;
+    if (isTouch) {
+      displayText = text.replace(/\[E\]\s*/g, '⚡ [TOQUE] ');
+    }
+    this.promptElem.textContent = displayText;
     this.promptElem.classList.remove('modal-hidden');
   }
 
@@ -25906,8 +25982,10 @@ class InteractableSystem {
 
     optionsElem.innerHTML = '';
     top3.forEach((opt, idx) => {
-      const card = document.createElement('div');
+      const card = document.createElement('button');
+      card.type = 'button';
       card.className = `npc-action-card ${opt.disabled ? 'disabled' : ''}`;
+      if (opt.disabled) card.disabled = true;
 
       // Extract crisp Verb from label
       let verb = opt.label;
@@ -25940,10 +26018,18 @@ class InteractableSystem {
         <div class="npc-card-badges">${badgesHtml}</div>
       `;
 
-      card.addEventListener('click', (e) => {
+      let actionFired = false;
+      const onAction = (e) => {
+        if (opt.disabled) return;
+        if (actionFired) return;
+        actionFired = true;
         e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        setTimeout(() => { actionFired = false; }, 350);
         this.executeQuickAction(idx);
-      });
+      };
+      card.addEventListener('click', onAction);
+      card.addEventListener('touchend', onAction);
 
       optionsElem.appendChild(card);
     });
@@ -29006,13 +29092,6 @@ class GameApp {
       this.sound.updateMusicContext(zone.id, inGameHour);
     }
     this.updateRadioLabel();
-
-    // 5. Mobile Orientation Tip (Show only in portrait on mobile)
-    const orientBanner = document.getElementById('orientation-banner');
-    if (orientBanner && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0))) {
-      const isPortrait = window.innerHeight > window.innerWidth;
-      orientBanner.classList.toggle('modal-hidden', !isPortrait);
-    }
   }
 
   updateRadioLabel() {

@@ -18,6 +18,21 @@ export class InteractableSystem {
 
     this.currentTarget = null;
     this.promptElem = document.getElementById('interact-prompt');
+    if (this.promptElem) {
+      let promptFired = false;
+      const onPromptTrigger = (e) => {
+        if (promptFired) return;
+        promptFired = true;
+        e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        setTimeout(() => { promptFired = false; }, 350);
+        if (this.game && typeof this.game.handleInteract === 'function') {
+          this.game.handleInteract();
+        }
+      };
+      this.promptElem.addEventListener('click', onPromptTrigger);
+      this.promptElem.addEventListener('touchend', onPromptTrigger);
+    }
 
     this.activeQuickNpc = null;
     this.activeQuickOptions = [];
@@ -386,7 +401,12 @@ export class InteractableSystem {
 
   showPrompt(text) {
     if (!this.promptElem) return;
-    this.promptElem.textContent = text;
+    const isTouch = 'ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0);
+    let displayText = text;
+    if (isTouch) {
+      displayText = text.replace(/\[E\]\s*/g, '⚡ [TOQUE] ');
+    }
+    this.promptElem.textContent = displayText;
     this.promptElem.classList.remove('modal-hidden');
   }
 
@@ -440,8 +460,10 @@ export class InteractableSystem {
 
     optionsElem.innerHTML = '';
     top3.forEach((opt, idx) => {
-      const card = document.createElement('div');
+      const card = document.createElement('button');
+      card.type = 'button';
       card.className = `npc-action-card ${opt.disabled ? 'disabled' : ''}`;
+      if (opt.disabled) card.disabled = true;
 
       // Extract crisp Verb from label
       let verb = opt.label;
@@ -474,10 +496,18 @@ export class InteractableSystem {
         <div class="npc-card-badges">${badgesHtml}</div>
       `;
 
-      card.addEventListener('click', (e) => {
+      let actionFired = false;
+      const onAction = (e) => {
+        if (opt.disabled) return;
+        if (actionFired) return;
+        actionFired = true;
         e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        setTimeout(() => { actionFired = false; }, 350);
         this.executeQuickAction(idx);
-      });
+      };
+      card.addEventListener('click', onAction);
+      card.addEventListener('touchend', onAction);
 
       optionsElem.appendChild(card);
     });

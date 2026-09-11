@@ -1310,13 +1310,6 @@ class GameApp {
       this.sound.updateMusicContext(zone.id, inGameHour);
     }
     this.updateRadioLabel();
-
-    // 5. Mobile Orientation Tip (Show only in portrait on mobile)
-    const orientBanner = document.getElementById('orientation-banner');
-    if (orientBanner && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0))) {
-      const isPortrait = window.innerHeight > window.innerWidth;
-      orientBanner.classList.toggle('modal-hidden', !isPortrait);
-    }
   }
 
   updateRadioLabel() {

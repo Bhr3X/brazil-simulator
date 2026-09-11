@@ -24,18 +24,30 @@ export class DialogSystem {
 
   initEvents() {
     if (this.btnClose) {
-      this.btnClose.addEventListener('click', () => {
+      const doClose = (e) => {
+        if (e) {
+          e.stopPropagation();
+          if (e.cancelable) e.preventDefault();
+        }
         this.close();
         this.reacquirePointerLock();
-      });
+      };
+      this.btnClose.addEventListener('click', doClose);
+      this.btnClose.addEventListener('touchend', doClose);
     }
 
     const backdrop = this.modalElem ? this.modalElem.querySelector('.modal-backdrop') : null;
     if (backdrop) {
-      backdrop.addEventListener('click', () => {
+      const doBackdropClose = (e) => {
+        if (e) {
+          e.stopPropagation();
+          if (e.cancelable) e.preventDefault();
+        }
         this.close();
         this.reacquirePointerLock();
-      });
+      };
+      backdrop.addEventListener('click', doBackdropClose);
+      backdrop.addEventListener('touchend', doBackdropClose);
     }
 
     window.addEventListener('keydown', (e) => {
@@ -154,7 +166,19 @@ export class DialogSystem {
         const visualBadges = this.formatActionBadges(opt);
         btn.innerHTML = `${keyBadge} <span class="dialog-option-label">${opt.label}</span> ${visualBadges}`;
 
-        btn.addEventListener('click', () => this.selectOption(idx));
+        let optFired = false;
+        const onSelect = (e) => {
+          if (opt.disabled || optFired) return;
+          optFired = true;
+          if (e) {
+            e.stopPropagation();
+            if (e.cancelable) e.preventDefault();
+          }
+          setTimeout(() => { optFired = false; }, 350);
+          this.selectOption(idx);
+        };
+        btn.addEventListener('click', onSelect);
+        btn.addEventListener('touchend', onSelect);
         this.optionsElem.appendChild(btn);
       });
     }

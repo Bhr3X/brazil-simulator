@@ -530,9 +530,7 @@ export class FirstPersonControls {
     this.euler.y += rotY;
     const maxPitch = Math.PI / 2 - 0.05;
     this.euler.x = Math.max(-maxPitch, Math.min(maxPitch, this.euler.x));
-    if (!this.isThirdPerson) {
-      this.camera.quaternion.setFromEuler(this.euler);
-    }
+    this.updateCameraPosition(0);
   }
 
   update(delta) {

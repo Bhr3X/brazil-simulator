@@ -269,7 +269,7 @@ export class TouchController {
   isInteractiveElement(target) {
     if (!target) return false;
     return !!target.closest(
-      'button, a, input, select, .touch-action-btn, #mobile-menu-drawer, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, .hud-btn'
+      'button, a, input, select, .touch-action-btn, .npc-action-card, #npc-quick-dock, #interact-prompt, #mobile-menu-drawer, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, .hud-btn, .interactive-touch, [role="button"]'
     );
   }
 
@@ -299,11 +299,11 @@ export class TouchController {
       // Ignore touches on HUD buttons, active modals or action buttons
       if (this.isInteractiveElement(target)) continue;
 
-      // Left Zone: Virtual Thumbstick ("Stick to Walk")
-      // Left 48% of screen and lower 75% of screen height
-      const isLeftZone = touch.clientX < Math.max(240, screenWidth * 0.48) && touch.clientY > screenHeight * 0.25;
+      // Movement Zone: Virtual Thumbstick ("Stick to Walk")
+      // Confined strictly to bottom-left quadrant (left 45% of width, bottom 75% of height)
+      const isMoveZone = touch.clientX < screenWidth * 0.45 && touch.clientY > screenHeight * 0.25;
 
-      if (isLeftZone && this.moveTouchId === null) {
+      if (isMoveZone && this.moveTouchId === null) {
         if (e.cancelable) e.preventDefault();
         this.moveTouchId = touch.identifier;
 
@@ -324,11 +324,15 @@ export class TouchController {
             this.joystickBase.classList.add('floating');
           }
         }
+        if (this.joystickBase) {
+          this.joystickBase.classList.add('active');
+        }
 
         this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
       }
-      // Right Zone: Camera Orbit Drag-to-Look
-      else if (touch.clientX >= screenWidth * 0.48 && this.lookTouchId === null) {
+      // Camera Look Drag Zone: Independent Right Thumb / Look Zone
+      // Any touch outside the movement zone (or subsequent touch if move is active)
+      else if (this.lookTouchId === null) {
         if (e.cancelable) e.preventDefault();
         this.lookTouchId = touch.identifier;
         this.lastLookX = touch.clientX;
@@ -457,7 +461,7 @@ export class TouchController {
       // Clear floating coordinate overrides to smoothly return to home anchor
       this.joystickBase.style.left = '';
       this.joystickBase.style.top = '';
-      this.joystickBase.classList.remove('floating', 'sprinting');
+      this.joystickBase.classList.remove('floating', 'sprinting', 'active');
     }
 
     if (this.joystickKnob) {
