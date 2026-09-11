@@ -1593,5 +1593,545 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  BLOCO_CARNAVAL: {
+    id: 'BLOCO_CARNAVAL',
+    title: '🥁 BLOCO DA EDGAR FACÓ',
+    getIntroText: (state) => `
+      O mestre do bloco segura o apito ao lado do trio estacionado, com o couro do surdo ainda quente.<br>
+      Folia no asfalto, confete no chão e o cortejo preso no horário do evento.<br>
+      <em>"— Entra na roda, guerreiro! Hoje a Edgar Facó é passarela!"</em><br>
+      <small style="color:#ffcc00">Saldo: ${state.formattedGrana} | Sanidade: ${state.sanidade}% | Ginga: ${state.ginga}</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'dancar_bloco',
+        label: state.flags.dancouBloco
+          ? 'Dançar no bloco (Você já mandou seu passo neste run)'
+          : 'Entrar na roda e dançar no bloco até o apito',
+        costLabel: 'Ritmo do cortejo (1x por run)',
+        disabled: Boolean(state.flags.dancouBloco),
+        execute: (state) => {
+          if (state.flags.dancouBloco) {
+            return 'O mestre aponta o apito: a cota de dança deste run já foi. O trio segue sem te puxar de novo.';
+          }
+          const mandouBem = state.rng.chance(0.65);
+          if (mandouBem) {
+            state.apply({
+              ginga: 15,
+              sanidade: 20,
+              flags: { dancouBloco: true }
+            }, 'news.bloco_danca');
+            return 'O surdo marcou o passo, o apito fechou a frase e a roda abriu pra você. Cortejo inteiro respondeu (+15 Ginga, +20% Sanidade)!';
+          }
+          state.apply({
+            sanidade: -8,
+            ginga: 5,
+            flags: { dancouBloco: true }
+          }, 'news.bloco_danca');
+          return 'O pé escorregou no confete e o apito riu alto. A roda segurou você de pé, mas a moral esfriou (-8% Sanidade, +5 Ginga).';
+        }
+      }
+    ]
+  },
+
+  CHURRASCO_CAMPO: {
+    id: 'CHURRASCO_CAMPO',
+    title: '🍖 CHURRASCO DO CAMPINHO',
+    getIntroText: (state) => `
+      O churrasqueiro vira a grelha ao lado da churrasqueira de tijolo, fumaça subindo no platô da favela.<br>
+      No campo, a pelada segue sem atrapalhar o fogo nem o acesso da ladeira.<br>
+      <em>"— Prato feito na brasa ou entra na pelada, chefia?"</em><br>
+      <small style="color:#ffcc00">Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'prato_churrasco',
+        label: state.canAfford(1800)
+          ? 'Pedir o prato do campinho (picanha na brasa, farofa e vinagrete)'
+          : 'Pedir o prato do campinho (Sem grana: R$ 18,00 na brasa)',
+        costLabel: 'R$ 18,00',
+        costCentavos: 1800,
+        disabled: !state.canAfford(1800),
+        execute: (state, sound) => {
+          if (!state.canAfford(1800)) {
+            return 'O churrasqueiro cobre a grelha: sem os R$ 18,00 o prato não sai. Nada foi cobrado e o fogo segue no mesmo ponto.';
+          }
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({
+            grana: -1800,
+            fome: 40,
+            sanidade: 22
+          }, 'news.churrasco_prato');
+          return 'Prato quente, farofa úmida e vinagrete no ponto. O bucho agradece e a cabeça esfria (-R$ 18,00, +40% Bucho, +22% Sanidade).';
+        }
+      },
+      {
+        id: 'pelada_campo',
+        label: state.flags.jogouPelada
+          ? 'Entrar na pelada (Você já jogou sua partida neste run)'
+          : 'Pedir pra entrar na pelada do campinho',
+        costLabel: 'Uma partida (1x por run)',
+        disabled: Boolean(state.flags.jogouPelada),
+        execute: (state) => {
+          if (state.flags.jogouPelada) {
+            return 'Os craques apontam o banco: a vaga da pelada deste run já foi. O campo segue sem te recolocar.';
+          }
+          const ganhou = state.rng.chance(0.55);
+          if (ganhou) {
+            state.apply({
+              ginga: 18,
+              sanidade: 12,
+              fome: -6,
+              flags: { jogouPelada: true }
+            }, 'news.pelada_campo');
+            return 'Você recebeu na meia, cruzou rasteiro e a galera gritou gol no platô (+18 Ginga, +12% Sanidade, -6% Bucho)!';
+          }
+          state.apply({
+            ginga: 8,
+            fome: -10,
+            sanidade: 6,
+            flags: { jogouPelada: true }
+          }, 'news.pelada_campo');
+          return 'A bola escapou no toco e você correu atrás até o fim. Perdeu o lance, mas suou a camisa (+8 Ginga, +6% Sanidade, -10% Bucho).';
+        }
+      }
+    ]
+  },
+
+  BARBEARIA_ACLIVE: {
+    id: 'BARBEARIA_ACLIVE',
+    title: '💈 BARBEARIA DO SEU ANTÔNIO',
+    getIntroText: (state) => `
+      O cheiro inconfundível de loção pós-barba mentolada e talco perfumado enche o salão.<br>
+      Seu Antônio afia o navalhete no couro de boi e aponta para a cadeira giratória:<br>
+      <em>"— Entra aí meu chapa! Barba, cabelo ou só dar um tapa no visual?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'corte_degrade',
+        label: 'Corte na régua degradê + Barba desenhada na navalha com toalha quente',
+        costLabel: 'R$ 35,00',
+        costCentavos: 3500,
+        disabled: !state.canAfford(3500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -3500, sanidade: 28, ginga: 20 }, 'Corte na régua do Seu Antônio');
+          return 'Cabelo disfarçado no capricho e barba alinhada no navalhete com toalha quente aromática. Autoestima lá em cima (+28% Sanidade, +20 Ginga)!';
+        }
+      },
+      {
+        id: 'papo_futebol',
+        label: state.flags.falouSeuAntonio
+          ? 'Conversar com Seu Antônio (Já resenhou com ele hoje)'
+          : 'Bater papo sobre o Brasileirão e os causos da ladeira',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.falouSeuAntonio),
+        execute: (state) => {
+          state.apply({ sanidade: 12, ginga: 5, flags: { falouSeuAntonio: true } }, 'Resenha na barbearia');
+          return 'Seu Antônio lembrou da final de 94, cornetou o técnico do time e te deu um conselho de ouro sobre a vizinhança (+12% Sanidade, +5 Ginga).';
+        }
+      },
+      {
+        id: 'comprar_pomada',
+        label: 'Comprar pomada modeladora de efeito seco',
+        costLabel: 'R$ 15,00',
+        costCentavos: 1500,
+        disabled: !state.canAfford(1500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -1500, ginga: 15, sanidade: 10 }, 'Pomada modeladora');
+          return 'Penteado travado que resiste à garoa e ao vento da Paula Ferreira! Visual blindado (+15 Ginga, +10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  ACOUQUE_BOI_DE_OURO: {
+    id: 'ACOUQUE_BOI_DE_OURO',
+    title: '🥩 AÇOUGUE BOI DE OURO',
+    getIntroText: (state) => `
+      Ganchos de inox com peças de carne fresca, aroma de corte fresco e o som rítmico do cutelo na tábua.<br>
+      O açougueiro de avental plástico cumprimenta com um aceno vigoroso:<br>
+      <em>"— Bom dia patrão! Hoje a picanha e a linguiça campeira estão daquele jeito, primeira linha!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'comprar_linguica',
+        label: 'Comprar 1kg de linguiça campeira artesanal temperada',
+        costLabel: 'R$ 22,00',
+        costCentavos: 2200,
+        disabled: !state.canAfford(2200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -2200, fome: 40, sanidade: 15 }, 'Linguiça campeira artesanal');
+          return 'Linguiça suculenta grelhada no ponto com ervas finas e pimenta suave. O bucho agradece e a fome foi embora (+40% Bucho, +15% Sanidade).';
+        }
+      },
+      {
+        id: 'comprar_carne_churrasco',
+        label: 'Comprar pedaço nobre de picanha maturada',
+        costLabel: 'R$ 45,00',
+        costCentavos: 4500,
+        disabled: !state.canAfford(4500),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -4500, fome: 55, sanidade: 28, ginga: 10 }, 'Picanha maturada');
+          return 'Carne macia com aquela capa de gordura dourada no sal grosso. Almoço de rei em plena subida da Freguesia (+55% Bucho, +28% Sanidade, +10 Ginga)!';
+        }
+      },
+      {
+        id: 'pedir_osso_sopa',
+        label: state.flags.pegouOssoAcougue
+          ? 'Pedir ossinho de boi pro cachorro / sopa (Cota do dia já retirada)'
+          : 'Pedir um ossinho de boi com tutano para o caldo',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.pegouOssoAcougue),
+        execute: (state) => {
+          state.apply({ sanidade: 8, fome: 5, flags: { pegouOssoAcougue: true } }, 'Osso com tutano');
+          return 'O açougueiro embrulhou com carinho um osso recheado de tutano: "— Faz um caldão reforçado que levanta defunto!" (+8% Sanidade, +5% Bucho).';
+        }
+      }
+    ]
+  },
+
+  HORTIFRUTI_PAULA_FERREIRA: {
+    id: 'HORTIFRUTI_PAULA_FERREIRA',
+    title: '🍎 HORTIFRÚTI DA LADEIRA',
+    getIntroText: (state) => `
+      Caixotes de madeira transbordando frutas coloridas, cheiro verde de coentro e laranjas recém-chegadas do CEAGESP.<br>
+      A dona da banca borrifa água fresca nas verduras e sorri calorosa:<br>
+      <em>"— Olá freguês! Fruta doce, verdura fresquinha e água de coco gelada pra hidratar na ladeira!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'duzia_banana',
+        label: 'Comprar uma dúzia de bananas-prata maduras',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -800, fome: 25, sanidade: 12 }, 'Bananas do CEAGESP');
+          return 'Bananas doces e ricas em potássio para encarar a subida íngreme sem cãibra (+25% Bucho, +12% Sanidade).';
+        }
+      },
+      {
+        id: 'agua_coco',
+        label: 'Tomar uma água de coco gelada furada na hora',
+        costLabel: 'R$ 7,00',
+        costCentavos: 700,
+        disabled: !state.canAfford(700),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -700, fome: 15, sanidade: 22 }, 'Água de coco da ladeira');
+          return 'Água de coco doce e trincando de gelada com canudinho biodegradável. Hidratação pura sob o sol de Pirituba (+15% Bucho, +22% Sanidade)!';
+        }
+      },
+      {
+        id: 'escolher_laranja',
+        label: state.flags.provouFrutaLadeira
+          ? 'Experimentar gomo de fruta na banca (Já provou hoje)'
+          : 'Aceitar um gomo de tangerina ponkã cortado na faca',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.provouFrutaLadeira),
+        execute: (state) => {
+          state.apply({ sanidade: 6, fome: 5, flags: { provouFrutaLadeira: true } }, 'Gomo de tangerina');
+          return 'A dona te oferece um gomo no capricho: "— Doce feito mel, freguês!" Refrescou a garganta e alegrou o dia (+6% Sanidade, +5% Bucho).';
+        }
+      }
+    ]
+  },
+
+  BOTECO_LADEIRA: {
+    id: 'BOTECO_LADEIRA',
+    title: '🍻 BAR DA LADEIRA (SINUCA & DOMINÓ)',
+    getIntroText: (state) => `
+      As pedras de dominó estalam com força nas mesinhas de madeira sob o toldo amarelo.<br>
+      Aposentados de chapéu de palha dão risada alta enquanto uma garrafa de cerveja sua no balde de gelo:<br>
+      <em>"— Quem é o próximo pra tomar um coro no dominó? Senta aí freguês!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'partida_domino',
+        label: state.flags.jogouDominoLadeira
+          ? 'Jogar partida de dominó apostada (Já jogou seu desafio nesta rodada)'
+          : 'Desafiar os veteranos no dominó (Aposta R$ 5,00)',
+        costLabel: 'Aposta R$ 5,00 (1x por run)',
+        costCentavos: 500,
+        disabled: Boolean(state.flags.jogouDominoLadeira) || !state.canAfford(500),
+        execute: (state, sound) => {
+          const vitoria = state.rng.chance(Math.min(0.85, 0.40 + (state.ginga / 200)));
+          if (vitoria) {
+            if (sound) sound.playCoin();
+            state.apply({
+              grana: 1500,
+              ginga: 16,
+              sanidade: 18,
+              flags: { jogouDominoLadeira: true }
+            }, 'Vitória no dominó da ladeira');
+            return '— BUCHA DE SENA NA CABEÇA! Você bateu de primeira fechando o jogo. Os velhinhos aplaudiram e passaram R$ 15,00 (+R$ 15,00, +16 Ginga, +18% Sanidade)!';
+          } else {
+            state.apply({
+              grana: -500,
+              ginga: 5,
+              sanidade: 6,
+              flags: { jogouDominoLadeira: true }
+            }, 'Derrota honrosa no dominó');
+            return 'O Seu Ditinho bateu na ponta com um carretão invisível! Você perdeu R$ 5,00, mas ganhou o respeito da mesa (+5 Ginga, +6% Sanidade).';
+          }
+        }
+      },
+      {
+        id: 'cerveja_torresmo',
+        label: 'Cerveja 600ml gelada de garrafa + Porção de torresmo crocante',
+        costLabel: 'R$ 16,00',
+        costCentavos: 1600,
+        disabled: !state.canAfford(1600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1600, fome: 32, sanidade: 24 }, 'Cerveja e torresmo da ladeira');
+          return 'Copo lagoinha cheio de colarinho branco e torresmo que estala a cada mordida. O cansaço da subida sumiu no ato (+32% Bucho, +24% Sanidade).';
+        }
+      },
+      {
+        id: 'prosa_balcao',
+        label: state.flags.prosaLadeira
+          ? 'Ouvir conselhos no balcão (Já conversou hoje)'
+          : 'Tomar uma água mineral com gás e ouvir os causos antigos de Pirituba',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.prosaLadeira),
+        execute: (state) => {
+          state.apply({ sanidade: 10, flags: { prosaLadeira: true } }, 'Prosa no balcão da ladeira');
+          return 'O dono do bar conta quando a Paula Ferreira era estrada de terra batida e bondinho subia até a igreja. Nostalgia pura (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  CASA_DO_NORTE: {
+    id: 'CASA_DO_NORTE',
+    title: '☀️ CASA DO NORTE ASA BRANCA',
+    getIntroText: (state) => `
+      O aroma inebriante de carne de sol assada na manteiga de garrafa e queijo coalho na brasa invade o ar.<br>
+      Música de Luiz Gonzaga ecoa suave de uma caixinha de som enquanto o dono te recebe de braços abertos:<br>
+      <em>"— Ô cabra bom! Aqui tem sustança pra aguentar qualquer tranco em São Paulo!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'baiao_dois',
+        label: 'Prato comercial farto de Baião de Dois com carne de sol e queijo coalho',
+        costLabel: 'R$ 26,00',
+        costCentavos: 2600,
+        disabled: !state.canAfford(2600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -2600, fome: 60, sanidade: 30 }, 'Baião de Dois da Casa do Norte');
+          return 'Feijão fradinho, arroz soltinho, pedaços generosos de carne de sol e nata. Sustança pesada que enche o bucho por horas (+60% Bucho, +30% Sanidade)!';
+        }
+      },
+      {
+        id: 'queijo_coalho',
+        label: 'Espeto de queijo coalho tostado com melaço de cana de rapadura',
+        costLabel: 'R$ 12,00',
+        costCentavos: 1200,
+        disabled: !state.canAfford(1200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1200, fome: 30, sanidade: 18 }, 'Queijo coalho com melaço');
+          return 'Queijo dourado estalando com crostinha crocante e o toque adocicado do melaço artesanal (+30% Bucho, +18% Sanidade).';
+        }
+      },
+      {
+        id: 'dose_cachaca_artesanal',
+        label: 'Dose de cachaça de alambique curtida na casca de jatobá',
+        costLabel: 'R$ 6,00',
+        costCentavos: 600,
+        disabled: !state.canAfford(600),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -600, ginga: 15, sanidade: 10, fome: -5 }, 'Cachaça curtida no jatobá');
+          return 'Desceu queimando a garganta e esquentando a alma. O passo ficou mais leve e o gingado afiado (+15 Ginga, +10% Sanidade, -5% Bucho)!';
+        }
+      }
+    ]
+  },
+
+  LOTERICA_PIRITUBA: {
+    id: 'LOTERICA_PIRITUBA',
+    title: '🍀 LOTÉRICA PIRITUBA',
+    getIntroText: (state) => `
+      Guichês blindados com avisos da Caixa, cartazes da Mega-Sena acumulada e o barulho de impressoras térmicas.<br>
+      A atendente atende no interfone do vidro:<br>
+      <em>"— Próximo! Vai ser aposta da sorte ou pagamento de contas no Caixa Aqui?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'aposta_mega_sena',
+        label: 'Fazer uma fezinha na Mega-Sena (Volante simples de 6 dezenas)',
+        costLabel: 'R$ 5,00',
+        costCentavos: 500,
+        disabled: !state.canAfford(500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const sorteGrande = state.rng.chance(0.015);
+          const sorteMedia = !sorteGrande && state.rng.chance(0.15);
+
+          if (sorteGrande) {
+            state.apply({ grana: 50000, sanidade: 50, ginga: 35 }, 'ACERTOU NA MEGA-SENA!');
+            return '🎉 INACREDITÁVEL! SUA APOSTA BATEU NA QUADRA PREMIADA! Você recebeu R$ 500,00 na hora no guichê (+R$ 500,00, +50% Sanidade, +35 Ginga)!';
+          } else if (sorteMedia) {
+            state.apply({ grana: 4500, sanidade: 22, ginga: 15 }, 'Acerto na raspadinha/loto');
+            return '🍀 O bilhete rendeu um prêmio surpresa de R$ 50,00! A atendente te pagou em dinheiro vivo (+R$ 50,00, +22% Sanidade, +15 Ginga)!';
+          } else {
+            state.apply({ grana: -500, sanidade: 10 }, 'Aposta Mega-Sena');
+            return 'Comprovante verde no bolso. A esperança de ficar milionário renova as energias do trabalhador paulistano (+10% Sanidade).';
+          }
+        }
+      },
+      {
+        id: 'pagar_conta_luz',
+        label: state.flags.boletoPago
+          ? 'Pagar conta de luz Enel (Boleto do dia já quitado com sucesso)'
+          : 'Pagar conta de luz da Enel (Meta do dia)',
+        costLabel: 'R$ 124,50',
+        costCentavos: 12450,
+        disabled: Boolean(state.flags.boletoPago) || !state.canAfford(12450),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: -12450,
+            sanidade: 35,
+            removeInventoryId: 'boleto_enel',
+            flags: { boletoPago: true }
+          }, 'Pagamento da conta de luz na Lotérica');
+          return 'Boleto autenticado no guichê com carimbo mecânico! Nome limpo e energia garantida (+35% Sanidade)!';
+        }
+      },
+      {
+        id: 'raspadinha_dinheiro',
+        label: 'Comprar Raspadinha Instantânea da Caixa',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const ganhou = state.rng.chance(0.40);
+          if (ganhou) {
+            state.apply({ grana: 700, sanidade: 15, ginga: 10 }, 'Prêmio na Raspadinha');
+            return 'Raspou a moeda e achou três trevos dourados! Ganhou R$ 10,00 no ato (+R$ 10,00 líquido, +15% Sanidade, +10 Ginga)!';
+          } else {
+            state.apply({ grana: -300, sanidade: -3 }, 'Raspadinha sem prêmio');
+            return 'Bateu na trave: dois números iguais e um diferente. Fica pra próxima (-R$ 3,00, -3% Sanidade).';
+          }
+        }
+      }
+    ]
+  },
+
+  PASTELARIA_BETO: {
+    id: 'PASTELARIA_BETO',
+    title: '🥟 PASTELARIA DO BETO',
+    getIntroText: (state) => `
+      O barulho borbulhante do tacho de óleo quente e o vapor doce da cana moída no engenho elétrico.<br>
+      Seu Beto escorre um pastel dourado e estalando com a escumadeira inox:<br>
+      <em>"— Saiu agora, sequinho e crocante! Vai querer de carne com ovo ou queijo especial?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pastel_especial_30cm',
+        label: 'Pastel Especial de 30cm (Carne moída, queijo, ovo e azeitona) + Copo de Garapa 500ml',
+        costLabel: 'R$ 15,00',
+        costCentavos: 1500,
+        disabled: !state.canAfford(1500),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1500, fome: 55, sanidade: 25 }, 'Pastel de 30cm com caldo de cana');
+          return 'Massa folhada cheia de bolhas crocantes, queijo esticando e caldo de cana com limão trincando de gelado. Bucho lotado (+55% Bucho, +25% Sanidade)!';
+        }
+      },
+      {
+        id: 'pastel_palmito',
+        label: 'Pastel vegetariano de palmito pupunha cremoso',
+        costLabel: 'R$ 10,00',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1000, fome: 35, sanidade: 16 }, 'Pastel de palmito cremoso');
+          return 'Recheio cremoso e farto, massa levinha e crocante. Clássico paulistano aprovado (+35% Bucho, +16% Sanidade).';
+        }
+      },
+      {
+        id: 'vinagrete_extra',
+        label: state.flags.vinagreteBeto
+          ? 'Caprichar no pote de vinagrete e pimenta (Já temperou hoje)'
+          : 'Temperar o pastel com o vinagrete caseiro e molho de pimenta da casa',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.vinagreteBeto),
+        execute: (state) => {
+          state.apply({ sanidade: 6, ginga: 4, flags: { vinagreteBeto: true } }, 'Vinagrete com pimenta');
+          return 'Colherada farta de vinagrete ácido com pimenta malagueta caseira. Deu aquele toque de mestre no lanche (+6% Sanidade, +4 Ginga).';
+        }
+      }
+    ]
+  },
+
+  BAR_DO_PEIXE: {
+    id: 'BAR_DO_PEIXE',
+    title: '🐟 BAR & PETISCARIA CANTINHO DO PEIXE',
+    getIntroText: (state) => `
+      As mesas externas sob guarda-sóis azuis servem travessas de peixe frito estalando e limão cortado em quatro.<br>
+      O garçom de bandeja equilibrada no ombro sorri na calçada:<br>
+      <em>"— Fala patrão! Isca de tilápia com molho tártaro ou manjubinha frita com cerveja trincando?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'isca_tilapia',
+        label: 'Porção farta de isca de tilápia crocante com molho tártaro e limão taiti',
+        costLabel: 'R$ 32,00',
+        costCentavos: 3200,
+        disabled: !state.canAfford(3200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -3200, fome: 50, sanidade: 28 }, 'Isca de tilápia crocante');
+          return 'Peixe fresco, empanado fininho e crocante com gotas de limão e molho tártaro cremoso. Almoço de respeito (+50% Bucho, +28% Sanidade)!';
+        }
+      },
+      {
+        id: 'lambari_cerveja',
+        label: 'Porção de manjubinha frita + Cerveja 600ml estupidamente gelada no balde',
+        costLabel: 'R$ 24,00',
+        costCentavos: 2400,
+        disabled: !state.canAfford(2400),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -2400, fome: 40, sanidade: 24 }, 'Manjubinha e cerveja trincando');
+          return 'Petisco clássico de boteco paulistano acompanhado de cerveja com aquela garoa de gelo no vidro (+40% Bucho, +24% Sanidade).';
+        }
+      },
+      {
+        id: 'pedir_caldo_peixe',
+        label: 'Caldinho de peixe quente temperado no copinho com cebolinha',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -800, fome: 22, sanidade: 16 }, 'Caldinho de peixe');
+          return 'Caldo fumegante com cheiro-verde e pimentinha que assenta o estômago e revigora as forças (+22% Bucho, +16% Sanidade).';
+        }
+      }
+    ]
   }
 };
+

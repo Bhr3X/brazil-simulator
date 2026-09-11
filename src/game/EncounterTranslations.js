@@ -650,5 +650,289 @@ export const EN_ENCOUNTER_TEXTS = {
         outcome: 'You step through the revolving glass doors onto the Pirituba sidewalk, feeling the authentic urban heat of São Paulo asphalt!'
       }
     }
+  },
+
+  BLOCO_CARNAVAL: {
+    title: '🥁 EDGAR FACÓ CARNIVAL BLOCO',
+    closed: '[CLOSED] BLOCO OUTSIDE EVENT HOURS',
+    unavailable: 'The bloco master already closed your dance slot for this run.',
+    news: {
+      bloco_danca: 'Danced with the carnival bloco on Edgar Facó'
+    },
+    intro: (state) => `
+      The bloco master holds his whistle beside the parked trio, the bass drum still warm.<br>
+      Confetti on the plaza and the cortege locked to the event clock.<br>
+      <em>"— Join the circle, warrior! Edgar Facó is a runway today!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Sanity: ${state.sanidade}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      dancar_bloco: {
+        label: (state) => state.flags.dancouBloco
+          ? 'Dance in the bloco (You already took your turn this run)'
+          : 'Join the circle and dance until the whistle',
+        costLabel: 'Parade rhythm (1x per run)',
+        outcome: (state, ptResult) => ptResult.includes('escorregou')
+          ? 'Your foot slipped on confetti and the whistle laughed. The circle kept you upright, but the vibe cooled (-8% Sanity, +5 Ginga).'
+          : 'The bass drum locked your step, the whistle closed the phrase, and the whole cortege answered (+15 Ginga, +20% Sanity)!'
+      }
+    }
+  },
+
+  CHURRASCO_CAMPO: {
+    title: '🍖 CAMPINHO BARBECUE',
+    closed: '[CLOSED] CAMPINHO OUTSIDE EVENT HOURS',
+    unavailable: 'The grill cook already filled your pelada slot for this run.',
+    news: {
+      churrasco_prato: 'Ate a barbecue plate at the favela campinho',
+      pelada_campo: 'Played a pickup match on the favela pitch'
+    },
+    intro: (state) => `
+      The grill cook turns meat beside the brick barbecue, smoke rising over the favela plateau.<br>
+      The pickup game stays off the fire and the hillside connector.<br>
+      <em>"— Hot plate off the grill, or jump into the pelada?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      prato_churrasco: {
+        label: (state) => state.canAfford(1800)
+          ? 'Order the campinho plate (grilled steak, farofa, and vinagrete)'
+          : 'Order the campinho plate (Need R$ 18.00 — grill stays covered)',
+        costLabel: 'R$ 18.00',
+        outcome: (state, ptResult) => ptResult.includes('sem os R$')
+          ? 'The cook covers the grill: without R$ 18.00 the plate does not leave. Nothing was charged and the fire stays put.'
+          : 'Hot plate, moist farofa, and vinagrete on point. Stomach thanks you and your head cools down (-R$ 18.00, +40% Stomach, +22% Sanity).'
+      },
+      pelada_campo: {
+        label: (state) => state.flags.jogouPelada
+          ? 'Join the pelada (You already played your match this run)'
+          : 'Ask to join the campinho pickup game',
+        costLabel: 'One match (1x per run)',
+        outcome: (state, ptResult) => ptResult.includes('escapou')
+          ? 'The ball squirmed off your toe and you chased it to the end. You missed the play but earned the shirt (+8 Ginga, +6% Sanity, -10% Stomach).'
+          : 'You received at midfield, squared it low, and the plateau yelled goal (+18 Ginga, +12% Sanity, -6% Stomach)!'
+      }
+    }
+  },
+
+  BARBEARIA_ACLIVE: {
+    title: '💈 SEU ANTÔNIO\'S BARBERSHOP',
+    intro: (state) => `
+      The crisp scent of menthol aftershave and fine talcum powder fills the cozy shop.<br>
+      Seu Antônio strops his straight razor on leather and gestures warmly to the swivel chair:<br>
+      <em>"— Come right in, my friend! Haircut, razor beard trim, or just sharpening up your look?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      corte_degrade: {
+        label: 'Razor fade haircut + Straight-razor beard styling with hot towel',
+        outcome: 'Sharp fade taper and straight-razor beard styling with an aromatic hot towel. Confidence through the roof (+28% Sanity, +20 Ginga)!'
+      },
+      papo_futebol: {
+        label: (state) => state.flags.falouSeuAntonio
+          ? 'Chat with Seu Antônio (Already talked with him today)'
+          : 'Talk soccer and local neighborhood stories',
+        costLabel: 'Free (1x per day)',
+        outcome: 'Seu Antônio reminisced about the 1994 World Cup, debated local football tactics, and gave you golden advice (+12% Sanity, +5 Ginga).'
+      },
+      comprar_pomada: {
+        label: 'Buy matte styling hair pomade',
+        outcome: 'Rock-solid hairstyle that withstands the humid breeze of Paula Ferreira hill (+15 Ginga, +10% Sanity).'
+      }
+    }
+  },
+
+  ACOUQUE_BOI_DE_OURO: {
+    title: '🥩 BOI DE OURO BUTCHER SHOP',
+    intro: (state) => `
+      Stainless steel hooks with fresh prime cuts and the rhythmic chop of the cleaver on the wood block.<br>
+      The butcher in a clean white apron gives you a hearty wave:<br>
+      <em>"— Good morning, boss! Today the picanha and country sausage are top notch!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      comprar_linguica: {
+        label: 'Buy 1kg of handcrafted seasoned country sausage',
+        outcome: 'Juicy country sausage grilled to perfection with herbs and mild pepper. Hunger vanquished (+40% Stomach, +15% Sanity).'
+      },
+      comprar_carne_churrasco: {
+        label: 'Buy a prime cut of aged picanha rump steak',
+        outcome: 'Tender steak grilled over rock salt with a golden fat cap. A royal meal on the Freguesia hill (+55% Stomach, +28% Sanity, +10 Ginga)!'
+      },
+      pedir_osso_sopa: {
+        label: (state) => state.flags.pegouOssoAcougue
+          ? 'Ask for a marrow bone for broth/dog (Already claimed today)'
+          : 'Ask for a beef marrow bone for soup broth',
+        costLabel: 'Free (1x per day)',
+        outcome: 'The butcher neatly wraps a rich marrow bone: "— Simmer this into a hearty broth that resurrects the dead!" (+8% Sanity, +5% Stomach).'
+      }
+    }
+  },
+
+  HORTIFRUTI_PAULA_FERREIRA: {
+    title: '🍎 HILLSIDE FRESH PRODUCE MARKET',
+    intro: (state) => `
+      Wooden crates overflowing with colorful tropical fruits, fresh coriander, and sweet oranges from CEAGESP.<br>
+      The market lady mists the leafy greens with cool water and smiles:<br>
+      <em>"— Welcome! Sweet fruit, crisp greens, and cold fresh coconut water for your hill climb!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      duzia_banana: {
+        label: 'Buy a dozen ripe bananas',
+        outcome: 'Sweet, potassium-packed bananas to tackle the steep uphill climb without cramping (+25% Stomach, +12% Sanity).'
+      },
+      agua_coco: {
+        label: 'Drink a freshly drilled ice-cold coconut water',
+        outcome: 'Naturally sweet and sub-zero cold coconut water with a straw. Pure hydration under the Pirituba sun (+15% Stomach, +22% Sanity)!'
+      },
+      escolher_laranja: {
+        label: (state) => state.flags.provouFrutaLadeira
+          ? 'Taste sample fruit at the stand (Already sampled today)'
+          : 'Accept a freshly sliced segment of sweet tangerine',
+        costLabel: 'Free (1x per day)',
+        outcome: 'She hands you a juicy segment: "— Sweet as honey!" Refreshed your throat and brightened your mood (+6% Sanity, +5% Stomach).'
+      }
+    }
+  },
+
+  BOTECO_LADEIRA: {
+    title: '🍻 HILLSIDE CORNER BAR (SNOOKER & DOMINOES)',
+    intro: (state) => `
+      Domino tiles slam down loudly onto wooden tables under the bright yellow awning.<br>
+      Retirees in straw hats laugh heartily as a brown beer bottle chills in an ice bucket:<br>
+      <em>"— Who's next to take a beating in dominoes? Pull up a chair, partner!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      partida_domino: {
+        label: (state) => state.flags.jogouDominoLadeira
+          ? 'Play domino wager match (Already played your match this run)'
+          : 'Challenge the seasoned veterans to dominoes (R$ 5.00 bet)',
+        costLabel: 'R$ 5.00 bet (1x per run)',
+        outcome: (state, ptResult) => ptResult.includes('BUCHA DE SENA')
+          ? '— DOUBLE SIX SLAMMED DOWN! You sealed the table on the first read. The old-timers cheered and handed over R$ 15.00 (+R$ 15.00, +16 Ginga, +18% Sanity)!'
+          : 'Seu Ditinho trapped your corner with a sly move! You lost R$ 5.00, but earned the table\'s deep respect (+5 Ginga, +6% Sanity).'
+      },
+      cerveja_torresmo: {
+        label: '600ml ice-cold bottled beer + Plate of crispy pork cracklings (torresmo)',
+        outcome: 'A cold lager with a snowy foam collar and cracklings that crunch with every bite. The fatigue of the climb vanished instantly (+32% Stomach, +24% Sanity).'
+      },
+      prosa_balcao: {
+        label: (state) => state.flags.prosaLadeira
+          ? 'Hear bar stories (Already talked today)'
+          : 'Sip sparkling water and listen to old tales of Pirituba',
+        costLabel: 'Free (1x per day)',
+        outcome: 'The bartender recalls when Paula Ferreira was a dirt road and trams ran up to the church. Pure São Paulo nostalgia (+10% Sanity).'
+      }
+    }
+  },
+
+  CASA_DO_NORTE: {
+    title: '☀️ ASA BRANCA NORTHEASTERN EMPORIUM',
+    intro: (state) => `
+      The mouth-watering aroma of cured sun-dried beef sizzling in clarified butter and grilled coalho cheese fills the air.<br>
+      Northeastern forró music plays softly as the owner welcomes you with open arms:<br>
+      <em>"— Welcome! True northeastern sustenance to handle any grind in São Paulo!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      baiao_dois: {
+        label: 'Hearty plate of Baião de Dois with sun-dried beef and coalho cheese',
+        outcome: 'Black-eyed peas, seasoned rice, generous chunks of sun-dried beef, and creamy cheese. Heavy fuel that keeps you full for hours (+60% Stomach, +30% Sanity)!'
+      },
+      queijo_coalho: {
+        label: 'Toasted coalho cheese skewer drizzled with sugarcane molasses',
+        outcome: 'Golden grilled cheese with a crispy crust and the sweet glaze of craft molasses (+30% Stomach, +18% Sanity).'
+      },
+      dose_cachaca_artesanal: {
+        label: 'Shot of artisanal copper-still cachaça infused with jatobá bark',
+        outcome: 'Went down fiery and warmed the spirit. Footsteps became lighter and your hustle sharper (+15 Ginga, +10% Sanity, -5% Stomach)!'
+      }
+    }
+  },
+
+  LOTERICA_PIRITUBA: {
+    title: '🍀 PIRITUBA LOTTERY & BANK AGENCY',
+    intro: (state) => `
+      Bulletproof cashier windows with official banners, giant Mega-Sena jackpot posters, and buzzing thermal printers.<br>
+      The teller speaks over the intercom:<br>
+      <em>"— Next! Lottery ticket or bill payments at Caixa Aqui?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      aposta_mega_sena: {
+        label: 'Place a Mega-Sena jackpot bet (Standard 6-number ticket)',
+        outcome: (state, ptResult) => ptResult.includes('INACREDITÁVEL')
+          ? '🎉 UNBELIEVABLE! YOUR NUMBERS HIT A WINNING TIER! You collected R$ 500.00 right at the counter (+R$ 500.00, +50% Sanity, +35 Ginga)!'
+          : ptResult.includes('surpresa')
+            ? '🍀 Your ticket yielded a surprise R$ 50.00 payout! The teller handed you cash (+R$ 50.00, +22% Sanity, +15 Ginga)!'
+            : 'Green ticket tucked into your pocket. The dream of hitting the jackpot fuels the spirit of the São Paulo worker (+10% Sanity).'
+      },
+      pagar_conta_luz: {
+        label: (state) => state.flags.boletoPago
+          ? 'Pay Enel electric bill (Daily bill already paid)'
+          : 'Pay Enel electric bill at the counter (Daily Objective)',
+        costLabel: 'R$ 124.50',
+        outcome: 'Bill officially stamped and paid at the counter! Good credit preserved and lights stay on (+35% Sanity)!'
+      },
+      raspadinha_dinheiro: {
+        label: 'Buy a Caixa instant scratch-off lottery ticket',
+        outcome: (state, ptResult) => ptResult.includes('Ganhou R$')
+          ? 'Scratched the foil and found three golden clovers! Won R$ 10.00 on the spot (+R$ 10.00 net, +15% Sanity, +10 Ginga)!'
+          : 'Just missed: two matching numbers and one dud. Better luck next time (-R$ 3.00, -3% Sanity).'
+      }
+    }
+  },
+
+  PASTELARIA_BETO: {
+    title: '🥟 BETO\'S PASTELARIA',
+    intro: (state) => `
+      The sizzling sizzle of hot oil vats and the sweet vapor of fresh sugarcane passing through the electric press.<br>
+      Seu Beto lifts a golden, blistered pastel with a slotted skimmer:<br>
+      <em>"— Fresh out of the oil, crispy and piping hot! Meat with egg, or special cheese?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pastel_especial_30cm: {
+        label: 'Giant 30cm Special Pastel (Ground beef, cheese, egg, olive) + 500ml Sugarcane Juice',
+        outcome: 'Puffed crispy crust, molten cheese pull, and fresh cold sugarcane juice with lime. Stomach completely full (+55% Stomach, +25% Sanity)!'
+      },
+      pastel_palmito: {
+        label: 'Vegetarian creamy hearts of palm pastel',
+        outcome: 'Generous creamy filling in a flaky golden crust. A São Paulo street food classic (+35% Stomach, +16% Sanity).'
+      },
+      vinagrete_extra: {
+        label: (state) => state.flags.vinagreteBeto
+          ? 'Top with vinaigrette & chili sauce (Already seasoned today)'
+          : 'Top your pastel with homemade tomato vinaigrette and house malagueta hot sauce',
+        costLabel: 'Free (1x per day)',
+        outcome: 'A generous spoonful of tangy vinaigrette with house chili. The master touch on your snack (+6% Sanity, +4 Ginga).'
+      }
+    }
+  },
+
+  BAR_DO_PEIXE: {
+    title: '🐟 CANTINHO DO PEIXE SEAFOOD PUB',
+    intro: (state) => `
+      Outdoor tables under blue parasols serve platters of sizzling fried fish with lime wedges.<br>
+      The waiter balancing a tray on his shoulder grins from the sidewalk:<br>
+      <em>"— Hey boss! Crispy tilapia tenders with tartar sauce or fried whitebait with sub-zero beer?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      isca_tilapia: {
+        label: 'Platter of crispy fried tilapia tenders with tartar sauce and lime',
+        outcome: 'Fresh fish, light crunchy batter, fresh lime juice, and creamy tartar sauce. A respectable feast (+50% Stomach, +28% Sanity)!'
+      },
+      lambari_cerveja: {
+        label: 'Fried crispy whitebait fish + 600ml ice-cold bottled beer in cooler',
+        outcome: 'Classic São Paulo pub finger food paired with beer frosted with ice (+40% Stomach, +24% Sanity).'
+      },
+      pedir_caldo_peixe: {
+        label: 'Cup of steaming hot seasoned fish broth with scallions',
+        outcome: 'Steaming broth with scallions and mild pepper that warms your core and restores vitality (+22% Stomach, +16% Sanity).'
+      }
+    }
   }
 };
+

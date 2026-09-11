@@ -5569,6 +5569,938 @@ class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // ---------------------------------------------------------------------------
+  // Trompe-l'œil Boundary Illusion Walls & Construction Site Textures
+  // ---------------------------------------------------------------------------
+
+  // Realistic forced-perspective painted mural of Av. Edgar Facó / Avenue extending to infinity
+  createTrompeLoeilAvenue(facingWest = true) {
+    const key = `trompe_loeil_avenue_${facingWest ? 'west' : 'east'}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Sky with sunny smog/haze gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 240);
+    skyGrad.addColorStop(0, '#4a90e2');
+    skyGrad.addColorStop(0.6, '#8ec5fc');
+    skyGrad.addColorStop(1, '#e0f2fe');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, 512, 240);
+
+    // Fluffy painted clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+    [[80, 60, 45], [115, 55, 60], [145, 65, 40], [360, 80, 50], [400, 75, 65], [435, 85, 40]].forEach(([cx, cy, r]) => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Distant mountain / Pico do Jaraguá on the horizon
+    ctx.fillStyle = '#64748b';
+    ctx.beginPath();
+    ctx.moveTo(120, 240);
+    ctx.lineTo(200, 165);
+    ctx.lineTo(230, 178);
+    ctx.lineTo(275, 138); // Jaraguá summit
+    ctx.lineTo(315, 180);
+    ctx.lineTo(420, 240);
+    ctx.closePath();
+    ctx.fill();
+
+    // Antenna tower on summit
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(275, 138);
+    ctx.lineTo(275, 92);
+    ctx.stroke();
+
+    // Distant São Paulo skyline towers
+    const bldgs = [
+      [25, 145, 38, 95, '#6b7280'],
+      [70, 125, 32, 115, '#4b5563'],
+      [110, 155, 26, 85, '#9ca3af'],
+      [335, 135, 34, 105, '#4b5563'],
+      [375, 115, 42, 125, '#374151'],
+      [425, 150, 32, 90, '#6b7280'],
+      [465, 130, 36, 110, '#4b5563']
+    ];
+    for (const [bx, by, bw, bh, col] of bldgs) {
+      ctx.fillStyle = col;
+      ctx.fillRect(bx, by, bw, bh);
+      // Windows
+      ctx.fillStyle = '#cbd5e1';
+      for (let wy = by + 6; wy < by + bh - 6; wy += 8) {
+        for (let wx = bx + 4; wx < bx + bw - 4; wx += 6) {
+          ctx.fillRect(wx, wy, 2.5, 3.5);
+        }
+      }
+    }
+
+    const vanishX = 256;
+    const vanishY = 240;
+
+    // Ground terrain / base asphalt
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(0, 240, 512, 272);
+
+    // Roadway perspective polygon
+    ctx.fillStyle = '#262930';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 26, vanishY);
+    ctx.lineTo(vanishX + 26, vanishY);
+    ctx.lineTo(472, 512);
+    ctx.lineTo(40, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Red SPTrans bus lane in perspective
+    ctx.fillStyle = '#991b1b';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 9, vanishY);
+    ctx.lineTo(vanishX + 5, vanishY);
+    ctx.lineTo(290, 512);
+    ctx.lineTo(190, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Yellow dashed center lines
+    ctx.fillStyle = '#f59e0b';
+    for (let i = 1; i <= 10; i++) {
+      const t1 = Math.pow(i / 10, 2.2);
+      const t2 = Math.pow((i + 0.55) / 10, 2.2);
+      const y1 = vanishY + t1 * (512 - vanishY);
+      const y2 = vanishY + t2 * (512 - vanishY);
+      const w1 = 1.2 + t1 * 8;
+      const w2 = 1.2 + t2 * 8;
+      ctx.beginPath();
+      ctx.moveTo(vanishX - w1 / 2, y1);
+      ctx.lineTo(vanishX + w1 / 2, y1);
+      ctx.lineTo(vanishX + w2 / 2, y2);
+      ctx.lineTo(vanishX - w2 / 2, y2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // White outer road borders
+    ctx.fillStyle = '#e2e8f0';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 24, vanishY);
+    ctx.lineTo(vanishX - 22, vanishY);
+    ctx.lineTo(54, 512);
+    ctx.lineTo(44, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(vanishX + 22, vanishY);
+    ctx.lineTo(vanishX + 24, vanishY);
+    ctx.lineTo(468, 512);
+    ctx.lineTo(458, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Sidewalks & curbs converging
+    ctx.fillStyle = '#475569';
+    ctx.beginPath();
+    ctx.moveTo(0, vanishY + 5);
+    ctx.lineTo(vanishX - 26, vanishY);
+    ctx.lineTo(40, 512);
+    ctx.lineTo(0, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(512, vanishY + 5);
+    ctx.lineTo(vanishX + 26, vanishY);
+    ctx.lineTo(472, 512);
+    ctx.lineTo(512, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Curb edge highlights
+    ctx.fillStyle = '#cbd5e1';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 26, vanishY);
+    ctx.lineTo(vanishX - 24, vanishY);
+    ctx.lineTo(44, 512);
+    ctx.lineTo(40, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(vanishX + 24, vanishY);
+    ctx.lineTo(vanishX + 26, vanishY);
+    ctx.lineTo(472, 512);
+    ctx.lineTo(468, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Distant traffic: painted red bus & white Fiat Uno
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(vanishX - 6, vanishY - 9, 15, 11);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(vanishX - 6, vanishY - 6, 15, 2.5);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(vanishX - 5, vanishY - 9, 13, 2.2);
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(vanishX + 15, vanishY + 6, 10, 6.5);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(vanishX + 16, vanishY + 11.5, 2.5, 2);
+    ctx.fillRect(vanishX + 22, vanishY + 11.5, 2.5, 2);
+
+    // Light poles along sidewalk converging in perspective
+    for (let p = 1; p <= 5; p++) {
+      const pt = Math.pow(p / 5, 1.8);
+      const py = vanishY + pt * (512 - vanishY);
+      const pxL = (vanishX - 26) + (35 - (vanishX - 26)) * pt;
+      const pxR = (vanishX + 26) + (477 - (vanishX + 26)) * pt;
+      const ph = 18 + pt * 70;
+
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1 + pt * 2.8;
+      ctx.beginPath();
+      ctx.moveTo(pxL, py);
+      ctx.lineTo(pxL, py - ph);
+      ctx.lineTo(pxL + 6 + pt * 11, py - ph);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(pxR, py);
+      ctx.lineTo(pxR, py - ph);
+      ctx.lineTo(pxR - (6 + pt * 11), py - ph);
+      ctx.stroke();
+    }
+
+    // Concrete slab seams revealing the solid wall structure
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, 508, 508);
+    ctx.beginPath();
+    ctx.moveTo(170, 0); ctx.lineTo(170, 512);
+    ctx.moveTo(342, 0); ctx.lineTo(342, 512);
+    ctx.moveTo(0, 256); ctx.lineTo(512, 256);
+    ctx.stroke();
+
+    // Satirical stencil at the bottom
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('🚧 PINTURA HIPER-REALISTA • TROMPE-L\'OEIL PAULISTANO 🚧', 45, 502);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Colonial cobblestone perspective street for Largo da Matriz boundary
+  createTrompeLoeilColonialStreet() {
+    const key = 'trompe_loeil_colonial_street';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Twilight sky gradient
+    const sky = ctx.createLinearGradient(0, 0, 0, 230);
+    sky.addColorStop(0, '#f97316');
+    sky.addColorStop(0.5, '#fbbf24');
+    sky.addColorStop(1, '#fed7aa');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 512, 230);
+
+    // Historic church dome & colonial roofs on horizon
+    ctx.fillStyle = '#451a03';
+    ctx.beginPath();
+    ctx.arc(256, 175, 28, Math.PI, 0);
+    ctx.lineTo(284, 230);
+    ctx.lineTo(228, 230);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cross on dome
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(256, 147); ctx.lineTo(256, 125);
+    ctx.moveTo(250, 134); ctx.lineTo(262, 134);
+    ctx.stroke();
+
+    // Colonial sobrados along left and right
+    ctx.fillStyle = '#854d0e';
+    ctx.fillRect(20, 140, 95, 90);
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(397, 130, 95, 100);
+
+    const vanishX = 256;
+    const vanishY = 230;
+
+    // Cobblestone ground quad
+    ctx.fillStyle = '#78716c';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 22, vanishY);
+    ctx.lineTo(vanishX + 22, vanishY);
+    ctx.lineTo(460, 512);
+    ctx.lineTo(52, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cobblestone texture lines
+    ctx.strokeStyle = '#44403c';
+    for (let i = 1; i <= 14; i++) {
+      const t = Math.pow(i / 14, 1.9);
+      const y = vanishY + t * (512 - vanishY);
+      ctx.lineWidth = 0.8 + t * 2.5;
+      ctx.beginPath();
+      ctx.moveTo(vanishX - (vanishX - 52) * t, y);
+      ctx.lineTo(vanishX + (460 - vanishX) * t, y);
+      ctx.stroke();
+    }
+
+    // Concrete slab boundary lines
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, 508, 508);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('🏛️ LARGO DA MATRIZ • CONTINUAÇÃO ILUSÓRIA • FREGUESIA DO Ó', 32, 502);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Favela valley perspective for northern crest / campinho
+  createTrompeLoeilFavelaValley() {
+    const key = 'trompe_loeil_favela_valley';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Sunny blue sky
+    const sky = ctx.createLinearGradient(0, 0, 0, 180);
+    sky.addColorStop(0, '#0284c7');
+    sky.addColorStop(1, '#bae6fd');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 512, 180);
+
+    // Jaraguá Mountain in center
+    ctx.fillStyle = '#475569';
+    ctx.beginPath();
+    ctx.moveTo(130, 180);
+    ctx.lineTo(256, 70);
+    ctx.lineTo(380, 180);
+    ctx.closePath();
+    ctx.fill();
+
+    // Antenna
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(256, 70);
+    ctx.lineTo(256, 25);
+    ctx.stroke();
+
+    // Dense favela houses descending down the hillside
+    const houseCols = ['#c2410c', '#b45309', '#a16207', '#9a3412', '#7c2d12', '#475569', '#15803d'];
+    for (let r = 0; r < 8; r++) {
+      const y = 180 + r * 40;
+      const h = 30 + r * 5;
+      const w = 40 + r * 6;
+      for (let x = -20; x < 530; x += w + 6) {
+        ctx.fillStyle = houseCols[Math.floor(Math.random() * houseCols.length)];
+        ctx.fillRect(x + (r % 2) * 15, y, w, h);
+
+        // Blue water tank
+        ctx.fillStyle = '#2563eb';
+        ctx.fillRect(x + (r % 2) * 15 + w * 0.4, y - 6, w * 0.28, 7);
+
+        // Windows
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(x + (r % 2) * 15 + 8, y + 10, 8, 8);
+        ctx.fillRect(x + (r % 2) * 15 + w - 16, y + 10, 8, 8);
+      }
+    }
+
+    // Concrete slab border
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, 508, 508);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('⚽ QUEBRADA INFINITA • MURO PINTADO DO CAMPINHO', 65, 502);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Huge authentic Brazilian public works construction signboard:
+  // "DESCULPE PELO TRANSTORNO, ESTAMOS EM OBRAS"
+  createObrasSignHuge() {
+    const key = 'obras_sign_huge';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(1024, 512);
+
+    // High visibility safety yellow background
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // Inner white border panel
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(20, 20, 984, 472);
+
+    // Top and bottom hazard stripes (black & yellow diagonal caution stripes)
+    const drawHazardStripe = (startY, height) => {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(20, startY, 984, height);
+      ctx.fillStyle = '#f59e0b';
+      const stripeW = 32;
+      for (let x = -height; x < 1024 + height; x += stripeW * 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, startY + height);
+        ctx.lineTo(x + stripeW, startY + height);
+        ctx.lineTo(x + stripeW + height, startY);
+        ctx.lineTo(x + height, startY);
+        ctx.closePath();
+        ctx.fill();
+      }
+    };
+    drawHazardStripe(20, 36);
+    drawHazardStripe(456, 36);
+
+    // Government Header
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '900 30px "Arial Black", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🚧  PREFEITURA DE SÃO PAULO  🚧', 512, 100);
+
+    ctx.fillStyle = '#334155';
+    ctx.font = 'bold 20px "Arial Black", Arial, sans-serif';
+    ctx.fillText('SECRETARIA MUNICIPAL DE INFRAESTRUTURA URBANA E OBRAS', 512, 134);
+
+    // Dividing rule
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(70, 155);
+    ctx.lineTo(954, 155);
+    ctx.stroke();
+
+    // Main Huge Headline
+    ctx.fillStyle = '#dc2626'; // Bold red
+    ctx.font = '900 48px "Arial Black", Arial, sans-serif';
+    ctx.fillText('DESCULPE PELO TRANSTORNO,', 512, 225);
+
+    ctx.fillStyle = '#0f172a'; // Bold dark slate
+    ctx.font = '900 64px "Arial Black", Arial, sans-serif';
+    ctx.fillText('ESTAMOS EM OBRAS', 512, 305);
+
+    // Dividing rule
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(120, 335);
+    ctx.lineTo(904, 335);
+    ctx.stroke();
+
+    // Work specifications & satirical subtext
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 22px Arial, sans-serif';
+    ctx.fillText('OBRA: DUPLICAÇÃO, PAVIMENTAÇÃO E CONTENÇÃO DA MALHA VIÁRIA', 512, 375);
+
+    ctx.font = '19px Arial, sans-serif';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('TRECHO: PIRITUBA ⇄ FREGUESIA DO Ó • LOTE 042-B', 512, 410);
+
+    ctx.font = 'italic 16px Arial, sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('PRAZO ESTIMADO: INDETERMINADO • TRÂNSITO LOCAL RESTRITO', 512, 440);
+
+    // Weathering / bolt rivets on the corners
+    ctx.fillStyle = '#334155';
+    [[35, 35], [989, 35], [35, 477], [989, 477]].forEach(([bx, by]) => {
+      ctx.beginPath();
+      ctx.arc(bx, by, 7, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Brazilian wooden plywood construction hoarding / tapume wall (Verde/Azul Tapume)
+  createTapumeMadeira() {
+    const key = 'tapume_madeira';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Industrial green painted plywood base
+    ctx.fillStyle = '#1e3a2b';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Vertical plywood panel seams
+    ctx.fillStyle = '#14271d';
+    for (let x = 64; x < 256; x += 64) {
+      ctx.fillRect(x - 2, 0, 4, 256);
+    }
+
+    // Wood grain and weathering
+    for (let i = 0; i < 2500; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#244533' : '#172e21';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 3, 2);
+    }
+
+    // Stenciled white text
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('OBRAS', 12, 45);
+    ctx.fillText('PERIGO', 76, 45);
+    ctx.fillText('OBRAS', 140, 45);
+    ctx.fillText('OBRAS', 204, 45);
+
+    // Yellow hazard bottom kickplate
+    ctx.fillStyle = '#eab308';
+    ctx.fillRect(0, 240, 256, 16);
+    ctx.fillStyle = '#0f172a';
+    for (let x = -16; x < 256; x += 24) {
+      ctx.beginPath();
+      ctx.moveTo(x, 256); ctx.lineTo(x + 12, 256);
+      ctx.lineTo(x + 20, 240); ctx.lineTo(x + 8, 240);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    const texture = this.toThreeTexture(canvas, 2, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Orange safety plastic netting / tela fachadeira
+  createTelaLaranjaMesh() {
+    const key = 'tela_laranja_mesh';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 128);
+
+    ctx.clearRect(0, 0, 128, 128);
+    ctx.fillStyle = '#ea580c'; // Vibrant safety orange
+
+    // Perforated mesh grid
+    const cellSize = 16;
+    const barWidth = 4;
+    for (let x = 0; x < 128; x += cellSize) {
+      ctx.fillRect(x, 0, barWidth, 128);
+    }
+    for (let y = 0; y < 128; y += cellSize) {
+      ctx.fillRect(0, y, 128, barWidth);
+    }
+
+    const texture = this.toThreeTexture(canvas, 4, 4);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 63. Barbearia do Seu Antônio Sign
+  createBarbeariaSign() {
+    const key = 'barbearia_antonio_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0f172a'; // Deep navy blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    // Gold decorative border
+    ctx.strokeStyle = '#d4af37';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    // Barber pole stripes left and right
+    const drawStripeIcon = (ox) => {
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(ox, 16, 14, 64);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(ox + 4, 16, 6, 64);
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(ox + 2, 30, 10, 16);
+      ctx.fillRect(ox + 2, 54, 10, 16);
+    };
+    drawStripeIcon(14);
+    drawStripeIcon(228);
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 17px "Arial Black", Impact, sans-serif';
+    ctx.fillText('BARBEARIA SEU ANTÔNIO', 128, 38);
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CORTE • BARBA NA NAVALHA • DEGRADÊ', 128, 58);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'italic 10px serif';
+    ctx.fillText('Desde 1994 • Tradição da Ladeira', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Barber pole spiral cylinder texture
+  createBarberPoleTexture() {
+    const key = 'barber_pole_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 256);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 128, 256);
+
+    // Diagonal helical stripes (red and blue)
+    const stripeWidth = 24;
+    for (let y = -128; y < 384; y += 48) {
+      // Red stripe
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(128, y + 64);
+      ctx.lineTo(128, y + 64 + stripeWidth);
+      ctx.lineTo(0, y + stripeWidth);
+      ctx.closePath();
+      ctx.fill();
+
+      // Blue stripe
+      ctx.fillStyle = '#2563eb';
+      ctx.beginPath();
+      ctx.moveTo(0, y + 24);
+      ctx.lineTo(128, y + 24 + 64);
+      ctx.lineTo(128, y + 24 + 64 + stripeWidth);
+      ctx.lineTo(0, y + 24 + stripeWidth);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    texture.wrapT = THREE.RepeatWrapping;
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 64. Açougue Boi de Ouro Sign
+  createAcougueSign() {
+    const key = 'acougue_boi_de_ouro_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#7f1d1d'; // Rich butcher crimson
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#f59e0b'; // Amber border
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial Black", Impact, sans-serif';
+    ctx.fillText('AÇOUGUE BOI DE OURO', 128, 38);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CARNES NOBRES • PICANHA • LINGUIÇA ARTESANAL', 128, 60);
+
+    ctx.fillStyle = '#fca5a5';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('ABATE DIÁRIO • CORTE NA HORA', 128, 78);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 65. Hortifrúti da Ladeira Sign
+  createHortifrutiSign() {
+    const key = 'hortifruti_ladeira_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#14532d'; // Forest green
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#84cc16'; // Lime accent
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", Impact, sans-serif';
+    ctx.fillText('HORTIFRÚTI DA LADEIRA', 128, 38);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('FRUTAS • VERDURAS • LEGUMES SELECIONADOS', 128, 58);
+
+    ctx.fillStyle = '#a3e635';
+    ctx.font = 'italic 10px sans-serif';
+    ctx.fillText('Direto do CEAGESP para a sua mesa!', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 66. Bar da Ladeira (Sinuca & Dominó)
+  createBotecoLadeiraSign() {
+    const key = 'boteco_ladeira_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0369a1'; // Sky-ocean blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial Black", Impact, sans-serif';
+    ctx.fillText('BAR DA LADEIRA', 128, 38);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('SINUCA • DOMINÓ • CERVEJA ESTUPIDAMENTE GELADA', 128, 60);
+
+    ctx.fillStyle = '#bae6fd';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('TORRESMO CROCANTE & PETISCOS', 128, 78);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 67. Casa do Norte Asa Branca Sign
+  createCasaDoNorteSign() {
+    const key = 'casa_do_norte_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#78350f'; // Warm terracotta leather
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef3c7';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", Impact, sans-serif';
+    ctx.fillText('CASA DO NORTE ASA BRANCA', 128, 38);
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('QUEIJO COALHO • CARNE DE SOL • FARINHAS • CACHAÇAS', 128, 60);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'italic 10px serif';
+    ctx.fillText('O verdadeiro sabor do Nordeste em Pirituba', 128, 78);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 68. Lotérica Pirituba Sign
+  createLotericaSign() {
+    const key = 'loterica_pirituba_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    // Caixa Econômica split background: Blue top, Orange lower accent
+    ctx.fillStyle = '#004d9c'; // Caixa blue
+    ctx.fillRect(0, 0, 256, 70);
+    ctx.fillStyle = '#f37021'; // Caixa orange
+    ctx.fillRect(0, 70, 256, 26);
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(3, 3, 250, 90);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 19px "Arial Black", Impact, sans-serif';
+    ctx.fillText('LOTÉRICA PIRITUBA', 128, 32);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CAIXA AQUI • MEGA-SENA • LOTOFÁCIL', 128, 52);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('PAGUE SUAS CONTAS & BOLETOS AQUI', 128, 86);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 69. Pastelaria do Beto Sign
+  createPastelariaBetoSign() {
+    const key = 'pastelaria_beto_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#b91c1c'; // Vibrant red
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#facc15'; // Bright yellow
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial Black", Impact, sans-serif';
+    ctx.fillText('PASTELARIA DO BETO', 128, 38);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('PASTÉIS GIGANTES 30CM • CALDO DE CANA GELADO', 128, 58);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('FRITURA SEQUINHA & NA HORA • VINAGRETE À VONTADE', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 70. Pet Shop Au-Au Pirituba Sign
+  createPetShopAuAuSign() {
+    const key = 'pet_shop_auau_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0284c7'; // Sky bright blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(4, 4, 248, 88);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", sans-serif';
+    ctx.fillText('PET SHOP AU-AU PIRITUBA', 128, 36);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('🐾 BANHO & TOSA • RAÇÕES • ACESSÓRIOS 🐾', 128, 58);
+
+    ctx.fillStyle = '#e0f2fe';
+    ctx.font = 'italic 10px sans-serif';
+    ctx.fillText('Cuidando do seu melhor amigo com carinho', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 71. Bar & Petiscaria Cantinho do Peixe
+  createBarPeixeSign() {
+    const key = 'bar_peixe_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0f3a5d'; // Deep nautical blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#7dd3fc';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", Impact, sans-serif';
+    ctx.fillText('CANTINHO DO PEIXE', 128, 36);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('ISCA DE TILÁPIA • CAMARÃO • MANJUBINHA FRITA', 128, 58);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('🐟 CERVEJA DE GARRAFA TRINCANDO NO BALDE 🐟', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 72. Authentic Sobrado Residential Facade Texture
+  createSobradoFacade(color = '#d97706', windowTrim = '#1e293b') {
+    const key = `sobrado_facade_${color}_${windowTrim}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Base stucco painted facade
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Weathering and grain
+    for (let i = 0; i < 300; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 3, 3);
+    }
+
+    // Two upper floor windows with wrought iron grates
+    const drawWindow = (wx, wy, ww, wh) => {
+      // Sill / molding
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(wx - 4, wy - 4, ww + 8, wh + 8);
+
+      // Frame
+      ctx.fillStyle = windowTrim;
+      ctx.fillRect(wx, wy, ww, wh);
+
+      // Glass panes (tinted)
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(wx + 4, wy + 4, ww / 2 - 6, wh - 8);
+      ctx.fillRect(wx + ww / 2 + 2, wy + 4, ww / 2 - 6, wh - 8);
+
+      // Iron protective grates
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      for (let gy = wy + 10; gy < wy + wh - 6; gy += 12) {
+        ctx.beginPath();
+        ctx.moveTo(wx, gy); ctx.lineTo(wx + ww, gy);
+        ctx.stroke();
+      }
+      for (let gx = wx + 8; gx < wx + ww; gx += 12) {
+        ctx.beginPath();
+        ctx.moveTo(gx, wy); ctx.lineTo(gx, wy + wh);
+        ctx.stroke();
+      }
+    };
+
+    drawWindow(32, 40, 72, 90);
+    drawWindow(152, 40, 72, 90);
+
+    // Decorative molding band between floors
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 160, 256, 12);
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillRect(0, 172, 256, 4);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 
 
@@ -8301,6 +9233,59 @@ class SoundEngine {
       });
     } catch (e) {}
   }
+
+  // 31. Cartoon Head Bonk on Solid Illusion Wall (Bater a testa no muro de obra)
+  playHeadBonk() {
+    if (!this.isInitialized || this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+
+      // 1. Pitch-dropping hollow thud oscillator (Bonk resonance)
+      const osc = this.ctx.createOscillator();
+      const oscGain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(340, t);
+      osc.frequency.exponentialRampToValueAtTime(75, t + 0.16);
+
+      oscGain.gain.setValueAtTime(0.60, t);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+
+      osc.connect(oscGain);
+      oscGain.connect(this.masterGain);
+      osc.start(t);
+      osc.stop(t + 0.20);
+
+      // 2. Forehead impact dull thud transient
+      const thud = this.ctx.createOscillator();
+      const thudGain = this.ctx.createGain();
+      thud.type = 'triangle';
+      thud.frequency.setValueAtTime(150, t);
+      thud.frequency.exponentialRampToValueAtTime(40, t + 0.09);
+
+      thudGain.gain.setValueAtTime(0.65, t);
+      thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+
+      thud.connect(thudGain);
+      thudGain.connect(this.masterGain);
+      thud.start(t);
+      thud.stop(t + 0.12);
+
+      // 3. Subtle comical high ping ring (slapstick stars effect)
+      const ping = this.ctx.createOscillator();
+      const pingGain = this.ctx.createGain();
+      ping.type = 'sine';
+      ping.frequency.setValueAtTime(780, t + 0.02);
+      ping.frequency.exponentialRampToValueAtTime(520, t + 0.25);
+
+      pingGain.gain.setValueAtTime(0.20, t + 0.02);
+      pingGain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+
+      ping.connect(pingGain);
+      pingGain.connect(this.masterGain);
+      ping.start(t + 0.02);
+      ping.stop(t + 0.30);
+    } catch (e) {}
+  }
 }
 
 
@@ -8597,6 +9582,78 @@ const WORLD_ZONES = [
     openHour: 0.0,
     closeHour: 24.0,
     description: 'Tradicional enclave de sobrados paulistanos, oficinas mecânicas, serralherias e comércio de bairro entre a Edgar Facó e a Freguesia.'
+  },
+  {
+    id: 'BARBEARIA_ACLIVE',
+    name: 'BARBEARIA DO SEU ANTÔNIO (NAVALHA & DEGRADÊ)',
+    min: { x: -14.0, y: 0.0, z: 80.0 },
+    max: { x: -5.0, y: 7.0, z: 94.0 },
+    openHour: 8.0,
+    closeHour: 20.0,
+    description: 'Barbearia clássica de bairro na ladeira. Toalha quente, navalhete afiado, pós-barba mentolado e conversa fiada de futebol.'
+  },
+  {
+    id: 'ACOUQUE_BOI_DE_OURO',
+    name: 'AÇOUGUE BOI DE OURO (CORTE & PICANHA)',
+    min: { x: -14.0, y: 1.0, z: 98.0 },
+    max: { x: -5.0, y: 8.0, z: 112.0 },
+    openHour: 7.0,
+    closeHour: 19.0,
+    description: 'Açougue tradicional de bairro. Ganchos de carne, balcão refrigerado inox, moedor barulhento e cortes frescos.'
+  },
+  {
+    id: 'HORTIFRUTI_PAULA_FERREIRA',
+    name: 'HORTIFRÚTI DA LADEIRA (FRUTAS & VERDURAS)',
+    min: { x: 7.0, y: 0.0, z: 80.0 },
+    max: { x: 16.0, y: 7.0, z: 94.0 },
+    openHour: 7.0,
+    closeHour: 19.5,
+    description: 'Banca de legumes e hortaliças frescas. Caixotes de madeira inclinados na calçada com bananas, laranjas e cheiro de coentro fresco.'
+  },
+  {
+    id: 'BOTECO_LADEIRA',
+    name: 'BAR DA LADEIRA (SINUCA & DOMINÓ)',
+    min: { x: 7.0, y: 3.0, z: 118.0 },
+    max: { x: 16.0, y: 10.0, z: 132.0 },
+    openHour: 10.0,
+    closeHour: 23.5,
+    description: 'Ponto de encontro dos aposentados na subida. Mesinhas de plástico na calçada com partidas acirradas de dominó e torresmo crocante.'
+  },
+  {
+    id: 'CASA_DO_NORTE',
+    name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)',
+    min: { x: -34.0, y: 0.0, z: 36.0 },
+    max: { x: -20.0, y: 7.0, z: 47.0 },
+    openHour: 9.0,
+    closeHour: 22.0,
+    description: 'Empório e restaurante nordestino tradicional na Edgar Facó. Queijo coalho assado, carne de sol, farinha de mandioca e cachaça da boa.'
+  },
+  {
+    id: 'LOTERICA_PIRITUBA',
+    name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)',
+    min: { x: 57.0, y: 0.0, z: 36.0 },
+    max: { x: 68.0, y: 7.0, z: 47.0 },
+    openHour: 8.0,
+    closeHour: 18.0,
+    description: 'Agência lotérica oficial da Caixa. Fila organizada com fitas amarelas, volantes de apostas da Mega-Sena e pagamento de contas com boleto.'
+  },
+  {
+    id: 'PASTELARIA_BETO',
+    name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO DE CANA)',
+    min: { x: 69.0, y: 0.0, z: 36.0 },
+    max: { x: 80.0, y: 7.0, z: 47.0 },
+    openHour: 6.0,
+    closeHour: 22.0,
+    description: 'Pastelaria tradicional com engenho elétrico de caldo de cana, pastéis dourados sequinhos de 30cm e potes de molho vinagrete e pimenta.'
+  },
+  {
+    id: 'BAR_DO_PEIXE',
+    name: 'BAR & PETISCARIA CANTINHO DO PEIXE',
+    min: { x: 96.0, y: 0.0, z: -8.0 },
+    max: { x: 112.0, y: 7.0, z: 2.0 },
+    openHour: 11.0,
+    closeHour: 23.5,
+    description: 'Bar especializado em porções e petiscos na margem da Edgar Facó. Isca de peixe frita, lambari crocante, limão taiti e cerveja estupidamente gelada.'
   },
   {
     id: 'PAULA_FERREIRA_FREGUESIA',
@@ -9445,11 +10502,21 @@ class FirstPersonControls {
       { pos: new THREE.Vector3(1.0, 9.8, -70), look: new THREE.Vector3(28, 45, -190) }
     ];
 
+    // Illusion boundary walls & head bonk
+    this.illusionWalls = [];
+    this.onHeadBonk = null;
+    this.lastBonkTime = 0;
+    this.headBonkOffset = 0;
+
     if (this.scene) {
       this.createPlayerAvatar();
     }
 
     this.initListeners();
+  }
+
+  setIllusionWalls(walls) {
+    this.illusionWalls = Array.isArray(walls) ? walls : [];
   }
 
   initListeners() {
@@ -9940,6 +11007,43 @@ class FirstPersonControls {
     const actualMoveDist = Math.hypot(resolved.x - this.position.x, resolved.z - this.position.z);
     this.position.copy(resolved);
 
+    // 5.5 Check collision against painted illusion walls (Wile E. Coyote head bonk)
+    if (this.illusionWalls && this.illusionWalls.length > 0 && isMoving) {
+      const now = performance.now();
+      if (now - this.lastBonkTime > 1200) {
+        for (let i = 0; i < this.illusionWalls.length; i++) {
+          const wall = this.illusionWalls[i];
+          const b = wall.bounds;
+          if (!b) continue;
+          if (
+            this.position.x >= b.minX - 0.75 && this.position.x <= b.maxX + 0.75 &&
+            this.position.z >= b.minZ - 0.75 && this.position.z <= b.maxZ + 0.75 &&
+            this.position.y >= b.minY - 0.5 && this.position.y <= b.maxY + 1.0
+          ) {
+            const dot = moveDir.x * wall.normal.x + moveDir.z * wall.normal.z;
+            if (dot < -0.25) {
+              this.lastBonkTime = now;
+              this.headBonkOffset = 0.16;
+
+              // Push player back away from solid wall
+              this.position.x += wall.normal.x * 0.35;
+              this.position.z += wall.normal.z * 0.35;
+              this.velocity.set(wall.normal.x * 2.5, 0.6, wall.normal.z * 2.5);
+
+              if (this.sound && typeof this.sound.playHeadBonk === 'function') {
+                this.sound.playHeadBonk();
+              }
+
+              if (typeof this.onHeadBonk === 'function') {
+                this.onHeadBonk(wall);
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+
     // 6. Head bobbing & footsteps
     let bobOffsetY = 0;
     if (isMoving && this.canJump) {
@@ -9958,6 +11062,12 @@ class FirstPersonControls {
       }
     } else {
       this.bobTimer = 0;
+    }
+
+    // Smoothly decay head bonk camera jar
+    if (this.headBonkOffset > 0.001) {
+      this.headBonkOffset = Math.max(0, this.headBonkOffset - delta * 0.65);
+      bobOffsetY += Math.sin(this.headBonkOffset * 35) * this.headBonkOffset * 0.5;
     }
 
     // 7. Update player avatar animations & 3rd person camera
@@ -12327,6 +13437,8 @@ class CityBuilder {
     this.interactiveDoors = [];
     this.blocoTrioGroup = null;
     this.campinhoGroup = null;
+    this.illusionWalls = [];
+    this.constructionSigns = [];
 
     // Lighting fixtures
     this.sunLight = null;
@@ -12351,11 +13463,14 @@ class CityBuilder {
     this.buildBaileDaLaje();
     this.buildExpandedStreetsAndDetails();
     this.buildPaulaFerreiraFreguesiaExtension();
+    this.buildPaulaFerreiraCorridorCommercesAndSobrados();
     this.buildSeteBarrasSector();
     this.buildEdgarFaccoPetronioPortelaExtension();
+    this.buildEdgarFaccoExtendedCommerces();
     this.buildLargoDaMatrizFreguesia();
     this.buildBlocoEdgarFaccoTrioPlaza();
     this.buildFavelaCampinho();
+    this.buildMapBoundaryIllusionWallsAndConstructionSites();
   }
 
   // 1. Scene Lighting & Atmospherics
@@ -16354,29 +17469,34 @@ class CityBuilder {
     // Physics Slope Collider for the climb
     this.physics.addSlope(-6.0, 9.0, 75.0, 155.0, 0.0, 8.5);
 
-    // Concrete Retaining Walls (Muros de Arrimo) on the flanks
+    // Concrete Retaining Walls (Muros de Arrimo) behind stepped buildings
     const wallMat = new THREE.MeshLambertMaterial({
       map: this.textures.createReboco('#7d776f', 8, 4)
     });
 
-    // West retaining wall
-    const wallW = new THREE.Mesh(new THREE.BoxGeometry(0.5, 5.0, slopeHypot), wallMat);
+    // West retaining wall behind buildings
+    const wallW = new THREE.Mesh(new THREE.BoxGeometry(0.5, 6.0, slopeHypot), wallMat);
     wallW.rotation.x = -slopeAngle;
-    wallW.position.set(-6.25, 3.8, 115.0);
+    wallW.position.set(-14.0, 3.8, 115.0);
     this.scene.add(wallW);
 
-    // East retaining wall with green metal railing
-    const wallE = new THREE.Mesh(new THREE.BoxGeometry(0.5, 5.0, slopeHypot), wallMat);
+    // East retaining wall behind buildings
+    const wallE = new THREE.Mesh(new THREE.BoxGeometry(0.5, 6.0, slopeHypot), wallMat);
     wallE.rotation.x = -slopeAngle;
-    wallE.position.set(9.25, 3.8, 115.0);
+    wallE.position.set(17.0, 3.8, 115.0);
     this.scene.add(wallE);
 
-    // Metal safety guardrail along the hillside sidewalk
-    const railMat = new THREE.MeshLambertMaterial({ color: 0x224422 });
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, slopeHypot), railMat);
-    rail.rotation.x = -slopeAngle;
-    rail.position.set(9.0, 5.0, 115.0);
-    this.scene.add(rail);
+    // Sidewalk stone curbs framing the street
+    const curbMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+    const curbW = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.25, slopeHypot), curbMat);
+    curbW.rotation.x = -slopeAngle;
+    curbW.position.set(-3.5, 4.35, 115.0);
+    this.scene.add(curbW);
+
+    const curbE = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.25, slopeHypot), curbMat);
+    curbE.rotation.x = -slopeAngle;
+    curbE.position.set(6.5, 4.35, 115.0);
+    this.scene.add(curbE);
 
     // Street light poles along the climb
     [85, 105, 125, 145].forEach(pz => {
@@ -16395,6 +17515,445 @@ class CityBuilder {
       light.position.set(7.5, py + 6.5, pz);
       this.scene.add(light);
     });
+  }
+
+  // 19.3 Continuous Street View Commerces & Terraced Sobrados along Rua Paula Ferreira (Z = 75 to 155)
+  buildPaulaFerreiraCorridorCommercesAndSobrados() {
+    const calcElevation = (z) => ((z - 75.0) / 80.0) * 8.5;
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xd4d4d8 });
+    const roofMat = new THREE.MeshLambertMaterial({ map: this.textures.createTelhaOndulada(4, 4) });
+
+    // =========================================================================
+    // WEST SIDE OF PAULA FERREIRA (X: -13.5 to -6.0)
+    // =========================================================================
+
+    // 1. Barbearia do Seu Antônio (Z = 78.0 to 92.0, Center Z = 85.0)
+    const barbZ = 85.0;
+    const barbY = calcElevation(barbZ);
+    const barbGeo = new THREE.BoxGeometry(7.5, 5.2, 14.0);
+    const barbMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#1e293b', 2, 2)
+    });
+    const barbMesh = new THREE.Mesh(barbGeo, barbMat);
+    barbMesh.position.set(-9.75, barbY + 2.6, barbZ);
+    this.scene.add(barbMesh);
+
+    // Barbearia Sign
+    const barbSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createBarbeariaSign() });
+    const barbSign = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 6.0), barbSignMat);
+    barbSign.position.set(-5.95, barbY + 3.8, barbZ);
+    this.scene.add(barbSign);
+
+    // 3D Barber Pole (Helical striped cylinder)
+    const poleMat = new THREE.MeshBasicMaterial({ map: this.textures.createBarberPoleTexture() });
+    const barberPole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.3, 16), poleMat);
+    barberPole.position.set(-5.85, barbY + 2.4, barbZ - 3.8);
+    this.scene.add(barberPole);
+
+    // Barber Pole brackets and chrome cap
+    const capGeo = new THREE.SphereGeometry(0.22, 12, 12);
+    const poleCap = new THREE.Mesh(capGeo, chromeMat);
+    poleCap.position.set(-5.85, barbY + 3.1, barbZ - 3.8);
+    this.scene.add(poleCap);
+
+    const bracketGeo = new THREE.BoxGeometry(0.25, 0.08, 0.15);
+    const brkTop = new THREE.Mesh(bracketGeo, chromeMat);
+    brkTop.position.set(-5.95, barbY + 2.9, barbZ - 3.8);
+    this.scene.add(brkTop);
+    const brkBot = new THREE.Mesh(bracketGeo, chromeMat);
+    brkBot.position.set(-5.95, barbY + 1.8, barbZ - 3.8);
+    this.scene.add(brkBot);
+
+    // Barber interior chair
+    const chairBase = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.15, 12), chromeMat);
+    chairBase.position.set(-8.5, barbY + 0.15, barbZ);
+    this.scene.add(chairBase);
+    const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.2, 0.7), new THREE.MeshLambertMaterial({ color: 0x991b1b }));
+    chairSeat.position.set(-8.5, barbY + 0.65, barbZ);
+    this.scene.add(chairSeat);
+    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.15), new THREE.MeshLambertMaterial({ color: 0x991b1b }));
+    chairBack.position.set(-8.5, barbY + 1.05, barbZ + 0.3);
+    this.scene.add(chairBack);
+
+    // Warm Interior Point Light
+    const barbLight = new THREE.PointLight(0xfff1d6, 1.2, 8);
+    barbLight.position.set(-8.0, barbY + 2.8, barbZ);
+    this.scene.add(barbLight);
+
+    // Barbearia Physics Collider
+    this.physics.addBoxCollider(new THREE.Vector3(-13.5, 0, 78.0), new THREE.Vector3(-6.0, barbY + 5.5, 92.0), 'solid');
+
+    // 2. Açougue Boi de Ouro (Z = 96.0 to 110.0, Center Z = 103.0)
+    const acougueZ = 103.0;
+    const acougueY = calcElevation(acougueZ);
+    const acougueGeo = new THREE.BoxGeometry(7.5, 5.2, 14.0);
+    const acougueMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#f8fafc', 2, 2)
+    });
+    const acougueMesh = new THREE.Mesh(acougueGeo, acougueMat);
+    acougueMesh.position.set(-9.75, acougueY + 2.6, acougueZ);
+    this.scene.add(acougueMesh);
+
+    // Açougue Sign
+    const acougueSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createAcougueSign() });
+    const acougueSign = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 6.0), acougueSignMat);
+    acougueSign.position.set(-5.95, acougueY + 3.8, acougueZ);
+    this.scene.add(acougueSign);
+
+    // Butcher Awning (Toldo listrado vermelho e branco)
+    const toldoMat = new THREE.MeshLambertMaterial({ color: 0x991b1b });
+    const toldoMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 7.0), toldoMat);
+    toldoMesh.rotation.z = -0.25;
+    toldoMesh.position.set(-5.2, acougueY + 3.0, acougueZ);
+    this.scene.add(toldoMesh);
+
+    // Refrigerated counter prop inside
+    const counterMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 1.0, 4.5),
+      new THREE.MeshLambertMaterial({ color: 0xe2e8f0 })
+    );
+    counterMesh.position.set(-7.8, acougueY + 0.5, acougueZ);
+    this.scene.add(counterMesh);
+
+    // Açougue Physics Collider
+    this.physics.addBoxCollider(new THREE.Vector3(-13.5, 0, 96.0), new THREE.Vector3(-6.0, acougueY + 5.5, 110.0), 'solid');
+
+    // 3. Stepped Terraced Sobrados (West Flank)
+    // Sobrado 1 (Ochre & Wood): Z = 114.0 to 126.0 (Center Z = 120.0)
+    const sob1Z = 120.0;
+    const sob1Y = calcElevation(sob1Z);
+    const sob1Mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 6.8, 12.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createSobradoFacade('#d97706', '#1e293b') })
+    );
+    sob1Mesh.position.set(-9.75, sob1Y + 3.4, sob1Z);
+    this.scene.add(sob1Mesh);
+
+    const roof1 = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.4, 12.4), roofMat);
+    roof1.position.set(-9.75, sob1Y + 6.9, sob1Z);
+    this.scene.add(roof1);
+
+    // Interactive Door for Sobrado 1
+    const door1Pivot = new THREE.Group();
+    door1Pivot.position.set(-6.0, sob1Y, sob1Z - 2.0);
+    const door1Mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 2.1, 1.1),
+      new THREE.MeshLambertMaterial({ map: this.textures.createWoodenHouseDoorTexture() })
+    );
+    door1Mesh.position.set(0, 1.05, 0.55);
+    door1Pivot.add(door1Mesh);
+    this.scene.add(door1Pivot);
+
+    const door1Collider = this.physics.addBoxCollider(
+      new THREE.Vector3(-6.2, sob1Y, sob1Z - 2.6),
+      new THREE.Vector3(-5.8, sob1Y + 2.2, sob1Z - 1.4),
+      'solid'
+    );
+    this.interactiveDoors.push({
+      id: 'sobrado_paula_120',
+      name: 'SOBRADO RESIDENCIAL 120',
+      position: new THREE.Vector3(-5.6, sob1Y + 1.1, sob1Z - 2.0),
+      maxDist: 2.5,
+      doorMesh: door1Pivot,
+      collider: door1Collider,
+      isOpen: false,
+      openAngle: Math.PI / 2
+    });
+
+    this.physics.addBoxCollider(new THREE.Vector3(-13.5, 0, 114.0), new THREE.Vector3(-6.0, sob1Y + 7.2, 126.0), 'solid');
+
+    // Sobrado 2 (Blue & White with Watchdog): Z = 128.0 to 140.0 (Center Z = 134.0)
+    const sob2Z = 134.0;
+    const sob2Y = calcElevation(sob2Z);
+    const sob2Mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 6.8, 12.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createSobradoFacade('#0284c7', '#ffffff') })
+    );
+    sob2Mesh.position.set(-9.75, sob2Y + 3.4, sob2Z);
+    this.scene.add(sob2Mesh);
+
+    const roof2 = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.4, 12.4), roofMat);
+    roof2.position.set(-9.75, sob2Y + 6.9, sob2Z);
+    this.scene.add(roof2);
+
+    // Front yard black iron gate
+    const gateMat = new THREE.MeshLambertMaterial({ color: 0x18181b });
+    const gate = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.8, 3.2), gateMat);
+    gate.position.set(-6.0, sob2Y + 0.9, sob2Z + 2.5);
+    this.scene.add(gate);
+
+    // Warning Sign "CUIDADO COM O CÃO / BRAVO"
+    const dogSignMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+    const dogSign = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.8), dogSignMat);
+    dogSign.position.set(-5.95, sob2Y + 1.4, sob2Z + 2.5);
+    this.scene.add(dogSign);
+
+    // Watchdog prop behind gate (Caramelo / Guard Dog)
+    const dogGroup = new THREE.Group();
+    const dogFurMat = new THREE.MeshLambertMaterial({ color: 0xc2782b });
+    const dogTorso = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.4, 0.7), dogFurMat);
+    dogTorso.position.set(0, 0.45, 0);
+    dogGroup.add(dogTorso);
+    const dogHead = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.3, 0.35), dogFurMat);
+    dogHead.position.set(0, 0.72, 0.38);
+    dogGroup.add(dogHead);
+    const dogSnout = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.15, 0.22), new THREE.MeshLambertMaterial({ color: 0x1c1917 }));
+    dogSnout.position.set(0, 0.65, 0.58);
+    dogGroup.add(dogSnout);
+    const earGeo = new THREE.ConeGeometry(0.08, 0.18, 4);
+    const earL = new THREE.Mesh(earGeo, dogFurMat);
+    earL.position.set(-0.12, 0.92, 0.32);
+    dogGroup.add(earL);
+    const earR = new THREE.Mesh(earGeo, dogFurMat);
+    earR.position.set(0.12, 0.92, 0.32);
+    dogGroup.add(earR);
+    const dogTail = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.4, 6), dogFurMat);
+    dogTail.rotation.x = -0.6;
+    dogTail.position.set(0, 0.6, -0.42);
+    dogGroup.add(dogTail);
+    dogGroup.position.set(-6.8, sob2Y, sob2Z + 2.5);
+    dogGroup.rotation.y = Math.PI / 2;
+    this.scene.add(dogGroup);
+
+    this.physics.addBoxCollider(new THREE.Vector3(-13.5, 0, 128.0), new THREE.Vector3(-6.0, sob2Y + 7.2, 140.0), 'solid');
+
+    // Sobrado 3 (Colonial Sobrado): Z = 142.0 to 154.0 (Center Z = 148.0)
+    const sob3Z = 148.0;
+    const sob3Y = calcElevation(sob3Z);
+    const sob3Mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 6.8, 12.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createSobradoFacade('#fef08a', '#334155') })
+    );
+    sob3Mesh.position.set(-9.75, sob3Y + 3.4, sob3Z);
+    this.scene.add(sob3Mesh);
+
+    const roof3 = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.4, 12.4), roofMat);
+    roof3.position.set(-9.75, sob3Y + 6.9, sob3Z);
+    this.scene.add(roof3);
+
+    this.physics.addBoxCollider(new THREE.Vector3(-13.5, 0, 142.0), new THREE.Vector3(-6.0, sob3Y + 7.2, 154.0), 'solid');
+
+    // =========================================================================
+    // EAST SIDE OF PAULA FERREIRA (X: 9.0 to 16.5)
+    // =========================================================================
+
+    // 4. Hortifrúti da Ladeira (Z = 78.0 to 92.0, Center Z = 85.0)
+    const hortiZ = 85.0;
+    const hortiY = calcElevation(hortiZ);
+    const hortiMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 4.8, 14.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createPaintedWall('#15803d', 2, 2) })
+    );
+    hortiMesh.position.set(12.75, hortiY + 2.4, hortiZ);
+    this.scene.add(hortiMesh);
+
+    // Hortifrúti Sign
+    const hortiSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createHortifrutiSign() });
+    const hortiSign = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 6.0), hortiSignMat);
+    hortiSign.position.set(8.95, hortiY + 3.6, hortiZ);
+    this.scene.add(hortiSign);
+
+    // Green canvas awning projecting over sidewalk
+    const hortiAwningMat = new THREE.MeshLambertMaterial({ color: 0x166534 });
+    const hortiAwning = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 7.0), hortiAwningMat);
+    hortiAwning.rotation.z = 0.25;
+    hortiAwning.position.set(8.2, hortiY + 2.9, hortiZ);
+    this.scene.add(hortiAwning);
+
+    // Sidewalk wooden fruit crate display stands
+    const crateWoodMat = new THREE.MeshLambertMaterial({ color: 0x854d0e });
+    [-2.0, 0.0, 2.0].forEach((offZ) => {
+      const stand = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 1.4), crateWoodMat);
+      stand.position.set(8.5, hortiY + 0.35, hortiZ + offZ);
+      this.scene.add(stand);
+
+      const fruitMat = new THREE.MeshLambertMaterial({
+        color: offZ < 0 ? 0x15803d : (offZ === 0 ? 0xf97316 : 0xfacc15)
+      });
+      const fruitGeo = new THREE.SphereGeometry(0.14, 8, 8);
+      for (let fx = -0.2; fx <= 0.2; fx += 0.2) {
+        for (let fz = -0.4; fz <= 0.4; fz += 0.25) {
+          const fruit = new THREE.Mesh(fruitGeo, fruitMat);
+          fruit.position.set(8.5 + fx, hortiY + 0.76, hortiZ + offZ + fz);
+          this.scene.add(fruit);
+        }
+      }
+    });
+
+    this.physics.addBoxCollider(new THREE.Vector3(9.0, 0, 78.0), new THREE.Vector3(16.5, hortiY + 5.2, 92.0), 'solid');
+
+    // 5. Pet Shop Au-Au Pirituba (Z = 96.0 to 110.0, Center Z = 103.0)
+    const petZ = 103.0;
+    const petY = calcElevation(petZ);
+    const petMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 4.8, 14.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createPaintedWall('#0284c7', 2, 2) })
+    );
+    petMesh.position.set(12.75, petY + 2.4, petZ);
+    this.scene.add(petMesh);
+
+    // Pet Shop Sign
+    const petSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createPetShopAuAuSign() });
+    const petSign = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 6.0), petSignMat);
+    petSign.position.set(8.95, petY + 3.6, petZ);
+    this.scene.add(petSign);
+
+    // Doghouse prop on sidewalk
+    const doghouseMat = new THREE.MeshLambertMaterial({ color: 0x991b1b });
+    const doghouse = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.8, 0.9), doghouseMat);
+    doghouse.position.set(8.5, petY + 0.4, petZ - 2.5);
+    this.scene.add(doghouse);
+
+    const doghouseRoof = new THREE.Mesh(new THREE.ConeGeometry(0.7, 0.4, 4), new THREE.MeshLambertMaterial({ color: 0x18181b }));
+    doghouseRoof.rotation.y = Math.PI / 4;
+    doghouseRoof.position.set(8.5, petY + 0.95, petZ - 2.5);
+    this.scene.add(doghouseRoof);
+
+    // Water bowl
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.1, 12), new THREE.MeshLambertMaterial({ color: 0x38bdf8 }));
+    bowl.position.set(8.5, petY + 0.05, petZ - 1.6);
+    this.scene.add(bowl);
+
+    // Friendly Golden Retriever prop sitting outside
+    const petDogGroup = new THREE.Group();
+    const goldenMat = new THREE.MeshLambertMaterial({ color: 0xf59e0b });
+    const petDogBody = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.45, 0.6), goldenMat);
+    petDogBody.position.set(0, 0.35, 0);
+    petDogGroup.add(petDogBody);
+    const petDogHead = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 0.32), goldenMat);
+    petDogHead.position.set(0, 0.65, 0.3);
+    petDogGroup.add(petDogHead);
+    const petDogSnout = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.18), new THREE.MeshLambertMaterial({ color: 0x1c1917 }));
+    petDogSnout.position.set(0, 0.58, 0.48);
+    petDogGroup.add(petDogSnout);
+    petDogGroup.position.set(8.5, petY, petZ - 0.8);
+    petDogGroup.rotation.y = -Math.PI / 2;
+    this.scene.add(petDogGroup);
+
+    this.physics.addBoxCollider(new THREE.Vector3(9.0, 0, 96.0), new THREE.Vector3(16.5, petY + 5.2, 110.0), 'solid');
+
+    // 6. Bar da Ladeira (Sinuca & Dominó) (Z = 114.0 to 128.0, Center Z = 121.0)
+    const barZ = 121.0;
+    const barY = calcElevation(barZ);
+    const barMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 5.0, 14.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createPaintedWall('#0369a1', 2, 2) })
+    );
+    barMesh.position.set(12.75, barY + 2.5, barZ);
+    this.scene.add(barMesh);
+
+    // Bar da Ladeira Sign
+    const barSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createBotecoLadeiraSign() });
+    const barSign = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 6.0), barSignMat);
+    barSign.position.set(8.95, barY + 3.8, barZ);
+    this.scene.add(barSign);
+
+    // Yellow boteco awning overhead
+    const barAwningMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+    const barAwning = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 7.0), barAwningMat);
+    barAwning.rotation.z = 0.25;
+    barAwning.position.set(8.2, barY + 3.0, barZ);
+    this.scene.add(barAwning);
+
+    // Sidewalk Domino Scene
+    const dTableGeo = new THREE.BoxGeometry(1.1, 0.08, 1.1);
+    const dTableMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+    const dTable = new THREE.Mesh(dTableGeo, dTableMat);
+    dTable.position.set(8.3, barY + 0.72, barZ);
+    this.scene.add(dTable);
+
+    const dLegGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.72, 8);
+    const dLegMat = new THREE.MeshLambertMaterial({ color: 0x18181b });
+    [-0.45, 0.45].forEach(lx => {
+      [-0.45, 0.45].forEach(lz => {
+        const leg = new THREE.Mesh(dLegGeo, dLegMat);
+        leg.position.set(8.3 + lx, barY + 0.36, barZ + lz);
+        this.scene.add(leg);
+      });
+    });
+
+    // White domino tiles arranged on the table
+    const dominoTileMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+    const tileGeo = new THREE.BoxGeometry(0.06, 0.02, 0.12);
+    for (let t = -0.3; t <= 0.3; t += 0.12) {
+      const tile = new THREE.Mesh(tileGeo, dominoTileMat);
+      tile.position.set(8.3 + (Math.sin(t * 10) * 0.1), barY + 0.77, barZ + t);
+      tile.rotation.y = t * 1.5;
+      this.scene.add(tile);
+    }
+
+    // Yellow ice bucket and brown beer bottle on table
+    const iceBucket = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.09, 0.16, 10), new THREE.MeshLambertMaterial({ color: 0xfacc15 }));
+    iceBucket.position.set(8.65, barY + 0.82, barZ + 0.35);
+    this.scene.add(iceBucket);
+    const beerBottle = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.24, 8), new THREE.MeshLambertMaterial({ color: 0x451a03 }));
+    beerBottle.position.set(8.65, barY + 0.92, barZ + 0.35);
+    this.scene.add(beerBottle);
+
+    // Red plastic boteco chairs around table
+    const chairMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+    [-0.7, 0.7].forEach((cz) => {
+      const chair = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.5), chairMat);
+      chair.position.set(8.3, barY + 0.45, barZ + cz);
+      this.scene.add(chair);
+
+      // Retired senhorzinho seated character
+      const humanGroup = new THREE.Group();
+      const skinMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+      const shirtMat = new THREE.MeshLambertMaterial({ color: cz < 0 ? 0x0284c7 : 0x16a34a });
+      const hatMat = new THREE.MeshLambertMaterial({ color: 0xfef08a });
+
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.45, 0.25), shirtMat);
+      torso.position.set(0, 0.65, 0);
+      humanGroup.add(torso);
+
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.2), skinMat);
+      head.position.set(0, 0.96, 0);
+      humanGroup.add(head);
+
+      const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.04, 12), hatMat);
+      hat.position.set(0, 1.08, 0);
+      humanGroup.add(hat);
+
+      humanGroup.position.set(8.3, barY + 0.2, barZ + cz);
+      humanGroup.rotation.y = cz < 0 ? 0 : Math.PI;
+      this.scene.add(humanGroup);
+    });
+
+    this.physics.addBoxCollider(new THREE.Vector3(9.0, 0, 114.0), new THREE.Vector3(16.5, barY + 5.5, 128.0), 'solid');
+
+    // 7. Stepped Historic Sobrados (East Flank)
+    // Sobrado East 1 (Pastel Rose): Z = 130.0 to 142.0 (Center Z = 136.0)
+    const sobE1Z = 136.0;
+    const sobE1Y = calcElevation(sobE1Z);
+    const sobE1Mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 6.8, 12.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createSobradoFacade('#fda4af', '#475569') })
+    );
+    sobE1Mesh.position.set(12.75, sobE1Y + 3.4, sobE1Z);
+    this.scene.add(sobE1Mesh);
+
+    const roofE1 = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.4, 12.4), roofMat);
+    roofE1.position.set(12.75, sobE1Y + 6.9, sobE1Z);
+    this.scene.add(roofE1);
+
+    this.physics.addBoxCollider(new THREE.Vector3(9.0, 0, 130.0), new THREE.Vector3(16.5, sobE1Y + 7.2, 142.0), 'solid');
+
+    // Sobrado East 2 (Colonial Yellow & White): Z = 144.0 to 154.0 (Center Z = 149.0)
+    const sobE2Z = 149.0;
+    const sobE2Y = calcElevation(sobE2Z);
+    const sobE2Mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(7.5, 6.8, 10.0),
+      new THREE.MeshLambertMaterial({ map: this.textures.createColonialWall('#e8c96b', 2, 2) })
+    );
+    sobE2Mesh.position.set(12.75, sobE2Y + 3.4, sobE2Z);
+    this.scene.add(sobE2Mesh);
+
+    const roofE2 = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.4, 10.4), roofMat);
+    roofE2.position.set(12.75, sobE2Y + 6.9, sobE2Z);
+    this.scene.add(roofE2);
+
+    this.physics.addBoxCollider(new THREE.Vector3(9.0, 0, 144.0), new THREE.Vector3(16.5, sobE2Y + 7.2, 154.0), 'solid');
   }
 
   // =========================================================================
@@ -16770,6 +18329,287 @@ class CityBuilder {
     this.physics.addBoxCollider(new THREE.Vector3(135.0, 0, -25.0), new THREE.Vector3(155.0, 10, -18.0), 'solid'); // North Petrônio Dead End
     this.physics.addBoxCollider(new THREE.Vector3(135.0, 0, 58.0), new THREE.Vector3(155.0, 10, 65.0), 'solid');  // South Petrônio Dead End
     this.physics.addBoxCollider(new THREE.Vector3(50.0, 0, -15.0), new THREE.Vector3(135.0, 10, -8.0), 'solid');   // North corridor wall
+  }
+
+  // 21.7 Continuous Commerces, Services & Authentic Establishments along Av. Gen. Edgar Facó
+  buildEdgarFaccoExtendedCommerces() {
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xd4d4d8 });
+    const tireMat = new THREE.MeshLambertMaterial({ color: 0x09090b });
+
+    // =========================================================================
+    // WEST EDGAR FACÓ (X: -58.0 to -20.0)
+    // =========================================================================
+
+    // 1. Casa do Norte Asa Branca (South side: X = -34.0 to -20.5, Z = 37.0 to 47.0)
+    const cNorteGeo = new THREE.BoxGeometry(13.5, 5.5, 10.0);
+    const cNorteMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#78350f', 2, 2)
+    });
+    const cNorteMesh = new THREE.Mesh(cNorteGeo, cNorteMat);
+    cNorteMesh.position.set(-27.25, 2.75, 42.0);
+    this.scene.add(cNorteMesh);
+
+    // Signboard
+    const cNorteSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createCasaDoNorteSign() });
+    const cNorteSign = new THREE.Mesh(new THREE.BoxGeometry(6.0, 1.2, 0.1), cNorteSignMat);
+    cNorteSign.position.set(-27.25, 4.2, 36.95);
+    this.scene.add(cNorteSign);
+
+    // Rustic barrel table and stools on sidewalk
+    const barrelMat = new THREE.MeshLambertMaterial({ color: 0x92400e });
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 0.85, 12), barrelMat);
+    barrel.position.set(-23.5, 0.425, 35.5);
+    this.scene.add(barrel);
+
+    const stoolMat = new THREE.MeshLambertMaterial({ color: 0x451a03 });
+    [-0.55, 0.55].forEach(sx => {
+      const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.5, 8), stoolMat);
+      stool.position.set(-23.5 + sx, 0.25, 35.5);
+      this.scene.add(stool);
+    });
+
+    this.physics.addBoxCollider(new THREE.Vector3(-34.0, 0, 37.0), new THREE.Vector3(-20.5, 6.0, 47.0), 'solid');
+
+    // 2. Depósito Pirituba - Materiais de Construção (North side: X = -48.0 to -36.0, Z = -10.0 to 2.0)
+    const depGeo = new THREE.BoxGeometry(12.0, 5.8, 12.0);
+    const depMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#475569', 2, 2)
+    });
+    const depMesh = new THREE.Mesh(depGeo, depMat);
+    depMesh.position.set(-42.0, 2.9, -4.0);
+    this.scene.add(depMesh);
+
+    // Depósito Signboard
+    const depSignTex = this.textures.createStoreSign('DEPÓSITO PIRITUBA', '#1e293b', '#facc15');
+    const depSign = new THREE.Mesh(new THREE.BoxGeometry(6.0, 1.2, 0.1), new THREE.MeshBasicMaterial({ map: depSignTex }));
+    depSign.position.set(-42.0, 4.5, 2.05);
+    this.scene.add(depSign);
+
+    // Yard props: Stacks of reddish-orange bricks (tijolo baiano)
+    const brickMat = new THREE.MeshLambertMaterial({ map: this.textures.createTijoloBaiano(2, 2) });
+    const brickStack = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), brickMat);
+    brickStack.position.set(-37.5, 0.6, 3.2);
+    this.scene.add(brickStack);
+
+    // Cone pile of construction sand
+    const sandMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+    const sandPile = new THREE.Mesh(new THREE.ConeGeometry(1.2, 0.9, 12), sandMat);
+    sandPile.position.set(-45.5, 0.45, 3.2);
+    this.scene.add(sandPile);
+
+    this.physics.addBoxCollider(new THREE.Vector3(-48.0, 0, -10.0), new THREE.Vector3(-36.0, 6.0, 2.0), 'solid');
+
+    // 3. Oficina de Motos Grau & Corte (North side: X = -58.0 to -48.0, Z = -10.0 to 2.0)
+    const motoGeo = new THREE.BoxGeometry(10.0, 5.0, 12.0);
+    const motoMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#18181b', 2, 2)
+    });
+    const motoMesh = new THREE.Mesh(motoGeo, motoMat);
+    motoMesh.position.set(-53.0, 2.5, -4.0);
+    this.scene.add(motoMesh);
+
+    // Roll-up steel garage doors
+    const steelDoorMat = new THREE.MeshLambertMaterial({ map: this.textures.createPortaAco('#334155') });
+    const motoDoor = new THREE.Mesh(new THREE.BoxGeometry(4.0, 3.5, 0.1), steelDoorMat);
+    motoDoor.position.set(-53.0, 1.75, 2.02);
+    this.scene.add(motoDoor);
+
+    // Neon motorcycle shop sign
+    const motoSignTex = this.textures.createStoreSign('GRAU & CORTE MOTOS', '#09090b', '#22c55e');
+    const motoSign = new THREE.Mesh(new THREE.BoxGeometry(5.0, 1.0, 0.1), new THREE.MeshBasicMaterial({ map: motoSignTex }));
+    motoSign.position.set(-53.0, 4.0, 2.05);
+    this.scene.add(motoSign);
+
+    // Motorcycle prop parked outside
+    const bikeGroup = new THREE.Group();
+    const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.1, 12);
+    const frontWheel = new THREE.Mesh(wheelGeo, tireMat);
+    frontWheel.rotation.z = Math.PI / 2;
+    frontWheel.position.set(0.6, 0.28, 0);
+    bikeGroup.add(frontWheel);
+    const rearWheel = new THREE.Mesh(wheelGeo, tireMat);
+    rearWheel.rotation.z = Math.PI / 2;
+    rearWheel.position.set(-0.6, 0.28, 0);
+    bikeGroup.add(rearWheel);
+    const bikeFrame = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.3, 0.2), new THREE.MeshLambertMaterial({ color: 0xdc2626 }));
+    bikeFrame.position.set(0, 0.55, 0);
+    bikeGroup.add(bikeFrame);
+    const handlebar = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.6), chromeMat);
+    handlebar.position.set(0.4, 0.75, 0);
+    bikeGroup.add(handlebar);
+    bikeGroup.position.set(-51.0, 0, 3.2);
+    bikeGroup.rotation.y = -0.3;
+    this.scene.add(bikeGroup);
+
+    this.physics.addBoxCollider(new THREE.Vector3(-58.0, 0, -10.0), new THREE.Vector3(-48.0, 5.5, 2.0), 'solid');
+
+    // =========================================================================
+    // EAST EDGAR FACÓ (X: 57.0 to 135.0)
+    // =========================================================================
+
+    // 4. Lotérica Pirituba (South side: X = 57.0 to 68.0, Z = 37.0 to 47.0)
+    const lotGeo = new THREE.BoxGeometry(11.0, 5.2, 10.0);
+    const lotMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#f8fafc', 2, 2)
+    });
+    const lotMesh = new THREE.Mesh(lotGeo, lotMat);
+    lotMesh.position.set(62.5, 2.6, 42.0);
+    this.scene.add(lotMesh);
+
+    // Lotérica Signboard
+    const lotSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createLotericaSign() });
+    const lotSign = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.2, 0.1), lotSignMat);
+    lotSign.position.set(62.5, 4.0, 36.95);
+    this.scene.add(lotSign);
+
+    // Armored glass counter pass-through on facade
+    const glassCounter = new THREE.Mesh(
+      new THREE.BoxGeometry(3.0, 1.5, 0.1),
+      new THREE.MeshLambertMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.6 })
+    );
+    glassCounter.position.set(62.5, 1.8, 36.96);
+    this.scene.add(glassCounter);
+
+    // Yellow queue stanchions on sidewalk
+    const stanchionMat = new THREE.MeshLambertMaterial({ color: 0xfacc15 });
+    [-1.2, 0, 1.2].forEach(ox => {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 8), stanchionMat);
+      post.position.set(62.5 + ox, 0.45, 35.8);
+      this.scene.add(post);
+    });
+
+    this.physics.addBoxCollider(new THREE.Vector3(57.0, 0, 37.0), new THREE.Vector3(68.0, 5.5, 47.0), 'solid');
+
+    // 5. Pastelaria do Beto (South side: X = 69.0 to 80.0, Z = 37.0 to 47.0)
+    const pastGeo = new THREE.BoxGeometry(11.0, 5.2, 10.0);
+    const pastMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#fef08a', 2, 2)
+    });
+    const pastMesh = new THREE.Mesh(pastGeo, pastMat);
+    pastMesh.position.set(74.5, 2.6, 42.0);
+    this.scene.add(pastMesh);
+
+    // Pastelaria Signboard
+    const pastSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createPastelariaBetoSign() });
+    const pastSign = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.2, 0.1), pastSignMat);
+    pastSign.position.set(74.5, 4.0, 36.95);
+    this.scene.add(pastSign);
+
+    // Red & yellow awning over sidewalk
+    const pastAwningMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+    const pastAwning = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.1, 1.6), pastAwningMat);
+    pastAwning.rotation.x = -0.25;
+    pastAwning.position.set(74.5, 3.2, 36.2);
+    this.scene.add(pastAwning);
+
+    // Stainless steel frying station & sugarcane press
+    const fryStation = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 0.8), chromeMat);
+    fryStation.position.set(73.2, 0.45, 36.0);
+    this.scene.add(fryStation);
+
+    // Sugarcane green stalks prop
+    const caneMat = new THREE.MeshLambertMaterial({ color: 0x65a30d });
+    for (let c = 0; c < 5; c++) {
+      const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 8), caneMat);
+      cane.rotation.z = 0.15;
+      cane.position.set(75.2 + c * 0.08, 0.8, 36.1);
+      this.scene.add(cane);
+    }
+
+    this.physics.addBoxCollider(new THREE.Vector3(69.0, 0, 37.0), new THREE.Vector3(80.0, 5.5, 47.0), 'solid');
+
+    // 6. Bar & Petiscaria Cantinho do Peixe (North side: X = 96.0 to 112.0, Z = -8.0 to 2.0)
+    const peixeGeo = new THREE.BoxGeometry(16.0, 5.5, 10.0);
+    const peixeMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#0284c7', 2, 2)
+    });
+    const peixeMesh = new THREE.Mesh(peixeGeo, peixeMat);
+    peixeMesh.position.set(104.0, 2.75, -3.0);
+    this.scene.add(peixeMesh);
+
+    // Signboard
+    const peixeSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createBarPeixeSign() });
+    const peixeSign = new THREE.Mesh(new THREE.BoxGeometry(6.5, 1.2, 0.1), peixeSignMat);
+    peixeSign.position.set(104.0, 4.2, 2.05);
+    this.scene.add(peixeSign);
+
+    // Outdoor Dining Veranda: 3 tables with blue parasols
+    const tableGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.06, 12);
+    const tableMat = new THREE.MeshLambertMaterial({ color: 0x0284c7 });
+    const umbrellaMat = new THREE.MeshLambertMaterial({ color: 0x0369a1 });
+    const umbrellaGeo = new THREE.ConeGeometry(1.2, 0.4, 8);
+
+    [-4.0, 0, 4.0].forEach(ox => {
+      const tPos = new THREE.Vector3(104.0 + ox, 0.72, 3.8);
+      const tbl = new THREE.Mesh(tableGeo, tableMat);
+      tbl.position.copy(tPos);
+      this.scene.add(tbl);
+
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.2, 8), chromeMat);
+      pole.position.set(tPos.x, 1.1, tPos.z);
+      this.scene.add(pole);
+
+      const umbrella = new THREE.Mesh(umbrellaGeo, umbrellaMat);
+      umbrella.position.set(tPos.x, 2.2, tPos.z);
+      this.scene.add(umbrella);
+
+      [-0.7, 0.7].forEach(cz => {
+        const chr = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.45, 0.4), new THREE.MeshLambertMaterial({ color: 0xffffff }));
+        chr.position.set(tPos.x, 0.225, tPos.z + cz);
+        this.scene.add(chr);
+      });
+    });
+
+    this.physics.addBoxCollider(new THREE.Vector3(96.0, 0, -8.0), new THREE.Vector3(112.0, 6.0, 2.0), 'solid');
+
+    // 7. Ponto de Táxi Pirituba (North sidewalk: X = 120.0 to 130.0, Z = 4.0 to 8.0)
+    const taxiSignMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+    const taxiPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.05, 16), taxiSignMat);
+    taxiPlate.rotation.x = Math.PI / 2;
+    taxiPlate.position.set(122.0, 2.8, 6.0);
+    this.scene.add(taxiPlate);
+
+    const taxiPole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.8, 8), chromeMat);
+    taxiPole.position.set(122.0, 1.4, 6.0);
+    this.scene.add(taxiPole);
+
+    // Chevrolet Spin Taxi Prop parked at curb
+    const taxiCar = new THREE.Group();
+    const taxiBodyMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+    const carBody = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.9, 1.6), taxiBodyMat);
+    carBody.position.set(0, 0.65, 0);
+    taxiCar.add(carBody);
+
+    const carCabin = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.7, 1.4), new THREE.MeshLambertMaterial({ color: 0x334155 }));
+    carCabin.position.set(-0.2, 1.4, 0);
+    taxiCar.add(carCabin);
+
+    // SPTrans Red & Blue Stripe decal on side doors
+    const stripeBlue = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.06, 1.62), new THREE.MeshBasicMaterial({ color: 0x0284c7 }));
+    stripeBlue.position.set(0, 0.68, 0);
+    taxiCar.add(stripeBlue);
+    const stripeRed = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.04, 1.62), new THREE.MeshBasicMaterial({ color: 0xdc2626 }));
+    stripeRed.position.set(0, 0.62, 0);
+    taxiCar.add(stripeRed);
+
+    // Lighted Taxi Roof Sign
+    const taxiRoofSign = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.18, 0.2), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+    taxiRoofSign.position.set(-0.2, 1.84, 0);
+    taxiCar.add(taxiRoofSign);
+
+    // 4 Wheels
+    [-1.1, 1.1].forEach(wx => {
+      [-0.8, 0.8].forEach(wz => {
+        const whl = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 12), tireMat);
+        whl.rotation.x = Math.PI / 2;
+        whl.position.set(wx, 0.3, wz);
+        taxiCar.add(whl);
+      });
+    });
+
+    taxiCar.position.set(126.0, 0, 6.2);
+    this.scene.add(taxiCar);
+    this.physics.addBoxCollider(new THREE.Vector3(124.0, 0, 5.2), new THREE.Vector3(128.0, 2.0, 7.2), 'solid');
   }
 
   // =========================================================================
@@ -17358,6 +19198,398 @@ class CityBuilder {
     group.add(railR);
 
     this.scene.add(group);
+  }
+
+  // =========================================================================
+  // 24. Map Boundary Trompe-l'œil Illusion Walls & Construction Sites
+  // "Desculpe pelo transtorno, estamos em Obras"
+  // =========================================================================
+  buildMapBoundaryIllusionWallsAndConstructionSites() {
+    const boundaryGroup = new THREE.Group();
+    boundaryGroup.name = 'boundaryIllusionWallsGroup';
+    this.scene.add(boundaryGroup);
+
+    const concreteMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createReboco('#475569', 4, 4)
+    });
+    const tapumeMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createTapumeMadeira()
+    });
+    const telaMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createTelaLaranjaMesh(),
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    const sandMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+    const gravelMat = new THREE.MeshLambertMaterial({ color: 0x64748b });
+    const pipeMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
+    const steelMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
+    const coneMat = new THREE.MeshLambertMaterial({ color: 0xea580c });
+    const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+    // Helper: Build huge official construction panel
+    const buildHugeObrasSign = (x, y, z, rotY) => {
+      const signGroup = new THREE.Group();
+      signGroup.name = 'obrasHugeSign';
+
+      // 10m x 5m panel board
+      const signMat = new THREE.MeshBasicMaterial({
+        map: this.textures.createObrasSignHuge()
+      });
+      const board = new THREE.Mesh(new THREE.BoxGeometry(10.0, 5.0, 0.2), signMat);
+      board.position.set(0, 0, 0);
+      signGroup.add(board);
+
+      // Back frame
+      const backFrame = new THREE.Mesh(new THREE.BoxGeometry(10.2, 5.2, 0.1), steelMat);
+      backFrame.position.set(0, 0, -0.12);
+      signGroup.add(backFrame);
+
+      // Two heavy steel pillars supporting the board
+      [-4.2, 4.2].forEach(px => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, y + 2.5, 8), steelMat);
+        pillar.position.set(px, -(y + 2.5) / 2 + 2.5, 0);
+        signGroup.add(pillar);
+      });
+
+      // Twin yellow hazard lamps on top
+      [-3.5, 3.5].forEach(lx => {
+        const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.35, 8), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+        lamp.position.set(lx, 2.7, 0);
+        signGroup.add(lamp);
+      });
+
+      signGroup.position.set(x, y, z);
+      signGroup.rotation.y = rotY;
+      boundaryGroup.add(signGroup);
+
+      this.constructionSigns.push({
+        group: signGroup,
+        text: 'Desculpe pelo transtorno, estamos em Obras',
+        pos: new THREE.Vector3(x, y, z)
+      });
+      return signGroup;
+    };
+
+    // Helper: Traffic cone
+    const addCone = (cx, cy, cz) => {
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.85, 10), coneMat);
+      cone.position.set(cx, cy + 0.425, cz);
+      boundaryGroup.add(cone);
+      const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.20, 0.22, 10), whiteMat);
+      ring.position.set(cx, cy + 0.40, cz);
+      boundaryGroup.add(ring);
+    };
+
+    // Helper: Stack of concrete pipes
+    const addPipes = (px, py, pz, rotY = 0) => {
+      const pipeGeo = new THREE.CylinderGeometry(0.65, 0.65, 2.6, 12, 1, true);
+      [-0.7, 0.7].forEach(offset => {
+        const p = new THREE.Mesh(pipeGeo, pipeMat);
+        p.rotation.z = Math.PI / 2;
+        p.rotation.y = rotY;
+        p.position.set(px + offset * Math.cos(rotY), py + 0.65, pz + offset * Math.sin(rotY));
+        boundaryGroup.add(p);
+      });
+      const topP = new THREE.Mesh(pipeGeo, pipeMat);
+      topP.rotation.z = Math.PI / 2;
+      topP.rotation.y = rotY;
+      topP.position.set(px, py + 1.8, pz);
+      boundaryGroup.add(topP);
+    };
+
+    // Helper: Sand / gravel heap
+    const addHeap = (hx, hy, hz, radius = 2.4, height = 1.3, isGravel = false) => {
+      const heap = new THREE.Mesh(
+        new THREE.ConeGeometry(radius, height, 10),
+        isGravel ? gravelMat : sandMat
+      );
+      heap.position.set(hx, hy + height / 2, hz);
+      boundaryGroup.add(heap);
+    };
+
+    // Helper: Scaffolding tower
+    const addScaffold = (sx, sy, sz) => {
+      const frame = new THREE.Group();
+      [-1.2, 1.2].forEach(fx => {
+        [-0.8, 0.8].forEach(fz => {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 4.8, 6), steelMat);
+          leg.position.set(fx, 2.4, fz);
+          frame.add(leg);
+        });
+      });
+      [2.2, 4.4].forEach(dy => {
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.08, 1.8), new THREE.MeshLambertMaterial({ color: 0xa16207 }));
+        plank.position.set(0, dy, 0);
+        frame.add(plank);
+      });
+      frame.position.set(sx, sy, sz);
+      boundaryGroup.add(frame);
+    };
+
+    // -----------------------------------------------------------------------
+    // 1. WEST EDGAR FACÓ (X = -60.0, Z = 20.0, Y = 0)
+    // -----------------------------------------------------------------------
+    {
+      const wallW = 38.0, wallH = 11.0;
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(wallW, wallH),
+        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(true) })
+      );
+      plane.rotation.y = Math.PI / 2; // Faces +X (towards player coming west)
+      plane.position.set(-59.4, wallH / 2, 20.0);
+      boundaryGroup.add(plane);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(1.6, wallH, wallW), concreteMat);
+      back.position.set(-60.2, wallH / 2, 20.0);
+      boundaryGroup.add(back);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(-61.2, 0, 1.0),
+        new THREE.Vector3(-59.2, 13.0, 39.0),
+        'solid'
+      );
+
+      this.illusionWalls.push({
+        id: 'west_edgar_facco',
+        name: 'Muro Pintado Edgar Facó (Oeste)',
+        planePos: new THREE.Vector3(-59.4, 0, 20.0),
+        normal: new THREE.Vector3(1, 0, 0),
+        bounds: { minX: -61.2, maxX: -59.2, minZ: 1.0, maxZ: 39.0, minY: 0, maxY: 12.0 }
+      });
+
+      buildHugeObrasSign(-55.5, 6.2, 20.0, Math.PI / 2);
+
+      const tapumeN = new THREE.Mesh(new THREE.BoxGeometry(10.0, 2.6, 0.2), tapumeMat);
+      tapumeN.position.set(-54.5, 1.3, 4.8);
+      boundaryGroup.add(tapumeN);
+
+      const tapumeS = new THREE.Mesh(new THREE.BoxGeometry(10.0, 2.6, 0.2), tapumeMat);
+      tapumeS.position.set(-54.5, 1.3, 35.2);
+      boundaryGroup.add(tapumeS);
+
+      const net = new THREE.Mesh(new THREE.PlaneGeometry(16.0, 1.4), telaMat);
+      net.rotation.y = Math.PI / 2;
+      net.position.set(-57.8, 0.7, 20.0);
+      boundaryGroup.add(net);
+
+      addCone(-56.8, 0, 12.0);
+      addCone(-56.8, 0, 16.0);
+      addCone(-56.8, 0, 24.0);
+      addCone(-56.8, 0, 28.0);
+      addPipes(-57.5, 0, 6.5, Math.PI / 2);
+      addHeap(-56.2, 0, 32.5, 2.8, 1.4, false);
+      addHeap(-58.0, 0, 34.0, 2.0, 1.1, true);
+      addScaffold(-57.2, 0, 3.2);
+    }
+
+    // -----------------------------------------------------------------------
+    // 2. EAST EDGAR FACÓ (X = 165.0, Z = 20.0, Y = 0)
+    // -----------------------------------------------------------------------
+    {
+      const wallW = 38.0, wallH = 11.0;
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(wallW, wallH),
+        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
+      );
+      plane.rotation.y = -Math.PI / 2; // Faces -X (towards player coming east)
+      plane.position.set(164.8, wallH / 2, 20.0);
+      boundaryGroup.add(plane);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(1.6, wallH, wallW), concreteMat);
+      back.position.set(165.6, wallH / 2, 20.0);
+      boundaryGroup.add(back);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(164.5, 0, 1.0),
+        new THREE.Vector3(166.5, 13.0, 39.0),
+        'solid'
+      );
+
+      this.illusionWalls.push({
+        id: 'east_edgar_facco',
+        name: 'Muro Pintado Edgar Facó (Leste)',
+        planePos: new THREE.Vector3(164.8, 0, 20.0),
+        normal: new THREE.Vector3(-1, 0, 0),
+        bounds: { minX: 164.5, maxX: 166.5, minZ: 1.0, maxZ: 39.0, minY: 0, maxY: 12.0 }
+      });
+
+      buildHugeObrasSign(160.5, 6.2, 20.0, -Math.PI / 2);
+
+      const tapumeN = new THREE.Mesh(new THREE.BoxGeometry(8.0, 2.6, 0.2), tapumeMat);
+      tapumeN.position.set(160.5, 1.3, 4.8);
+      boundaryGroup.add(tapumeN);
+
+      addCone(161.8, 0, 12.0);
+      addCone(161.8, 0, 16.0);
+      addCone(161.8, 0, 24.0);
+      addCone(161.8, 0, 28.0);
+      addPipes(162.5, 0, 33.5, -Math.PI / 2);
+      addHeap(161.5, 0, 7.5, 2.6, 1.3, true);
+      addScaffold(162.2, 0, 35.5);
+    }
+
+    // -----------------------------------------------------------------------
+    // 3. NORTH PETRÔNIO PORTELA (X = 145.0, Z = -18.0, Y = 0)
+    // -----------------------------------------------------------------------
+    {
+      const wallW = 22.0, wallH = 9.0;
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(wallW, wallH),
+        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(true) })
+      );
+      plane.position.set(145.0, wallH / 2, -17.8);
+      boundaryGroup.add(plane);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
+      back.position.set(145.0, wallH / 2, -18.6);
+      boundaryGroup.add(back);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(134.0, 0, -19.5),
+        new THREE.Vector3(156.0, 11.0, -17.5),
+        'solid'
+      );
+
+      this.illusionWalls.push({
+        id: 'north_petronio',
+        name: 'Muro Pintado Petrônio Portela (Norte)',
+        planePos: new THREE.Vector3(145.0, 0, -17.8),
+        normal: new THREE.Vector3(0, 0, 1),
+        bounds: { minX: 134.0, maxX: 156.0, minZ: -19.5, maxZ: -17.5, minY: 0, maxY: 11.0 }
+      });
+
+      buildHugeObrasSign(145.0, 5.5, -13.5, 0);
+
+      addCone(140.0, 0, -15.0);
+      addCone(145.0, 0, -15.0);
+      addCone(150.0, 0, -15.0);
+      addPipes(137.0, 0, -14.5, 0);
+      addHeap(152.0, 0, -14.5, 2.4, 1.2, false);
+    }
+
+    // -----------------------------------------------------------------------
+    // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 58.0, Y = 0)
+    // -----------------------------------------------------------------------
+    {
+      const wallW = 22.0, wallH = 9.0;
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(wallW, wallH),
+        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
+      );
+      plane.rotation.y = Math.PI; // Faces -Z (towards player coming south)
+      plane.position.set(145.0, wallH / 2, 57.8);
+      boundaryGroup.add(plane);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
+      back.position.set(145.0, wallH / 2, 58.6);
+      boundaryGroup.add(back);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(134.0, 0, 57.5),
+        new THREE.Vector3(156.0, 11.0, 59.5),
+        'solid'
+      );
+
+      this.illusionWalls.push({
+        id: 'south_petronio',
+        name: 'Muro Pintado Petrônio Portela (Sul)',
+        planePos: new THREE.Vector3(145.0, 0, 57.8),
+        normal: new THREE.Vector3(0, 0, -1),
+        bounds: { minX: 134.0, maxX: 156.0, minZ: 57.5, maxZ: 59.5, minY: 0, maxY: 11.0 }
+      });
+
+      buildHugeObrasSign(145.0, 5.5, 53.5, Math.PI);
+
+      addCone(140.0, 0, 55.0);
+      addCone(145.0, 0, 55.0);
+      addCone(150.0, 0, 55.0);
+      addHeap(138.0, 0, 54.5, 2.5, 1.3, true);
+    }
+
+    // -----------------------------------------------------------------------
+    // 5. SOUTH LARGO DA MATRIZ (Z = 235.0, X = 1.5, Y = 8.5)
+    // -----------------------------------------------------------------------
+    {
+      const wallW = 36.0, wallH = 9.0;
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(wallW, wallH),
+        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilColonialStreet() })
+      );
+      plane.rotation.y = Math.PI; // Faces -Z (towards player walking south through plaza)
+      plane.position.set(1.5, 8.5 + wallH / 2, 234.8);
+      boundaryGroup.add(plane);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
+      back.position.set(1.5, 8.5 + wallH / 2, 235.6);
+      boundaryGroup.add(back);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(-16.5, 8.5, 234.5),
+        new THREE.Vector3(19.5, 19.5, 236.5),
+        'solid'
+      );
+
+      this.illusionWalls.push({
+        id: 'south_matriz',
+        name: 'Muro Pintado Largo da Matriz (Sul)',
+        planePos: new THREE.Vector3(1.5, 8.5, 234.8),
+        normal: new THREE.Vector3(0, 0, -1),
+        bounds: { minX: -16.5, maxX: 19.5, minZ: 234.5, maxZ: 236.5, minY: 8.5, maxY: 19.5 }
+      });
+
+      buildHugeObrasSign(1.5, 8.5 + 5.5, 230.5, Math.PI);
+
+      const tapumeM = new THREE.Mesh(new THREE.BoxGeometry(12.0, 2.8, 0.2), tapumeMat);
+      tapumeM.position.set(-8.0, 8.5 + 1.4, 232.0);
+      boundaryGroup.add(tapumeM);
+
+      addScaffold(12.0, 8.5, 232.0);
+      addCone(-3.0, 8.5, 231.5);
+      addCone(1.5, 8.5, 231.5);
+      addCone(6.0, 8.5, 231.5);
+      addHeap(-12.0, 8.5, 232.0, 2.6, 1.2, true);
+    }
+
+    // -----------------------------------------------------------------------
+    // 6. NORTH FAVELA CAMPINHO (Z = -116.0, X = 0.0, Y = 9.5)
+    // -----------------------------------------------------------------------
+    {
+      const wallW = 44.0, wallH = 7.5;
+      const plane = new THREE.Mesh(
+        new THREE.PlaneGeometry(wallW, wallH),
+        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilFavelaValley() })
+      );
+      plane.position.set(0.0, 9.5 + wallH / 2, -115.8);
+      boundaryGroup.add(plane);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
+      back.position.set(0.0, 9.5 + wallH / 2, -116.6);
+      boundaryGroup.add(back);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(-22.5, 9.5, -117.2),
+        new THREE.Vector3(22.5, 18.0, -115.2),
+        'solid'
+      );
+
+      this.illusionWalls.push({
+        id: 'north_campinho',
+        name: 'Muro Pintado Favela Campinho (Norte)',
+        planePos: new THREE.Vector3(0.0, 9.5, -115.8),
+        normal: new THREE.Vector3(0, 0, 1),
+        bounds: { minX: -22.5, maxX: 22.5, minZ: -117.2, maxZ: -115.2, minY: 9.5, maxY: 18.0 }
+      });
+
+      buildHugeObrasSign(0.0, 9.5 + 4.8, -112.5, 0);
+
+      addCone(-10.0, 9.5, -113.5);
+      addCone(-5.0, 9.5, -113.5);
+      addCone(5.0, 9.5, -113.5);
+      addCone(10.0, 9.5, -113.5);
+      addHeap(-16.0, 9.5, -113.5, 2.2, 1.1, false);
+      addPipes(16.0, 9.5, -113.5, 0);
+    }
   }
 }
 
@@ -18014,8 +20246,292 @@ const EN_ENCOUNTER_TEXTS = {
         outcome: 'You step through the revolving glass doors onto the Pirituba sidewalk, feeling the authentic urban heat of São Paulo asphalt!'
       }
     }
+  },
+
+  BLOCO_CARNAVAL: {
+    title: '🥁 EDGAR FACÓ CARNIVAL BLOCO',
+    closed: '[CLOSED] BLOCO OUTSIDE EVENT HOURS',
+    unavailable: 'The bloco master already closed your dance slot for this run.',
+    news: {
+      bloco_danca: 'Danced with the carnival bloco on Edgar Facó'
+    },
+    intro: (state) => `
+      The bloco master holds his whistle beside the parked trio, the bass drum still warm.<br>
+      Confetti on the plaza and the cortege locked to the event clock.<br>
+      <em>"— Join the circle, warrior! Edgar Facó is a runway today!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Sanity: ${state.sanidade}% | Street Savvy: ${state.ginga}</small>
+    `,
+    options: {
+      dancar_bloco: {
+        label: (state) => state.flags.dancouBloco
+          ? 'Dance in the bloco (You already took your turn this run)'
+          : 'Join the circle and dance until the whistle',
+        costLabel: 'Parade rhythm (1x per run)',
+        outcome: (state, ptResult) => ptResult.includes('escorregou')
+          ? 'Your foot slipped on confetti and the whistle laughed. The circle kept you upright, but the vibe cooled (-8% Sanity, +5 Ginga).'
+          : 'The bass drum locked your step, the whistle closed the phrase, and the whole cortege answered (+15 Ginga, +20% Sanity)!'
+      }
+    }
+  },
+
+  CHURRASCO_CAMPO: {
+    title: '🍖 CAMPINHO BARBECUE',
+    closed: '[CLOSED] CAMPINHO OUTSIDE EVENT HOURS',
+    unavailable: 'The grill cook already filled your pelada slot for this run.',
+    news: {
+      churrasco_prato: 'Ate a barbecue plate at the favela campinho',
+      pelada_campo: 'Played a pickup match on the favela pitch'
+    },
+    intro: (state) => `
+      The grill cook turns meat beside the brick barbecue, smoke rising over the favela plateau.<br>
+      The pickup game stays off the fire and the hillside connector.<br>
+      <em>"— Hot plate off the grill, or jump into the pelada?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      prato_churrasco: {
+        label: (state) => state.canAfford(1800)
+          ? 'Order the campinho plate (grilled steak, farofa, and vinagrete)'
+          : 'Order the campinho plate (Need R$ 18.00 — grill stays covered)',
+        costLabel: 'R$ 18.00',
+        outcome: (state, ptResult) => ptResult.includes('sem os R$')
+          ? 'The cook covers the grill: without R$ 18.00 the plate does not leave. Nothing was charged and the fire stays put.'
+          : 'Hot plate, moist farofa, and vinagrete on point. Stomach thanks you and your head cools down (-R$ 18.00, +40% Stomach, +22% Sanity).'
+      },
+      pelada_campo: {
+        label: (state) => state.flags.jogouPelada
+          ? 'Join the pelada (You already played your match this run)'
+          : 'Ask to join the campinho pickup game',
+        costLabel: 'One match (1x per run)',
+        outcome: (state, ptResult) => ptResult.includes('escapou')
+          ? 'The ball squirmed off your toe and you chased it to the end. You missed the play but earned the shirt (+8 Ginga, +6% Sanity, -10% Stomach).'
+          : 'You received at midfield, squared it low, and the plateau yelled goal (+18 Ginga, +12% Sanity, -6% Stomach)!'
+      }
+    }
+  },
+
+  BARBEARIA_ACLIVE: {
+    title: '💈 SEU ANTÔNIO\'S BARBERSHOP',
+    intro: (state) => `
+      The crisp scent of menthol aftershave and fine talcum powder fills the cozy shop.<br>
+      Seu Antônio strops his straight razor on leather and gestures warmly to the swivel chair:<br>
+      <em>"— Come right in, my friend! Haircut, razor beard trim, or just sharpening up your look?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      corte_degrade: {
+        label: 'Razor fade haircut + Straight-razor beard styling with hot towel',
+        outcome: 'Sharp fade taper and straight-razor beard styling with an aromatic hot towel. Confidence through the roof (+28% Sanity, +20 Ginga)!'
+      },
+      papo_futebol: {
+        label: (state) => state.flags.falouSeuAntonio
+          ? 'Chat with Seu Antônio (Already talked with him today)'
+          : 'Talk soccer and local neighborhood stories',
+        costLabel: 'Free (1x per day)',
+        outcome: 'Seu Antônio reminisced about the 1994 World Cup, debated local football tactics, and gave you golden advice (+12% Sanity, +5 Ginga).'
+      },
+      comprar_pomada: {
+        label: 'Buy matte styling hair pomade',
+        outcome: 'Rock-solid hairstyle that withstands the humid breeze of Paula Ferreira hill (+15 Ginga, +10% Sanity).'
+      }
+    }
+  },
+
+  ACOUQUE_BOI_DE_OURO: {
+    title: '🥩 BOI DE OURO BUTCHER SHOP',
+    intro: (state) => `
+      Stainless steel hooks with fresh prime cuts and the rhythmic chop of the cleaver on the wood block.<br>
+      The butcher in a clean white apron gives you a hearty wave:<br>
+      <em>"— Good morning, boss! Today the picanha and country sausage are top notch!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      comprar_linguica: {
+        label: 'Buy 1kg of handcrafted seasoned country sausage',
+        outcome: 'Juicy country sausage grilled to perfection with herbs and mild pepper. Hunger vanquished (+40% Stomach, +15% Sanity).'
+      },
+      comprar_carne_churrasco: {
+        label: 'Buy a prime cut of aged picanha rump steak',
+        outcome: 'Tender steak grilled over rock salt with a golden fat cap. A royal meal on the Freguesia hill (+55% Stomach, +28% Sanity, +10 Ginga)!'
+      },
+      pedir_osso_sopa: {
+        label: (state) => state.flags.pegouOssoAcougue
+          ? 'Ask for a marrow bone for broth/dog (Already claimed today)'
+          : 'Ask for a beef marrow bone for soup broth',
+        costLabel: 'Free (1x per day)',
+        outcome: 'The butcher neatly wraps a rich marrow bone: "— Simmer this into a hearty broth that resurrects the dead!" (+8% Sanity, +5% Stomach).'
+      }
+    }
+  },
+
+  HORTIFRUTI_PAULA_FERREIRA: {
+    title: '🍎 HILLSIDE FRESH PRODUCE MARKET',
+    intro: (state) => `
+      Wooden crates overflowing with colorful tropical fruits, fresh coriander, and sweet oranges from CEAGESP.<br>
+      The market lady mists the leafy greens with cool water and smiles:<br>
+      <em>"— Welcome! Sweet fruit, crisp greens, and cold fresh coconut water for your hill climb!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      duzia_banana: {
+        label: 'Buy a dozen ripe bananas',
+        outcome: 'Sweet, potassium-packed bananas to tackle the steep uphill climb without cramping (+25% Stomach, +12% Sanity).'
+      },
+      agua_coco: {
+        label: 'Drink a freshly drilled ice-cold coconut water',
+        outcome: 'Naturally sweet and sub-zero cold coconut water with a straw. Pure hydration under the Pirituba sun (+15% Stomach, +22% Sanity)!'
+      },
+      escolher_laranja: {
+        label: (state) => state.flags.provouFrutaLadeira
+          ? 'Taste sample fruit at the stand (Already sampled today)'
+          : 'Accept a freshly sliced segment of sweet tangerine',
+        costLabel: 'Free (1x per day)',
+        outcome: 'She hands you a juicy segment: "— Sweet as honey!" Refreshed your throat and brightened your mood (+6% Sanity, +5% Stomach).'
+      }
+    }
+  },
+
+  BOTECO_LADEIRA: {
+    title: '🍻 HILLSIDE CORNER BAR (SNOOKER & DOMINOES)',
+    intro: (state) => `
+      Domino tiles slam down loudly onto wooden tables under the bright yellow awning.<br>
+      Retirees in straw hats laugh heartily as a brown beer bottle chills in an ice bucket:<br>
+      <em>"— Who's next to take a beating in dominoes? Pull up a chair, partner!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      partida_domino: {
+        label: (state) => state.flags.jogouDominoLadeira
+          ? 'Play domino wager match (Already played your match this run)'
+          : 'Challenge the seasoned veterans to dominoes (R$ 5.00 bet)',
+        costLabel: 'R$ 5.00 bet (1x per run)',
+        outcome: (state, ptResult) => ptResult.includes('BUCHA DE SENA')
+          ? '— DOUBLE SIX SLAMMED DOWN! You sealed the table on the first read. The old-timers cheered and handed over R$ 15.00 (+R$ 15.00, +16 Ginga, +18% Sanity)!'
+          : 'Seu Ditinho trapped your corner with a sly move! You lost R$ 5.00, but earned the table\'s deep respect (+5 Ginga, +6% Sanity).'
+      },
+      cerveja_torresmo: {
+        label: '600ml ice-cold bottled beer + Plate of crispy pork cracklings (torresmo)',
+        outcome: 'A cold lager with a snowy foam collar and cracklings that crunch with every bite. The fatigue of the climb vanished instantly (+32% Stomach, +24% Sanity).'
+      },
+      prosa_balcao: {
+        label: (state) => state.flags.prosaLadeira
+          ? 'Hear bar stories (Already talked today)'
+          : 'Sip sparkling water and listen to old tales of Pirituba',
+        costLabel: 'Free (1x per day)',
+        outcome: 'The bartender recalls when Paula Ferreira was a dirt road and trams ran up to the church. Pure São Paulo nostalgia (+10% Sanity).'
+      }
+    }
+  },
+
+  CASA_DO_NORTE: {
+    title: '☀️ ASA BRANCA NORTHEASTERN EMPORIUM',
+    intro: (state) => `
+      The mouth-watering aroma of cured sun-dried beef sizzling in clarified butter and grilled coalho cheese fills the air.<br>
+      Northeastern forró music plays softly as the owner welcomes you with open arms:<br>
+      <em>"— Welcome! True northeastern sustenance to handle any grind in São Paulo!"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      baiao_dois: {
+        label: 'Hearty plate of Baião de Dois with sun-dried beef and coalho cheese',
+        outcome: 'Black-eyed peas, seasoned rice, generous chunks of sun-dried beef, and creamy cheese. Heavy fuel that keeps you full for hours (+60% Stomach, +30% Sanity)!'
+      },
+      queijo_coalho: {
+        label: 'Toasted coalho cheese skewer drizzled with sugarcane molasses',
+        outcome: 'Golden grilled cheese with a crispy crust and the sweet glaze of craft molasses (+30% Stomach, +18% Sanity).'
+      },
+      dose_cachaca_artesanal: {
+        label: 'Shot of artisanal copper-still cachaça infused with jatobá bark',
+        outcome: 'Went down fiery and warmed the spirit. Footsteps became lighter and your hustle sharper (+15 Ginga, +10% Sanity, -5% Stomach)!'
+      }
+    }
+  },
+
+  LOTERICA_PIRITUBA: {
+    title: '🍀 PIRITUBA LOTTERY & BANK AGENCY',
+    intro: (state) => `
+      Bulletproof cashier windows with official banners, giant Mega-Sena jackpot posters, and buzzing thermal printers.<br>
+      The teller speaks over the intercom:<br>
+      <em>"— Next! Lottery ticket or bill payments at Caixa Aqui?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      aposta_mega_sena: {
+        label: 'Place a Mega-Sena jackpot bet (Standard 6-number ticket)',
+        outcome: (state, ptResult) => ptResult.includes('INACREDITÁVEL')
+          ? '🎉 UNBELIEVABLE! YOUR NUMBERS HIT A WINNING TIER! You collected R$ 500.00 right at the counter (+R$ 500.00, +50% Sanity, +35 Ginga)!'
+          : ptResult.includes('surpresa')
+            ? '🍀 Your ticket yielded a surprise R$ 50.00 payout! The teller handed you cash (+R$ 50.00, +22% Sanity, +15 Ginga)!'
+            : 'Green ticket tucked into your pocket. The dream of hitting the jackpot fuels the spirit of the São Paulo worker (+10% Sanity).'
+      },
+      pagar_conta_luz: {
+        label: (state) => state.flags.boletoPago
+          ? 'Pay Enel electric bill (Daily bill already paid)'
+          : 'Pay Enel electric bill at the counter (Daily Objective)',
+        costLabel: 'R$ 124.50',
+        outcome: 'Bill officially stamped and paid at the counter! Good credit preserved and lights stay on (+35% Sanity)!'
+      },
+      raspadinha_dinheiro: {
+        label: 'Buy a Caixa instant scratch-off lottery ticket',
+        outcome: (state, ptResult) => ptResult.includes('Ganhou R$')
+          ? 'Scratched the foil and found three golden clovers! Won R$ 10.00 on the spot (+R$ 10.00 net, +15% Sanity, +10 Ginga)!'
+          : 'Just missed: two matching numbers and one dud. Better luck next time (-R$ 3.00, -3% Sanity).'
+      }
+    }
+  },
+
+  PASTELARIA_BETO: {
+    title: '🥟 BETO\'S PASTELARIA',
+    intro: (state) => `
+      The sizzling sizzle of hot oil vats and the sweet vapor of fresh sugarcane passing through the electric press.<br>
+      Seu Beto lifts a golden, blistered pastel with a slotted skimmer:<br>
+      <em>"— Fresh out of the oil, crispy and piping hot! Meat with egg, or special cheese?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      pastel_especial_30cm: {
+        label: 'Giant 30cm Special Pastel (Ground beef, cheese, egg, olive) + 500ml Sugarcane Juice',
+        outcome: 'Puffed crispy crust, molten cheese pull, and fresh cold sugarcane juice with lime. Stomach completely full (+55% Stomach, +25% Sanity)!'
+      },
+      pastel_palmito: {
+        label: 'Vegetarian creamy hearts of palm pastel',
+        outcome: 'Generous creamy filling in a flaky golden crust. A São Paulo street food classic (+35% Stomach, +16% Sanity).'
+      },
+      vinagrete_extra: {
+        label: (state) => state.flags.vinagreteBeto
+          ? 'Top with vinaigrette & chili sauce (Already seasoned today)'
+          : 'Top your pastel with homemade tomato vinaigrette and house malagueta hot sauce',
+        costLabel: 'Free (1x per day)',
+        outcome: 'A generous spoonful of tangy vinaigrette with house chili. The master touch on your snack (+6% Sanity, +4 Ginga).'
+      }
+    }
+  },
+
+  BAR_DO_PEIXE: {
+    title: '🐟 CANTINHO DO PEIXE SEAFOOD PUB',
+    intro: (state) => `
+      Outdoor tables under blue parasols serve platters of sizzling fried fish with lime wedges.<br>
+      The waiter balancing a tray on his shoulder grins from the sidewalk:<br>
+      <em>"— Hey boss! Crispy tilapia tenders with tartar sauce or fried whitebait with sub-zero beer?"</em><br>
+      <small style="color:#ffcc00">Balance: ${state.formattedGrana} | Stomach: ${state.fome}% | Sanity: ${state.sanidade}%</small>
+    `,
+    options: {
+      isca_tilapia: {
+        label: 'Platter of crispy fried tilapia tenders with tartar sauce and lime',
+        outcome: 'Fresh fish, light crunchy batter, fresh lime juice, and creamy tartar sauce. A respectable feast (+50% Stomach, +28% Sanity)!'
+      },
+      lambari_cerveja: {
+        label: 'Fried crispy whitebait fish + 600ml ice-cold bottled beer in cooler',
+        outcome: 'Classic São Paulo pub finger food paired with beer frosted with ice (+40% Stomach, +24% Sanity).'
+      },
+      pedir_caldo_peixe: {
+        label: 'Cup of steaming hot seasoned fish broth with scallions',
+        outcome: 'Steaming broth with scallions and mild pepper that warms your core and restores vitality (+22% Stomach, +16% Sanity).'
+      }
+    }
   }
 };
+
 
 /**
  * Internationalization (i18n) Engine for Brazil Simulator // Sobrevivência BR
@@ -18187,7 +20703,15 @@ const TRANSLATIONS = {
       elevador_terreo: { name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)' },
       bar_frango: { name: 'O LENDÁRIO BAR FRANGÓ (DESDE 1987)', prompt: 'PEDIR FAMOSA COXINHA COM CATUPIRY & CHOPP ARTESANAL' },
       igreja_matriz: { name: 'PARÓQUIA NOSSA SENHORA DO Ó (1580)', prompt: 'ENTRAR NA IGREJA HISTÓRICA, REZAR OU ACENDER UMA VELA' },
-      boteco_sete_barras: { name: 'BOTECO DAS 7 BARRAS (SINUCA & TUBAÍNA)', prompt: 'TOMAR UMA TUBAÍNA GELADA OU JOGAR UMA PARTIDA DE SINUCA' }
+      boteco_sete_barras: { name: 'BOTECO DAS 7 BARRAS (SINUCA & TUBAÍNA)', prompt: 'TOMAR UMA TUBAÍNA GELADA OU JOGAR UMA PARTIDA DE SINUCA' },
+      barbearia_antonio: { name: 'BARBEARIA DO SEU ANTÔNIO (NAVALHA & DEGRADÊ)', prompt: 'CORTAR CABELO, FAZER BARBA OU PROSEAR' },
+      acougue_boi_ouro: { name: 'AÇOUGUE BOI DE OURO (CORTE & PICANHA)', prompt: 'COMPRAR CARNES NOBRES OU LINGUIÇA CASEIRA' },
+      hortifruti_ladeira: { name: 'HORTIFRÚTI DA LADEIRA (FRUTAS & LEGUMES)', prompt: 'COMPRAR FRUTAS FRESCAS OU ÁGUA DE COCO' },
+      boteco_ladeira: { name: 'BAR DA LADEIRA (SINUCA & DOMINÓ)', prompt: 'JOGAR DOMINÓ OU PEDIR CERVEJA COM TORRESMO' },
+      casa_do_norte: { name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)', prompt: 'PEDIR BAIÃO DE DOIS OU COMPRAR QUEIJO COALHO' },
+      loterica_pirituba: { name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)', prompt: 'APOSTAR NA MEGA-SENA OU PAGAR CONTAS' },
+      pastelaria_beto: { name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)', prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA' },
+      bar_peixe: { name: 'BAR & PETISCARIA CANTINHO DO PEIXE', prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO' }
     },
 
     npcs: {
@@ -18196,7 +20720,19 @@ const TRANSLATIONS = {
       juninho: { name: 'JUNINHO DA MONARK', prompt: 'FALAR COM JUNINHO DA BIKE' },
       dona_neide: { name: 'DONA NEIDE (TIA DA MARMITA)', prompt: 'FALAR COM DONA NEIDE DA FEIRA' },
       sargento_rocha: { name: 'SARGENTO ROCHA (PMESP)', prompt: 'FALAR COM O SARGENTO ROCHA (PM)' },
-      menor_corre: { name: 'MENOR DO CORRE (QUEBRADA)', prompt: 'FALAR COM O MENOR DO CORRE' }
+      menor_corre: { name: 'MENOR DO CORRE (QUEBRADA)', prompt: 'FALAR COM O MENOR DO CORRE' },
+      mestre_bloco: {
+        name: 'MESTRE DO BLOCO',
+        prompt: 'FALAR COM O MESTRE DO BLOCO',
+        closed: '[FECHADO] BLOCO FORA DE HORÁRIO',
+        unavailable: 'O mestre já encerrou sua cota de dança neste run.'
+      },
+      churrasqueiro_campo: {
+        name: 'CHURRASQUEIRO DO CAMPINHO',
+        prompt: 'FALAR COM O CHURRASQUEIRO',
+        closed: '[FECHADO] CAMPINHO FORA DE HORÁRIO',
+        unavailable: 'O churrasqueiro já fechou sua vaga na pelada neste run.'
+      }
     },
 
     defeat: {
@@ -18227,7 +20763,15 @@ const TRANSLATIONS = {
       storm_start: '⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.',
       storm_end: '🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.',
       caramelo_bark: '🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!',
-      traffic_hit: '🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)'
+      traffic_hit: '🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)',
+      head_bonk: '💥 <strong>POFT!</strong> Você deu com a cara no muro! A rua era só uma pintura na parede...<br><span style="font-size:11px;color:#fcd34d;">🚧 Desculpe pelo transtorno, estamos em obras!</span>'
+    },
+
+    news: {
+      bloco_danca: 'Dançou no bloco da Edgar Facó',
+      churrasco_prato: 'Comeu prato no churrasco do campinho',
+      pelada_campo: 'Jogou pelada no campinho da favela',
+      head_bonk: 'Bateu com a cara no muro pintado de obra achando que a rua continuava'
     }
   },
 
@@ -18391,7 +20935,15 @@ const TRANSLATIONS = {
       elevador_terreo: { name: 'LOBBY ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (RIDE UP TO 12TH FLOOR PENTHOUSE)' },
       bar_frango: { name: 'THE LEGENDARY BAR FRANGÓ (SINCE 1987)', prompt: 'ORDER FAMOUS CHICKEN COXINHA & CRAFT BEER' },
       igreja_matriz: { name: 'OUR LADY OF Ó HISTORIC CHURCH (1580)', prompt: 'ENTER HISTORIC CHURCH, PRAY OR LIGHT A CANDLE' },
-      boteco_sete_barras: { name: 'SETE BARRAS CORNER PUB (SNOOKER & SODA)', prompt: 'DRINK AN ICE-COLD TUBAÍNA OR PLAY SNOOKER' }
+      boteco_sete_barras: { name: 'SETE BARRAS CORNER PUB (SNOOKER & SODA)', prompt: 'DRINK AN ICE-COLD TUBAÍNA OR PLAY SNOOKER' },
+      barbearia_antonio: { name: 'SEU ANTÔNIO\'S BARBERSHOP (FADE & SHAVE)', prompt: 'GET A HAIRCUT, SHAVE, OR CHAT' },
+      acougue_boi_ouro: { name: 'BOI DE OURO BUTCHER SHOP (PRIME CUTS)', prompt: 'BUY PRIME CUTS OR HANDMADE SAUSAGE' },
+      hortifruti_ladeira: { name: 'HILLSIDE FRESH PRODUCE MARKET (FRUITS & GREENS)', prompt: 'BUY FRESH FRUIT OR COCONUT WATER' },
+      boteco_ladeira: { name: 'HILLSIDE CORNER BAR (SNOOKER & DOMINOES)', prompt: 'PLAY DOMINOES OR ORDER BEER & TORRESMO' },
+      casa_do_norte: { name: 'ASA BRANCA NORTHEASTERN EMPORIUM', prompt: 'ORDER BAIÃO DE DOIS OR BUY COALHO CHEESE' },
+      loterica_pirituba: { name: 'PIRITUBA LOTTERY & BANK AGENCY (CAIXA AQUI)', prompt: 'PLAY MEGA-SENA JACKPOT OR PAY BILLS' },
+      pastelaria_beto: { name: 'BETO\'S PASTELARIA (GIANT PASTEL & CANE JUICE)', prompt: 'ORDER 30CM PASTEL & SUGARCANE JUICE' },
+      bar_peixe: { name: 'CANTINHO DO PEIXE SEAFOOD PUB', prompt: 'ORDER CRISPY TILAPIA TENDERS & COLD BEER' }
     },
 
     npcs: {
@@ -18400,7 +20952,19 @@ const TRANSLATIONS = {
       juninho: { name: 'JUNINHO ON HIS BICYCLE', prompt: 'TALK TO JUNINHO (BIKE WHEELIE KID)' },
       dona_neide: { name: 'DONA NEIDE (MEAL BOX LADY)', prompt: 'TALK TO DONA NEIDE FROM THE MARKET' },
       sargento_rocha: { name: 'SERGEANT ROCHA (MILITARY POLICE)', prompt: 'TALK TO SERGEANT ROCHA (POLICE)' },
-      menor_corre: { name: 'STREET RUNNER (LOCAL HUSTLER)', prompt: 'TALK TO THE STREET RUNNER' }
+      menor_corre: { name: 'STREET RUNNER (LOCAL HUSTLER)', prompt: 'TALK TO THE STREET RUNNER' },
+      mestre_bloco: {
+        name: 'BLOCO MASTER',
+        prompt: 'TALK TO THE BLOCO MASTER',
+        closed: '[CLOSED] BLOCO OUTSIDE EVENT HOURS',
+        unavailable: 'The bloco master already closed your dance slot for this run.'
+      },
+      churrasqueiro_campo: {
+        name: 'CAMPINHO GRILL COOK',
+        prompt: 'TALK TO THE GRILL COOK',
+        closed: '[CLOSED] CAMPINHO OUTSIDE EVENT HOURS',
+        unavailable: 'The grill cook already filled your pelada slot for this run.'
+      }
     },
 
     defeat: {
@@ -18431,7 +20995,15 @@ const TRANSLATIONS = {
       storm_start: '⛈️ <strong>SÃO PAULO SUMMER DELUGE!</strong><br>Torrential rain and crawling traffic on Edgar Facó.',
       storm_end: '🌤️ <strong>THE STORM HAS PASSED!</strong> São Paulo\'s skies have cleared up once again.',
       caramelo_bark: '🐕 <strong>CARAMELO BARKED!</strong> Watch out for the speeding vehicle!',
-      traffic_hit: '🚨 <strong>WATCH OUT!</strong> You were almost hit by oncoming traffic! Look both ways! (-25% Sanity, +20% Heat)'
+      traffic_hit: '🚨 <strong>WATCH OUT!</strong> You were almost hit by oncoming traffic! Look both ways! (-25% Sanity, +20% Heat)',
+      head_bonk: '💥 <strong>BONK!</strong> You slammed face-first into a solid wall! The road was just a painting...<br><span style="font-size:11px;color:#fcd34d;">🚧 Sorry for the inconvenience, under construction!</span>'
+    },
+
+    news: {
+      bloco_danca: 'Danced with the carnival bloco on Edgar Facó',
+      churrasco_prato: 'Ate a barbecue plate at the favela campinho',
+      pelada_campo: 'Played a pickup match on the favela pitch',
+      head_bonk: 'Slammed face-first into a painted illusion construction wall thinking the road continued'
     }
   }
 };
@@ -21167,8 +23739,548 @@ const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  BLOCO_CARNAVAL: {
+    id: 'BLOCO_CARNAVAL',
+    title: '🥁 BLOCO DA EDGAR FACÓ',
+    getIntroText: (state) => `
+      O mestre do bloco segura o apito ao lado do trio estacionado, com o couro do surdo ainda quente.<br>
+      Folia no asfalto, confete no chão e o cortejo preso no horário do evento.<br>
+      <em>"— Entra na roda, guerreiro! Hoje a Edgar Facó é passarela!"</em><br>
+      <small style="color:#ffcc00">Saldo: ${state.formattedGrana} | Sanidade: ${state.sanidade}% | Ginga: ${state.ginga}</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'dancar_bloco',
+        label: state.flags.dancouBloco
+          ? 'Dançar no bloco (Você já mandou seu passo neste run)'
+          : 'Entrar na roda e dançar no bloco até o apito',
+        costLabel: 'Ritmo do cortejo (1x por run)',
+        disabled: Boolean(state.flags.dancouBloco),
+        execute: (state) => {
+          if (state.flags.dancouBloco) {
+            return 'O mestre aponta o apito: a cota de dança deste run já foi. O trio segue sem te puxar de novo.';
+          }
+          const mandouBem = state.rng.chance(0.65);
+          if (mandouBem) {
+            state.apply({
+              ginga: 15,
+              sanidade: 20,
+              flags: { dancouBloco: true }
+            }, 'news.bloco_danca');
+            return 'O surdo marcou o passo, o apito fechou a frase e a roda abriu pra você. Cortejo inteiro respondeu (+15 Ginga, +20% Sanidade)!';
+          }
+          state.apply({
+            sanidade: -8,
+            ginga: 5,
+            flags: { dancouBloco: true }
+          }, 'news.bloco_danca');
+          return 'O pé escorregou no confete e o apito riu alto. A roda segurou você de pé, mas a moral esfriou (-8% Sanidade, +5 Ginga).';
+        }
+      }
+    ]
+  },
+
+  CHURRASCO_CAMPO: {
+    id: 'CHURRASCO_CAMPO',
+    title: '🍖 CHURRASCO DO CAMPINHO',
+    getIntroText: (state) => `
+      O churrasqueiro vira a grelha ao lado da churrasqueira de tijolo, fumaça subindo no platô da favela.<br>
+      No campo, a pelada segue sem atrapalhar o fogo nem o acesso da ladeira.<br>
+      <em>"— Prato feito na brasa ou entra na pelada, chefia?"</em><br>
+      <small style="color:#ffcc00">Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'prato_churrasco',
+        label: state.canAfford(1800)
+          ? 'Pedir o prato do campinho (picanha na brasa, farofa e vinagrete)'
+          : 'Pedir o prato do campinho (Sem grana: R$ 18,00 na brasa)',
+        costLabel: 'R$ 18,00',
+        costCentavos: 1800,
+        disabled: !state.canAfford(1800),
+        execute: (state, sound) => {
+          if (!state.canAfford(1800)) {
+            return 'O churrasqueiro cobre a grelha: sem os R$ 18,00 o prato não sai. Nada foi cobrado e o fogo segue no mesmo ponto.';
+          }
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({
+            grana: -1800,
+            fome: 40,
+            sanidade: 22
+          }, 'news.churrasco_prato');
+          return 'Prato quente, farofa úmida e vinagrete no ponto. O bucho agradece e a cabeça esfria (-R$ 18,00, +40% Bucho, +22% Sanidade).';
+        }
+      },
+      {
+        id: 'pelada_campo',
+        label: state.flags.jogouPelada
+          ? 'Entrar na pelada (Você já jogou sua partida neste run)'
+          : 'Pedir pra entrar na pelada do campinho',
+        costLabel: 'Uma partida (1x por run)',
+        disabled: Boolean(state.flags.jogouPelada),
+        execute: (state) => {
+          if (state.flags.jogouPelada) {
+            return 'Os craques apontam o banco: a vaga da pelada deste run já foi. O campo segue sem te recolocar.';
+          }
+          const ganhou = state.rng.chance(0.55);
+          if (ganhou) {
+            state.apply({
+              ginga: 18,
+              sanidade: 12,
+              fome: -6,
+              flags: { jogouPelada: true }
+            }, 'news.pelada_campo');
+            return 'Você recebeu na meia, cruzou rasteiro e a galera gritou gol no platô (+18 Ginga, +12% Sanidade, -6% Bucho)!';
+          }
+          state.apply({
+            ginga: 8,
+            fome: -10,
+            sanidade: 6,
+            flags: { jogouPelada: true }
+          }, 'news.pelada_campo');
+          return 'A bola escapou no toco e você correu atrás até o fim. Perdeu o lance, mas suou a camisa (+8 Ginga, +6% Sanidade, -10% Bucho).';
+        }
+      }
+    ]
+  },
+
+  BARBEARIA_ACLIVE: {
+    id: 'BARBEARIA_ACLIVE',
+    title: '💈 BARBEARIA DO SEU ANTÔNIO',
+    getIntroText: (state) => `
+      O cheiro inconfundível de loção pós-barba mentolada e talco perfumado enche o salão.<br>
+      Seu Antônio afia o navalhete no couro de boi e aponta para a cadeira giratória:<br>
+      <em>"— Entra aí meu chapa! Barba, cabelo ou só dar um tapa no visual?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'corte_degrade',
+        label: 'Corte na régua degradê + Barba desenhada na navalha com toalha quente',
+        costLabel: 'R$ 35,00',
+        costCentavos: 3500,
+        disabled: !state.canAfford(3500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -3500, sanidade: 28, ginga: 20 }, 'Corte na régua do Seu Antônio');
+          return 'Cabelo disfarçado no capricho e barba alinhada no navalhete com toalha quente aromática. Autoestima lá em cima (+28% Sanidade, +20 Ginga)!';
+        }
+      },
+      {
+        id: 'papo_futebol',
+        label: state.flags.falouSeuAntonio
+          ? 'Conversar com Seu Antônio (Já resenhou com ele hoje)'
+          : 'Bater papo sobre o Brasileirão e os causos da ladeira',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.falouSeuAntonio),
+        execute: (state) => {
+          state.apply({ sanidade: 12, ginga: 5, flags: { falouSeuAntonio: true } }, 'Resenha na barbearia');
+          return 'Seu Antônio lembrou da final de 94, cornetou o técnico do time e te deu um conselho de ouro sobre a vizinhança (+12% Sanidade, +5 Ginga).';
+        }
+      },
+      {
+        id: 'comprar_pomada',
+        label: 'Comprar pomada modeladora de efeito seco',
+        costLabel: 'R$ 15,00',
+        costCentavos: 1500,
+        disabled: !state.canAfford(1500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -1500, ginga: 15, sanidade: 10 }, 'Pomada modeladora');
+          return 'Penteado travado que resiste à garoa e ao vento da Paula Ferreira! Visual blindado (+15 Ginga, +10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  ACOUQUE_BOI_DE_OURO: {
+    id: 'ACOUQUE_BOI_DE_OURO',
+    title: '🥩 AÇOUGUE BOI DE OURO',
+    getIntroText: (state) => `
+      Ganchos de inox com peças de carne fresca, aroma de corte fresco e o som rítmico do cutelo na tábua.<br>
+      O açougueiro de avental plástico cumprimenta com um aceno vigoroso:<br>
+      <em>"— Bom dia patrão! Hoje a picanha e a linguiça campeira estão daquele jeito, primeira linha!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'comprar_linguica',
+        label: 'Comprar 1kg de linguiça campeira artesanal temperada',
+        costLabel: 'R$ 22,00',
+        costCentavos: 2200,
+        disabled: !state.canAfford(2200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -2200, fome: 40, sanidade: 15 }, 'Linguiça campeira artesanal');
+          return 'Linguiça suculenta grelhada no ponto com ervas finas e pimenta suave. O bucho agradece e a fome foi embora (+40% Bucho, +15% Sanidade).';
+        }
+      },
+      {
+        id: 'comprar_carne_churrasco',
+        label: 'Comprar pedaço nobre de picanha maturada',
+        costLabel: 'R$ 45,00',
+        costCentavos: 4500,
+        disabled: !state.canAfford(4500),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -4500, fome: 55, sanidade: 28, ginga: 10 }, 'Picanha maturada');
+          return 'Carne macia com aquela capa de gordura dourada no sal grosso. Almoço de rei em plena subida da Freguesia (+55% Bucho, +28% Sanidade, +10 Ginga)!';
+        }
+      },
+      {
+        id: 'pedir_osso_sopa',
+        label: state.flags.pegouOssoAcougue
+          ? 'Pedir ossinho de boi pro cachorro / sopa (Cota do dia já retirada)'
+          : 'Pedir um ossinho de boi com tutano para o caldo',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.pegouOssoAcougue),
+        execute: (state) => {
+          state.apply({ sanidade: 8, fome: 5, flags: { pegouOssoAcougue: true } }, 'Osso com tutano');
+          return 'O açougueiro embrulhou com carinho um osso recheado de tutano: "— Faz um caldão reforçado que levanta defunto!" (+8% Sanidade, +5% Bucho).';
+        }
+      }
+    ]
+  },
+
+  HORTIFRUTI_PAULA_FERREIRA: {
+    id: 'HORTIFRUTI_PAULA_FERREIRA',
+    title: '🍎 HORTIFRÚTI DA LADEIRA',
+    getIntroText: (state) => `
+      Caixotes de madeira transbordando frutas coloridas, cheiro verde de coentro e laranjas recém-chegadas do CEAGESP.<br>
+      A dona da banca borrifa água fresca nas verduras e sorri calorosa:<br>
+      <em>"— Olá freguês! Fruta doce, verdura fresquinha e água de coco gelada pra hidratar na ladeira!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'duzia_banana',
+        label: 'Comprar uma dúzia de bananas-prata maduras',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -800, fome: 25, sanidade: 12 }, 'Bananas do CEAGESP');
+          return 'Bananas doces e ricas em potássio para encarar a subida íngreme sem cãibra (+25% Bucho, +12% Sanidade).';
+        }
+      },
+      {
+        id: 'agua_coco',
+        label: 'Tomar uma água de coco gelada furada na hora',
+        costLabel: 'R$ 7,00',
+        costCentavos: 700,
+        disabled: !state.canAfford(700),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -700, fome: 15, sanidade: 22 }, 'Água de coco da ladeira');
+          return 'Água de coco doce e trincando de gelada com canudinho biodegradável. Hidratação pura sob o sol de Pirituba (+15% Bucho, +22% Sanidade)!';
+        }
+      },
+      {
+        id: 'escolher_laranja',
+        label: state.flags.provouFrutaLadeira
+          ? 'Experimentar gomo de fruta na banca (Já provou hoje)'
+          : 'Aceitar um gomo de tangerina ponkã cortado na faca',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.provouFrutaLadeira),
+        execute: (state) => {
+          state.apply({ sanidade: 6, fome: 5, flags: { provouFrutaLadeira: true } }, 'Gomo de tangerina');
+          return 'A dona te oferece um gomo no capricho: "— Doce feito mel, freguês!" Refrescou a garganta e alegrou o dia (+6% Sanidade, +5% Bucho).';
+        }
+      }
+    ]
+  },
+
+  BOTECO_LADEIRA: {
+    id: 'BOTECO_LADEIRA',
+    title: '🍻 BAR DA LADEIRA (SINUCA & DOMINÓ)',
+    getIntroText: (state) => `
+      As pedras de dominó estalam com força nas mesinhas de madeira sob o toldo amarelo.<br>
+      Aposentados de chapéu de palha dão risada alta enquanto uma garrafa de cerveja sua no balde de gelo:<br>
+      <em>"— Quem é o próximo pra tomar um coro no dominó? Senta aí freguês!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'partida_domino',
+        label: state.flags.jogouDominoLadeira
+          ? 'Jogar partida de dominó apostada (Já jogou seu desafio nesta rodada)'
+          : 'Desafiar os veteranos no dominó (Aposta R$ 5,00)',
+        costLabel: 'Aposta R$ 5,00 (1x por run)',
+        costCentavos: 500,
+        disabled: Boolean(state.flags.jogouDominoLadeira) || !state.canAfford(500),
+        execute: (state, sound) => {
+          const vitoria = state.rng.chance(Math.min(0.85, 0.40 + (state.ginga / 200)));
+          if (vitoria) {
+            if (sound) sound.playCoin();
+            state.apply({
+              grana: 1500,
+              ginga: 16,
+              sanidade: 18,
+              flags: { jogouDominoLadeira: true }
+            }, 'Vitória no dominó da ladeira');
+            return '— BUCHA DE SENA NA CABEÇA! Você bateu de primeira fechando o jogo. Os velhinhos aplaudiram e passaram R$ 15,00 (+R$ 15,00, +16 Ginga, +18% Sanidade)!';
+          } else {
+            state.apply({
+              grana: -500,
+              ginga: 5,
+              sanidade: 6,
+              flags: { jogouDominoLadeira: true }
+            }, 'Derrota honrosa no dominó');
+            return 'O Seu Ditinho bateu na ponta com um carretão invisível! Você perdeu R$ 5,00, mas ganhou o respeito da mesa (+5 Ginga, +6% Sanidade).';
+          }
+        }
+      },
+      {
+        id: 'cerveja_torresmo',
+        label: 'Cerveja 600ml gelada de garrafa + Porção de torresmo crocante',
+        costLabel: 'R$ 16,00',
+        costCentavos: 1600,
+        disabled: !state.canAfford(1600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1600, fome: 32, sanidade: 24 }, 'Cerveja e torresmo da ladeira');
+          return 'Copo lagoinha cheio de colarinho branco e torresmo que estala a cada mordida. O cansaço da subida sumiu no ato (+32% Bucho, +24% Sanidade).';
+        }
+      },
+      {
+        id: 'prosa_balcao',
+        label: state.flags.prosaLadeira
+          ? 'Ouvir conselhos no balcão (Já conversou hoje)'
+          : 'Tomar uma água mineral com gás e ouvir os causos antigos de Pirituba',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.prosaLadeira),
+        execute: (state) => {
+          state.apply({ sanidade: 10, flags: { prosaLadeira: true } }, 'Prosa no balcão da ladeira');
+          return 'O dono do bar conta quando a Paula Ferreira era estrada de terra batida e bondinho subia até a igreja. Nostalgia pura (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  CASA_DO_NORTE: {
+    id: 'CASA_DO_NORTE',
+    title: '☀️ CASA DO NORTE ASA BRANCA',
+    getIntroText: (state) => `
+      O aroma inebriante de carne de sol assada na manteiga de garrafa e queijo coalho na brasa invade o ar.<br>
+      Música de Luiz Gonzaga ecoa suave de uma caixinha de som enquanto o dono te recebe de braços abertos:<br>
+      <em>"— Ô cabra bom! Aqui tem sustança pra aguentar qualquer tranco em São Paulo!"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'baiao_dois',
+        label: 'Prato comercial farto de Baião de Dois com carne de sol e queijo coalho',
+        costLabel: 'R$ 26,00',
+        costCentavos: 2600,
+        disabled: !state.canAfford(2600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -2600, fome: 60, sanidade: 30 }, 'Baião de Dois da Casa do Norte');
+          return 'Feijão fradinho, arroz soltinho, pedaços generosos de carne de sol e nata. Sustança pesada que enche o bucho por horas (+60% Bucho, +30% Sanidade)!';
+        }
+      },
+      {
+        id: 'queijo_coalho',
+        label: 'Espeto de queijo coalho tostado com melaço de cana de rapadura',
+        costLabel: 'R$ 12,00',
+        costCentavos: 1200,
+        disabled: !state.canAfford(1200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1200, fome: 30, sanidade: 18 }, 'Queijo coalho com melaço');
+          return 'Queijo dourado estalando com crostinha crocante e o toque adocicado do melaço artesanal (+30% Bucho, +18% Sanidade).';
+        }
+      },
+      {
+        id: 'dose_cachaca_artesanal',
+        label: 'Dose de cachaça de alambique curtida na casca de jatobá',
+        costLabel: 'R$ 6,00',
+        costCentavos: 600,
+        disabled: !state.canAfford(600),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -600, ginga: 15, sanidade: 10, fome: -5 }, 'Cachaça curtida no jatobá');
+          return 'Desceu queimando a garganta e esquentando a alma. O passo ficou mais leve e o gingado afiado (+15 Ginga, +10% Sanidade, -5% Bucho)!';
+        }
+      }
+    ]
+  },
+
+  LOTERICA_PIRITUBA: {
+    id: 'LOTERICA_PIRITUBA',
+    title: '🍀 LOTÉRICA PIRITUBA',
+    getIntroText: (state) => `
+      Guichês blindados com avisos da Caixa, cartazes da Mega-Sena acumulada e o barulho de impressoras térmicas.<br>
+      A atendente atende no interfone do vidro:<br>
+      <em>"— Próximo! Vai ser aposta da sorte ou pagamento de contas no Caixa Aqui?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Ginga: ${state.ginga} | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'aposta_mega_sena',
+        label: 'Fazer uma fezinha na Mega-Sena (Volante simples de 6 dezenas)',
+        costLabel: 'R$ 5,00',
+        costCentavos: 500,
+        disabled: !state.canAfford(500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const sorteGrande = state.rng.chance(0.015);
+          const sorteMedia = !sorteGrande && state.rng.chance(0.15);
+
+          if (sorteGrande) {
+            state.apply({ grana: 50000, sanidade: 50, ginga: 35 }, 'ACERTOU NA MEGA-SENA!');
+            return '🎉 INACREDITÁVEL! SUA APOSTA BATEU NA QUADRA PREMIADA! Você recebeu R$ 500,00 na hora no guichê (+R$ 500,00, +50% Sanidade, +35 Ginga)!';
+          } else if (sorteMedia) {
+            state.apply({ grana: 4500, sanidade: 22, ginga: 15 }, 'Acerto na raspadinha/loto');
+            return '🍀 O bilhete rendeu um prêmio surpresa de R$ 50,00! A atendente te pagou em dinheiro vivo (+R$ 50,00, +22% Sanidade, +15 Ginga)!';
+          } else {
+            state.apply({ grana: -500, sanidade: 10 }, 'Aposta Mega-Sena');
+            return 'Comprovante verde no bolso. A esperança de ficar milionário renova as energias do trabalhador paulistano (+10% Sanidade).';
+          }
+        }
+      },
+      {
+        id: 'pagar_conta_luz',
+        label: state.flags.boletoPago
+          ? 'Pagar conta de luz Enel (Boleto do dia já quitado com sucesso)'
+          : 'Pagar conta de luz da Enel (Meta do dia)',
+        costLabel: 'R$ 124,50',
+        costCentavos: 12450,
+        disabled: Boolean(state.flags.boletoPago) || !state.canAfford(12450),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: -12450,
+            sanidade: 35,
+            removeInventoryId: 'boleto_enel',
+            flags: { boletoPago: true }
+          }, 'Pagamento da conta de luz na Lotérica');
+          return 'Boleto autenticado no guichê com carimbo mecânico! Nome limpo e energia garantida (+35% Sanidade)!';
+        }
+      },
+      {
+        id: 'raspadinha_dinheiro',
+        label: 'Comprar Raspadinha Instantânea da Caixa',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          const ganhou = state.rng.chance(0.40);
+          if (ganhou) {
+            state.apply({ grana: 700, sanidade: 15, ginga: 10 }, 'Prêmio na Raspadinha');
+            return 'Raspou a moeda e achou três trevos dourados! Ganhou R$ 10,00 no ato (+R$ 10,00 líquido, +15% Sanidade, +10 Ginga)!';
+          } else {
+            state.apply({ grana: -300, sanidade: -3 }, 'Raspadinha sem prêmio');
+            return 'Bateu na trave: dois números iguais e um diferente. Fica pra próxima (-R$ 3,00, -3% Sanidade).';
+          }
+        }
+      }
+    ]
+  },
+
+  PASTELARIA_BETO: {
+    id: 'PASTELARIA_BETO',
+    title: '🥟 PASTELARIA DO BETO',
+    getIntroText: (state) => `
+      O barulho borbulhante do tacho de óleo quente e o vapor doce da cana moída no engenho elétrico.<br>
+      Seu Beto escorre um pastel dourado e estalando com a escumadeira inox:<br>
+      <em>"— Saiu agora, sequinho e crocante! Vai querer de carne com ovo ou queijo especial?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pastel_especial_30cm',
+        label: 'Pastel Especial de 30cm (Carne moída, queijo, ovo e azeitona) + Copo de Garapa 500ml',
+        costLabel: 'R$ 15,00',
+        costCentavos: 1500,
+        disabled: !state.canAfford(1500),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1500, fome: 55, sanidade: 25 }, 'Pastel de 30cm com caldo de cana');
+          return 'Massa folhada cheia de bolhas crocantes, queijo esticando e caldo de cana com limão trincando de gelado. Bucho lotado (+55% Bucho, +25% Sanidade)!';
+        }
+      },
+      {
+        id: 'pastel_palmito',
+        label: 'Pastel vegetariano de palmito pupunha cremoso',
+        costLabel: 'R$ 10,00',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1000, fome: 35, sanidade: 16 }, 'Pastel de palmito cremoso');
+          return 'Recheio cremoso e farto, massa levinha e crocante. Clássico paulistano aprovado (+35% Bucho, +16% Sanidade).';
+        }
+      },
+      {
+        id: 'vinagrete_extra',
+        label: state.flags.vinagreteBeto
+          ? 'Caprichar no pote de vinagrete e pimenta (Já temperou hoje)'
+          : 'Temperar o pastel com o vinagrete caseiro e molho de pimenta da casa',
+        costLabel: 'Grátis (1x por dia)',
+        disabled: Boolean(state.flags.vinagreteBeto),
+        execute: (state) => {
+          state.apply({ sanidade: 6, ginga: 4, flags: { vinagreteBeto: true } }, 'Vinagrete com pimenta');
+          return 'Colherada farta de vinagrete ácido com pimenta malagueta caseira. Deu aquele toque de mestre no lanche (+6% Sanidade, +4 Ginga).';
+        }
+      }
+    ]
+  },
+
+  BAR_DO_PEIXE: {
+    id: 'BAR_DO_PEIXE',
+    title: '🐟 BAR & PETISCARIA CANTINHO DO PEIXE',
+    getIntroText: (state) => `
+      As mesas externas sob guarda-sóis azuis servem travessas de peixe frito estalando e limão cortado em quatro.<br>
+      O garçom de bandeja equilibrada no ombro sorri na calçada:<br>
+      <em>"— Fala patrão! Isca de tilápia com molho tártaro ou manjubinha frita com cerveja trincando?"</em><br>
+      <small style="color:#ffcc00">Seu Saldo: ${state.formattedGrana} | Bucho: ${state.fome}% | Sanidade: ${state.sanidade}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'isca_tilapia',
+        label: 'Porção farta de isca de tilápia crocante com molho tártaro e limão taiti',
+        costLabel: 'R$ 32,00',
+        costCentavos: 3200,
+        disabled: !state.canAfford(3200),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -3200, fome: 50, sanidade: 28 }, 'Isca de tilápia crocante');
+          return 'Peixe fresco, empanado fininho e crocante com gotas de limão e molho tártaro cremoso. Almoço de respeito (+50% Bucho, +28% Sanidade)!';
+        }
+      },
+      {
+        id: 'lambari_cerveja',
+        label: 'Porção de manjubinha frita + Cerveja 600ml estupidamente gelada no balde',
+        costLabel: 'R$ 24,00',
+        costCentavos: 2400,
+        disabled: !state.canAfford(2400),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -2400, fome: 40, sanidade: 24 }, 'Manjubinha e cerveja trincando');
+          return 'Petisco clássico de boteco paulistano acompanhado de cerveja com aquela garoa de gelo no vidro (+40% Bucho, +24% Sanidade).';
+        }
+      },
+      {
+        id: 'pedir_caldo_peixe',
+        label: 'Caldinho de peixe quente temperado no copinho com cebolinha',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -800, fome: 22, sanidade: 16 }, 'Caldinho de peixe');
+          return 'Caldo fumegante com cheiro-verde e pimentinha que assenta o estômago e revigora as forças (+22% Bucho, +16% Sanidade).';
+        }
+      }
+    ]
   }
 };
+
 
 /**
  * Autonomous Roaming NPC System for Brazil Simulator (Pirituba, SP)
@@ -21335,6 +24447,7 @@ class NpcSystem {
     this.npcs.push(menorCorre);
 
     this.initEventCrowds();
+    this.initEventHosts();
   }
 
   // Build articulated humanoid 3D mesh
@@ -22161,6 +25274,44 @@ class NpcSystem {
     this.rng.state = savedState;
   }
 
+  initEventHosts() {
+    this.npcs.push(this.createHumanoidNpc({
+      id: 'mestre_bloco',
+      name: 'MESTRE DO BLOCO',
+      prompt: 'FALAR COM O MESTRE DO BLOCO',
+      encounterId: 'BLOCO_CARNAVAL',
+      shirtColor: 0xf59e0b,
+      skinColor: 0x8d5524,
+      pantsColor: 0x1f2937,
+      capColor: 0xdc2626,
+      hasCap: true,
+      speed: 0.35,
+      waypoints: [{ x: 137.2, z: 42.4 }],
+      zoneId: BLOCO_ZONE_ID,
+      interactable: true,
+      animationMode: 'DANCE',
+      baseY: 0
+    }));
+
+    this.npcs.push(this.createHumanoidNpc({
+      id: 'churrasqueiro_campo',
+      name: 'CHURRASQUEIRO DO CAMPINHO',
+      prompt: 'FALAR COM O CHURRASQUEIRO',
+      encounterId: 'CHURRASCO_CAMPO',
+      shirtColor: 0x7f1d1d,
+      skinColor: 0x6b4423,
+      pantsColor: 0x111827,
+      capColor: 0xf8fafc,
+      hasCap: true,
+      speed: 0.3,
+      waypoints: [{ x: -19.4, y: 9.5, z: -89.6 }],
+      zoneId: CAMPINHO_ZONE_ID,
+      interactable: true,
+      animationMode: null,
+      baseY: 9.5
+    }));
+  }
+
   initEventSpectators() {
     if (!this._spectatorGeo) {
       this._spectatorGeo = new THREE.BoxGeometry(0.36, 1.1, 0.26);
@@ -22399,6 +25550,78 @@ class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'BOTECO_SETE_BARRAS',
         zoneId: 'RUA_SETE_BARRAS'
+      },
+      {
+        id: 'barbearia_antonio',
+        name: 'BARBEARIA DO SEU ANTÔNIO (NAVALHA & DEGRADÊ)',
+        prompt: 'CORTAR CABELO, FAZER BARBA OU PROSEAR',
+        position: new THREE.Vector3(-6.2, 2.2, 85.0),
+        maxDist: 3.5,
+        encounterId: 'BARBEARIA_ACLIVE',
+        zoneId: 'BARBEARIA_ACLIVE'
+      },
+      {
+        id: 'acougue_boi_ouro',
+        name: 'AÇOUGUE BOI DE OURO (CORTE & PICANHA)',
+        prompt: 'COMPRAR CARNES NOBRES OU LINGUIÇA CASEIRA',
+        position: new THREE.Vector3(-6.2, 4.1, 103.0),
+        maxDist: 3.5,
+        encounterId: 'ACOUQUE_BOI_DE_OURO',
+        zoneId: 'ACOUQUE_BOI_DE_OURO'
+      },
+      {
+        id: 'hortifruti_ladeira',
+        name: 'HORTIFRÚTI DA LADEIRA (FRUTAS & LEGUMES)',
+        prompt: 'COMPRAR FRUTAS FRESCAS OU ÁGUA DE COCO',
+        position: new THREE.Vector3(9.2, 2.2, 85.0),
+        maxDist: 3.5,
+        encounterId: 'HORTIFRUTI_PAULA_FERREIRA',
+        zoneId: 'HORTIFRUTI_PAULA_FERREIRA'
+      },
+      {
+        id: 'boteco_ladeira',
+        name: 'BAR DA LADEIRA (SINUCA & DOMINÓ)',
+        prompt: 'JOGAR DOMINÓ OU PEDIR CERVEJA COM TORRESMO',
+        position: new THREE.Vector3(9.2, 6.0, 121.0),
+        maxDist: 3.8,
+        encounterId: 'BOTECO_LADEIRA',
+        zoneId: 'BOTECO_LADEIRA'
+      },
+      {
+        id: 'casa_do_norte',
+        name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)',
+        prompt: 'PEDIR BAIÃO DE DOIS OU COMPRAR QUEIJO COALHO',
+        position: new THREE.Vector3(-27.0, 1.2, 38.0),
+        maxDist: 3.5,
+        encounterId: 'CASA_DO_NORTE',
+        zoneId: 'CASA_DO_NORTE'
+      },
+      {
+        id: 'loterica_pirituba',
+        name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)',
+        prompt: 'APOSTAR NA MEGA-SENA OU PAGAR CONTAS',
+        position: new THREE.Vector3(62.5, 1.2, 38.0),
+        maxDist: 3.5,
+        encounterId: 'LOTERICA_PIRITUBA',
+        zoneId: 'LOTERICA_PIRITUBA'
+      },
+      {
+        id: 'pastelaria_beto',
+        name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)',
+        prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA',
+        position: new THREE.Vector3(74.5, 1.2, 38.0),
+        maxDist: 3.5,
+        encounterId: 'PASTELARIA_BETO',
+        zoneId: 'PASTELARIA_BETO'
+      },
+      {
+        id: 'bar_peixe',
+        name: 'BAR & PETISCARIA CANTINHO DO PEIXE',
+        prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO',
+        position: new THREE.Vector3(104.0, 1.2, 1.0),
+        maxDist: 3.8,
+        encounterId: 'BAR_DO_PEIXE',
+        zoneId: 'BAR_DO_PEIXE'
       }
     ];
   }
@@ -22416,6 +25639,7 @@ class InteractableSystem {
     if (isAnyModalOpen) {
       this.currentTarget = null;
       this.hidePrompt();
+      this.hideNpcQuickDock();
       return;
     }
 
@@ -22575,6 +25799,8 @@ class InteractableSystem {
       dona_neide: '👵',
       sargento_rocha: '👮',
       menor_corre: '🧢',
+      mestre_bloco: '🥁',
+      churrasqueiro_campo: '🍖',
       flanelinha: '🚙'
     };
 
@@ -22633,7 +25859,8 @@ class InteractableSystem {
     if (!this.activeQuickOptions || !this.activeQuickOptions[index]) return;
     const opt = this.activeQuickOptions[index];
     const game = window.app?.game;
-    if (!game || !game.state) return;
+    if (!game || !game.state || !game.isRunActive) return;
+    if (this.dialog && this.dialog.isOpen) return;
 
     if (opt.disabled) {
       if (game.hud) game.hud.showToast('⚠️ <strong>AÇÃO INDISPONÍVEL:</strong> Recursos insuficientes!', 2500);
@@ -23901,6 +27128,25 @@ class GameManager {
     this.hands = new HandsSystem(this.scene, this.camera, this.sound);
     if (this.controls) {
       this.controls.handsSystem = this.hands;
+      this.controls.onHeadBonk = (wall) => {
+        const bonkMsg = t(
+          'toasts.head_bonk',
+          '💥 <strong>POFT!</strong> Você deu com a cara no muro! A rua era só uma pintura na parede...<br><span style="font-size:11px;color:#fcd34d;">🚧 Desculpe pelo transtorno, estamos em obras!</span>'
+        );
+        if (this.hud) {
+          this.hud.showToast(bonkMsg, 4000);
+        }
+        if (this.sound && this.sound.newsDesk) {
+          this.sound.newsDesk.recordAction(
+            'HEAD_BONK',
+            'Bateu com a cara no muro pintado de obra achando que a rua continuava',
+            { wallId: wall ? wall.id : 'unknown' }
+          );
+        }
+        if (this.isRunActive && this.state) {
+          this.state.apply({ sanidade: -1 }, 'news.head_bonk');
+        }
+      };
     }
     this.props = new GameProps(this.scene, this.physics, this.textures, this.sound);
     this.encounters = BRAZILIAN_ENCOUNTERS;
@@ -24389,6 +27635,9 @@ class GameApp {
       this.sound,
       this.renderer.scene
     );
+    if (this.city && this.city.illusionWalls) {
+      this.controls.setIllusionWalls(this.city.illusionWalls);
+    }
 
     const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
     const seedParam = urlParams ? urlParams.get('seed') : null;

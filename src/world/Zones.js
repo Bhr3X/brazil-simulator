@@ -293,6 +293,78 @@ export const WORLD_ZONES = [
     description: 'Tradicional enclave de sobrados paulistanos, oficinas mecânicas, serralherias e comércio de bairro entre a Edgar Facó e a Freguesia.'
   },
   {
+    id: 'BARBEARIA_ACLIVE',
+    name: 'BARBEARIA DO SEU ANTÔNIO (NAVALHA & DEGRADÊ)',
+    min: { x: -14.0, y: 0.0, z: 80.0 },
+    max: { x: -5.0, y: 7.0, z: 94.0 },
+    openHour: 8.0,
+    closeHour: 20.0,
+    description: 'Barbearia clássica de bairro na ladeira. Toalha quente, navalhete afiado, pós-barba mentolado e conversa fiada de futebol.'
+  },
+  {
+    id: 'ACOUQUE_BOI_DE_OURO',
+    name: 'AÇOUGUE BOI DE OURO (CORTE & PICANHA)',
+    min: { x: -14.0, y: 1.0, z: 98.0 },
+    max: { x: -5.0, y: 8.0, z: 112.0 },
+    openHour: 7.0,
+    closeHour: 19.0,
+    description: 'Açougue tradicional de bairro. Ganchos de carne, balcão refrigerado inox, moedor barulhento e cortes frescos.'
+  },
+  {
+    id: 'HORTIFRUTI_PAULA_FERREIRA',
+    name: 'HORTIFRÚTI DA LADEIRA (FRUTAS & VERDURAS)',
+    min: { x: 7.0, y: 0.0, z: 80.0 },
+    max: { x: 16.0, y: 7.0, z: 94.0 },
+    openHour: 7.0,
+    closeHour: 19.5,
+    description: 'Banca de legumes e hortaliças frescas. Caixotes de madeira inclinados na calçada com bananas, laranjas e cheiro de coentro fresco.'
+  },
+  {
+    id: 'BOTECO_LADEIRA',
+    name: 'BAR DA LADEIRA (SINUCA & DOMINÓ)',
+    min: { x: 7.0, y: 3.0, z: 118.0 },
+    max: { x: 16.0, y: 10.0, z: 132.0 },
+    openHour: 10.0,
+    closeHour: 23.5,
+    description: 'Ponto de encontro dos aposentados na subida. Mesinhas de plástico na calçada com partidas acirradas de dominó e torresmo crocante.'
+  },
+  {
+    id: 'CASA_DO_NORTE',
+    name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)',
+    min: { x: -34.0, y: 0.0, z: 36.0 },
+    max: { x: -20.0, y: 7.0, z: 47.0 },
+    openHour: 9.0,
+    closeHour: 22.0,
+    description: 'Empório e restaurante nordestino tradicional na Edgar Facó. Queijo coalho assado, carne de sol, farinha de mandioca e cachaça da boa.'
+  },
+  {
+    id: 'LOTERICA_PIRITUBA',
+    name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)',
+    min: { x: 57.0, y: 0.0, z: 36.0 },
+    max: { x: 68.0, y: 7.0, z: 47.0 },
+    openHour: 8.0,
+    closeHour: 18.0,
+    description: 'Agência lotérica oficial da Caixa. Fila organizada com fitas amarelas, volantes de apostas da Mega-Sena e pagamento de contas com boleto.'
+  },
+  {
+    id: 'PASTELARIA_BETO',
+    name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO DE CANA)',
+    min: { x: 69.0, y: 0.0, z: 36.0 },
+    max: { x: 80.0, y: 7.0, z: 47.0 },
+    openHour: 6.0,
+    closeHour: 22.0,
+    description: 'Pastelaria tradicional com engenho elétrico de caldo de cana, pastéis dourados sequinhos de 30cm e potes de molho vinagrete e pimenta.'
+  },
+  {
+    id: 'BAR_DO_PEIXE',
+    name: 'BAR & PETISCARIA CANTINHO DO PEIXE',
+    min: { x: 96.0, y: 0.0, z: -8.0 },
+    max: { x: 112.0, y: 7.0, z: 2.0 },
+    openHour: 11.0,
+    closeHour: 23.5,
+    description: 'Bar especializado em porções e petiscos na margem da Edgar Facó. Isca de peixe frita, lambari crocante, limão taiti e cerveja estupidamente gelada.'
+  },
+  {
     id: 'PAULA_FERREIRA_FREGUESIA',
     name: 'RUA PAULA FERREIRA (SUBIDA DA FREGUESIA)',
     min: { x: -8.0, y: 0.0, z: 32.0 },

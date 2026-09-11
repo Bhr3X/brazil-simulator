@@ -2277,5 +2277,937 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // ---------------------------------------------------------------------------
+  // Trompe-l'œil Boundary Illusion Walls & Construction Site Textures
+  // ---------------------------------------------------------------------------
+
+  // Realistic forced-perspective painted mural of Av. Edgar Facó / Avenue extending to infinity
+  createTrompeLoeilAvenue(facingWest = true) {
+    const key = `trompe_loeil_avenue_${facingWest ? 'west' : 'east'}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Sky with sunny smog/haze gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 240);
+    skyGrad.addColorStop(0, '#4a90e2');
+    skyGrad.addColorStop(0.6, '#8ec5fc');
+    skyGrad.addColorStop(1, '#e0f2fe');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, 512, 240);
+
+    // Fluffy painted clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+    [[80, 60, 45], [115, 55, 60], [145, 65, 40], [360, 80, 50], [400, 75, 65], [435, 85, 40]].forEach(([cx, cy, r]) => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Distant mountain / Pico do Jaraguá on the horizon
+    ctx.fillStyle = '#64748b';
+    ctx.beginPath();
+    ctx.moveTo(120, 240);
+    ctx.lineTo(200, 165);
+    ctx.lineTo(230, 178);
+    ctx.lineTo(275, 138); // Jaraguá summit
+    ctx.lineTo(315, 180);
+    ctx.lineTo(420, 240);
+    ctx.closePath();
+    ctx.fill();
+
+    // Antenna tower on summit
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(275, 138);
+    ctx.lineTo(275, 92);
+    ctx.stroke();
+
+    // Distant São Paulo skyline towers
+    const bldgs = [
+      [25, 145, 38, 95, '#6b7280'],
+      [70, 125, 32, 115, '#4b5563'],
+      [110, 155, 26, 85, '#9ca3af'],
+      [335, 135, 34, 105, '#4b5563'],
+      [375, 115, 42, 125, '#374151'],
+      [425, 150, 32, 90, '#6b7280'],
+      [465, 130, 36, 110, '#4b5563']
+    ];
+    for (const [bx, by, bw, bh, col] of bldgs) {
+      ctx.fillStyle = col;
+      ctx.fillRect(bx, by, bw, bh);
+      // Windows
+      ctx.fillStyle = '#cbd5e1';
+      for (let wy = by + 6; wy < by + bh - 6; wy += 8) {
+        for (let wx = bx + 4; wx < bx + bw - 4; wx += 6) {
+          ctx.fillRect(wx, wy, 2.5, 3.5);
+        }
+      }
+    }
+
+    const vanishX = 256;
+    const vanishY = 240;
+
+    // Ground terrain / base asphalt
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(0, 240, 512, 272);
+
+    // Roadway perspective polygon
+    ctx.fillStyle = '#262930';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 26, vanishY);
+    ctx.lineTo(vanishX + 26, vanishY);
+    ctx.lineTo(472, 512);
+    ctx.lineTo(40, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Red SPTrans bus lane in perspective
+    ctx.fillStyle = '#991b1b';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 9, vanishY);
+    ctx.lineTo(vanishX + 5, vanishY);
+    ctx.lineTo(290, 512);
+    ctx.lineTo(190, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Yellow dashed center lines
+    ctx.fillStyle = '#f59e0b';
+    for (let i = 1; i <= 10; i++) {
+      const t1 = Math.pow(i / 10, 2.2);
+      const t2 = Math.pow((i + 0.55) / 10, 2.2);
+      const y1 = vanishY + t1 * (512 - vanishY);
+      const y2 = vanishY + t2 * (512 - vanishY);
+      const w1 = 1.2 + t1 * 8;
+      const w2 = 1.2 + t2 * 8;
+      ctx.beginPath();
+      ctx.moveTo(vanishX - w1 / 2, y1);
+      ctx.lineTo(vanishX + w1 / 2, y1);
+      ctx.lineTo(vanishX + w2 / 2, y2);
+      ctx.lineTo(vanishX - w2 / 2, y2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // White outer road borders
+    ctx.fillStyle = '#e2e8f0';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 24, vanishY);
+    ctx.lineTo(vanishX - 22, vanishY);
+    ctx.lineTo(54, 512);
+    ctx.lineTo(44, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(vanishX + 22, vanishY);
+    ctx.lineTo(vanishX + 24, vanishY);
+    ctx.lineTo(468, 512);
+    ctx.lineTo(458, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Sidewalks & curbs converging
+    ctx.fillStyle = '#475569';
+    ctx.beginPath();
+    ctx.moveTo(0, vanishY + 5);
+    ctx.lineTo(vanishX - 26, vanishY);
+    ctx.lineTo(40, 512);
+    ctx.lineTo(0, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(512, vanishY + 5);
+    ctx.lineTo(vanishX + 26, vanishY);
+    ctx.lineTo(472, 512);
+    ctx.lineTo(512, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Curb edge highlights
+    ctx.fillStyle = '#cbd5e1';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 26, vanishY);
+    ctx.lineTo(vanishX - 24, vanishY);
+    ctx.lineTo(44, 512);
+    ctx.lineTo(40, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(vanishX + 24, vanishY);
+    ctx.lineTo(vanishX + 26, vanishY);
+    ctx.lineTo(472, 512);
+    ctx.lineTo(468, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Distant traffic: painted red bus & white Fiat Uno
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(vanishX - 6, vanishY - 9, 15, 11);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(vanishX - 6, vanishY - 6, 15, 2.5);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(vanishX - 5, vanishY - 9, 13, 2.2);
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(vanishX + 15, vanishY + 6, 10, 6.5);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(vanishX + 16, vanishY + 11.5, 2.5, 2);
+    ctx.fillRect(vanishX + 22, vanishY + 11.5, 2.5, 2);
+
+    // Light poles along sidewalk converging in perspective
+    for (let p = 1; p <= 5; p++) {
+      const pt = Math.pow(p / 5, 1.8);
+      const py = vanishY + pt * (512 - vanishY);
+      const pxL = (vanishX - 26) + (35 - (vanishX - 26)) * pt;
+      const pxR = (vanishX + 26) + (477 - (vanishX + 26)) * pt;
+      const ph = 18 + pt * 70;
+
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1 + pt * 2.8;
+      ctx.beginPath();
+      ctx.moveTo(pxL, py);
+      ctx.lineTo(pxL, py - ph);
+      ctx.lineTo(pxL + 6 + pt * 11, py - ph);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(pxR, py);
+      ctx.lineTo(pxR, py - ph);
+      ctx.lineTo(pxR - (6 + pt * 11), py - ph);
+      ctx.stroke();
+    }
+
+    // Concrete slab seams revealing the solid wall structure
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, 508, 508);
+    ctx.beginPath();
+    ctx.moveTo(170, 0); ctx.lineTo(170, 512);
+    ctx.moveTo(342, 0); ctx.lineTo(342, 512);
+    ctx.moveTo(0, 256); ctx.lineTo(512, 256);
+    ctx.stroke();
+
+    // Satirical stencil at the bottom
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('🚧 PINTURA HIPER-REALISTA • TROMPE-L\'OEIL PAULISTANO 🚧', 45, 502);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Colonial cobblestone perspective street for Largo da Matriz boundary
+  createTrompeLoeilColonialStreet() {
+    const key = 'trompe_loeil_colonial_street';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Twilight sky gradient
+    const sky = ctx.createLinearGradient(0, 0, 0, 230);
+    sky.addColorStop(0, '#f97316');
+    sky.addColorStop(0.5, '#fbbf24');
+    sky.addColorStop(1, '#fed7aa');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 512, 230);
+
+    // Historic church dome & colonial roofs on horizon
+    ctx.fillStyle = '#451a03';
+    ctx.beginPath();
+    ctx.arc(256, 175, 28, Math.PI, 0);
+    ctx.lineTo(284, 230);
+    ctx.lineTo(228, 230);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cross on dome
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(256, 147); ctx.lineTo(256, 125);
+    ctx.moveTo(250, 134); ctx.lineTo(262, 134);
+    ctx.stroke();
+
+    // Colonial sobrados along left and right
+    ctx.fillStyle = '#854d0e';
+    ctx.fillRect(20, 140, 95, 90);
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(397, 130, 95, 100);
+
+    const vanishX = 256;
+    const vanishY = 230;
+
+    // Cobblestone ground quad
+    ctx.fillStyle = '#78716c';
+    ctx.beginPath();
+    ctx.moveTo(vanishX - 22, vanishY);
+    ctx.lineTo(vanishX + 22, vanishY);
+    ctx.lineTo(460, 512);
+    ctx.lineTo(52, 512);
+    ctx.closePath();
+    ctx.fill();
+
+    // Cobblestone texture lines
+    ctx.strokeStyle = '#44403c';
+    for (let i = 1; i <= 14; i++) {
+      const t = Math.pow(i / 14, 1.9);
+      const y = vanishY + t * (512 - vanishY);
+      ctx.lineWidth = 0.8 + t * 2.5;
+      ctx.beginPath();
+      ctx.moveTo(vanishX - (vanishX - 52) * t, y);
+      ctx.lineTo(vanishX + (460 - vanishX) * t, y);
+      ctx.stroke();
+    }
+
+    // Concrete slab boundary lines
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, 508, 508);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('🏛️ LARGO DA MATRIZ • CONTINUAÇÃO ILUSÓRIA • FREGUESIA DO Ó', 32, 502);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Favela valley perspective for northern crest / campinho
+  createTrompeLoeilFavelaValley() {
+    const key = 'trompe_loeil_favela_valley';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Sunny blue sky
+    const sky = ctx.createLinearGradient(0, 0, 0, 180);
+    sky.addColorStop(0, '#0284c7');
+    sky.addColorStop(1, '#bae6fd');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 512, 180);
+
+    // Jaraguá Mountain in center
+    ctx.fillStyle = '#475569';
+    ctx.beginPath();
+    ctx.moveTo(130, 180);
+    ctx.lineTo(256, 70);
+    ctx.lineTo(380, 180);
+    ctx.closePath();
+    ctx.fill();
+
+    // Antenna
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(256, 70);
+    ctx.lineTo(256, 25);
+    ctx.stroke();
+
+    // Dense favela houses descending down the hillside
+    const houseCols = ['#c2410c', '#b45309', '#a16207', '#9a3412', '#7c2d12', '#475569', '#15803d'];
+    for (let r = 0; r < 8; r++) {
+      const y = 180 + r * 40;
+      const h = 30 + r * 5;
+      const w = 40 + r * 6;
+      for (let x = -20; x < 530; x += w + 6) {
+        ctx.fillStyle = houseCols[Math.floor(Math.random() * houseCols.length)];
+        ctx.fillRect(x + (r % 2) * 15, y, w, h);
+
+        // Blue water tank
+        ctx.fillStyle = '#2563eb';
+        ctx.fillRect(x + (r % 2) * 15 + w * 0.4, y - 6, w * 0.28, 7);
+
+        // Windows
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(x + (r % 2) * 15 + 8, y + 10, 8, 8);
+        ctx.fillRect(x + (r % 2) * 15 + w - 16, y + 10, 8, 8);
+      }
+    }
+
+    // Concrete slab border
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(2, 2, 508, 508);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText('⚽ QUEBRADA INFINITA • MURO PINTADO DO CAMPINHO', 65, 502);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Huge authentic Brazilian public works construction signboard:
+  // "DESCULPE PELO TRANSTORNO, ESTAMOS EM OBRAS"
+  createObrasSignHuge() {
+    const key = 'obras_sign_huge';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(1024, 512);
+
+    // High visibility safety yellow background
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(0, 0, 1024, 512);
+
+    // Inner white border panel
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(20, 20, 984, 472);
+
+    // Top and bottom hazard stripes (black & yellow diagonal caution stripes)
+    const drawHazardStripe = (startY, height) => {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(20, startY, 984, height);
+      ctx.fillStyle = '#f59e0b';
+      const stripeW = 32;
+      for (let x = -height; x < 1024 + height; x += stripeW * 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, startY + height);
+        ctx.lineTo(x + stripeW, startY + height);
+        ctx.lineTo(x + stripeW + height, startY);
+        ctx.lineTo(x + height, startY);
+        ctx.closePath();
+        ctx.fill();
+      }
+    };
+    drawHazardStripe(20, 36);
+    drawHazardStripe(456, 36);
+
+    // Government Header
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '900 30px "Arial Black", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🚧  PREFEITURA DE SÃO PAULO  🚧', 512, 100);
+
+    ctx.fillStyle = '#334155';
+    ctx.font = 'bold 20px "Arial Black", Arial, sans-serif';
+    ctx.fillText('SECRETARIA MUNICIPAL DE INFRAESTRUTURA URBANA E OBRAS', 512, 134);
+
+    // Dividing rule
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(70, 155);
+    ctx.lineTo(954, 155);
+    ctx.stroke();
+
+    // Main Huge Headline
+    ctx.fillStyle = '#dc2626'; // Bold red
+    ctx.font = '900 48px "Arial Black", Arial, sans-serif';
+    ctx.fillText('DESCULPE PELO TRANSTORNO,', 512, 225);
+
+    ctx.fillStyle = '#0f172a'; // Bold dark slate
+    ctx.font = '900 64px "Arial Black", Arial, sans-serif';
+    ctx.fillText('ESTAMOS EM OBRAS', 512, 305);
+
+    // Dividing rule
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(120, 335);
+    ctx.lineTo(904, 335);
+    ctx.stroke();
+
+    // Work specifications & satirical subtext
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 22px Arial, sans-serif';
+    ctx.fillText('OBRA: DUPLICAÇÃO, PAVIMENTAÇÃO E CONTENÇÃO DA MALHA VIÁRIA', 512, 375);
+
+    ctx.font = '19px Arial, sans-serif';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('TRECHO: PIRITUBA ⇄ FREGUESIA DO Ó • LOTE 042-B', 512, 410);
+
+    ctx.font = 'italic 16px Arial, sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('PRAZO ESTIMADO: INDETERMINADO • TRÂNSITO LOCAL RESTRITO', 512, 440);
+
+    // Weathering / bolt rivets on the corners
+    ctx.fillStyle = '#334155';
+    [[35, 35], [989, 35], [35, 477], [989, 477]].forEach(([bx, by]) => {
+      ctx.beginPath();
+      ctx.arc(bx, by, 7, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Brazilian wooden plywood construction hoarding / tapume wall (Verde/Azul Tapume)
+  createTapumeMadeira() {
+    const key = 'tapume_madeira';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Industrial green painted plywood base
+    ctx.fillStyle = '#1e3a2b';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Vertical plywood panel seams
+    ctx.fillStyle = '#14271d';
+    for (let x = 64; x < 256; x += 64) {
+      ctx.fillRect(x - 2, 0, 4, 256);
+    }
+
+    // Wood grain and weathering
+    for (let i = 0; i < 2500; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#244533' : '#172e21';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 3, 2);
+    }
+
+    // Stenciled white text
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('OBRAS', 12, 45);
+    ctx.fillText('PERIGO', 76, 45);
+    ctx.fillText('OBRAS', 140, 45);
+    ctx.fillText('OBRAS', 204, 45);
+
+    // Yellow hazard bottom kickplate
+    ctx.fillStyle = '#eab308';
+    ctx.fillRect(0, 240, 256, 16);
+    ctx.fillStyle = '#0f172a';
+    for (let x = -16; x < 256; x += 24) {
+      ctx.beginPath();
+      ctx.moveTo(x, 256); ctx.lineTo(x + 12, 256);
+      ctx.lineTo(x + 20, 240); ctx.lineTo(x + 8, 240);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    const texture = this.toThreeTexture(canvas, 2, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Orange safety plastic netting / tela fachadeira
+  createTelaLaranjaMesh() {
+    const key = 'tela_laranja_mesh';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 128);
+
+    ctx.clearRect(0, 0, 128, 128);
+    ctx.fillStyle = '#ea580c'; // Vibrant safety orange
+
+    // Perforated mesh grid
+    const cellSize = 16;
+    const barWidth = 4;
+    for (let x = 0; x < 128; x += cellSize) {
+      ctx.fillRect(x, 0, barWidth, 128);
+    }
+    for (let y = 0; y < 128; y += cellSize) {
+      ctx.fillRect(0, y, 128, barWidth);
+    }
+
+    const texture = this.toThreeTexture(canvas, 4, 4);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 63. Barbearia do Seu Antônio Sign
+  createBarbeariaSign() {
+    const key = 'barbearia_antonio_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0f172a'; // Deep navy blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    // Gold decorative border
+    ctx.strokeStyle = '#d4af37';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    // Barber pole stripes left and right
+    const drawStripeIcon = (ox) => {
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(ox, 16, 14, 64);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(ox + 4, 16, 6, 64);
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(ox + 2, 30, 10, 16);
+      ctx.fillRect(ox + 2, 54, 10, 16);
+    };
+    drawStripeIcon(14);
+    drawStripeIcon(228);
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 17px "Arial Black", Impact, sans-serif';
+    ctx.fillText('BARBEARIA SEU ANTÔNIO', 128, 38);
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CORTE • BARBA NA NAVALHA • DEGRADÊ', 128, 58);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'italic 10px serif';
+    ctx.fillText('Desde 1994 • Tradição da Ladeira', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Barber pole spiral cylinder texture
+  createBarberPoleTexture() {
+    const key = 'barber_pole_texture';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 256);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 128, 256);
+
+    // Diagonal helical stripes (red and blue)
+    const stripeWidth = 24;
+    for (let y = -128; y < 384; y += 48) {
+      // Red stripe
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(128, y + 64);
+      ctx.lineTo(128, y + 64 + stripeWidth);
+      ctx.lineTo(0, y + stripeWidth);
+      ctx.closePath();
+      ctx.fill();
+
+      // Blue stripe
+      ctx.fillStyle = '#2563eb';
+      ctx.beginPath();
+      ctx.moveTo(0, y + 24);
+      ctx.lineTo(128, y + 24 + 64);
+      ctx.lineTo(128, y + 24 + 64 + stripeWidth);
+      ctx.lineTo(0, y + 24 + stripeWidth);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    texture.wrapT = THREE.RepeatWrapping;
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 64. Açougue Boi de Ouro Sign
+  createAcougueSign() {
+    const key = 'acougue_boi_de_ouro_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#7f1d1d'; // Rich butcher crimson
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#f59e0b'; // Amber border
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial Black", Impact, sans-serif';
+    ctx.fillText('AÇOUGUE BOI DE OURO', 128, 38);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CARNES NOBRES • PICANHA • LINGUIÇA ARTESANAL', 128, 60);
+
+    ctx.fillStyle = '#fca5a5';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('ABATE DIÁRIO • CORTE NA HORA', 128, 78);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 65. Hortifrúti da Ladeira Sign
+  createHortifrutiSign() {
+    const key = 'hortifruti_ladeira_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#14532d'; // Forest green
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#84cc16'; // Lime accent
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", Impact, sans-serif';
+    ctx.fillText('HORTIFRÚTI DA LADEIRA', 128, 38);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('FRUTAS • VERDURAS • LEGUMES SELECIONADOS', 128, 58);
+
+    ctx.fillStyle = '#a3e635';
+    ctx.font = 'italic 10px sans-serif';
+    ctx.fillText('Direto do CEAGESP para a sua mesa!', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 66. Bar da Ladeira (Sinuca & Dominó)
+  createBotecoLadeiraSign() {
+    const key = 'boteco_ladeira_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0369a1'; // Sky-ocean blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial Black", Impact, sans-serif';
+    ctx.fillText('BAR DA LADEIRA', 128, 38);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('SINUCA • DOMINÓ • CERVEJA ESTUPIDAMENTE GELADA', 128, 60);
+
+    ctx.fillStyle = '#bae6fd';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('TORRESMO CROCANTE & PETISCOS', 128, 78);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 67. Casa do Norte Asa Branca Sign
+  createCasaDoNorteSign() {
+    const key = 'casa_do_norte_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#78350f'; // Warm terracotta leather
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef3c7';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", Impact, sans-serif';
+    ctx.fillText('CASA DO NORTE ASA BRANCA', 128, 38);
+
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('QUEIJO COALHO • CARNE DE SOL • FARINHAS • CACHAÇAS', 128, 60);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'italic 10px serif';
+    ctx.fillText('O verdadeiro sabor do Nordeste em Pirituba', 128, 78);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 68. Lotérica Pirituba Sign
+  createLotericaSign() {
+    const key = 'loterica_pirituba_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    // Caixa Econômica split background: Blue top, Orange lower accent
+    ctx.fillStyle = '#004d9c'; // Caixa blue
+    ctx.fillRect(0, 0, 256, 70);
+    ctx.fillStyle = '#f37021'; // Caixa orange
+    ctx.fillRect(0, 70, 256, 26);
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(3, 3, 250, 90);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 19px "Arial Black", Impact, sans-serif';
+    ctx.fillText('LOTÉRICA PIRITUBA', 128, 32);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CAIXA AQUI • MEGA-SENA • LOTOFÁCIL', 128, 52);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('PAGUE SUAS CONTAS & BOLETOS AQUI', 128, 86);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 69. Pastelaria do Beto Sign
+  createPastelariaBetoSign() {
+    const key = 'pastelaria_beto_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#b91c1c'; // Vibrant red
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#facc15'; // Bright yellow
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Arial Black", Impact, sans-serif';
+    ctx.fillText('PASTELARIA DO BETO', 128, 38);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('PASTÉIS GIGANTES 30CM • CALDO DE CANA GELADO', 128, 58);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('FRITURA SEQUINHA & NA HORA • VINAGRETE À VONTADE', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 70. Pet Shop Au-Au Pirituba Sign
+  createPetShopAuAuSign() {
+    const key = 'pet_shop_auau_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0284c7'; // Sky bright blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(4, 4, 248, 88);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", sans-serif';
+    ctx.fillText('PET SHOP AU-AU PIRITUBA', 128, 36);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('🐾 BANHO & TOSA • RAÇÕES • ACESSÓRIOS 🐾', 128, 58);
+
+    ctx.fillStyle = '#e0f2fe';
+    ctx.font = 'italic 10px sans-serif';
+    ctx.fillText('Cuidando do seu melhor amigo com carinho', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 71. Bar & Petiscaria Cantinho do Peixe
+  createBarPeixeSign() {
+    const key = 'bar_peixe_sign';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 96);
+    ctx.fillStyle = '#0f3a5d'; // Deep nautical blue
+    ctx.fillRect(0, 0, 256, 96);
+
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(5, 5, 246, 86);
+
+    ctx.fillStyle = '#7dd3fc';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 18px "Arial Black", Impact, sans-serif';
+    ctx.fillText('CANTINHO DO PEIXE', 128, 36);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('ISCA DE TILÁPIA • CAMARÃO • MANJUBINHA FRITA', 128, 58);
+
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('🐟 CERVEJA DE GARRAFA TRINCANDO NO BALDE 🐟', 128, 76);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 72. Authentic Sobrado Residential Facade Texture
+  createSobradoFacade(color = '#d97706', windowTrim = '#1e293b') {
+    const key = `sobrado_facade_${color}_${windowTrim}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Base stucco painted facade
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Weathering and grain
+    for (let i = 0; i < 300; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 3, 3);
+    }
+
+    // Two upper floor windows with wrought iron grates
+    const drawWindow = (wx, wy, ww, wh) => {
+      // Sill / molding
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(wx - 4, wy - 4, ww + 8, wh + 8);
+
+      // Frame
+      ctx.fillStyle = windowTrim;
+      ctx.fillRect(wx, wy, ww, wh);
+
+      // Glass panes (tinted)
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(wx + 4, wy + 4, ww / 2 - 6, wh - 8);
+      ctx.fillRect(wx + ww / 2 + 2, wy + 4, ww / 2 - 6, wh - 8);
+
+      // Iron protective grates
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      for (let gy = wy + 10; gy < wy + wh - 6; gy += 12) {
+        ctx.beginPath();
+        ctx.moveTo(wx, gy); ctx.lineTo(wx + ww, gy);
+        ctx.stroke();
+      }
+      for (let gx = wx + 8; gx < wx + ww; gx += 12) {
+        ctx.beginPath();
+        ctx.moveTo(gx, wy); ctx.lineTo(gx, wy + wh);
+        ctx.stroke();
+      }
+    };
+
+    drawWindow(32, 40, 72, 90);
+    drawWindow(152, 40, 72, 90);
+
+    // Decorative molding band between floors
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 160, 256, 12);
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillRect(0, 172, 256, 4);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 

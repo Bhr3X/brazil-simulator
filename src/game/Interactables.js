@@ -181,6 +181,78 @@ export class InteractableSystem {
         maxDist: 3.8,
         encounterId: 'BOTECO_SETE_BARRAS',
         zoneId: 'RUA_SETE_BARRAS'
+      },
+      {
+        id: 'barbearia_antonio',
+        name: 'BARBEARIA DO SEU ANTÔNIO (NAVALHA & DEGRADÊ)',
+        prompt: 'CORTAR CABELO, FAZER BARBA OU PROSEAR',
+        position: new THREE.Vector3(-6.2, 2.2, 85.0),
+        maxDist: 3.5,
+        encounterId: 'BARBEARIA_ACLIVE',
+        zoneId: 'BARBEARIA_ACLIVE'
+      },
+      {
+        id: 'acougue_boi_ouro',
+        name: 'AÇOUGUE BOI DE OURO (CORTE & PICANHA)',
+        prompt: 'COMPRAR CARNES NOBRES OU LINGUIÇA CASEIRA',
+        position: new THREE.Vector3(-6.2, 4.1, 103.0),
+        maxDist: 3.5,
+        encounterId: 'ACOUQUE_BOI_DE_OURO',
+        zoneId: 'ACOUQUE_BOI_DE_OURO'
+      },
+      {
+        id: 'hortifruti_ladeira',
+        name: 'HORTIFRÚTI DA LADEIRA (FRUTAS & LEGUMES)',
+        prompt: 'COMPRAR FRUTAS FRESCAS OU ÁGUA DE COCO',
+        position: new THREE.Vector3(9.2, 2.2, 85.0),
+        maxDist: 3.5,
+        encounterId: 'HORTIFRUTI_PAULA_FERREIRA',
+        zoneId: 'HORTIFRUTI_PAULA_FERREIRA'
+      },
+      {
+        id: 'boteco_ladeira',
+        name: 'BAR DA LADEIRA (SINUCA & DOMINÓ)',
+        prompt: 'JOGAR DOMINÓ OU PEDIR CERVEJA COM TORRESMO',
+        position: new THREE.Vector3(9.2, 6.0, 121.0),
+        maxDist: 3.8,
+        encounterId: 'BOTECO_LADEIRA',
+        zoneId: 'BOTECO_LADEIRA'
+      },
+      {
+        id: 'casa_do_norte',
+        name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)',
+        prompt: 'PEDIR BAIÃO DE DOIS OU COMPRAR QUEIJO COALHO',
+        position: new THREE.Vector3(-27.0, 1.2, 38.0),
+        maxDist: 3.5,
+        encounterId: 'CASA_DO_NORTE',
+        zoneId: 'CASA_DO_NORTE'
+      },
+      {
+        id: 'loterica_pirituba',
+        name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)',
+        prompt: 'APOSTAR NA MEGA-SENA OU PAGAR CONTAS',
+        position: new THREE.Vector3(62.5, 1.2, 38.0),
+        maxDist: 3.5,
+        encounterId: 'LOTERICA_PIRITUBA',
+        zoneId: 'LOTERICA_PIRITUBA'
+      },
+      {
+        id: 'pastelaria_beto',
+        name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)',
+        prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA',
+        position: new THREE.Vector3(74.5, 1.2, 38.0),
+        maxDist: 3.5,
+        encounterId: 'PASTELARIA_BETO',
+        zoneId: 'PASTELARIA_BETO'
+      },
+      {
+        id: 'bar_peixe',
+        name: 'BAR & PETISCARIA CANTINHO DO PEIXE',
+        prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO',
+        position: new THREE.Vector3(104.0, 1.2, 1.0),
+        maxDist: 3.8,
+        encounterId: 'BAR_DO_PEIXE',
+        zoneId: 'BAR_DO_PEIXE'
       }
     ];
   }
@@ -198,6 +270,7 @@ export class InteractableSystem {
     if (isAnyModalOpen) {
       this.currentTarget = null;
       this.hidePrompt();
+      this.hideNpcQuickDock();
       return;
     }
 
@@ -357,6 +430,8 @@ export class InteractableSystem {
       dona_neide: '👵',
       sargento_rocha: '👮',
       menor_corre: '🧢',
+      mestre_bloco: '🥁',
+      churrasqueiro_campo: '🍖',
       flanelinha: '🚙'
     };
 
@@ -415,7 +490,8 @@ export class InteractableSystem {
     if (!this.activeQuickOptions || !this.activeQuickOptions[index]) return;
     const opt = this.activeQuickOptions[index];
     const game = window.app?.game;
-    if (!game || !game.state) return;
+    if (!game || !game.state || !game.isRunActive) return;
+    if (this.dialog && this.dialog.isOpen) return;
 
     if (opt.disabled) {
       if (game.hud) game.hud.showToast('⚠️ <strong>AÇÃO INDISPONÍVEL:</strong> Recursos insuficientes!', 2500);

@@ -169,7 +169,15 @@ export const TRANSLATIONS = {
       elevador_terreo: { name: 'ELEVADOR DA PORTARIA (JARAGUÁ TOWER)', prompt: 'PEGAR ELEVADOR (SUBIR PARA A COBERTURA / PENTHOUSE)' },
       bar_frango: { name: 'O LENDÁRIO BAR FRANGÓ (DESDE 1987)', prompt: 'PEDIR FAMOSA COXINHA COM CATUPIRY & CHOPP ARTESANAL' },
       igreja_matriz: { name: 'PARÓQUIA NOSSA SENHORA DO Ó (1580)', prompt: 'ENTRAR NA IGREJA HISTÓRICA, REZAR OU ACENDER UMA VELA' },
-      boteco_sete_barras: { name: 'BOTECO DAS 7 BARRAS (SINUCA & TUBAÍNA)', prompt: 'TOMAR UMA TUBAÍNA GELADA OU JOGAR UMA PARTIDA DE SINUCA' }
+      boteco_sete_barras: { name: 'BOTECO DAS 7 BARRAS (SINUCA & TUBAÍNA)', prompt: 'TOMAR UMA TUBAÍNA GELADA OU JOGAR UMA PARTIDA DE SINUCA' },
+      barbearia_antonio: { name: 'BARBEARIA DO SEU ANTÔNIO (NAVALHA & DEGRADÊ)', prompt: 'CORTAR CABELO, FAZER BARBA OU PROSEAR' },
+      acougue_boi_ouro: { name: 'AÇOUGUE BOI DE OURO (CORTE & PICANHA)', prompt: 'COMPRAR CARNES NOBRES OU LINGUIÇA CASEIRA' },
+      hortifruti_ladeira: { name: 'HORTIFRÚTI DA LADEIRA (FRUTAS & LEGUMES)', prompt: 'COMPRAR FRUTAS FRESCAS OU ÁGUA DE COCO' },
+      boteco_ladeira: { name: 'BAR DA LADEIRA (SINUCA & DOMINÓ)', prompt: 'JOGAR DOMINÓ OU PEDIR CERVEJA COM TORRESMO' },
+      casa_do_norte: { name: 'CASA DO NORTE ASA BRANCA (QUEIJOS & FARINHA)', prompt: 'PEDIR BAIÃO DE DOIS OU COMPRAR QUEIJO COALHO' },
+      loterica_pirituba: { name: 'LOTÉRICA PIRITUBA (CAIXA AQUI & MEGA-SENA)', prompt: 'APOSTAR NA MEGA-SENA OU PAGAR CONTAS' },
+      pastelaria_beto: { name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)', prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA' },
+      bar_peixe: { name: 'BAR & PETISCARIA CANTINHO DO PEIXE', prompt: 'PEDIR ISCA DE TILÁPIA & CERVEJA TRINCANDO' }
     },
 
     npcs: {
@@ -178,7 +186,19 @@ export const TRANSLATIONS = {
       juninho: { name: 'JUNINHO DA MONARK', prompt: 'FALAR COM JUNINHO DA BIKE' },
       dona_neide: { name: 'DONA NEIDE (TIA DA MARMITA)', prompt: 'FALAR COM DONA NEIDE DA FEIRA' },
       sargento_rocha: { name: 'SARGENTO ROCHA (PMESP)', prompt: 'FALAR COM O SARGENTO ROCHA (PM)' },
-      menor_corre: { name: 'MENOR DO CORRE (QUEBRADA)', prompt: 'FALAR COM O MENOR DO CORRE' }
+      menor_corre: { name: 'MENOR DO CORRE (QUEBRADA)', prompt: 'FALAR COM O MENOR DO CORRE' },
+      mestre_bloco: {
+        name: 'MESTRE DO BLOCO',
+        prompt: 'FALAR COM O MESTRE DO BLOCO',
+        closed: '[FECHADO] BLOCO FORA DE HORÁRIO',
+        unavailable: 'O mestre já encerrou sua cota de dança neste run.'
+      },
+      churrasqueiro_campo: {
+        name: 'CHURRASQUEIRO DO CAMPINHO',
+        prompt: 'FALAR COM O CHURRASQUEIRO',
+        closed: '[FECHADO] CAMPINHO FORA DE HORÁRIO',
+        unavailable: 'O churrasqueiro já fechou sua vaga na pelada neste run.'
+      }
     },
 
     defeat: {
@@ -209,7 +229,15 @@ export const TRANSLATIONS = {
       storm_start: '⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.',
       storm_end: '🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.',
       caramelo_bark: '🐕 <strong>CARAMELO LATIU!</strong> Cuidado com o carro em alta velocidade!',
-      traffic_hit: '🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)'
+      traffic_hit: '🚨 <strong>CUIDADO!</strong> Você quase foi atropelado na pista! Olhe para os dois lados! (-25% Sanidade, +20% Perigo)',
+      head_bonk: '💥 <strong>POFT!</strong> Você deu com a cara no muro! A rua era só uma pintura na parede...<br><span style="font-size:11px;color:#fcd34d;">🚧 Desculpe pelo transtorno, estamos em obras!</span>'
+    },
+
+    news: {
+      bloco_danca: 'Dançou no bloco da Edgar Facó',
+      churrasco_prato: 'Comeu prato no churrasco do campinho',
+      pelada_campo: 'Jogou pelada no campinho da favela',
+      head_bonk: 'Bateu com a cara no muro pintado de obra achando que a rua continuava'
     }
   },
 
@@ -373,7 +401,15 @@ export const TRANSLATIONS = {
       elevador_terreo: { name: 'LOBBY ELEVATOR (JARAGUÁ TOWER)', prompt: 'TAKE ELEVATOR (RIDE UP TO 12TH FLOOR PENTHOUSE)' },
       bar_frango: { name: 'THE LEGENDARY BAR FRANGÓ (SINCE 1987)', prompt: 'ORDER FAMOUS CHICKEN COXINHA & CRAFT BEER' },
       igreja_matriz: { name: 'OUR LADY OF Ó HISTORIC CHURCH (1580)', prompt: 'ENTER HISTORIC CHURCH, PRAY OR LIGHT A CANDLE' },
-      boteco_sete_barras: { name: 'SETE BARRAS CORNER PUB (SNOOKER & SODA)', prompt: 'DRINK AN ICE-COLD TUBAÍNA OR PLAY SNOOKER' }
+      boteco_sete_barras: { name: 'SETE BARRAS CORNER PUB (SNOOKER & SODA)', prompt: 'DRINK AN ICE-COLD TUBAÍNA OR PLAY SNOOKER' },
+      barbearia_antonio: { name: 'SEU ANTÔNIO\'S BARBERSHOP (FADE & SHAVE)', prompt: 'GET A HAIRCUT, SHAVE, OR CHAT' },
+      acougue_boi_ouro: { name: 'BOI DE OURO BUTCHER SHOP (PRIME CUTS)', prompt: 'BUY PRIME CUTS OR HANDMADE SAUSAGE' },
+      hortifruti_ladeira: { name: 'HILLSIDE FRESH PRODUCE MARKET (FRUITS & GREENS)', prompt: 'BUY FRESH FRUIT OR COCONUT WATER' },
+      boteco_ladeira: { name: 'HILLSIDE CORNER BAR (SNOOKER & DOMINOES)', prompt: 'PLAY DOMINOES OR ORDER BEER & TORRESMO' },
+      casa_do_norte: { name: 'ASA BRANCA NORTHEASTERN EMPORIUM', prompt: 'ORDER BAIÃO DE DOIS OR BUY COALHO CHEESE' },
+      loterica_pirituba: { name: 'PIRITUBA LOTTERY & BANK AGENCY (CAIXA AQUI)', prompt: 'PLAY MEGA-SENA JACKPOT OR PAY BILLS' },
+      pastelaria_beto: { name: 'BETO\'S PASTELARIA (GIANT PASTEL & CANE JUICE)', prompt: 'ORDER 30CM PASTEL & SUGARCANE JUICE' },
+      bar_peixe: { name: 'CANTINHO DO PEIXE SEAFOOD PUB', prompt: 'ORDER CRISPY TILAPIA TENDERS & COLD BEER' }
     },
 
     npcs: {
@@ -382,7 +418,19 @@ export const TRANSLATIONS = {
       juninho: { name: 'JUNINHO ON HIS BICYCLE', prompt: 'TALK TO JUNINHO (BIKE WHEELIE KID)' },
       dona_neide: { name: 'DONA NEIDE (MEAL BOX LADY)', prompt: 'TALK TO DONA NEIDE FROM THE MARKET' },
       sargento_rocha: { name: 'SERGEANT ROCHA (MILITARY POLICE)', prompt: 'TALK TO SERGEANT ROCHA (POLICE)' },
-      menor_corre: { name: 'STREET RUNNER (LOCAL HUSTLER)', prompt: 'TALK TO THE STREET RUNNER' }
+      menor_corre: { name: 'STREET RUNNER (LOCAL HUSTLER)', prompt: 'TALK TO THE STREET RUNNER' },
+      mestre_bloco: {
+        name: 'BLOCO MASTER',
+        prompt: 'TALK TO THE BLOCO MASTER',
+        closed: '[CLOSED] BLOCO OUTSIDE EVENT HOURS',
+        unavailable: 'The bloco master already closed your dance slot for this run.'
+      },
+      churrasqueiro_campo: {
+        name: 'CAMPINHO GRILL COOK',
+        prompt: 'TALK TO THE GRILL COOK',
+        closed: '[CLOSED] CAMPINHO OUTSIDE EVENT HOURS',
+        unavailable: 'The grill cook already filled your pelada slot for this run.'
+      }
     },
 
     defeat: {
@@ -413,7 +461,15 @@ export const TRANSLATIONS = {
       storm_start: '⛈️ <strong>SÃO PAULO SUMMER DELUGE!</strong><br>Torrential rain and crawling traffic on Edgar Facó.',
       storm_end: '🌤️ <strong>THE STORM HAS PASSED!</strong> São Paulo\'s skies have cleared up once again.',
       caramelo_bark: '🐕 <strong>CARAMELO BARKED!</strong> Watch out for the speeding vehicle!',
-      traffic_hit: '🚨 <strong>WATCH OUT!</strong> You were almost hit by oncoming traffic! Look both ways! (-25% Sanity, +20% Heat)'
+      traffic_hit: '🚨 <strong>WATCH OUT!</strong> You were almost hit by oncoming traffic! Look both ways! (-25% Sanity, +20% Heat)',
+      head_bonk: '💥 <strong>BONK!</strong> You slammed face-first into a solid wall! The road was just a painting...<br><span style="font-size:11px;color:#fcd34d;">🚧 Sorry for the inconvenience, under construction!</span>'
+    },
+
+    news: {
+      bloco_danca: 'Danced with the carnival bloco on Edgar Facó',
+      churrasco_prato: 'Ate a barbecue plate at the favela campinho',
+      pelada_campo: 'Played a pickup match on the favela pitch',
+      head_bonk: 'Slammed face-first into a painted illusion construction wall thinking the road continued'
     }
   }
 };

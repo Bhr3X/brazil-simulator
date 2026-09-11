@@ -10,11 +10,15 @@ async function runTestSuite(url) {
   fs.mkdirSync(tmpDir, { recursive: true });
 
   const port = 9330 + Math.floor(Math.random() * 50);
-  const chrome = spawn('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', [
+  const chromeBin = process.env.QA_CHROME
+    || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  const chrome = spawn(chromeBin, [
     '--headless=new',
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${tmpDir}`,
     '--disable-gpu',
+    '--no-first-run',
+    '--no-default-browser-check',
     url
   ]);
 
@@ -3045,13 +3049,17 @@ async function runTestSuite(url) {
         const targetsOpen = npcs.getInteractableTargets();
         const targetIdsOpen = targetsOpen.map((t) => t.id).sort();
         const expectedTargets = originalIds.slice().sort();
-        const targetsExactWhenOpen = targetIdsOpen.length === 6
-          && expectedTargets.every((id, i) => targetIdsOpen[i] === id)
+        const scheduledHostIds = ['mestre_bloco', 'churrasqueiro_campo'];
+        const extrasOpen = targetIdsOpen.filter((id) => !originalIds.includes(id));
+        const originalsTargetedOpen = expectedTargets.every((id) => targetIdsOpen.includes(id));
+        const extrasAreHostsOrEmpty = extrasOpen.every((id) => scheduledHostIds.includes(id));
+        const targetsExactWhenOpen = originalsTargetedOpen && extrasAreHostsOrEmpty
           && targetsOpen.every((t) => t.isNpc && t.isOpen);
         applyHour(8.0, farStreet);
         const targetsClosed = npcs.getInteractableTargets();
-        const targetsExactWhenClosed = targetsClosed.length === 6
-          && targetsClosed.map((t) => t.id).sort().every((id, i) => expectedTargets[i] === id);
+        const extrasClosed = targetsClosed.map((t) => t.id).filter((id) => !originalIds.includes(id));
+        const targetsExactWhenClosed = expectedTargets.every((id) => targetsClosed.some((t) => t.id === id))
+          && extrasClosed.length === 0;
         const eventNeverTargeted = [...carnival, ...campinho].every((n) =>
           !targetsOpen.some((t) => t.id === n.id) && !targetsClosed.some((t) => t.id === n.id)
         );
@@ -3223,6 +3231,694 @@ async function runTestSuite(url) {
     console.log(`[TEST 33] Scheduled carnival and campinho crowds:`, carnivalCrowdTested);
     if (!carnivalCrowdTested.ok) {
       throw new Error(`TEST 33 FAILED: scheduled carnival/campinho crowds must preserve original arrival-frame steering, hide inactive interactable zone NPCs, draw costumes/paths from this.rng with restored state, differ by costume/path across seeds, and interpolate event waypoint y. ${JSON.stringify(carnivalCrowdTested)}`);
+    }
+
+    // TEST 34: Carnival + campinho hosts, encounters, I5 predicates, and PT/EN keys
+    const carnivalHostsTested = await evaluate(`
+      (async () => {
+        const game = window.app.game;
+        const npcs = game && game.npcs;
+        const interactables = game && game.interactables;
+        if (!npcs || !Array.isArray(npcs.npcs) || !interactables) {
+          return { ok: false, reason: 'NpcSystem or Interactables missing' };
+        }
+
+        const originalIds = ['clodoaldo', 'caramelo', 'juninho', 'dona_neide', 'sargento_rocha', 'menor_corre'];
+        const hostIds = ['mestre_bloco', 'churrasqueiro_campo'];
+        const mestre = npcs.npcs.find((n) => n.id === 'mestre_bloco');
+        const churras = npcs.npcs.find((n) => n.id === 'churrasqueiro_campo');
+        const hostsExist = !!(mestre && churras);
+        const idsOk = hostsExist
+          && mestre.zoneId === 'BLOCO_EDGAR_FACCO'
+          && churras.zoneId === 'CAMPINHO_CHURRASCO'
+          && mestre.interactable === true
+          && churras.interactable === true
+          && mestre.encounterId === 'BLOCO_CARNAVAL'
+          && churras.encounterId === 'CHURRASCO_CAMPO'
+          && Math.abs((churras.baseY != null ? churras.baseY : -99) - 9.5) <= 0.05;
+
+        const blocoZone = { min: { x: 132, z: 34 }, max: { x: 160, z: 52 } };
+        const trioBox = { min: { x: 140, z: 41.6 }, max: { x: 152, z: 44.5 } };
+        const pitch = { min: { x: -14, z: -106 }, max: { x: 14, z: -92 } };
+        const grill = { x: -18.0, z: -88.5 };
+        const inBox = (p, b) => !!(p && p.x >= b.min.x && p.x <= b.max.x && p.z >= b.min.z && p.z <= b.max.z);
+        const mestrePos = mestre && mestre.group ? mestre.group.position : null;
+        const churrasPos = churras && churras.group ? churras.group.position : null;
+        const mestrePlaced = !!(mestrePos
+          && inBox(mestrePos, blocoZone)
+          && mestrePos.z > 32
+          && !inBox(mestrePos, trioBox));
+        const churrasPlaced = !!(churrasPos
+          && Math.abs(churrasPos.y - 9.5) <= 0.25
+          && Math.hypot(churrasPos.x - grill.x, churrasPos.z - grill.z) <= 3.5
+          && !inBox(churrasPos, pitch)
+          && !(Math.abs(churrasPos.x) <= 6 && churrasPos.z >= -87 && churrasPos.z <= -81));
+
+        const decorative = npcs.npcs.filter((n) =>
+          (n.zoneId === 'BLOCO_EDGAR_FACCO' || n.zoneId === 'CAMPINHO_CHURRASCO')
+          && n.interactable === false
+        );
+        const originalsPresent = originalIds.every((id) => npcs.npcs.some((n) => n.id === id));
+
+        const hourState = (hour) => ({ currentHour: hour });
+        const applyHour = (hour, playerPos) => {
+          if (game.state) game.state.currentHour = hour;
+          if (game.clock && typeof game.clock.setHour === 'function') game.clock.setHour(hour, false);
+          npcs.update(0.016, playerPos || { x: 0, y: 1.2, z: 0 }, false, hourState(hour));
+        };
+
+        applyHour(12.0);
+        const noonTargets = npcs.getInteractableTargets();
+        const noonIds = noonTargets.map((t) => t.id);
+        const originalsAtNoon = originalIds.every((id) => noonIds.includes(id));
+        const hostsAtNoon = hostIds.every((id) => noonIds.includes(id));
+        const extrasAreHosts = noonIds.every((id) => originalIds.includes(id) || hostIds.includes(id));
+        const decorativeNeverTargeted = decorative.every((n) => !noonIds.includes(n.id));
+
+        applyHour(9.99);
+        const idsBeforeBloco = npcs.getInteractableTargets().map((t) => t.id);
+        const mestreClosedBefore = !idsBeforeBloco.includes('mestre_bloco')
+          && originalIds.every((id) => idsBeforeBloco.includes(id));
+        applyHour(10.0);
+        const mestreOpenAtOpen = npcs.getInteractableTargets().some((t) => t.id === 'mestre_bloco');
+        applyHour(15.99);
+        const mestreOpenBeforeClose = npcs.getInteractableTargets().some((t) => t.id === 'mestre_bloco');
+        applyHour(16.0);
+        const mestreClosedAtClose = !npcs.getInteractableTargets().some((t) => t.id === 'mestre_bloco');
+
+        applyHour(10.99);
+        const churrasClosedBefore = !npcs.getInteractableTargets().some((t) => t.id === 'churrasqueiro_campo');
+        applyHour(11.0);
+        const churrasOpenAtOpen = npcs.getInteractableTargets().some((t) => t.id === 'churrasqueiro_campo');
+        applyHour(19.99);
+        const churrasOpenBeforeClose = npcs.getInteractableTargets().some((t) => t.id === 'churrasqueiro_campo');
+        applyHour(20.0);
+        const churrasClosedAtClose = !npcs.getInteractableTargets().some((t) => t.id === 'churrasqueiro_campo');
+        const hostScheduleOk = mestreClosedBefore && mestreOpenAtOpen && mestreOpenBeforeClose && mestreClosedAtClose
+          && churrasClosedBefore && churrasOpenAtOpen && churrasOpenBeforeClose && churrasClosedAtClose;
+
+        applyHour(12.0);
+        const mestreVisibleOpen = !!(mestre && mestre.group && mestre.group.visible === true);
+        const churrasVisibleOpen = !!(churras && churras.group && churras.group.visible === true);
+        applyHour(9.0);
+        const mestreHiddenClosed = !!(mestre && mestre.group && mestre.group.visible === false);
+        applyHour(10.0);
+        const churrasHiddenClosed = !!(churras && churras.group && churras.group.visible === false);
+
+        const dock = document.getElementById('npc-quick-dock');
+        const promptEl = document.getElementById('interact-prompt');
+        const dockVisible = () => !!(dock && !dock.classList.contains('modal-hidden'));
+        const promptVisible = () => !!(promptEl && !promptEl.classList.contains('modal-hidden'));
+        const endEl = document.getElementById('end-run-modal');
+        const dlgEl = document.getElementById('dialogue-modal');
+        const hideAllModals = () => {
+          ['dialogue-modal', 'street-view-modal', 'visuals-modal', 'roulette-modal', 'end-run-modal'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('modal-hidden');
+          });
+          if (game.dialog) game.dialog.isOpen = false;
+          game.isRunActive = true;
+          if (window.app.controls && window.app.controls.refreshFreeze) window.app.controls.refreshFreeze();
+        };
+        const aimAt = (npc) => {
+          const p = npc && npc.group ? npc.group.position : { x: 0, y: 0, z: 0 };
+          const pos = { x: p.x, y: (p.y || 0) + 1.2, z: p.z + 2.0 };
+          if (window.app.controls && window.app.controls.position) {
+            window.app.controls.position.set(pos.x, pos.y, pos.z);
+          }
+          return { pos, fwd: new THREE.Vector3(0, 0, -1) };
+        };
+        const refreshInteract = (npc) => {
+          const aim = aimAt(npc);
+          interactables.update(aim.pos, aim.fwd, game.clock, game.state);
+          return aim;
+        };
+        const snapshotElig = (expectedId) => {
+          const t = interactables.currentTarget;
+          const targeted = !!(t && t.isOpen && t.anchor && t.anchor.id === expectedId);
+          const prompt = dockVisible() && interactables.activeQuickNpc === expectedId;
+          const modalBlock = !!(game.dialog && game.dialog.isOpen)
+            || !!(dlgEl && !dlgEl.classList.contains('modal-hidden'))
+            || !!(endEl && !endEl.classList.contains('modal-hidden'));
+          const exec = targeted && game.isRunActive === true && !modalBlock;
+          return {
+            targeted,
+            prompt,
+            exec,
+            parity: targeted === prompt && prompt === exec
+          };
+        };
+
+        let openMestre = { targeted: false, prompt: false, exec: false, parity: false };
+        let openChurras = { targeted: false, prompt: false, exec: false, parity: false };
+        let closedMestre = { targeted: false, prompt: false, exec: false, parity: false };
+        let closedChurras = { targeted: false, prompt: false, exec: false, parity: false };
+        let modalMestre = { targeted: false, prompt: false, exec: false, parity: false };
+        let endChurras = { targeted: false, prompt: false, exec: false, parity: false };
+        let endHandleBlocked = false;
+        let i5Error = null;
+        try {
+          hideAllModals();
+          applyHour(12.0);
+          refreshInteract(mestre);
+          openMestre = snapshotElig('mestre_bloco');
+          refreshInteract(churras);
+          openChurras = snapshotElig('churrasqueiro_campo');
+
+          applyHour(9.99);
+          refreshInteract(mestre);
+          closedMestre = snapshotElig('mestre_bloco');
+          applyHour(10.99);
+          refreshInteract(churras);
+          closedChurras = snapshotElig('churrasqueiro_campo');
+
+          hideAllModals();
+          applyHour(12.0);
+          refreshInteract(mestre);
+          if (game.dialog) game.dialog.isOpen = true;
+          if (dlgEl) dlgEl.classList.remove('modal-hidden');
+          refreshInteract(mestre);
+          modalMestre = snapshotElig('mestre_bloco');
+          if (game.dialog) game.dialog.isOpen = false;
+          if (dlgEl) dlgEl.classList.add('modal-hidden');
+
+          hideAllModals();
+          applyHour(12.0);
+          refreshInteract(churras);
+          game.isRunActive = false;
+          if (endEl) endEl.classList.remove('modal-hidden');
+          refreshInteract(churras);
+          endChurras = snapshotElig('churrasqueiro_campo');
+          const flagsBeforeEnd = { ...game.state.flags };
+          const granaBeforeEnd = game.state.grana;
+          game.handleInteract();
+          endHandleBlocked = game.state.grana === granaBeforeEnd
+            && game.state.flags.dancouBloco === flagsBeforeEnd.dancouBloco
+            && game.state.flags.jogouPelada === flagsBeforeEnd.jogouPelada;
+          hideAllModals();
+        } catch (e) {
+          i5Error = e && e.message ? e.message : String(e);
+        }
+
+        const i5Ok = openMestre.parity && openMestre.targeted && openMestre.prompt && openMestre.exec
+          && openChurras.parity && openChurras.targeted && openChurras.prompt && openChurras.exec
+          && closedMestre.parity && !closedMestre.targeted && !closedMestre.prompt && !closedMestre.exec
+          && closedChurras.parity && !closedChurras.targeted && !closedChurras.prompt && !closedChurras.exec
+          && modalMestre.parity && !modalMestre.targeted && !modalMestre.prompt && !modalMestre.exec
+          && endChurras.parity && !endChurras.targeted && !endChurras.prompt && !endChurras.exec
+          && endHandleBlocked;
+
+        const encs = game.encounters;
+        const blocoEnc = encs && encs.BLOCO_CARNAVAL;
+        const churrEnc = encs && encs.CHURRASCO_CAMPO;
+        const encExist = !!(blocoEnc && churrEnc
+          && typeof blocoEnc.getOptions === 'function'
+          && typeof churrEnc.getOptions === 'function');
+
+        const GS = game.state.constructor;
+        const makeState = (overrides = {}) => new GS({
+          id: 'TEST_HOSTS',
+          title: 'Teste Hosts',
+          badge: '🎭',
+          dailyObjective: 'Testar bloco e campinho',
+          grana: overrides.grana != null ? overrides.grana : 10000,
+          fome: overrides.fome != null ? overrides.fome : 40,
+          sanidade: overrides.sanidade != null ? overrides.sanidade : 40,
+          perigo: 20,
+          ginga: 40,
+          decay: { fomePerHour: 5, sanidadePerHour: 5 },
+          inventory: []
+        }, game.rng);
+
+        let danceOnce = false;
+        let peladaOnce = false;
+        let platePriceOk = false;
+        let platePayOk = false;
+        let plateRefuseOk = false;
+        let rngConsumed = false;
+        let danceReasonOk = false;
+        let plateReasonOk = false;
+        let peladaReasonOk = false;
+
+        if (encExist) {
+          const s1 = makeState();
+          const dance1 = blocoEnc.getOptions(s1).find((o) => o.id === 'dancar_bloco');
+          if (dance1 && !dance1.disabled) {
+            const rngBefore = s1.rng.state;
+            dance1.execute(s1, game.sound);
+            rngConsumed = s1.rng.state !== rngBefore;
+            danceOnce = s1.flags.dancouBloco === true;
+            danceReasonOk = s1.history.some((h) => h.reason === 'news.bloco_danca');
+            const dance2 = blocoEnc.getOptions(s1).find((o) => o.id === 'dancar_bloco');
+            const snap = { fome: s1.fome, sanidade: s1.sanidade, ginga: s1.ginga, hist: s1.history.length, grana: s1.grana };
+            if (dance2) dance2.execute(s1, game.sound);
+            danceOnce = danceOnce && dance2 && dance2.disabled === true
+              && s1.fome === snap.fome && s1.sanidade === snap.sanidade && s1.ginga === snap.ginga
+              && s1.grana === snap.grana && s1.history.length === snap.hist;
+          }
+
+          const s2 = makeState({ grana: 1800, fome: 30, sanidade: 30 });
+          const plate = churrEnc.getOptions(s2).find((o) => o.id === 'prato_churrasco');
+          platePriceOk = !!(plate && plate.costCentavos === 1800 && Number.isInteger(plate.costCentavos) && plate.disabled !== true);
+          if (plate) {
+            plate.execute(s2, game.sound);
+            platePayOk = s2.grana === 0 && s2.fome === 70 && s2.sanidade === 52
+              && Number.isInteger(s2.grana);
+            plateReasonOk = s2.history.some((h) => h.reason === 'news.churrasco_prato');
+          }
+
+          const s3 = makeState({ grana: 1799, fome: 30, sanidade: 30 });
+          const platePoor = churrEnc.getOptions(s3).find((o) => o.id === 'prato_churrasco');
+          const poorDisabled = !!(platePoor && platePoor.disabled);
+          if (platePoor) platePoor.execute(s3, game.sound);
+          plateRefuseOk = poorDisabled && s3.grana === 1799 && s3.fome === 30 && s3.sanidade === 30
+            && !s3.history.some((h) => h.reason === 'news.churrasco_prato');
+
+          const s4 = makeState();
+          const pelada = churrEnc.getOptions(s4).find((o) => o.id === 'pelada_campo');
+          if (pelada && !pelada.disabled) {
+            const rngBefore = s4.rng.state;
+            pelada.execute(s4, game.sound);
+            rngConsumed = rngConsumed && s4.rng.state !== rngBefore;
+            peladaOnce = s4.flags.jogouPelada === true;
+            peladaReasonOk = s4.history.some((h) => h.reason === 'news.pelada_campo');
+            const pelada2 = churrEnc.getOptions(s4).find((o) => o.id === 'pelada_campo');
+            const snap = { fome: s4.fome, sanidade: s4.sanidade, ginga: s4.ginga, hist: s4.history.length, grana: s4.grana };
+            if (pelada2) pelada2.execute(s4, game.sound);
+            peladaOnce = peladaOnce && pelada2 && pelada2.disabled === true
+              && s4.fome === snap.fome && s4.sanidade === snap.sanidade && s4.ginga === snap.ginga
+              && s4.grana === snap.grana && s4.history.length === snap.hist;
+          }
+        }
+
+        const pagePath = window.location.pathname;
+        const isEsmBuild = pagePath.endsWith('index.html') || pagePath === '/' || pagePath === '';
+        let tFn = typeof t === 'function' ? t : null;
+        let getNpc = typeof getLocalizedNpc === 'function' ? getLocalizedNpc : null;
+        let getEnc = typeof getLocalizedEncounter === 'function' ? getLocalizedEncounter : null;
+        let setLang = typeof setLanguage === 'function' ? setLanguage : null;
+        let getLang = typeof getLanguage === 'function' ? getLanguage : null;
+        let i18nSource = tFn ? 'lexical' : 'missing';
+        if (isEsmBuild) {
+          const i18n = await import('/src/game/i18n.js');
+          tFn = i18n.t;
+          getNpc = i18n.getLocalizedNpc;
+          getEnc = i18n.getLocalizedEncounter;
+          setLang = i18n.setLanguage;
+          getLang = i18n.getLanguage;
+          i18nSource = 'esm-import';
+        }
+
+        const newsKeys = ['news.bloco_danca', 'news.churrasco_prato', 'news.pelada_campo'];
+        const npcFields = ['name', 'prompt', 'closed', 'unavailable'];
+        const resolveOk = (val, raw) => typeof val === 'string' && val.length > 0 && val !== raw;
+        const prevLang = getLang ? getLang() : 'pt';
+
+        if (setLang) setLang('pt');
+        const ptNewsOk = !!(tFn && newsKeys.every((k) => resolveOk(tFn(k), k)));
+        const ptNpcOk = !!(getNpc && hostIds.every((id) => {
+          const loc = getNpc(id, 'pt');
+          return loc && npcFields.every((f) => resolveOk(loc[f], id) && loc[f] !== f);
+        }));
+        const ptEncOk = !!(encExist
+          && resolveOk(blocoEnc.title, 'BLOCO_CARNAVAL')
+          && resolveOk(churrEnc.title, 'CHURRASCO_CAMPO')
+          && blocoEnc.getOptions(makeState()).every((o) => resolveOk(o.label, o.id))
+          && churrEnc.getOptions(makeState()).every((o) => resolveOk(o.label, o.id)));
+
+        if (setLang) setLang('en');
+        const enNewsOk = !!(tFn && newsKeys.every((k) => resolveOk(tFn(k), k)));
+        const enNpcOk = !!(getNpc && hostIds.every((id) => {
+          const loc = getNpc(id, 'en');
+          return loc && npcFields.every((f) => resolveOk(loc[f], id) && loc[f] !== f);
+        }));
+        const enBloco = getEnc ? getEnc('BLOCO_CARNAVAL', 'en') : null;
+        const enChurr = getEnc ? getEnc('CHURRASCO_CAMPO', 'en') : null;
+        const enLabel = (opt, state) => (opt && typeof opt.label === 'function' ? opt.label(state) : (opt && opt.label));
+        const enEncOk = !!(enBloco && enChurr
+          && resolveOk(enBloco.title, 'BLOCO_CARNAVAL')
+          && resolveOk(enChurr.title, 'CHURRASCO_CAMPO')
+          && enBloco.options && enBloco.options.dancar_bloco
+          && enChurr.options && enChurr.options.prato_churrasco && enChurr.options.pelada_campo
+          && resolveOk(enLabel(enBloco.options.dancar_bloco, makeState()), 'dancar_bloco')
+          && resolveOk(enLabel(enChurr.options.prato_churrasco, makeState()), 'prato_churrasco')
+          && resolveOk(enLabel(enChurr.options.pelada_campo, makeState()), 'pelada_campo')
+          && resolveOk(
+            typeof enBloco.options.dancar_bloco.outcome === 'function'
+              ? enBloco.options.dancar_bloco.outcome(makeState(), '')
+              : enBloco.options.dancar_bloco.outcome,
+            'dancar_bloco'
+          )
+          && resolveOk(
+            typeof enChurr.options.prato_churrasco.outcome === 'function'
+              ? enChurr.options.prato_churrasco.outcome(makeState(), '')
+              : enChurr.options.prato_churrasco.outcome,
+            'prato_churrasco'
+          )
+          && resolveOk(
+            typeof enChurr.options.pelada_campo.outcome === 'function'
+              ? enChurr.options.pelada_campo.outcome(makeState(), '')
+              : enChurr.options.pelada_campo.outcome,
+            'pelada_campo'
+          ));
+
+        if (setLang) setLang(prevLang === 'en' ? 'en' : 'pt');
+        const keysOk = ptNewsOk && ptNpcOk && ptEncOk && enNewsOk && enNpcOk && enEncOk;
+
+        const ok = hostsExist && idsOk && mestrePlaced && churrasPlaced
+          && originalsPresent && originalsAtNoon && hostsAtNoon && extrasAreHosts
+          && decorativeNeverTargeted && hostScheduleOk
+          && mestreVisibleOpen && mestreHiddenClosed && churrasVisibleOpen && churrasHiddenClosed
+          && i5Ok && encExist
+          && danceOnce && peladaOnce && platePriceOk && platePayOk && plateRefuseOk
+          && rngConsumed && danceReasonOk && plateReasonOk && peladaReasonOk
+          && keysOk
+          && (i18nSource === 'esm-import' || i18nSource === 'lexical');
+
+        return {
+          ok,
+          reason: hostsExist ? null : 'event hosts missing',
+          hostsExist,
+          idsOk,
+          mestrePlaced,
+          churrasPlaced,
+          mestrePos: mestrePos ? { x: mestrePos.x, y: mestrePos.y, z: mestrePos.z } : null,
+          churrasPos: churrasPos ? { x: churrasPos.x, y: churrasPos.y, z: churrasPos.z } : null,
+          originalsPresent,
+          originalsAtNoon,
+          hostsAtNoon,
+          extrasAreHosts,
+          decorativeNeverTargeted,
+          hostScheduleOk,
+          schedule: {
+            mestreClosedBefore, mestreOpenAtOpen, mestreOpenBeforeClose, mestreClosedAtClose,
+            churrasClosedBefore, churrasOpenAtOpen, churrasOpenBeforeClose, churrasClosedAtClose
+          },
+          mestreVisibleOpen,
+          mestreHiddenClosed,
+          churrasVisibleOpen,
+          churrasHiddenClosed,
+          i5Ok,
+          i5Error,
+          openMestre,
+          openChurras,
+          closedMestre,
+          closedChurras,
+          modalMestre,
+          endChurras,
+          endHandleBlocked,
+          encExist,
+          danceOnce,
+          peladaOnce,
+          platePriceOk,
+          platePayOk,
+          plateRefuseOk,
+          rngConsumed,
+          danceReasonOk,
+          plateReasonOk,
+          peladaReasonOk,
+          keysOk,
+          ptNewsOk,
+          ptNpcOk,
+          ptEncOk,
+          enNewsOk,
+          enNpcOk,
+          enEncOk,
+          i18nSource
+        };
+      })()
+    `);
+    console.log(`[TEST 34] Carnival and campinho hosts + encounters:`, carnivalHostsTested);
+    if (!carnivalHostsTested.ok) {
+      throw new Error(`TEST 34 FAILED: carnival/campinho hosts must be scheduled interactable NPCs with I5/I6 encounter predicates, integer-centavo churrasco, once-per-run dance/pelada, rng chance, and complete PT/EN keys. ${JSON.stringify(carnivalHostsTested)}`);
+    }
+
+    // -------------------------------------------------------------
+    // TEST 35: Map boundary trompe-l'œil illusion walls, construction sites ('Desculpe pelo transtorno, estamos em Obras'), and interactive head-bonk
+    // -------------------------------------------------------------
+    const boundaryIllusionTested = await evaluate(`
+      (async () => {
+        const app = window.app;
+        if (!app || !app.city || !app.controls || !app.physics) {
+          return { ok: false, reason: 'app subsystems missing' };
+        }
+
+        const city = app.city;
+        const controls = app.controls;
+        const physics = app.physics;
+        const walls = city.illusionWalls || [];
+        const signs = city.constructionSigns || [];
+
+        const expectedWallIds = [
+          'west_edgar_facco',
+          'east_edgar_facco',
+          'north_petronio',
+          'south_petronio',
+          'south_matriz',
+          'north_campinho'
+        ];
+
+        const wallsExist = expectedWallIds.every(id => walls.some(w => w.id === id));
+        const controlsWallsSynced = Array.isArray(controls.illusionWalls) && controls.illusionWalls.length >= 6;
+
+        // Check solid collision inside each wall volume
+        const collidersSolid = walls.every(w => {
+          const b = w.bounds;
+          const midX = (b.minX + b.maxX) / 2;
+          const midY = (b.minY + b.maxY) / 2;
+          const midZ = (b.minZ + b.maxZ) / 2;
+          const testPos = new THREE.Vector3(midX, midY, midZ);
+          return physics.collidesWithSolids(testPos, 0.38, 0.45);
+        });
+
+        // Check construction signs with 'Desculpe pelo transtorno, estamos em Obras'
+        const signsCountOk = signs.length >= 6;
+        const signTextOk = signs.every(s => typeof s.text === 'string' && s.text.includes('Desculpe pelo transtorno, estamos em Obras'));
+
+        // Check boundary group in Three scene
+        const group = app.renderer.scene.getObjectByName('boundaryIllusionWallsGroup');
+        const hasSceneGroup = !!group && group.children.length >= 12;
+
+        // Check sound engine has playHeadBonk
+        const hasBonkSound = app.sound && typeof app.sound.playHeadBonk === 'function';
+        let soundExecutedSafely = false;
+        if (hasBonkSound) {
+          try {
+            app.sound.playHeadBonk();
+            soundExecutedSafely = true;
+          } catch (e) {
+            soundExecutedSafely = false;
+          }
+        }
+
+        // Test Head Bonk Experience:
+        // Position player facing West Edgar Faco wall at X = -58.8, moving west (-X)
+        const westWall = walls.find(w => w.id === 'west_edgar_facco');
+        let bonkCallbackFired = false;
+        let bonkedWallId = null;
+
+        const prevOnBonk = controls.onHeadBonk;
+        controls.onHeadBonk = (w) => {
+          bonkCallbackFired = true;
+          bonkedWallId = w ? w.id : null;
+          if (prevOnBonk) prevOnBonk(w);
+        };
+
+        controls.teleport(-58.8, 0, 20.0, Math.PI / 2); // Facing west (-X)
+        controls.moveForward = true;
+        controls.lastBonkTime = 0; // Reset cooldown
+        controls.update(0.08); // Step movement towards wall
+
+        const bonkFired = bonkCallbackFired && bonkedWallId === 'west_edgar_facco';
+        const cameraJarOk = controls.headBonkOffset > 0;
+        const playerBlocked = controls.position.x > -59.5; // Did not penetrate solid wall at -60
+
+        // Reset controls
+        controls.moveForward = false;
+        controls.onHeadBonk = prevOnBonk;
+
+        // Verify i18n keys in both PT and EN
+        const pagePath = window.location.pathname;
+        const isEsmBuild = pagePath.endsWith('index.html') || pagePath === '/' || pagePath === '';
+        let tFn = typeof t === 'function' ? t : null;
+        let setLang = typeof setLanguage === 'function' ? setLanguage : null;
+        let getLang = typeof getLanguage === 'function' ? getLanguage : null;
+        if (isEsmBuild) {
+          const i18n = await import('/src/game/i18n.js');
+          tFn = i18n.t;
+          setLang = i18n.setLanguage;
+          getLang = i18n.getLanguage;
+        }
+
+        const prevLang = getLang ? getLang() : 'pt';
+        if (setLang) setLang('pt');
+        const ptToast = tFn ? tFn('toasts.head_bonk') : '';
+        const ptNews = tFn ? tFn('news.head_bonk') : '';
+        const ptOk = ptToast.includes('POFT!') && ptToast.includes('Desculpe pelo transtorno') && ptNews.includes('muro pintado');
+
+        if (setLang) setLang('en');
+        const enToast = tFn ? tFn('toasts.head_bonk') : '';
+        const enNews = tFn ? tFn('news.head_bonk') : '';
+        const enOk = enToast.includes('BONK!') && enToast.includes('under construction') && enNews.includes('painted illusion');
+
+        if (setLang) setLang(prevLang === 'en' ? 'en' : 'pt');
+
+        const ok = wallsExist && controlsWallsSynced && collidersSolid
+          && signsCountOk && signTextOk && hasSceneGroup
+          && hasBonkSound && soundExecutedSafely
+          && bonkFired && cameraJarOk && playerBlocked
+          && ptOk && enOk;
+
+        return {
+          ok,
+          wallsCount: walls.length,
+          wallsExist,
+          controlsWallsSynced,
+          collidersSolid,
+          signsCount: signs.length,
+          signsCountOk,
+          signTextOk,
+          hasSceneGroup,
+          hasBonkSound,
+          soundExecutedSafely,
+          bonkFired,
+          bonkedWallId,
+          cameraJarOk,
+          playerBlocked,
+          ptOk,
+          enOk
+        };
+      })()
+    `);
+    console.log(`[TEST 35] Boundary illusion walls, construction sites, and head-bonk:`, boundaryIllusionTested);
+    if (!boundaryIllusionTested.ok) {
+      throw new Error(`TEST 35 FAILED: boundary illusion walls must be solid painted colliders with 'Desculpe pelo transtorno, estamos em Obras' signs, head-bonk recoil, and PT/EN keys. ${JSON.stringify(boundaryIllusionTested)}`);
+    }
+
+    // -------------------------------------------------------------------------
+    // TEST 36: Continuous Urban Corridor Commerces, Establishments & Sobrados
+    // -------------------------------------------------------------------------
+    const corridorTested = await evaluate(`
+      (async () => {
+        const game = window.app && window.app.game;
+        const interactables = game && game.interactables;
+        const anchors = (interactables && interactables.anchors) || [];
+
+        const expectedIds = [
+          'barbearia_antonio',
+          'acougue_boi_ouro',
+          'hortifruti_ladeira',
+          'boteco_ladeira',
+          'casa_do_norte',
+          'loterica_pirituba',
+          'pastelaria_beto',
+          'bar_peixe'
+        ];
+
+        const anchorById = {};
+        anchors.forEach(a => { anchorById[a.id] = a; });
+        const allAnchorsExist = expectedIds.every(id => {
+          const a = anchorById[id];
+          return a && a.position && typeof a.position.x === 'number'
+            && a.prompt && a.encounterId && a.zoneId && a.maxDist > 0;
+        });
+
+        // Verify zones
+        const isEsm = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
+        let zonesList = [];
+        let encountersDict = null;
+        let transPt = null;
+        let transEn = null;
+        let enEncDict = null;
+
+        if (isEsm) {
+          const zMod = await import('/src/world/Zones.js');
+          zonesList = zMod.WORLD_ZONES || [];
+          const eMod = await import('/src/game/Encounters.js');
+          encountersDict = eMod.BRAZILIAN_ENCOUNTERS;
+          const iMod = await import('/src/game/i18n.js');
+          transPt = iMod.TRANSLATIONS.pt;
+          transEn = iMod.TRANSLATIONS.en;
+          const tMod = await import('/src/game/EncounterTranslations.js');
+          enEncDict = tMod.EN_ENCOUNTER_TEXTS;
+        } else {
+          zonesList = typeof WORLD_ZONES !== 'undefined' ? WORLD_ZONES : [];
+          encountersDict = typeof BRAZILIAN_ENCOUNTERS !== 'undefined' ? BRAZILIAN_ENCOUNTERS : null;
+          transPt = typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS.pt : null;
+          transEn = typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS.en : null;
+          enEncDict = typeof EN_ENCOUNTER_TEXTS !== 'undefined' ? EN_ENCOUNTER_TEXTS : null;
+        }
+
+        const expectedZoneIds = [
+          'BARBEARIA_ACLIVE',
+          'ACOUQUE_BOI_DE_OURO',
+          'HORTIFRUTI_PAULA_FERREIRA',
+          'BOTECO_LADEIRA',
+          'CASA_DO_NORTE',
+          'LOTERICA_PIRITUBA',
+          'PASTELARIA_BETO',
+          'BAR_DO_PEIXE'
+        ];
+        const zonesExist = expectedZoneIds.every(zid => zonesList.some(z => z.id === zid));
+
+        // Verify encounters
+        const encountersExist = expectedZoneIds.every(eid => {
+          const enc = encountersDict && encountersDict[eid];
+          return enc && enc.title && typeof enc.getIntroText === 'function' && typeof enc.getOptions === 'function';
+        });
+
+        // Test Mega-Sena interaction in Lotérica
+        let lotericaMegaSenaTested = false;
+        if (encountersDict && encountersDict.LOTERICA_PIRITUBA) {
+          const mockState = {
+            formattedGrana: 'R$ 50,00',
+            granaCentavos: 5000,
+            canAfford: (cost) => true,
+            ginga: 50,
+            sanidade: 70,
+            flags: {},
+            rng: { chance: (p) => p > 0.5 },
+            apply: function(deltas, reason) {
+              if (deltas.grana !== undefined) this.granaCentavos += deltas.grana;
+            }
+          };
+          const options = encountersDict.LOTERICA_PIRITUBA.getOptions(mockState);
+          const megaOption = options.find(o => o.id === 'aposta_mega_sena');
+          if (megaOption && megaOption.costCentavos === 500) {
+            const result = megaOption.execute(mockState, null);
+            lotericaMegaSenaTested = typeof result === 'string' && result.length > 0;
+          }
+        }
+
+        // Verify PT & EN translations for all 8 establishments
+        const ptInteractablesOk = expectedIds.every(id => transPt && transPt.interactables && transPt.interactables[id]);
+        const enInteractablesOk = expectedIds.every(id => transEn && transEn.interactables && transEn.interactables[id]);
+        const enEncountersOk = expectedZoneIds.every(eid => enEncDict && enEncDict[eid] && enEncDict[eid].title);
+
+        const ok = allAnchorsExist
+          && zonesExist
+          && encountersExist
+          && lotericaMegaSenaTested
+          && ptInteractablesOk
+          && enInteractablesOk
+          && enEncountersOk;
+
+        return {
+          ok,
+          allAnchorsExist,
+          anchorsCount: anchors.length,
+          zonesExist,
+          encountersExist,
+          lotericaMegaSenaTested,
+          ptInteractablesOk,
+          enInteractablesOk,
+          enEncountersOk
+        };
+      })()
+    `);
+    console.log(`[TEST 36] Continuous corridor commerces, zones, encounters & i18n:`, corridorTested);
+    if (!corridorTested.ok) {
+      throw new Error(`TEST 36 FAILED: continuous corridor must provide all 8 authentic establishments with anchors, zones, encounters, and i18n. ${JSON.stringify(corridorTested)}`);
     }
 
     // Check Console Errors
