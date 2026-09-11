@@ -1,0 +1,309 @@
+{
+  "scope": "Archify deterministic delivery receipts plus separately inspected browser evidence. Targets describe a proposed game, not implemented behavior.",
+  "diagrams": [
+    {
+      "name": "architecture",
+      "schemaVersion": 1,
+      "ok": true,
+      "command": "deliver",
+      "type": "architecture",
+      "input": "/private/tmp/claude-501/-Users-bhreno-First-Person-Engine/a3878468-713b-40b0-8e87-3c19a5db8777/scratchpad/recovered/ws/outputs/engine-architecture.json",
+      "output": "/private/tmp/claude-501/-Users-bhreno-First-Person-Engine/a3878468-713b-40b0-8e87-3c19a5db8777/scratchpad/recovered/ws/outputs/engine-architecture.html",
+      "specification": {
+        "sha256": "2ebb83e19086fb6a2f6d64b2270b076c2953b4f4dcb247fb9e28cb228fa0dc51",
+        "bytes": 3601
+      },
+      "artifact": {
+        "sha256": "c265fc6c6d22bfba05c4737ec554ef25fee559b7976fd9f2c948278f263dcb77",
+        "bytes": 712631
+      },
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      },
+      "browser_evidence": "passed",
+      "visual_review": "passed",
+      "correction_rounds": 1,
+      "browser_receipt": "engine-architecture.visual-check.json"
+    },
+    {
+      "name": "sequence",
+      "schemaVersion": 1,
+      "ok": true,
+      "command": "deliver",
+      "type": "sequence",
+      "input": "/private/tmp/claude-501/-Users-bhreno-First-Person-Engine/a3878468-713b-40b0-8e87-3c19a5db8777/scratchpad/recovered/ws/outputs/run-sequence.json",
+      "output": "/private/tmp/claude-501/-Users-bhreno-First-Person-Engine/a3878468-713b-40b0-8e87-3c19a5db8777/scratchpad/recovered/ws/outputs/run-sequence.html",
+      "specification": {
+        "sha256": "5e4ed3a82afc5cf92dfaccdec36fffd7f68e98f8a37c907564a1c0e00dc9a6b6",
+        "bytes": 2791
+      },
+      "artifact": {
+        "sha256": "026b58d54ab2669920e2d6ee3f35220a0706b39a24237988a1ed0991cd5e1cef",
+        "bytes": 709072
+      },
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      },
+      "browser_evidence": "passed",
+      "visual_review": "passed",
+      "correction_rounds": 1,
+      "browser_receipt": "run-sequence.visual-check.json"
+    },
+    {
+      "name": "feedback",
+      "schemaVersion": 1,
+      "ok": true,
+      "command": "deliver",
+      "type": "sequence",
+      "input": "/private/tmp/claude-501/-Users-bhreno-First-Person-Engine/a3878468-713b-40b0-8e87-3c19a5db8777/scratchpad/recovered/ws/outputs/runtime-feedback.json",
+      "output": "/private/tmp/claude-501/-Users-bhreno-First-Person-Engine/a3878468-713b-40b0-8e87-3c19a5db8777/scratchpad/recovered/ws/outputs/runtime-feedback.html",
+      "specification": {
+        "sha256": "65abd939913c8e296f27565b1192c1300c6ac5bd80b117614b5d484f02387a27",
+        "bytes": 2646
+      },
+      "artifact": {
+        "sha256": "56de35b9b72c6c840c3d913179912f50bba71dc720f9128d285c084370dd977e",
+        "bytes": 709077
+      },
+      "validation": {
+        "checksPassed": 9,
+        "checkCount": 9,
+        "compositionProfile": "showcase",
+        "compositionStatus": "pass",
+        "errors": 0,
+        "warnings": 0
+      },
+      "browser_evidence": "passed",
+      "visual_review": "passed",
+      "correction_rounds": 0,
+      "browser_receipt": "runtime-feedback.visual-check.json"
+    }
+  ],
+  "companion": {
+    "errors": [],
+    "checks": [
+      {
+        "width": 1440,
+        "height": 900,
+        "tab": "timeline-tab",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "tab": "engines",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "tab": "rules",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "tab": "delivery",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "tab": "evidence",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "tab": "timeline-tab",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "tab": "engines",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "tab": "rules",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "tab": "delivery",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1600,
+        "height": 1000,
+        "tab": "evidence",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "tab": "timeline-tab",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "tab": "engines",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "tab": "rules",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "tab": "delivery",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 1920,
+        "height": 1080,
+        "tab": "evidence",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "tab": "timeline-tab",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "tab": "engines",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "tab": "rules",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "tab": "delivery",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 2048,
+        "height": 1320,
+        "tab": "evidence",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "tab": "timeline-tab",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "tab": "engines",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "tab": "rules",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "tab": "delivery",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "tab": "evidence",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "tab": "timeline-tab",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "tab": "engines",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "tab": "rules",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "tab": "delivery",
+        "horizontalOverflow": false
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "tab": "evidence",
+        "horizontalOverflow": false
+      },
+      {
+        "test": "clockAt10",
+        "value": "10:00 \u00b7 22:00",
+        "pass": true
+      },
+      {
+        "test": "clockAt15",
+        "pass": true
+      },
+      {
+        "test": "defaultCost",
+        "pass": true
+      },
+      {
+        "test": "fresh15minCost",
+        "pass": true
+      },
+      {
+        "test": "theme",
+        "pass": true
+      },
+      {
+        "test": "localLinksExist",
+        "missing": []
+      },
+      {
+        "test": "svgTextBounds",
+        "overflow": []
+      }
+    ],
+    "artifact_sha256": "a94fd422f92500068818973c8e6a57df45017280b4267b64b503dddadb7e1547",
+    "visual_review": "passed",
+    "layout": "scrolling reference atlas; no horizontal page overflow"
+  }
+}

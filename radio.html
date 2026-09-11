@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📻 Rádio Pirituba FM 99.7 // Player Oficial</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --accent: #00ffcc;
+      --accent-warm: #ffaa00;
+      --text: #f0f6fc;
+      --muted: #8b949e;
+      --border: #30363d;
+      --vfd-green: #39ff14;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+    .radio-chassis {
+      width: 100%;
+      max-width: 820px;
+      background: #11151c;
+      border: 3px solid #2a313d;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .chassis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #222a36;
+      padding-bottom: 12px;
+    }
+    .brand-title {
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffcc00;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      background: #cc0000;
+      color: #fff;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+    /* VFD Retro Display */
+    .vfd-display {
+      background: #050a08;
+      border: 2px solid #14281f;
+      border-radius: 6px;
+      box-shadow: inset 0 0 20px rgba(0, 255, 120, 0.15);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-family: 'Courier New', Courier, monospace;
+      color: var(--vfd-green);
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+    .vfd-top-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 8px;
+      opacity: 0.85;
+    }
+    .vfd-track-title {
+      font-size: 22px;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+    .vfd-track-artist {
+      font-size: 14px;
+      color: #7aff96;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+    .vfd-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 13px;
+    }
+    /* Equalizer canvas */
+    #eq-canvas {
+      width: 140px;
+      height: 28px;
+      display: block;
+    }
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background: #1a222d;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #ffaa00, #00ffcc);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    /* Controls */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .button-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-ctrl {
+      background: #21262d;
+      border: 1px solid #363e4a;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .btn-ctrl:hover {
+      background: #30363d;
+      border-color: #58a6ff;
+      color: #58a6ff;
+    }
+    .btn-ctrl.btn-main {
+      background: #00ffcc;
+      color: #000;
+      border-color: #00ffcc;
+      padding: 12px 24px;
+      font-size: 16px;
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+    }
+    .btn-ctrl.btn-main:hover {
+      background: #33ffdd;
+      color: #000;
+    }
+    .btn-ctrl.active {
+      background: #ffaa00;
+      color: #000;
+      border-color: #ffaa00;
+    }
+    .volume-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .volume-box input[type="range"] {
+      accent-color: #00ffcc;
+      cursor: pointer;
+    }
+    /* Playlist section */
+    .playlist-section {
+      width: 100%;
+      max-width: 820px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .playlist-header {
+      font-size: 15px;
+      font-weight: bold;
+      color: #ffaa00;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .playlist-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .playlist-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .playlist-item:hover {
+      background: #161f2c;
+      border-color: #388bfd;
+    }
+    .playlist-item.playing {
+      background: #0f2d2b;
+      border-color: #00ffcc;
+    }
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .item-index {
+      font-size: 13px;
+      color: var(--muted);
+      width: 24px;
+      font-family: monospace;
+    }
+    .item-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .playlist-item.playing .item-title {
+      color: #00ffcc;
+    }
+    .item-artist {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .item-genre-tag {
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .genre-FUNK { background: #5c1d30; color: #ff6b9d; }
+    .genre-PAGODE { background: #4a3411; color: #ffbe53; }
+    .genre-MPB { background: #163e3b; color: #4ee0d5; }
+  </style>
+</head>
+<body>
+
+  <div class="radio-chassis">
+    <div class="chassis-header">
+      <div class="brand-title">
+        <span>📻 PIRITUBA FM // 99.7 MHz</span>
+        <span class="brand-badge">AO VIVO</span>
+      </div>
+      <div style="font-size: 12px; color: #8b949e;">STEREO HI-FI // SOBREVIVÊNCIA BR</div>
+    </div>
+
+    <!-- Retro VFD Green Display -->
+    <div class="vfd-display">
+      <div class="vfd-top-row">
+        <span id="vfd-status">▶ TOCANDO // SINTONIZADO</span>
+        <span id="vfd-station-name">AUTO (ESPACIAL)</span>
+        <span id="vfd-time">00:00 / 00:00</span>
+      </div>
+      <div class="vfd-track-title" id="vfd-title">Bonde da Simulação</div>
+      <div class="vfd-track-artist" id="vfd-artist">Bonde do Tigrão (Matrix Edition)</div>
+      <div class="vfd-bottom-row">
+        <span id="vfd-genre" style="color:#ffbe53;">GÊNERO: BAILE FUNK 2000s (114 BPM)</span>
+        <canvas id="eq-canvas" width="140" height="28"></canvas>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container" id="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- Controls Row -->
+    <div class="controls-row">
+      <div class="button-group">
+        <button class="btn-ctrl" id="btn-prev" title="Faixa Anterior">⏮ ANTERIOR</button>
+        <button class="btn-ctrl btn-main" id="btn-play">▶ TOCAR</button>
+        <button class="btn-ctrl" id="btn-next" title="Próxima Faixa">PRÓXIMA ⏭</button>
+        <button class="btn-ctrl" id="btn-vinheta" title="Tocar Vinheta da Rádio">🎙️ VINHETA</button>
+        <button class="btn-ctrl" id="btn-boteco" title="Alternar Som Ambiente de Boteco">🍺 BOTECO FX</button>
+      </div>
+
+      <div class="volume-box">
+        <span>VOLUME:</span>
+        <input type="range" id="vol-slider" min="0" max="1" step="0.02" value="0.75" style="width: 90px;">
+        <span id="vol-text">75%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Playlist -->
+  <div class="playlist-section">
+    <div class="playlist-header">
+      <span>DISCOGRAFIA COMPLETA (13 FAIXAS ORIGINAIS)</span>
+      <span style="font-size: 12px; color: var(--muted);">PIRITUBA, SÃO PAULO</span>
+    </div>
+    <ul class="playlist-list" id="playlist-ul"></ul>
+  </div>
+
+  <audio id="audio-player" preload="auto"></audio>
+  <audio id="boteco-player" loop preload="auto" src="media/audio/ambience/boteco_chatter.mp3"></audio>
+
+  <script>
+    const TRACKS = [
+      {
+        id: 'funk_bonde',
+        title: 'Bonde da Simulação',
+        artist: 'Bonde do Tigrão (Matrix Edition)',
+        genre: 'FUNK',
+        genreDesc: 'BAILE FUNK 2000s (114 BPM 808 VOLT MIX)',
+        src: 'media/audio/tracks/funk_bonde_tigrao.mp3'
+      },
+      {
+        id: 'pagode_romantico',
+        title: 'Rollback do Zé',
+        artist: 'Só Pra Contrariar o Bug',
+        genre: 'PAGODE',
+        genreDesc: 'PAGODE ROMÂNTICO 90s (CAVAQUINHO & PANDEIRO)',
+        src: 'media/audio/tracks/pagode_romantico.mp3'
+      },
+      {
+        id: 'bossa_mpb',
+        title: 'Bossa na Simulação',
+        artist: 'Tom Gilberto dos Bytes',
+        genre: 'MPB',
+        genreDesc: 'BOSSA NOVA & MPB (VIOLÃO DE NYLON SINCOPADO)',
+        src: 'media/audio/tracks/bossa_nova_mpb.mp3'
+      },
+      {
+        id: 'sertanejo_sofrencia',
+        title: 'Código Binário',
+        artist: 'Zezé di Camargo & o Servidor',
+        genre: 'PAGODE',
+        genreDesc: 'MODÃO SERTANEJO / SOFRÊNCIA (VIOLA & SANFONA)',
+        src: 'media/audio/tracks/sertanejo_sofrencia.mp3'
+      },
+      {
+        id: 'forro_pe_de_serra',
+        title: 'Matrix do Forró',
+        artist: 'Trio Nordestino do Glitch',
+        genre: 'PAGODE',
+        genreDesc: 'FORRÓ PÉ DE SERRA (ZABUMBA & TRIÂNGULO)',
+        src: 'media/audio/tracks/forro_pe_de_serra.mp3'
+      },
+      {
+        id: 'samba_enredo_carnaval',
+        title: 'Tigre da Ilusão',
+        artist: 'G.R.E.S. Vai-Vai do Byte',
+        genre: 'PAGODE',
+        genreDesc: 'SAMBA-ENREDO DE CARNAVAL (BATERIA NOTA 10)',
+        src: 'media/audio/tracks/samba_enredo_carnaval.mp3'
+      },
+      {
+        id: 'samba_de_raiz',
+        title: 'Samba do NPC',
+        artist: 'Zeca do Boteco',
+        genre: 'PAGODE',
+        genreDesc: 'SAMBA DE RAIZ (RODA DE BOTECO DO TIÃO)',
+        src: 'media/audio/tracks/samba_de_raiz.mp3'
+      },
+      {
+        id: 'axe_micareta',
+        title: 'Pula no Glitch',
+        artist: 'Chiclete com Firewall',
+        genre: 'FUNK',
+        genreDesc: 'AXÉ MUSIC SALVADOR 90s (TIMBAU & METAIS)',
+        src: 'media/audio/tracks/axe_micareta.mp3'
+      },
+      {
+        id: 'brega_romantico',
+        title: 'Garçom, Me Reinicia',
+        artist: 'Reginaldo do Cabaré',
+        genre: 'PAGODE',
+        genreDesc: 'BREGA ROMÂNTICO CLÁSSICO (CABARÉ DE PIRITUBA)',
+        src: 'media/audio/tracks/brega_romantico.mp3'
+      },
+      {
+        id: 'rap_nacional_sp',
+        title: 'Sobreviver Não É Videogame',
+        artist: 'Racionais do Asfalto',
+        genre: 'FUNK',
+        genreDesc: 'RAP NACIONAL SP 90s (BOOM-BAP & CRÔNICA URBANA)',
+        src: 'media/audio/tracks/rap_nacional_sp.mp3'
+      },
+      {
+        id: 'manguebeat_maracatu',
+        title: 'Da Lama ao Byte',
+        artist: 'Chico Science & Transistor',
+        genre: 'FUNK',
+        genreDesc: 'MANGUEBEAT (MARACATU ATÔMICO & GUITARRAS)',
+        src: 'media/audio/tracks/manguebeat_maracatu.mp3'
+      },
+      {
+        id: 'rock_nacional_80s',
+        title: 'Aperte o Reset',
+        artist: 'Titãs da Central',
+        genre: 'MPB',
+        genreDesc: 'ROCK NACIONAL 80s (PÓS-PUNK & OVERDRIVE)',
+        src: 'media/audio/tracks/rock_nacional_80s.mp3'
+      },
+      {
+        id: 'chorinho_tradicional',
+        title: 'Doçura do Choro',
+        artist: 'Pixinguinha do Algoritmo',
+        genre: 'MPB',
+        genreDesc: 'CHORINHO TRADICIONAL (FLAUTA & 7 CORDAS)',
+        src: 'media/audio/tracks/chorinho_tradicional.mp3'
+      }
+    ];
+
+    const VINHETAS = [
+      'media/audio/vinhetas/vinheta_alfa_fm.mp3',
+      'media/audio/vinhetas/vinheta_transmatrix.mp3'
+    ];
+
+    let currentTrackIdx = 0;
+    let isPlaying = false;
+    let isBotecoOn = false;
+
+    const audio = document.getElementById('audio-player');
+    const botecoAudio = document.getElementById('boteco-player');
+    const btnPlay = document.getElementById('btn-play');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnVinheta = document.getElementById('btn-vinheta');
+    const btnBoteco = document.getElementById('btn-boteco');
+    const vfdTitle = document.getElementById('vfd-title');
+    const vfdArtist = document.getElementById('vfd-artist');
+    const vfdGenre = document.getElementById('vfd-genre');
+    const vfdTime = document.getElementById('vfd-time');
+    const vfdStatus = document.getElementById('vfd-status');
+    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+    const volSlider = document.getElementById('vol-slider');
+    const volText = document.getElementById('vol-text');
+    const playlistUl = document.getElementById('playlist-ul');
+
+    function renderPlaylist() {
+      playlistUl.innerHTML = '';
+      TRACKS.forEach((tr, i) => {
+        const li = document.createElement('li');
+        li.className = 'playlist-item' + (i === currentTrackIdx ? ' playing' : '');
+        li.innerHTML = `
+          <div class="item-left">
+            <span class="item-index">${(i + 1).toString().padStart(2, '0')}</span>
+            <div>
+              <div class="item-title">${tr.title}</div>
+              <div class="item-artist">${tr.artist}</div>
+            </div>
+          </div>
+          <span class="item-genre-tag genre-${tr.genre}">${tr.genre}</span>
+        `;
+        li.addEventListener('click', () => {
+          loadTrack(i);
+          playTrack();
+        });
+        playlistUl.appendChild(li);
+      });
+    }
+
+    function formatTime(secs) {
+      if (isNaN(secs) || secs < 0) return '00:00';
+      const m = Math.floor(secs / 60);
+      const s = Math.floor(secs % 60);
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function loadTrack(idx) {
+      currentTrackIdx = (idx + TRACKS.length) % TRACKS.length;
+      const tr = TRACKS[currentTrackIdx];
+      audio.src = tr.src;
+      vfdTitle.textContent = tr.title;
+      vfdArtist.textContent = tr.artist;
+      vfdGenre.textContent = `GÊNERO: ${tr.genreDesc}`;
+      renderPlaylist();
+    }
+
+    function playTrack() {
+      audio.play().then(() => {
+        isPlaying = true;
+        btnPlay.textContent = '⏸ PAUSAR';
+        vfdStatus.textContent = '▶ TOCANDO // SINTONIZADO';
+      }).catch(err => {
+        console.warn('Playback error:', err);
+      });
+    }
+
+    function pauseTrack() {
+      audio.pause();
+      isPlaying = false;
+      btnPlay.textContent = '▶ TOCAR';
+      vfdStatus.textContent = '⏸ PAUSADO';
+    }
+
+    btnPlay.addEventListener('click', () => {
+      if (isPlaying) pauseTrack();
+      else playTrack();
+    });
+
+    btnPrev.addEventListener('click', () => {
+      loadTrack(currentTrackIdx - 1);
+      playTrack();
+    });
+
+    btnNext.addEventListener('click', () => {
+      loadTrack(currentTrackIdx + 1);
+      playTrack();
+    });
+
+    btnVinheta.addEventListener('click', () => {
+      const vSrc = VINHETAS[Math.floor(Math.random() * VINHETAS.length)];
+      vfdTitle.textContent = '🎙️ [VINHETA] Rádio Alfa FM';
+      vfdArtist.textContent = 'Sintonizando os 99.7 MHz de Pirituba...';
+      audio.src = vSrc;
+      playTrack();
+      audio.onended = () => {
+        audio.onended = defaultEnded;
+        loadTrack(currentTrackIdx + 1);
+        playTrack();
+      };
+    });
+
+    btnBoteco.addEventListener('click', () => {
+      isBotecoOn = !isBotecoOn;
+      if (isBotecoOn) {
+        botecoAudio.volume = 0.35;
+        botecoAudio.play().catch(() => {});
+        btnBoteco.classList.add('active');
+        btnBoteco.textContent = '🍺 BOTECO ATIVO';
+      } else {
+        botecoAudio.pause();
+        btnBoteco.classList.remove('active');
+        btnBoteco.textContent = '🍺 BOTECO FX';
+      }
+    });
+
+    function defaultEnded() {
+      if (Math.random() < 0.35) {
+        const vSrc = VINHETAS[Math.floor(Math.random() * VINHETAS.length)];
+        vfdTitle.textContent = '🎙️ [VINHETA] Rádio TransMatrix FM';
+        vfdArtist.textContent = 'Identificação de Estação Oficial';
+        audio.src = vSrc;
+        playTrack();
+        audio.onended = () => {
+          audio.onended = defaultEnded;
+          loadTrack(currentTrackIdx + 1);
+          playTrack();
+        };
+      } else {
+        loadTrack(currentTrackIdx + 1);
+        playTrack();
+      }
+    }
+    audio.onended = defaultEnded;
+
+    audio.addEventListener('timeupdate', () => {
+      const cur = audio.currentTime;
+      const dur = audio.duration || 0;
+      vfdTime.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+      if (dur > 0) {
+        progressBar.style.width = `${(cur / dur) * 100}%`;
+      }
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+      const rect = progressContainer.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, clickX / rect.width));
+      if (audio.duration) {
+        audio.currentTime = pct * audio.duration;
+      }
+    });
+
+    volSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      audio.volume = val;
+      volText.textContent = Math.round(val * 100) + '%';
+    });
+
+    const canvas = document.getElementById('eq-canvas');
+    const ctx = canvas.getContext('2d');
+    const bars = 14;
+    const barHeights = Array(bars).fill(2);
+
+    function animateEQ() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const barW = canvas.width / bars - 2;
+      for (let i = 0; i < bars; i++) {
+        if (isPlaying) {
+          const target = Math.random() * 24 + 4;
+          barHeights[i] += (target - barHeights[i]) * 0.25;
+        } else {
+          barHeights[i] += (2 - barHeights[i]) * 0.1;
+        }
+        ctx.fillStyle = '#39ff14';
+        ctx.fillRect(i * (barW + 2), canvas.height - barHeights[i], barW, barHeights[i]);
+      }
+      requestAnimationFrame(animateEQ);
+    }
+    animateEQ();
+
+    loadTrack(0);
+    audio.volume = 0.75;
+  </script>
+</body>
+</html>

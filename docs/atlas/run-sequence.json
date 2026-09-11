@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "From confirmation to world entry",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      480
+    ]
+  },
+  "participants": [
+    {
+      "id": "player",
+      "type": "frontend",
+      "label": "Player",
+      "sublabel": "browser / touch"
+    },
+    {
+      "id": "session",
+      "type": "backend",
+      "label": "Run coordinator",
+      "sublabel": "deterministic jobs"
+    },
+    {
+      "id": "authors",
+      "type": "cloud",
+      "label": "World authors",
+      "sublabel": "LLM + media"
+    },
+    {
+      "id": "compiler",
+      "type": "security",
+      "label": "World compiler",
+      "sublabel": "rules + validation"
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "Simulation",
+      "sublabel": "seeded state"
+    },
+    {
+      "id": "radio",
+      "type": "cloud",
+      "label": "Radio desk",
+      "sublabel": "events \u2192 audio"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 337,
+      "label": "PRE-RUN \u00b7 jobs overlap"
+    },
+    {
+      "from": 340,
+      "to": 410,
+      "label": "ENTRY \u00b7 ready gate"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "player",
+      "to": "session",
+      "y": 180,
+      "label": "Confirm valid land + coverage",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m1",
+      "from": "session",
+      "to": "authors",
+      "y": 215,
+      "label": "Fan out place / look / story / music",
+      "variant": "dashed"
+    },
+    {
+      "id": "m2",
+      "from": "session",
+      "to": "player",
+      "y": 250,
+      "label": "Cached wardrobe; customize now",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "authors",
+      "to": "compiler",
+      "y": 285,
+      "label": "Structured world + assets",
+      "variant": "default"
+    },
+    {
+      "id": "m4",
+      "from": "compiler",
+      "to": "engine",
+      "y": 320,
+      "label": "Publish validated opening pack",
+      "variant": "emphasis"
+    },
+    {
+      "id": "radio_start",
+      "from": "authors",
+      "to": "radio",
+      "y": 355,
+      "label": "Station ID + music job",
+      "variant": "dashed"
+    },
+    {
+      "id": "m5",
+      "from": "player",
+      "to": "engine",
+      "y": 390,
+      "label": "Confirm character; start clock at 0:00",
+      "variant": "emphasis"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "authors",
+      "from": 215,
+      "to": 400,
+      "type": "cloud"
+    },
+    {
+      "participant": "engine",
+      "from": 320,
+      "to": 400,
+      "type": "backend"
+    },
+    {
+      "participant": "radio",
+      "from": 355,
+      "to": 400,
+      "type": "cloud"
+    }
+  ]
+}

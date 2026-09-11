@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "How an action becomes a local story",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      480
+    ]
+  },
+  "participants": [
+    {
+      "id": "player",
+      "type": "frontend",
+      "label": "Player",
+      "sublabel": "move / use / drive"
+    },
+    {
+      "id": "rules",
+      "type": "backend",
+      "label": "Simulation",
+      "sublabel": "code owns effects"
+    },
+    {
+      "id": "journal",
+      "type": "messagebus",
+      "label": "Event journal",
+      "sublabel": "committed facts"
+    },
+    {
+      "id": "director",
+      "type": "backend",
+      "label": "Director",
+      "sublabel": "seeded selection"
+    },
+    {
+      "id": "news",
+      "type": "cloud",
+      "label": "Newsroom",
+      "sublabel": "AI + fact checks"
+    },
+    {
+      "id": "audio",
+      "type": "frontend",
+      "label": "Audio mixer",
+      "sublabel": "speech / music"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 305,
+      "label": "SIMULATION \u00b7 authoritative"
+    },
+    {
+      "from": 309,
+      "to": 410,
+      "label": "RADIO \u00b7 asynchronous"
+    }
+  ],
+  "messages": [
+    {
+      "id": "r0",
+      "from": "player",
+      "to": "rules",
+      "y": 180,
+      "label": "Submit supported action",
+      "variant": "emphasis"
+    },
+    {
+      "id": "r1",
+      "from": "rules",
+      "to": "journal",
+      "y": 215,
+      "label": "Commit deltas + event ID",
+      "variant": "emphasis"
+    },
+    {
+      "id": "r2",
+      "from": "journal",
+      "to": "director",
+      "y": 250,
+      "label": "Needs + recent consequences",
+      "variant": "dashed"
+    },
+    {
+      "id": "r3",
+      "from": "director",
+      "to": "rules",
+      "y": 285,
+      "label": "Schedule eligible next beat",
+      "variant": "default"
+    },
+    {
+      "id": "r4",
+      "from": "journal",
+      "to": "news",
+      "y": 320,
+      "label": "Publish facts; deduplicate",
+      "variant": "dashed"
+    },
+    {
+      "id": "r5",
+      "from": "news",
+      "to": "audio",
+      "y": 355,
+      "label": "Checked script \u2192 TTS segment",
+      "variant": "dashed"
+    },
+    {
+      "id": "r6",
+      "from": "audio",
+      "to": "player",
+      "y": 390,
+      "label": "Play local bulletin; duck music",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "rules",
+      "from": 180,
+      "to": 300,
+      "type": "backend"
+    },
+    {
+      "participant": "news",
+      "from": 320,
+      "to": 380,
+      "type": "cloud"
+    }
+  ]
+}

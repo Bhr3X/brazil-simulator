@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "The engine behind one local day",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1180,
+      560
+    ]
+  },
+  "components": [
+    {
+      "id": "selection",
+      "type": "frontend",
+      "label": "Choose a place",
+      "sublabel": "D \u00b7 map + character",
+      "pos": [
+        50.0,
+        50.0
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "jobs",
+      "type": "messagebus",
+      "label": "Run coordinator",
+      "sublabel": "D \u00b7 deadlines + retries",
+      "pos": [
+        428.2,
+        50.0
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "authors",
+      "type": "cloud",
+      "label": "World authors",
+      "sublabel": "AI \u00b7 context / story / audio",
+      "pos": [
+        806.4,
+        50.0
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "runtime",
+      "type": "backend",
+      "label": "Simulation core",
+      "sublabel": "D \u00b7 physics + state gate",
+      "pos": [
+        50.0,
+        226.4
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "compiler",
+      "type": "security",
+      "label": "World compiler",
+      "sublabel": "D \u00b7 validate + assemble",
+      "pos": [
+        428.2,
+        226.4
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "archive",
+      "type": "database",
+      "label": "Content archive",
+      "sublabel": "M \u00b7 versioned run manifest",
+      "pos": [
+        806.4,
+        226.4
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "director",
+      "type": "backend",
+      "label": "Pacing director",
+      "sublabel": "D \u00b7 score valid encounters",
+      "pos": [
+        50.0,
+        402.8
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "events",
+      "type": "messagebus",
+      "label": "Event journal",
+      "sublabel": "D \u00b7 committed facts",
+      "pos": [
+        428.2,
+        402.8
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "radio",
+      "type": "cloud",
+      "label": "Local radio",
+      "sublabel": "M \u00b7 script / TTS / mix",
+      "pos": [
+        806.4,
+        402.8
+      ],
+      "size": [
+        220,
+        86
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "selection",
+      "to": "jobs",
+      "label": "confirm",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e1",
+      "from": "jobs",
+      "to": "authors",
+      "label": "async jobs",
+      "variant": "dashed"
+    },
+    {
+      "id": "e2",
+      "from": "authors",
+      "to": "archive",
+      "label": "save candidates",
+      "variant": "default",
+      "labelDy": 60
+    },
+    {
+      "id": "e3",
+      "from": "archive",
+      "to": "compiler",
+      "label": "versioned packs",
+      "variant": "default"
+    },
+    {
+      "id": "e4",
+      "from": "compiler",
+      "to": "runtime",
+      "label": "admit pack",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e5",
+      "from": "runtime",
+      "to": "director",
+      "label": "state + needs",
+      "variant": "default",
+      "labelDy": 60
+    },
+    {
+      "id": "e6",
+      "from": "runtime",
+      "to": "events",
+      "label": "commit facts",
+      "variant": "default"
+    },
+    {
+      "id": "e7",
+      "from": "events",
+      "to": "radio",
+      "label": "event IDs",
+      "variant": "dashed"
+    }
+  ]
+}
