@@ -3890,7 +3890,17 @@ export class CityBuilder {
       new THREE.Vector3(58.0, 10, 0.0),
       'solid'
     );
-    // North Crest Boundary (behind favela campinho plateau)
+    // North crest wings stay near z≈-82; only the campinho corridor x -22..22 opens north.
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-60.0, 0, -88.0),
+      new THREE.Vector3(-22.0, 15, -82.0),
+      'solid'
+    );
+    this.physics.addBoxCollider(
+      new THREE.Vector3(22.0, 0, -88.0),
+      new THREE.Vector3(175.0, 15, -82.0),
+      'solid'
+    );
     this.physics.addBoxCollider(
       new THREE.Vector3(-60.0, 0, -118.0),
       new THREE.Vector3(175.0, 15, -114.0),
@@ -4885,6 +4895,25 @@ export class CityBuilder {
       'walkable'
     );
 
+    // Closed floor: south hill-to-plateau apron, north plateau-to-boundary, and side shoulders
+    const southApron = new THREE.Mesh(new THREE.BoxGeometry(44, 0.28, 6.2), dirtMat);
+    southApron.position.set(0, 9.36, -84);
+    group.add(southApron);
+    const northApron = new THREE.Mesh(new THREE.BoxGeometry(44, 0.28, 3.2), dirtMat);
+    northApron.position.set(0, 9.36, -112.6);
+    group.add(northApron);
+    const westShoulder = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.28, 33), dirtMat);
+    westShoulder.position.set(-21.1, 9.36, -97.5);
+    group.add(westShoulder);
+    const eastShoulder = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.28, 33), dirtMat);
+    eastShoulder.position.set(21.1, 9.36, -97.5);
+    group.add(eastShoulder);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-22, 9.35, -114),
+      new THREE.Vector3(22, 9.5, -81),
+      'walkable'
+    );
+
     // Playing surface exactly 28×14 m at y=9.5
     const pitch = new THREE.Mesh(new THREE.BoxGeometry(28, 0.08, 14), grassMat);
     pitch.position.set(0, 9.54, -99);
@@ -4973,7 +5002,7 @@ export class CityBuilder {
     westWall.position.set(-21.4, 7.1, -99);
     group.add(westWall);
     this.physics.addBoxCollider(
-      new THREE.Vector3(-22.0, 4.5, -113),
+      new THREE.Vector3(-22.0, 4.5, -114),
       new THREE.Vector3(-20.8, 12.0, -86.5),
       'solid'
     );
@@ -4982,7 +5011,7 @@ export class CityBuilder {
     eastWall.position.set(21.4, 7.1, -99);
     group.add(eastWall);
     this.physics.addBoxCollider(
-      new THREE.Vector3(20.8, 4.5, -113),
+      new THREE.Vector3(20.8, 4.5, -114),
       new THREE.Vector3(22.0, 12.0, -86.5),
       'solid'
     );
@@ -4998,36 +5027,22 @@ export class CityBuilder {
       );
     });
 
-    // Walkable connector from mirante/escadão approach (z≈-78, y≈8.5) to plateau (z=-87, y=9.5)
-    const rampLen = Math.hypot(9, 1.0);
-    const rampAngle = Math.atan2(1.0, 9);
-    const ramp = new THREE.Mesh(new THREE.BoxGeometry(12, 0.28, rampLen), dirtMat);
-    ramp.rotation.x = -rampAngle;
-    ramp.position.set(0, 9.0, -82.5);
+    // Crest-height connector: meet the existing hillside (~y=9.5 at z=-81) and stay level to the plateau
+    const ramp = new THREE.Mesh(new THREE.BoxGeometry(16, 0.22, 9.2), dirtMat);
+    ramp.position.set(0, 9.39, -82.6);
     group.add(ramp);
+    this.physics.addSlope(-10, 10, -87, -78, 9.5, 9.5);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(-8, 9.38, -87),
+      new THREE.Vector3(8, 9.5, -78),
+      'stair'
+    );
 
-    this.physics.addSlope(-10, 10, -87, -78, 9.5, 8.5);
-    const stepCount = 9;
-    for (let i = 0; i < stepCount; i++) {
-      const t0 = i / stepCount;
-      const t1 = (i + 1) / stepCount;
-      const z0 = -78 - t0 * 9;
-      const z1 = -78 - t1 * 9;
-      const y1 = 8.5 + t1 * 1.0;
-      this.physics.addBoxCollider(
-        new THREE.Vector3(-8, y1 - 0.12, Math.min(z0, z1)),
-        new THREE.Vector3(8, y1, Math.max(z0, z1)),
-        'stair'
-      );
-    }
-
-    const railL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, rampLen), railMat);
-    railL.rotation.x = -rampAngle;
-    railL.position.set(-6.1, 9.55, -82.5);
+    const railL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 9.2), railMat);
+    railL.position.set(-6.1, 9.85, -82.6);
     group.add(railL);
-    const railR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, rampLen), railMat);
-    railR.rotation.x = -rampAngle;
-    railR.position.set(6.1, 9.55, -82.5);
+    const railR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 9.2), railMat);
+    railR.position.set(6.1, 9.85, -82.6);
     group.add(railR);
 
     this.scene.add(group);

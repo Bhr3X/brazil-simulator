@@ -2364,19 +2364,28 @@ async function runTestSuite(url) {
     // TEST 31: Carnival plaza + favela campinho zones, geometry, connector, and world bound
     const carnivalCampinhoTested = await evaluate(`
       (async () => {
+        const leakedZoneHook = Object.prototype.hasOwnProperty.call(globalThis, 'ZoneManager')
+          || Object.prototype.hasOwnProperty.call(globalThis, 'WORLD_ZONES');
         const zoneApi = await (async () => {
-          if (typeof ZoneManager !== 'undefined') {
+          const pagePath = window.location.pathname;
+          const isEsmBuild = pagePath.endsWith('index.html') || pagePath === '/' || pagePath === '';
+          if (isEsmBuild) {
+            const mod = await import('/src/world/Zones.js');
             return {
-              getZoneAt: ZoneManager.getZoneAt.bind(ZoneManager),
-              isZoneOpen: ZoneManager.isZoneOpen.bind(ZoneManager),
-              WORLD_ZONES
+              getZoneAt: mod.ZoneManager.getZoneAt.bind(mod.ZoneManager),
+              isZoneOpen: mod.ZoneManager.isZoneOpen.bind(mod.ZoneManager),
+              WORLD_ZONES: mod.WORLD_ZONES,
+              source: 'esm-import'
             };
           }
-          const mod = await import('/src/world/Zones.js');
+          if (typeof ZoneManager === 'undefined' || typeof WORLD_ZONES === 'undefined') {
+            return { getZoneAt: () => ({ id: 'MISSING' }), isZoneOpen: () => false, WORLD_ZONES: [], source: 'missing-classic' };
+          }
           return {
-            getZoneAt: mod.ZoneManager.getZoneAt.bind(mod.ZoneManager),
-            isZoneOpen: mod.ZoneManager.isZoneOpen.bind(mod.ZoneManager),
-            WORLD_ZONES: mod.WORLD_ZONES
+            getZoneAt: ZoneManager.getZoneAt.bind(ZoneManager),
+            isZoneOpen: ZoneManager.isZoneOpen.bind(ZoneManager),
+            WORLD_ZONES,
+            source: 'classic-lexical'
           };
         })();
 
@@ -2479,15 +2488,40 @@ async function runTestSuite(url) {
           && Math.abs(c.max.y - 9.5) <= 0.15
         );
 
-        let walkPos = new THREE.Vector3(0, 8.5, -78);
-        const connectorSamples = [];
-        for (let i = 0; i < 22; i++) {
-          const target = walkPos.clone();
-          target.z -= 0.45;
-          walkPos = physics.resolveMovement(walkPos, target, 0.38, 0.5);
-          connectorSamples.push({ x: walkPos.x, y: walkPos.y, z: walkPos.z });
-        }
+        const walkNorth = (x, y, startZ, step, count) => {
+          let pos = new THREE.Vector3(x, y, startZ);
+          for (let i = 0; i < count; i++) {
+            const target = pos.clone();
+            target.z -= step;
+            pos = physics.resolveMovement(pos, target, 0.38, 0.5);
+          }
+          return pos;
+        };
+
+        const crestY = physics.getGroundHeight(0, -78);
+        const connectorStartReachable = crestY >= 9.0 && crestY <= 10.0;
+        const connectorMidY = physics.getGroundHeight(0, -84, crestY);
+        const connectorMeetsCrest = Math.abs(connectorMidY - 9.5) <= 0.2;
+        let walkPos = walkNorth(0, crestY, -78, 0.45, 22);
         const connectorReached = walkPos.z <= -86.5 && walkPos.y >= 9.2 && walkPos.y <= 10.2;
+
+        const westCrestY = physics.getGroundHeight(-28, -78);
+        const eastCrestY = physics.getGroundHeight(40, -78);
+        const westProbe = walkNorth(-28, Math.max(westCrestY, 9.0), -78, 0.5, 40);
+        const eastProbe = walkNorth(40, Math.max(eastCrestY, 9.0), -78, 0.5, 40);
+        const farEastProbe = walkNorth(80, 9.5, -78, 0.5, 40);
+        const offCentreClosed = westProbe.z >= -84 && eastProbe.z >= -84 && farEastProbe.z >= -84;
+
+        const floorNear = (x, z) => Math.abs(physics.getGroundHeight(x, z, 9.5) - 9.5) <= 0.2;
+        const southWestFloor = floorNear(-16, -84);
+        const southEastFloor = floorNear(16, -84);
+        const northMidFloor = floorNear(0, -112.5);
+        const northWestFloor = floorNear(-16, -112.5);
+        const northEastFloor = floorNear(16, -112.5);
+        const westSideFloor = floorNear(-21, -99);
+        const eastSideFloor = floorNear(21, -99);
+        const floorsClosed = southWestFloor && southEastFloor && northMidFloor
+          && northWestFloor && northEastFloor && westSideFloor && eastSideFloor;
 
         const avZone = zoneById.AV_EDGAR_FACCO;
         const busZone = zoneById.CORREDOR_BUS;
@@ -2525,7 +2559,13 @@ async function runTestSuite(url) {
           && trioOnLiveRoad === false
           && Math.abs(pitchGround - 9.5) <= 0.15
           && pitchWalkable === true
+          && connectorStartReachable === true
+          && connectorMeetsCrest === true
           && connectorReached === true
+          && offCentreClosed === true
+          && floorsClosed === true
+          && leakedZoneHook === false
+          && (zoneApi.source === 'esm-import' || zoneApi.source === 'classic-lexical')
           && physics.worldBounds.minZ === -120
           && doorCount >= 20;
 
@@ -2544,8 +2584,20 @@ async function runTestSuite(url) {
           trioOnLiveRoad,
           pitchGround,
           pitchWalkable,
+          connectorStartReachable,
+          crestY,
+          connectorMidY,
+          connectorMeetsCrest,
           connectorReached,
           connectorEnd: { x: walkPos.x, y: walkPos.y, z: walkPos.z },
+          offCentreClosed,
+          westProbe: { x: westProbe.x, y: westProbe.y, z: westProbe.z },
+          eastProbe: { x: eastProbe.x, y: eastProbe.y, z: eastProbe.z },
+          farEastProbe: { x: farEastProbe.x, y: farEastProbe.y, z: farEastProbe.z },
+          floorsClosed,
+          floorProbes: { southWestFloor, southEastFloor, northMidFloor, northWestFloor, northEastFloor, westSideFloor, eastSideFloor },
+          leakedZoneHook,
+          zoneSource: zoneApi.source,
           minZ: physics.worldBounds.minZ,
           doorCount
         };
@@ -2553,7 +2605,7 @@ async function runTestSuite(url) {
     `);
     console.log(`[TEST 31] Carnival plaza and favela campinho:`, carnivalCampinhoTested);
     if (!carnivalCampinhoTested.ok) {
-      throw new Error(`TEST 31 FAILED: carnival plaza and favela campinho must expose authoritative zones, named geometry, a walkable pitch/connector, a truck off the live road, minZ -120, and preserved doors. ${JSON.stringify(carnivalCampinhoTested)}`);
+      throw new Error(`TEST 31 FAILED: carnival plaza and favela campinho must keep off-centre north walls, a crest-height connector, closed floor gaps, no ZoneManager production hooks, and the original zone/geometry contracts. ${JSON.stringify(carnivalCampinhoTested)}`);
     }
 
     // Check Console Errors

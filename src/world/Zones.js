@@ -333,8 +333,3 @@ export class ZoneManager {
     return hour >= zone.openHour || hour < zone.closeHour;
   }
 }
-
-if (typeof globalThis !== 'undefined') {
-  globalThis.ZoneManager = ZoneManager;
-  globalThis.WORLD_ZONES = WORLD_ZONES;
-}
