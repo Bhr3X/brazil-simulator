@@ -35,12 +35,13 @@ A simulação dura **15 minutos reais** (900 segundos), mapeados em **24 horas i
 
 ---
 
-## 🎶 Trilha Sonora Procedural Brasileira (Web Audio 100%)
-Zero arquivos de áudio externos. Síntese procedural em tempo real:
-* **MPB / Bossa Nova (82 BPM)**: Violão de nylon sintetizado com batida de João Gilberto, baixo acústico e ganzá.
-* **Pagode Raiz / Samba de Roda (102 BPM)**: Cavaquinho com palhetada sincopada, surdo de marcação duplo, pandeiro e tamborim.
-* **Baile Funk Mandelão (130 BPM)**: Beat VoltMix 16-step, sub-bass 808 com pitch dive profundo e staccato synth.
-* **Rádio Pirituba FM**: Troque de estação a qualquer momento com a tecla `[N]`.
+## 🎶 Rádio Espacial Pirituba FM (13 faixas)
+
+A cidade toca um catálogo espacial de **13 faixas brasileiras gravadas** (funk, pagode, MPB, samba, forró, axé, brega, rap, manguebeat, rock e choro), com vinhetas da Alfa FM Pirituba e da TransMatrix FM, noticiário satírico e previsão do tempo que altera o clima no jogo. Síntese procedural em Web Audio permanece como fallback da rádio e para chuva, trovões e efeitos.
+
+`media/audio/ambience/briga_discussao.mp3` está disponível como ambiência gravada, intencionalmente ainda não ligada a uma cena.
+
+Troque de estação a qualquer momento com a tecla `[N]` (Auto / caixas da cidade, MPB, Pagode, Funk, Desligar).
 
 ---
 

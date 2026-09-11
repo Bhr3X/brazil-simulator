@@ -74,11 +74,10 @@ export class RadioBroadcast {
     this.songsPlayedInBlock = 0;
     this.songsPerNewsBlock = 2; // News after every 2 songs
     this.isBroadcastingNews = false;
+    this.pendingEndedCallback = null;
+    this.playbackGeneration = 0;
 
-    // Listen for song end
-    this.audioElement.addEventListener('ended', () => {
-      this.onSongEnded();
-    });
+    this.audioElement.addEventListener('ended', () => this.handleAudioEnded());
 
     this.audioElement.addEventListener('error', (e) => {
       console.warn('[RadioBroadcast] Track load error, using procedural fallback:', e);
@@ -93,6 +92,8 @@ export class RadioBroadcast {
 
   stop() {
     this.isPlaying = false;
+    this.pendingEndedCallback = null;
+    this.playbackGeneration++;
     if (this.audioElement) {
       this.audioElement.pause();
     }
@@ -101,6 +102,12 @@ export class RadioBroadcast {
   setStation(stationId) {
     if (!RADIO_STATIONS[stationId]) return RADIO_STATIONS[this.activeStation];
     this.activeStation = stationId;
+    this.pendingEndedCallback = null;
+    this.isBroadcastingNews = false;
+    this.playbackGeneration++;
+    if (this.duckingGain && this.ctx) {
+      this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.05);
+    }
 
     if (stationId === 'OFF') {
       this.effectiveGenre = 'OFF';
@@ -188,6 +195,17 @@ export class RadioBroadcast {
     }
   }
 
+  handleAudioEnded() {
+    const cb = this.pendingEndedCallback;
+    this.pendingEndedCallback = null;
+    if (!this.isPlaying || this.activeStation === 'OFF') return;
+    if (cb) {
+      cb();
+      return;
+    }
+    this.onSongEnded();
+  }
+
   // Intermission: Vinheta -> News & Weather -> Return Vinheta -> Next Song
   startRadioIntermission() {
     if (this.isBroadcastingNews) return;
@@ -200,18 +218,25 @@ export class RadioBroadcast {
     // 1. Play Station Vinheta
     const vinheta = VINHETAS_CATALOGUE[Math.floor(Math.random() * VINHETAS_CATALOGUE.length)];
     this.playAudioFile(vinheta.src, () => {
-      // 2. Broadcast Breaking News with dual journalists & Weather
-      if (this.newsDesk) {
-        this.newsDesk.broadcastBreakingNews(window.__BS_GAME_STATE__ || null, () => {
-          // 3. Play Return Vinheta and restore full volume
-          this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.8);
+      if (!this.isPlaying || this.activeStation === 'OFF') {
+        this.isBroadcastingNews = false;
+        return;
+      }
+      const newsGen = this.playbackGeneration;
+      const finishIntermission = () => {
+        if (this.playbackGeneration !== newsGen || !this.isPlaying || this.activeStation === 'OFF') {
           this.isBroadcastingNews = false;
-          this.playNextSong();
-        });
-      } else {
+          return;
+        }
         this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.8);
         this.isBroadcastingNews = false;
         this.playNextSong();
+      };
+      // 2. Broadcast Breaking News with dual journalists & Weather
+      if (this.newsDesk) {
+        this.newsDesk.broadcastBreakingNews(window.__BS_GAME_STATE__ || null, finishIntermission);
+      } else {
+        finishIntermission();
       }
     });
   }
@@ -245,17 +270,20 @@ export class RadioBroadcast {
 
   playAudioFile(src, onEndCallback = null) {
     if (!this.audioElement) return;
+    this.playbackGeneration++;
+    const gen = this.playbackGeneration;
+    this.pendingEndedCallback = typeof onEndCallback === 'function'
+      ? () => {
+          if (this.playbackGeneration !== gen) return;
+          onEndCallback();
+        }
+      : null;
     this.audioElement.src = src;
     this.audioElement.play().catch(err => {
       console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
     });
-
-    if (onEndCallback) {
-      const handler = () => {
-        this.audioElement.removeEventListener('ended', handler);
-        onEndCallback();
-      };
-      this.audioElement.addEventListener('ended', handler);
-    }
   }
 }
+
+RadioBroadcast.TRACKS_CATALOGUE = TRACKS_CATALOGUE;
+RadioBroadcast.VINHETAS_CATALOGUE = VINHETAS_CATALOGUE;

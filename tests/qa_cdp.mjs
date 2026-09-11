@@ -2077,6 +2077,209 @@ async function runTestSuite(url) {
       throw new Error(`TEST 26 FAILED: Walkable interiors or door punch test failed: ${JSON.stringify(walkableInteriorsTest)}`);
     }
 
+    // TEST 27: Radio forecast vs scheduled 16:00–17:15 storm ownership
+    const radioWeatherTested = await evaluate(`
+      (() => {
+        const game = window.app.game;
+        const origSetWeather = game.dayCycle.setWeather.bind(game.dayCycle);
+        const origToast = game.hud.showToast.bind(game.hud);
+        let setWeatherCalls = 0;
+        let toastCalls = 0;
+        game.dayCycle.setWeather = (mode) => { setWeatherCalls++; return origSetWeather(mode); };
+        game.hud.showToast = (msg, duration) => { toastCalls++; return origToast(msg, duration); };
+
+        const setSimHour = (hour) => {
+          game.isRunActive = true;
+          game.clock.hasEnded = false;
+          game.clock.isPaused = false;
+          game.clock.elapsed = (hour - 6.0) * (900 / 24);
+        };
+
+        try {
+          const weatherCb = game.sound && game.sound.newsDesk && game.sound.newsDesk.weatherCallback;
+          if (typeof weatherCb !== 'function') {
+            return { ok: false, reason: 'newsDesk weatherCallback is not registered' };
+          }
+
+          setSimHour(12.0);
+          weatherCb('GAROA');
+          game.update(0.016);
+          const garoaOutside = {
+            dayCycle: game.dayCycle.weather,
+            traffic: game.traffic ? game.traffic.weather : null,
+            isStorming: game.isStorming,
+            raining: !!(game.sound && game.sound.isRaining)
+          };
+
+          setWeatherCalls = 0;
+          toastCalls = 0;
+          game.update(0.016);
+          game.update(0.016);
+          game.update(0.016);
+          const unchangedGaroaApplies = { setWeatherCalls, toastCalls };
+
+          setSimHour(16.2);
+          game.update(0.016);
+          const scheduledOverride = {
+            dayCycle: game.dayCycle.weather,
+            traffic: game.traffic ? game.traffic.weather : null,
+            isStorming: game.isStorming,
+            raining: !!(game.sound && game.sound.isRaining)
+          };
+
+          setWeatherCalls = 0;
+          toastCalls = 0;
+          game.update(0.016);
+          game.update(0.016);
+          const unchangedStormApplies = { setWeatherCalls, toastCalls };
+
+          setSimHour(18.0);
+          game.update(0.016);
+          const restoredAfterWindow = {
+            dayCycle: game.dayCycle.weather,
+            traffic: game.traffic ? game.traffic.weather : null,
+            isStorming: game.isStorming,
+            raining: !!(game.sound && game.sound.isRaining)
+          };
+
+          weatherCb('STORM');
+          game.update(0.016);
+          const radioStormOutside = {
+            dayCycle: game.dayCycle.weather,
+            traffic: game.traffic ? game.traffic.weather : null,
+            isStorming: game.isStorming
+          };
+
+          const ok = garoaOutside.dayCycle === 'GAROA'
+            && garoaOutside.traffic === 'GAROA'
+            && garoaOutside.isStorming === false
+            && garoaOutside.raining === true
+            && unchangedGaroaApplies.setWeatherCalls === 0
+            && unchangedGaroaApplies.toastCalls === 0
+            && scheduledOverride.dayCycle === 'STORM'
+            && scheduledOverride.traffic === 'STORM'
+            && scheduledOverride.isStorming === true
+            && unchangedStormApplies.setWeatherCalls === 0
+            && unchangedStormApplies.toastCalls === 0
+            && restoredAfterWindow.dayCycle === 'GAROA'
+            && restoredAfterWindow.traffic === 'GAROA'
+            && restoredAfterWindow.isStorming === false
+            && restoredAfterWindow.raining === true
+            && radioStormOutside.dayCycle === 'STORM'
+            && radioStormOutside.isStorming === true;
+
+          return { ok, garoaOutside, unchangedGaroaApplies, scheduledOverride, unchangedStormApplies, restoredAfterWindow, radioStormOutside };
+        } finally {
+          game.dayCycle.setWeather = origSetWeather;
+          game.hud.showToast = origToast;
+        }
+      })()
+    `);
+    console.log(`[TEST 27] Radio weather vs scheduled storm:`, radioWeatherTested);
+    if (!radioWeatherTested.ok) {
+      throw new Error(`TEST 27 FAILED: radio GAROA must survive outside 16:00–17:15, yield to the scheduled storm inside the window, and be restored when the window ends. ${JSON.stringify(radioWeatherTested)}`);
+    }
+
+    // TEST 28: Vinheta completion must not run normal song-end accounting
+    const vinhetaEndedTested = await evaluate(`
+      (() => {
+        const radio = window.app.sound && window.app.sound.radioBroadcast;
+        if (!radio || !radio.audioElement) {
+          return { ok: false, reason: 'radioBroadcast audioElement missing' };
+        }
+
+        const origStation = radio.activeStation;
+        const origNewsDesk = radio.newsDesk;
+        const origPlayNext = radio.playNextSong.bind(radio);
+        let playNextCalls = 0;
+        radio.playNextSong = (...args) => { playNextCalls++; return origPlayNext(...args); };
+
+        try {
+          radio.songsPlayedInBlock = 0;
+          radio.isBroadcastingNews = false;
+          const trackBefore = radio.currentTrack ? radio.currentTrack.id : null;
+          let vinhetaContinued = false;
+          radio.playAudioFile('media/audio/vinhetas/vinheta_alfa_fm.mp3', () => { vinhetaContinued = true; });
+          radio.audioElement.dispatchEvent(new Event('ended'));
+          const afterVinheta = {
+            songsPlayedInBlock: radio.songsPlayedInBlock,
+            vinhetaContinued,
+            playNextCalls,
+            trackAfter: radio.currentTrack ? radio.currentTrack.id : null,
+            trackBefore
+          };
+
+          radio.songsPlayedInBlock = 0;
+          playNextCalls = 0;
+          let newsStarted = false;
+          radio.newsDesk = { broadcastBreakingNews: (_state, _cb) => { newsStarted = true; } };
+          radio.isBroadcastingNews = false;
+          radio.startRadioIntermission();
+          radio.audioElement.dispatchEvent(new Event('ended'));
+          const afterIntermissionVinheta = {
+            songsPlayedInBlock: radio.songsPlayedInBlock,
+            newsStarted,
+            playNextCalls
+          };
+
+          let staleFired = false;
+          radio.songsPlayedInBlock = 0;
+          radio.isBroadcastingNews = false;
+          radio.playAudioFile('media/audio/vinhetas/vinheta_transmatrix.mp3', () => { staleFired = true; });
+          radio.setStation('FUNK');
+          radio.audioElement.dispatchEvent(new Event('ended'));
+          const afterStationChange = { staleFired };
+
+          const ok = afterVinheta.songsPlayedInBlock === 0
+            && afterVinheta.vinhetaContinued === true
+            && afterVinheta.playNextCalls === 0
+            && afterVinheta.trackAfter === afterVinheta.trackBefore
+            && afterIntermissionVinheta.songsPlayedInBlock === 0
+            && afterIntermissionVinheta.newsStarted === true
+            && afterIntermissionVinheta.playNextCalls === 0
+            && afterStationChange.staleFired === false;
+
+          return { ok, afterVinheta, afterIntermissionVinheta, afterStationChange };
+        } finally {
+          radio.playNextSong = origPlayNext;
+          radio.newsDesk = origNewsDesk;
+          if (origStation) radio.setStation(origStation);
+        }
+      })()
+    `);
+    console.log(`[TEST 28] Vinheta ended accounting:`, vinhetaEndedTested);
+    if (!vinhetaEndedTested.ok) {
+      throw new Error(`TEST 28 FAILED: vinheta completion must continue without song-end accounting or stale station callbacks. ${JSON.stringify(vinhetaEndedTested)}`);
+    }
+
+    // TEST 29: TRACKS_CATALOGUE and VINHETAS_CATALOGUE URLs resolve to non-empty audio
+    const catalogueFetchTested = await evaluate(`
+      (async () => {
+        const radio = window.app.sound && window.app.sound.radioBroadcast;
+        const tracks = radio && radio.constructor && radio.constructor.TRACKS_CATALOGUE;
+        const vinhetas = radio && radio.constructor && radio.constructor.VINHETAS_CATALOGUE;
+        if (!Array.isArray(tracks) || tracks.length !== 13) {
+          return { ok: false, reason: 'TRACKS_CATALOGUE must expose 13 tracks on RadioBroadcast', trackCount: tracks && tracks.length };
+        }
+        if (!Array.isArray(vinhetas) || vinhetas.length !== 2) {
+          return { ok: false, reason: 'VINHETAS_CATALOGUE must expose 2 vinhetas on RadioBroadcast', vinhetaCount: vinhetas && vinhetas.length };
+        }
+        const items = tracks.concat(vinhetas);
+        const results = [];
+        for (const item of items) {
+          const res = await fetch(item.src);
+          const buf = await res.arrayBuffer();
+          results.push({ id: item.id, src: item.src, status: res.status, ok: res.ok, bytes: buf.byteLength });
+        }
+        const failed = results.filter(r => !r.ok || r.bytes <= 0);
+        return { ok: failed.length === 0, trackCount: tracks.length, vinhetaCount: vinhetas.length, failed, results };
+      })()
+    `);
+    console.log(`[TEST 29] Radio catalogue HTTP fetch:`, catalogueFetchTested);
+    if (!catalogueFetchTested.ok) {
+      throw new Error(`TEST 29 FAILED: all 13 TRACKS_CATALOGUE URLs and both VINHETAS_CATALOGUE URLs must return successful non-empty responses. ${JSON.stringify(catalogueFetchTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

@@ -54,6 +54,8 @@ export class GameManager {
     this.hasMotoTriggered = false;
     this.motoCheckTimer = 0;
     this.isStorming = false;
+    this.lastRadioForecast = 'CLEAR';
+    this.effectiveWeather = 'CLEAR';
     this.lastThunderTime = 0;
     this.blitzCount = 0;
     this.lastBlitzHour = -99;
@@ -117,22 +119,8 @@ export class GameManager {
       // Register radio weather forecast broadcast callback
       if (this.sound.newsDesk) {
         this.sound.newsDesk.setWeatherCallback((weatherMode) => {
-          this.dayCycle.setWeather(weatherMode);
-          if (this.traffic) this.traffic.setWeather(weatherMode);
-          if (weatherMode === 'STORM') {
-            this.isStorming = true;
-            this.sound.playRain(true);
-            this.sound.playThunder();
-            this.hud.showToast('⛈️ <strong>ALERTA DA RÁDIO:</strong> Temporal desabando em Pirituba!', 5000);
-          } else if (weatherMode === 'GAROA') {
-            this.isStorming = false;
-            this.sound.playRain(true);
-            this.hud.showToast('🌧️ <strong>ALERTA DA RÁDIO:</strong> Garoa paulistana típica e asfalto molhado.', 5000);
-          } else {
-            this.isStorming = false;
-            this.sound.playRain(false);
-            this.hud.showToast('☀️ <strong>ALERTA DA RÁDIO:</strong> Sol abriu em Pirituba! Tarde quente!', 4000);
-          }
+          this.lastRadioForecast = (weatherMode === 'STORM' || weatherMode === 'GAROA') ? weatherMode : 'CLEAR';
+          this.applyEffectiveWeather();
         });
       }
     }
@@ -147,6 +135,43 @@ export class GameManager {
 
     // Run end callback
     this.clock.onRunEnd = () => this.handleRunEnd(true);
+  }
+
+  applyEffectiveWeather() {
+    const hour = this.clock.inGameHour;
+    const inStormWindow = hour >= 16.0 && hour <= 17.25;
+    const nextWeather = inStormWindow ? 'STORM' : (this.lastRadioForecast || 'CLEAR');
+    this.isStorming = nextWeather === 'STORM';
+    if (nextWeather === this.effectiveWeather) return;
+
+    const prevWeather = this.effectiveWeather;
+    this.effectiveWeather = nextWeather;
+    this.dayCycle.setWeather(nextWeather);
+    if (this.traffic) this.traffic.setWeather(nextWeather);
+
+    if (this.sound) {
+      this.sound.playRain(nextWeather === 'STORM' || nextWeather === 'GAROA');
+      if (nextWeather === 'STORM' && prevWeather !== 'STORM') {
+        this.sound.playThunder();
+      }
+    }
+
+    if (!this.hud) return;
+    if (inStormWindow && nextWeather === 'STORM') {
+      this.hud.showToast(t('toasts.storm_start', '⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.'), 6000);
+      return;
+    }
+    if (prevWeather === 'STORM' && nextWeather === 'CLEAR') {
+      this.hud.showToast(t('toasts.storm_end', '🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.'), 4000);
+      return;
+    }
+    if (nextWeather === 'STORM') {
+      this.hud.showToast('⛈️ <strong>ALERTA DA RÁDIO:</strong> Temporal desabando em Pirituba!', 5000);
+    } else if (nextWeather === 'GAROA') {
+      this.hud.showToast('🌧️ <strong>ALERTA DA RÁDIO:</strong> Garoa paulistana típica e asfalto molhado.', 5000);
+    } else {
+      this.hud.showToast('☀️ <strong>ALERTA DA RÁDIO:</strong> Sol abriu em Pirituba! Tarde quente!', 4000);
+    }
   }
 
   update(delta) {
@@ -171,27 +196,8 @@ export class GameManager {
     // 3. Continuous 24h solar lighting
     this.dayCycle.update(this.clock.inGameHour);
 
-    // 3b. Dynamic São Paulo Summer Storm (16:00 - 17:15)
-    const hour = this.clock.inGameHour;
-    const inStormWindow = hour >= 16.0 && hour <= 17.25;
-    if (inStormWindow && !this.isStorming) {
-      this.isStorming = true;
-      this.dayCycle.setWeather('STORM');
-      if (this.traffic) this.traffic.setWeather('STORM');
-      if (this.sound) {
-        this.sound.playRain(true);
-        this.sound.playThunder();
-      }
-      this.hud.showToast(t('toasts.storm_start', '⛈️ <strong>TEMPORAL DE VERÃO EM SÃO PAULO!</strong><br>Chuva torrencial e trânsito lento na Edgar Facó.'), 6000);
-    } else if (!inStormWindow && this.isStorming) {
-      this.isStorming = false;
-      this.dayCycle.setWeather('CLEAR');
-      if (this.traffic) this.traffic.setWeather('CLEAR');
-      if (this.sound) {
-        this.sound.playRain(false);
-      }
-      this.hud.showToast(t('toasts.storm_end', '🌤️ <strong>A CHUVA PASSOU!</strong> O céu de São Paulo abriu novamente.'), 4000);
-    }
+    // 3b. Scheduled 16:00–17:15 storm has priority; otherwise honor last radio forecast
+    this.applyEffectiveWeather();
 
     if (this.isStorming && this.sound) {
       this.lastThunderTime += delta;
