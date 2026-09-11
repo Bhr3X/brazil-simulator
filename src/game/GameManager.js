@@ -126,14 +126,14 @@ export class GameManager {
       this.sound.init();
       this.sound.playCoin();
 
-      // Trigger class-specific soundtrack: Funk for poor, Pagode for mid-class, MPB for rich
-      const classGenreMap = {
-        CLASSE_DE: 'FUNK',
-        CLASSE_C: 'PAGODE',
-        CLASSE_AB: 'MPB'
+      // Trigger class-specific soundtrack: Rap Boom Bap for Muleke de Quebrada, Pagode for mid-class, MPB for rich
+      const classTrackMap = {
+        CLASSE_DE: { genre: 'FUNK', trackId: 'rap_sp' },
+        CLASSE_C: { genre: 'PAGODE', trackId: 'pagode_romantico' },
+        CLASSE_AB: { genre: 'MPB', trackId: 'bossa_mpb' }
       };
-      const genre = classGenreMap[chosenKey] || 'MPB';
-      this.sound.playClassMusic(genre);
+      const cfg = classTrackMap[chosenKey] || { genre: 'MPB', trackId: 'bossa_mpb' };
+      this.sound.playClassMusic(cfg.genre, cfg.trackId);
 
       // Register radio weather forecast broadcast callback
       if (this.sound.newsDesk) {

@@ -89,29 +89,11 @@ export class SpatialSoundSystem {
 
     this.currentAudibleGain = 1.0;
     this.nearestEmitter = null;
-    this.isPersonalRadio = false; // When true (headphones), spatial falloff is bypassed
+    this.isPersonalRadio = true; // When true (personal radio), radio station is pristine (full volume & 20kHz bandwidth)
   }
 
-  // Pre-load ambient audio loops for locations
+  // Pre-load ambient audio loops for locations (disabled to ensure pristine radio broadcast)
   initChatterStreams() {
-    for (const emitter of this.emitters) {
-      if (!emitter.ambienceFile) continue;
-      try {
-        const audio = new Audio();
-        audio.src = emitter.ambienceFile;
-        audio.loop = true;
-        audio.volume = 0.0;
-        audio.preload = 'auto';
-        this.chatterAudios.set(emitter.id, {
-          audio,
-          emitter,
-          isPlaying: false
-        });
-      } catch (e) {
-        console.warn('[SpatialSound] Could not init chatter for', emitter.id, e);
-      }
-    }
-
     // High danger police siren & enquadro chatter
     try {
       const pmAudio = new Audio();
@@ -131,21 +113,20 @@ export class SpatialSoundSystem {
   }
 
   setPersonalRadio(enabled) {
-    this.isPersonalRadio = enabled;
+    this.isPersonalRadio = enabled !== false;
   }
 
   // Main frame update: calculate distances to all emitters and adjust gain + filter
   update(playerPos, dangerLevel = 0) {
     if (!playerPos || !this.ctx) return;
 
-    // 1. Personal radio (headphone / manual dial override): always full volume
+    // 1. Personal radio (headphone / manual dial override): always full volume and crystal clear 20kHz
     if (this.isPersonalRadio) {
       const t = this.ctx.currentTime;
       this.spatialGain.gain.setTargetAtTime(1.0, t, 0.2);
       this.spatialFilter.frequency.setTargetAtTime(20000, t, 0.2);
       this.currentAudibleGain = 1.0;
-      return;
-    }
+    } else {
 
     // 2. Find closest emitter to player
     let closest = null;
@@ -178,29 +159,17 @@ export class SpatialSoundSystem {
       // Frequency opens up: from 700 Hz (distant muffled thud) up to 20,000 Hz (clear acoustic highs)
       const targetFreq = 700 + 19300 * Math.pow(factor, 2.0);
 
-      this.spatialGain.gain.setTargetAtTime(Math.max(0.05, calculatedGain), t, 0.18);
-      this.spatialFilter.frequency.setTargetAtTime(targetFreq, t, 0.18);
-      this.currentAudibleGain = calculatedGain;
+        this.spatialGain.gain.setTargetAtTime(Math.max(0.05, calculatedGain), t, 0.18);
+        this.spatialFilter.frequency.setTargetAtTime(targetFreq, t, 0.18);
+        this.currentAudibleGain = calculatedGain;
+      }
     }
 
-    // 3. Update spatial chatter loops for local establishments
+    // 3. Keep chatter audio loops strictly paused so they never compete with or drown out the radio
     for (const [emitterId, item] of this.chatterAudios.entries()) {
-      const dist = Math.hypot(playerPos.x - item.emitter.x, playerPos.z - item.emitter.z);
-      const maxChatterDist = 28.0; // Audible within 28 meters of boteco/feira
-      if (dist < maxChatterDist) {
-        const chatterFactor = Math.max(0, 1.0 - (dist / maxChatterDist));
-        const chatterVol = Math.pow(chatterFactor, 1.4) * 0.45;
-        if (!item.isPlaying) {
-          item.audio.play().then(() => { item.isPlaying = true; }).catch(() => {});
-        }
-        item.audio.volume = chatterVol;
-      } else {
-        if (item.isPlaying && item.audio.volume > 0.01) {
-          item.audio.volume = Math.max(0, item.audio.volume - 0.05);
-        } else if (item.isPlaying) {
-          item.audio.pause();
-          item.isPlaying = false;
-        }
+      if (item.isPlaying) {
+        item.audio.pause();
+        item.isPlaying = false;
       }
     }
 

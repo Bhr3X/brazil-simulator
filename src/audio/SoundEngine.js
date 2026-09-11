@@ -62,7 +62,6 @@ export class SoundEngine {
 
       // 4. Radio Broadcast Engine (13 recorded Brazilian tracks, vinhetas, ducking, weather triggers)
       this.radioBroadcast = new RadioBroadcast(this.ctx, this.spatialSystem, this.newsDesk, this.musicEngine);
-      this.radioBroadcast.start();
 
       this.isInitialized = true;
       this.startAmbience();
@@ -92,34 +91,34 @@ export class SoundEngine {
     return this.isMuted;
   }
 
-  playClassMusic(genre) {
+  playClassMusic(genre, preferredTrackId = null) {
     if (!this.isInitialized) this.init();
-    if (this.radioBroadcast) {
-      this.radioBroadcast.playClassMusic(genre);
-    }
     if (this.musicEngine) {
-      this.musicEngine.fadeToGenre(genre);
+      this.musicEngine.stop();
+    }
+    if (this.radioBroadcast) {
+      this.radioBroadcast.playClassMusic(genre, preferredTrackId);
     }
   }
 
   // Radio Station Controls (MPB, Pagode, Baile Funk, Auto, Off)
   setRadioStation(stationId) {
     if (!this.isInitialized) this.init();
+    if (this.musicEngine) {
+      this.musicEngine.stop();
+    }
     if (this.radioBroadcast) {
       this.radioBroadcast.setStation(stationId);
-    }
-    if (this.musicEngine) {
-      this.musicEngine.setStation(stationId);
     }
   }
 
   cycleRadioStation() {
     if (!this.isInitialized) this.init();
+    if (this.musicEngine) {
+      this.musicEngine.stop();
+    }
     if (this.radioBroadcast) {
       const st = this.radioBroadcast.cycleStation();
-      if (this.musicEngine) {
-        this.musicEngine.setStation(st.id);
-      }
       this.playRadioTuningGlitch();
       return st;
     }
@@ -130,7 +129,7 @@ export class SoundEngine {
     if (this.radioBroadcast) {
       this.radioBroadcast.updateContext(zoneId, inGameHour);
     }
-    if (this.musicEngine) {
+    if (this.musicEngine && (!this.radioBroadcast || !this.radioBroadcast.isPlaying)) {
       this.musicEngine.updateContext(zoneId, inGameHour);
     }
   }

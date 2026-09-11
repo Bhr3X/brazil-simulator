@@ -88,7 +88,9 @@ export class RadioBroadcast {
 
   start() {
     this.isPlaying = true;
-    this.playNextProgramItem();
+    if (!this.currentTrack) {
+      this.playNextProgramItem();
+    }
   }
 
   stop() {
@@ -133,9 +135,9 @@ export class RadioBroadcast {
       if (this.fallback) this.fallback.setStation('AUTO');
     }
 
-    // Update spatial mode: AUTO uses city speakers; specific station is direct
+    // Update spatial mode: Keep radio pristine
     if (this.spatial) {
-      this.spatial.setPersonalRadio(stationId !== 'AUTO' && stationId !== 'OFF');
+      this.spatial.setPersonalRadio(stationId !== 'OFF');
     }
 
     this.isPlaying = true;
@@ -151,11 +153,17 @@ export class RadioBroadcast {
     return this.setStation(nextStation);
   }
 
-  playClassMusic(genre) {
+  playClassMusic(genre, preferredTrackId = null) {
     if (['MPB', 'PAGODE', 'FUNK'].includes(genre)) {
       this.effectiveGenre = genre;
       this.cachedAutoGenre = genre;
-      const classTrack = TRACKS_CATALOGUE.find(t => t.genre === genre);
+      let classTrack = null;
+      if (preferredTrackId) {
+        classTrack = TRACKS_CATALOGUE.find(t => t.id === preferredTrackId);
+      }
+      if (!classTrack) {
+        classTrack = TRACKS_CATALOGUE.find(t => t.genre === genre);
+      }
       if (classTrack) {
         this.currentTrack = classTrack;
         this.isPlaying = true;
@@ -277,6 +285,9 @@ export class RadioBroadcast {
 
   playAudioFile(src, onEndCallback = null) {
     if (!this.audioElement) return;
+    if (this.fallback && typeof this.fallback.stop === 'function') {
+      this.fallback.stop();
+    }
     this.playbackGeneration++;
     const gen = this.playbackGeneration;
     this.pendingEndedCallback = typeof onEndCallback === 'function'
@@ -285,10 +296,16 @@ export class RadioBroadcast {
           onEndCallback();
         }
       : null;
+    this.audioElement.pause();
     this.audioElement.src = src;
-    this.audioElement.play().catch(err => {
-      console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
-    });
+    const playPromise = this.audioElement.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        if (err.name !== 'AbortError') {
+          console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
+        }
+      });
+    }
   }
 }
 

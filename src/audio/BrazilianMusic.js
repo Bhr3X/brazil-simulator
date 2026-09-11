@@ -21,9 +21,9 @@ export class BrazilianMusicEngine {
     this.activeStation = 'AUTO';
     this.effectiveGenre = 'MPB'; // 'MPB' | 'PAGODE' | 'FUNK' | 'OFF'
 
-    // Master music gain node for crossfades
+    // Master music gain node for crossfades (muted by default; only active as offline fallback)
     this.musicGain = this.ctx.createGain();
-    this.musicGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+    this.musicGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
     this.musicGain.connect(this.destination);
 
     // Track-specific gains for smooth crossfades
@@ -77,6 +77,9 @@ export class BrazilianMusicEngine {
     this.isPlaying = true;
     this.stepIndex = 0;
     this.nextNoteTime = this.ctx.currentTime + 0.05;
+    if (this.musicGain) {
+      this.musicGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+    }
     this.scheduler = this.scheduler.bind(this);
     this.timerId = setInterval(this.scheduler, 35);
   }
@@ -86,6 +89,9 @@ export class BrazilianMusicEngine {
     if (this.timerId) {
       clearInterval(this.timerId);
       this.timerId = null;
+    }
+    if (this.musicGain && this.ctx) {
+      this.musicGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
     }
   }
 

@@ -6913,29 +6913,11 @@ class SpatialSoundSystem {
 
     this.currentAudibleGain = 1.0;
     this.nearestEmitter = null;
-    this.isPersonalRadio = false; // When true (headphones), spatial falloff is bypassed
+    this.isPersonalRadio = true; // When true (personal radio), radio station is pristine (full volume & 20kHz bandwidth)
   }
 
-  // Pre-load ambient audio loops for locations
+  // Pre-load ambient audio loops for locations (disabled to ensure pristine radio broadcast)
   initChatterStreams() {
-    for (const emitter of this.emitters) {
-      if (!emitter.ambienceFile) continue;
-      try {
-        const audio = new Audio();
-        audio.src = emitter.ambienceFile;
-        audio.loop = true;
-        audio.volume = 0.0;
-        audio.preload = 'auto';
-        this.chatterAudios.set(emitter.id, {
-          audio,
-          emitter,
-          isPlaying: false
-        });
-      } catch (e) {
-        console.warn('[SpatialSound] Could not init chatter for', emitter.id, e);
-      }
-    }
-
     // High danger police siren & enquadro chatter
     try {
       const pmAudio = new Audio();
@@ -6955,21 +6937,20 @@ class SpatialSoundSystem {
   }
 
   setPersonalRadio(enabled) {
-    this.isPersonalRadio = enabled;
+    this.isPersonalRadio = enabled !== false;
   }
 
   // Main frame update: calculate distances to all emitters and adjust gain + filter
   update(playerPos, dangerLevel = 0) {
     if (!playerPos || !this.ctx) return;
 
-    // 1. Personal radio (headphone / manual dial override): always full volume
+    // 1. Personal radio (headphone / manual dial override): always full volume and crystal clear 20kHz
     if (this.isPersonalRadio) {
       const t = this.ctx.currentTime;
       this.spatialGain.gain.setTargetAtTime(1.0, t, 0.2);
       this.spatialFilter.frequency.setTargetAtTime(20000, t, 0.2);
       this.currentAudibleGain = 1.0;
-      return;
-    }
+    } else {
 
     // 2. Find closest emitter to player
     let closest = null;
@@ -7002,29 +6983,17 @@ class SpatialSoundSystem {
       // Frequency opens up: from 700 Hz (distant muffled thud) up to 20,000 Hz (clear acoustic highs)
       const targetFreq = 700 + 19300 * Math.pow(factor, 2.0);
 
-      this.spatialGain.gain.setTargetAtTime(Math.max(0.05, calculatedGain), t, 0.18);
-      this.spatialFilter.frequency.setTargetAtTime(targetFreq, t, 0.18);
-      this.currentAudibleGain = calculatedGain;
+        this.spatialGain.gain.setTargetAtTime(Math.max(0.05, calculatedGain), t, 0.18);
+        this.spatialFilter.frequency.setTargetAtTime(targetFreq, t, 0.18);
+        this.currentAudibleGain = calculatedGain;
+      }
     }
 
-    // 3. Update spatial chatter loops for local establishments
+    // 3. Keep chatter audio loops strictly paused so they never compete with or drown out the radio
     for (const [emitterId, item] of this.chatterAudios.entries()) {
-      const dist = Math.hypot(playerPos.x - item.emitter.x, playerPos.z - item.emitter.z);
-      const maxChatterDist = 28.0; // Audible within 28 meters of boteco/feira
-      if (dist < maxChatterDist) {
-        const chatterFactor = Math.max(0, 1.0 - (dist / maxChatterDist));
-        const chatterVol = Math.pow(chatterFactor, 1.4) * 0.45;
-        if (!item.isPlaying) {
-          item.audio.play().then(() => { item.isPlaying = true; }).catch(() => {});
-        }
-        item.audio.volume = chatterVol;
-      } else {
-        if (item.isPlaying && item.audio.volume > 0.01) {
-          item.audio.volume = Math.max(0, item.audio.volume - 0.05);
-        } else if (item.isPlaying) {
-          item.audio.pause();
-          item.isPlaying = false;
-        }
+      if (item.isPlaying) {
+        item.audio.pause();
+        item.isPlaying = false;
       }
     }
 
@@ -7515,7 +7484,9 @@ class RadioBroadcast {
 
   start() {
     this.isPlaying = true;
-    this.playNextProgramItem();
+    if (!this.currentTrack) {
+      this.playNextProgramItem();
+    }
   }
 
   stop() {
@@ -7560,9 +7531,9 @@ class RadioBroadcast {
       if (this.fallback) this.fallback.setStation('AUTO');
     }
 
-    // Update spatial mode: AUTO uses city speakers; specific station is direct
+    // Update spatial mode: Keep radio pristine
     if (this.spatial) {
-      this.spatial.setPersonalRadio(stationId !== 'AUTO' && stationId !== 'OFF');
+      this.spatial.setPersonalRadio(stationId !== 'OFF');
     }
 
     this.isPlaying = true;
@@ -7578,11 +7549,17 @@ class RadioBroadcast {
     return this.setStation(nextStation);
   }
 
-  playClassMusic(genre) {
+  playClassMusic(genre, preferredTrackId = null) {
     if (['MPB', 'PAGODE', 'FUNK'].includes(genre)) {
       this.effectiveGenre = genre;
       this.cachedAutoGenre = genre;
-      const classTrack = TRACKS_CATALOGUE.find(t => t.genre === genre);
+      let classTrack = null;
+      if (preferredTrackId) {
+        classTrack = TRACKS_CATALOGUE.find(t => t.id === preferredTrackId);
+      }
+      if (!classTrack) {
+        classTrack = TRACKS_CATALOGUE.find(t => t.genre === genre);
+      }
       if (classTrack) {
         this.currentTrack = classTrack;
         this.isPlaying = true;
@@ -7704,6 +7681,9 @@ class RadioBroadcast {
 
   playAudioFile(src, onEndCallback = null) {
     if (!this.audioElement) return;
+    if (this.fallback && typeof this.fallback.stop === 'function') {
+      this.fallback.stop();
+    }
     this.playbackGeneration++;
     const gen = this.playbackGeneration;
     this.pendingEndedCallback = typeof onEndCallback === 'function'
@@ -7712,10 +7692,16 @@ class RadioBroadcast {
           onEndCallback();
         }
       : null;
+    this.audioElement.pause();
     this.audioElement.src = src;
-    this.audioElement.play().catch(err => {
-      console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
-    });
+    const playPromise = this.audioElement.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        if (err.name !== 'AbortError') {
+          console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
+        }
+      });
+    }
   }
 }
 
@@ -7745,9 +7731,9 @@ class BrazilianMusicEngine {
     this.activeStation = 'AUTO';
     this.effectiveGenre = 'MPB'; // 'MPB' | 'PAGODE' | 'FUNK' | 'OFF'
 
-    // Master music gain node for crossfades
+    // Master music gain node for crossfades (muted by default; only active as offline fallback)
     this.musicGain = this.ctx.createGain();
-    this.musicGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+    this.musicGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
     this.musicGain.connect(this.destination);
 
     // Track-specific gains for smooth crossfades
@@ -7801,6 +7787,9 @@ class BrazilianMusicEngine {
     this.isPlaying = true;
     this.stepIndex = 0;
     this.nextNoteTime = this.ctx.currentTime + 0.05;
+    if (this.musicGain) {
+      this.musicGain.gain.setValueAtTime(0.28, this.ctx.currentTime);
+    }
     this.scheduler = this.scheduler.bind(this);
     this.timerId = setInterval(this.scheduler, 35);
   }
@@ -7810,6 +7799,9 @@ class BrazilianMusicEngine {
     if (this.timerId) {
       clearInterval(this.timerId);
       this.timerId = null;
+    }
+    if (this.musicGain && this.ctx) {
+      this.musicGain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
     }
   }
 
@@ -8380,7 +8372,6 @@ class SoundEngine {
 
       // 4. Radio Broadcast Engine (13 recorded Brazilian tracks, vinhetas, ducking, weather triggers)
       this.radioBroadcast = new RadioBroadcast(this.ctx, this.spatialSystem, this.newsDesk, this.musicEngine);
-      this.radioBroadcast.start();
 
       this.isInitialized = true;
       this.startAmbience();
@@ -8410,34 +8401,34 @@ class SoundEngine {
     return this.isMuted;
   }
 
-  playClassMusic(genre) {
+  playClassMusic(genre, preferredTrackId = null) {
     if (!this.isInitialized) this.init();
-    if (this.radioBroadcast) {
-      this.radioBroadcast.playClassMusic(genre);
-    }
     if (this.musicEngine) {
-      this.musicEngine.fadeToGenre(genre);
+      this.musicEngine.stop();
+    }
+    if (this.radioBroadcast) {
+      this.radioBroadcast.playClassMusic(genre, preferredTrackId);
     }
   }
 
   // Radio Station Controls (MPB, Pagode, Baile Funk, Auto, Off)
   setRadioStation(stationId) {
     if (!this.isInitialized) this.init();
+    if (this.musicEngine) {
+      this.musicEngine.stop();
+    }
     if (this.radioBroadcast) {
       this.radioBroadcast.setStation(stationId);
-    }
-    if (this.musicEngine) {
-      this.musicEngine.setStation(stationId);
     }
   }
 
   cycleRadioStation() {
     if (!this.isInitialized) this.init();
+    if (this.musicEngine) {
+      this.musicEngine.stop();
+    }
     if (this.radioBroadcast) {
       const st = this.radioBroadcast.cycleStation();
-      if (this.musicEngine) {
-        this.musicEngine.setStation(st.id);
-      }
       this.playRadioTuningGlitch();
       return st;
     }
@@ -8448,7 +8439,7 @@ class SoundEngine {
     if (this.radioBroadcast) {
       this.radioBroadcast.updateContext(zoneId, inGameHour);
     }
-    if (this.musicEngine) {
+    if (this.musicEngine && (!this.radioBroadcast || !this.radioBroadcast.isPlaying)) {
       this.musicEngine.updateContext(zoneId, inGameHour);
     }
   }
@@ -27393,14 +27384,14 @@ class GameManager {
       this.sound.init();
       this.sound.playCoin();
 
-      // Trigger class-specific soundtrack: Funk for poor, Pagode for mid-class, MPB for rich
-      const classGenreMap = {
-        CLASSE_DE: 'FUNK',
-        CLASSE_C: 'PAGODE',
-        CLASSE_AB: 'MPB'
+      // Trigger class-specific soundtrack: Rap Boom Bap for Muleke de Quebrada, Pagode for mid-class, MPB for rich
+      const classTrackMap = {
+        CLASSE_DE: { genre: 'FUNK', trackId: 'rap_sp' },
+        CLASSE_C: { genre: 'PAGODE', trackId: 'pagode_romantico' },
+        CLASSE_AB: { genre: 'MPB', trackId: 'bossa_mpb' }
       };
-      const genre = classGenreMap[chosenKey] || 'MPB';
-      this.sound.playClassMusic(genre);
+      const cfg = classTrackMap[chosenKey] || { genre: 'MPB', trackId: 'bossa_mpb' };
+      this.sound.playClassMusic(cfg.genre, cfg.trackId);
 
       // Register radio weather forecast broadcast callback
       if (this.sound.newsDesk) {
