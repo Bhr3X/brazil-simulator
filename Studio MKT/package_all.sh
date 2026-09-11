@@ -21,9 +21,12 @@ cd "$PROJECT_ROOT"
 node build.js
 rm -rf /tmp/brazil_bundle && mkdir -p /tmp/brazil_bundle
 cp "$PROJECT_ROOT/pirituba_standalone.html" /tmp/brazil_bundle/index.html
-cd /tmp/brazil_bundle && zip -q -9 "$BUNDLES_DIR/brazil-simulator.zip" index.html
+if [ -d "$PROJECT_ROOT/media" ]; then
+  cp -R "$PROJECT_ROOT/media" /tmp/brazil_bundle/
+fi
+cd /tmp/brazil_bundle && zip -q -9 -r "$BUNDLES_DIR/brazil-simulator.zip" index.html media
 rm -rf /tmp/brazil_bundle
-echo "    Packaged brazil-simulator.zip"
+echo "    Packaged brazil-simulator.zip with audio media"
 
 echo "==> Packaging 3: Rogue Reborn"
 if [ -f "/Users/bhreno/Desktop/Rogue Reborn - v0.3.0 CrazyGames/GAME_UPLOAD.zip" ]; then

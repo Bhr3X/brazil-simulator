@@ -7052,6 +7052,7 @@ class NewsDesk {
     this.isPlayingNews = false;
     this.newsTickerEl = null;
     this.weatherCallback = null;
+    this.currentAudio = null;
 
     // Available PT-BR voices in browser
     this.ptVoices = [];
@@ -7161,6 +7162,7 @@ class NewsDesk {
 
     if (bonks.length > 0) {
       story = {
+        id: 'bonk',
         title: 'Transtorno na Divisa: Pedestre Bate a Cabeça em Obra',
         cadu1: 'Atenção, ouvintes! Um incidente bizarro acabou de acontecer no limite das obras da Edgar Facó com a Paula Ferreira! Marcão, temos imagens?',
         marcao1: 'Ao vivo, Cadu! Um cidadão desatento tentou atravessar o tapume achando que a rua continuava e bateu a cabeça com tudo na parede pintada em obras! O barulho do impacto ecoou no quarteirão!',
@@ -7169,14 +7171,16 @@ class NewsDesk {
       };
     } else if (kicks.length >= 2) {
       story = {
+        id: 'kick',
         title: 'O Chutador Serial de Latinhas da Edgar Facó',
         cadu1: 'Atenção, ouvintes da Rede Simulação! Um flagrante de desordem pública na Edgar Facó está mobilizando a vizinhança. Marcão, você está ao vivo. O que está acontecendo?',
-        marcao1: `Pois é, Cadu! A coisa tá feia! Um elemento descontrolado foi flagrado desferindo chutes violentos em ${kicks.length} objetos no asfalto, incluindo latinhas de cerveja e a bola da molecada!`,
+        marcao1: 'Pois é, Cadu! A coisa tá feia! Um elemento descontrolado foi flagrado desferindo chutes violentos em objetos no asfalto, incluindo latinhas de cerveja e a bola da molecada!',
         cadu2: 'É um absurdo, Marcão! A que ponto chegamos? A pessoa não tem um lote pra carpir e fica chutando lixo pela avenida! As autoridades já foram acionadas?',
         marcao2: 'O Seu Tião do bar já ameaçou pegar o cabo de vassoura, Cadu! A CET pede que os motoristas diminuam a velocidade para não atropelar a bola dente-de-leite!'
       };
     } else if (gameState && gameState.fome < 25) {
       story = {
+        id: 'fome',
         title: 'Calamidade Nutricional: Bucho Zerado em Pirituba',
         cadu1: 'Urgente! O departamento de saúde comunitária emite alerta de nível vermelho para a região da Paula Ferreira. Marcão, qual é a gravidade da situação?',
         marcao1: 'Gravíssima, Cadu! Um cidadão está perambulando pelo bairro com o bucho em estado de calamidade pública! O estômago do indivíduo está roncando mais alto que a moto dos Correios!',
@@ -7184,16 +7188,17 @@ class NewsDesk {
         marcao2: 'Fontes informam que ele tá guardando as moedas ou simplesmente esqueceu de mastigar, Cadu! Se não comer um pastel nos próximos minutos, vai desmaiar no meio-fio!'
       };
     } else if (gameState && gameState.debt > 0) {
-      const debtReais = (gameState.debt / 100).toFixed(2).replace('.', ',');
       story = {
+        id: 'debt',
         title: 'Crise Financeira: Calote Histórico no Bar do Tião',
         cadu1: 'Economia em frangalhos em Pirituba! O rombo financeiro na praça já preocupa os comerciantes locais. Marcão, você tem os números?',
-        marcao1: `Exatamente, Cadu! Foi detectada uma dívida colossal de R$ ${debtReais} pendurada na caderneta de fiado do Seu Tião! O caloteiro segue foragido pelas esquinas!`,
+        marcao1: 'Exatamente, Cadu! Foi detectada uma dívida colossal pendurada na caderneta de fiado do Seu Tião! O caloteiro segue foragido pelas esquinas de Pirituba!',
         cadu2: 'Inadmissível, Marcão! O Seu Tião trabalha de sol a sol, vendendo cerveja estalando de gelada, pro cidadão tomar fiado e sumir do mapa? Cadê a honra do trabalhador?',
         marcao2: 'O Tião já cortou o fiado de todo o bairro, Cadu! Quem for tomar uma gelada agora, só no dinheiro vivo ou no Pix!'
       };
     } else if (gameState && gameState.perigo >= 50) {
       story = {
+        id: 'perigo',
         title: 'Operação Policial: Tensão nas Vielas da Zona Oeste',
         cadu1: 'Plantão policial! Viaturas da PM estão em patrulhamento ostensivo pelas artérias de Pirituba. Marcão, o cerco está se fechando?',
         marcao1: 'O clima é tenso, Cadu! A polícia identificou um indivíduo com índice de perigo nas alturas! O helicóptero Águia já sobrevoa a ponte da Paula Ferreira!',
@@ -7202,6 +7207,7 @@ class NewsDesk {
       };
     } else if (streetviews.length > 0) {
       story = {
+        id: 'rotina',
         title: 'Fenômeno Paranormal: O Homem que Encarava o Satélite',
         cadu1: 'Mistério sem explicação em Pirituba! Moradores relatam um transe coletivo no cruzamento central. Marcão, você presenciou a cena?',
         marcao1: 'Presenciei, Cadu! Um cidadão simplesmente parou no meio da rua, congelou o corpo e começou a encarar o céu em 360 graus, como se estivesse dentro do Google Street View!',
@@ -7211,6 +7217,7 @@ class NewsDesk {
     } else {
       // General satirical filler news
       story = {
+        id: 'rotina',
         title: 'Flagrante do Cotidiano: Rotina Agitada em Pirituba',
         cadu1: 'Voltamos com as notícias do trânsito e do cotidiano em Pirituba. Marcão, como está a movimentação das calçadas neste momento?',
         marcao1: 'Muita correria, Cadu! O pessoal descendo do trem da CPTM, a feira livre bombando e os cachorros vira-lata caramelo fazendo a ronda habitual na porta do açougue!',
@@ -7244,29 +7251,34 @@ class NewsDesk {
     };
   }
 
-  // Play dialogue sequentially using browser SpeechSynthesis with dual voices
+  // Play dialogue sequentially using pre-rendered ElevenLabs studio audio or Web Speech fallback
   broadcastBreakingNews(gameState, onComplete) {
     if (this.isPlayingNews) return;
     this.isPlayingNews = true;
 
     const { story, weather } = this.generateNewsScript(gameState);
 
-    // Dialogue sequence
+    // Dialogue sequence with pre-rendered clip IDs
     const lines = [
-      { speaker: 'Cadu (Estúdio)', text: story.cadu1, pitch: 0.88, rate: 1.02 },
-      { speaker: 'Marcão (Rua)', text: story.marcao1, pitch: 1.18, rate: 1.10 },
-      { speaker: 'Cadu (Estúdio)', text: story.cadu2, pitch: 0.88, rate: 1.02 },
-      { speaker: 'Marcão (Rua)', text: story.marcao2, pitch: 1.18, rate: 1.10 },
-      { speaker: 'Cadu (Estúdio)', text: 'E agora, Marcão, como fica o tempo nas próximas horas?', pitch: 0.88, rate: 1.04 },
-      { speaker: 'Marcão (Previsão)', text: weather.text, pitch: 1.15, rate: 1.08, isWeatherEnd: true }
+      { speaker: 'Cadu (Estúdio)', text: story.cadu1, pitch: 0.88, rate: 1.02, clipId: `${story.id}_cadu1` },
+      { speaker: 'Marcão (Rua)', text: story.marcao1, pitch: 1.18, rate: 1.10, clipId: `${story.id}_marcao1` },
+      { speaker: 'Cadu (Estúdio)', text: story.cadu2, pitch: 0.88, rate: 1.02, clipId: `${story.id}_cadu2` },
+      { speaker: 'Marcão (Rua)', text: story.marcao2, pitch: 1.18, rate: 1.10, clipId: `${story.id}_marcao2` },
+      { speaker: 'Cadu (Estúdio)', text: 'E agora, Marcão, como fica o tempo nas próximas horas?', pitch: 0.88, rate: 1.04, clipId: 'tempo_pergunta' },
+      { speaker: 'Marcão (Previsão)', text: weather.text, pitch: 1.15, rate: 1.08, isWeatherEnd: true, clipId: `tempo_${weather.mode.toLowerCase()}` }
     ];
 
     let currentIdx = 0;
 
     const playNextLine = () => {
+      if (!this.isPlayingNews) return;
       if (currentIdx >= lines.length) {
         this.hideNewsTicker();
         this.isPlayingNews = false;
+        if (this.currentAudio) {
+          try { this.currentAudio.pause(); } catch (e) {}
+          this.currentAudio = null;
+        }
         // Trigger weather shift in game engine
         if (this.weatherCallback) {
           this.weatherCallback(weather.mode);
@@ -7283,37 +7295,103 @@ class NewsDesk {
         this.sound.playRadioClick();
       }
 
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel(); // Cancel any lingering speech
-        const utterance = new SpeechSynthesisUtterance(item.text);
-        utterance.lang = 'pt-BR';
-        utterance.pitch = item.pitch;
-        utterance.rate = item.rate;
-
-        // Pick specific voice if available
-        if (this.ptVoices.length > 0) {
-          // If Cadu, pick first male/standard voice; if Marcão, pick second or alternate
-          const voiceIdx = item.speaker.includes('Cadu') ? 0 : Math.min(1, this.ptVoices.length - 1);
-          utterance.voice = this.ptVoices[voiceIdx];
+      let advanced = false;
+      let advanceTimer = null;
+      const advance = () => {
+        if (advanced) return;
+        advanced = true;
+        if (advanceTimer) {
+          clearTimeout(advanceTimer);
+          advanceTimer = null;
         }
+        setTimeout(playNextLine, 350);
+      };
 
-        utterance.onend = () => {
-          setTimeout(playNextLine, 350);
+      // Try playing high-fidelity ElevenLabs pre-rendered MP3
+      if (item.clipId && typeof Audio !== 'undefined') {
+        const audioSrc = `media/audio/news/${item.clipId}.mp3`;
+        const audio = new Audio(audioSrc);
+        this.currentAudio = audio;
+        audio.preload = 'auto';
+
+        let audioStarted = false;
+
+        audio.oncanplaythrough = () => {
+          if (audioStarted || !this.isPlayingNews) return;
+          audioStarted = true;
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              // Autoplay policy or file decode error -> fallback
+              this.speakFallback(item, advance);
+            });
+          }
         };
 
-        utterance.onerror = () => {
-          setTimeout(playNextLine, 350);
+        audio.onended = () => {
+          advance();
         };
 
-        window.speechSynthesis.speak(utterance);
+        audio.onerror = () => {
+          if (!audioStarted) {
+            this.speakFallback(item, advance);
+          } else {
+            advance();
+          }
+        };
+
+        // Safety fallback timer if file doesn't load or hangs
+        advanceTimer = setTimeout(() => {
+          if (!audioStarted) {
+            this.speakFallback(item, advance);
+          } else {
+            advance();
+          }
+        }, 18000);
       } else {
-        // Fallback for browsers without speech synthesis: show text on screen for 4s
-        setTimeout(playNextLine, 4000);
+        this.speakFallback(item, advance);
       }
     };
 
     // Begin sequence
     playNextLine();
+  }
+
+  speakFallback(item, callback) {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(item.text);
+        utterance.lang = 'pt-BR';
+        utterance.pitch = item.pitch || 1.0;
+        utterance.rate = item.rate || 1.0;
+
+        if (this.ptVoices && this.ptVoices.length > 0) {
+          const voiceIdx = item.speaker.includes('Cadu') ? 0 : Math.min(1, this.ptVoices.length - 1);
+          utterance.voice = this.ptVoices[voiceIdx];
+        }
+
+        utterance.onend = () => callback();
+        utterance.onerror = () => callback();
+        window.speechSynthesis.speak(utterance);
+        return;
+      } catch (e) {
+        // Ignore and use timer
+      }
+    }
+    setTimeout(callback, 4000);
+  }
+
+  stop() {
+    this.isPlayingNews = false;
+    this.hideNewsTicker();
+    if (this.currentAudio) {
+      try { this.currentAudio.pause(); } catch (e) {}
+      this.currentAudio = null;
+    }
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
   }
 }
 
@@ -7414,6 +7492,9 @@ class RadioBroadcast {
     this.isPlaying = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration++;
+    if (this.newsDesk && this.newsDesk.stop) {
+      this.newsDesk.stop();
+    }
     if (this.audioElement) {
       this.audioElement.pause();
     }
@@ -7425,6 +7506,9 @@ class RadioBroadcast {
     this.pendingEndedCallback = null;
     this.isBroadcastingNews = false;
     this.playbackGeneration++;
+    if (this.newsDesk && this.newsDesk.stop) {
+      this.newsDesk.stop();
+    }
     if (this.duckingGain && this.ctx) {
       this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.05);
     }

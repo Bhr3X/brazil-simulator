@@ -95,6 +95,9 @@ export class RadioBroadcast {
     this.isPlaying = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration++;
+    if (this.newsDesk && this.newsDesk.stop) {
+      this.newsDesk.stop();
+    }
     if (this.audioElement) {
       this.audioElement.pause();
     }
@@ -106,6 +109,9 @@ export class RadioBroadcast {
     this.pendingEndedCallback = null;
     this.isBroadcastingNews = false;
     this.playbackGeneration++;
+    if (this.newsDesk && this.newsDesk.stop) {
+      this.newsDesk.stop();
+    }
     if (this.duckingGain && this.ctx) {
       this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.05);
     }
