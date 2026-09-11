@@ -2498,19 +2498,25 @@ async function runTestSuite(url) {
           return pos;
         };
 
-        const crestY = physics.getGroundHeight(0, -78);
-        const connectorStartReachable = crestY >= 9.0 && crestY <= 10.0;
-        const connectorMidY = physics.getGroundHeight(0, -84, crestY);
+        // Hillside west of the mirante house (x=1±5, z=-73±4.5), south of the connector (z=-78).
+        const hillsideY = physics.getGroundHeight(-7, -77, 9.5);
+        const connectorStartReachable = hillsideY >= 8.5 && hillsideY <= 10.0;
+        const connectorMidY = physics.getGroundHeight(0, -79.5);
         const connectorMeetsCrest = Math.abs(connectorMidY - 9.5) <= 0.2;
-        let walkPos = walkNorth(0, crestY, -78, 0.45, 22);
+        let walkPos = walkNorth(-7, hillsideY, -77, 0.45, 30);
         const connectorReached = walkPos.z <= -86.5 && walkPos.y >= 9.2 && walkPos.y <= 10.2;
 
         const westCrestY = physics.getGroundHeight(-28, -78);
         const eastCrestY = physics.getGroundHeight(40, -78);
+        const westEdgeY = physics.getGroundHeight(-65, -78);
+        const eastEdgeY = physics.getGroundHeight(177, -78);
         const westProbe = walkNorth(-28, Math.max(westCrestY, 9.0), -78, 0.5, 40);
         const eastProbe = walkNorth(40, Math.max(eastCrestY, 9.0), -78, 0.5, 40);
         const farEastProbe = walkNorth(80, 9.5, -78, 0.5, 40);
-        const offCentreClosed = westProbe.z >= -84 && eastProbe.z >= -84 && farEastProbe.z >= -84;
+        const westEdgeProbe = walkNorth(-65, Math.max(westEdgeY, 0.5), -78, 0.5, 40);
+        const eastEdgeProbe = walkNorth(177, Math.max(eastEdgeY, 0.5), -78, 0.5, 40);
+        const offCentreClosed = westProbe.z >= -84 && eastProbe.z >= -84 && farEastProbe.z >= -84
+          && westEdgeProbe.z >= -84 && eastEdgeProbe.z >= -84;
 
         const floorNear = (x, z) => Math.abs(physics.getGroundHeight(x, z, 9.5) - 9.5) <= 0.2;
         const southWestFloor = floorNear(-16, -84);
@@ -2518,8 +2524,8 @@ async function runTestSuite(url) {
         const northMidFloor = floorNear(0, -112.5);
         const northWestFloor = floorNear(-16, -112.5);
         const northEastFloor = floorNear(16, -112.5);
-        const westSideFloor = floorNear(-21, -99);
-        const eastSideFloor = floorNear(21, -99);
+        const westSideFloor = floorNear(-20.3, -99);
+        const eastSideFloor = floorNear(20.3, -99);
         const floorsClosed = southWestFloor && southEastFloor && northMidFloor
           && northWestFloor && northEastFloor && westSideFloor && eastSideFloor;
 
@@ -2585,7 +2591,8 @@ async function runTestSuite(url) {
           pitchGround,
           pitchWalkable,
           connectorStartReachable,
-          crestY,
+          hillsideY,
+          crestY: hillsideY,
           connectorMidY,
           connectorMeetsCrest,
           connectorReached,
@@ -2594,6 +2601,8 @@ async function runTestSuite(url) {
           westProbe: { x: westProbe.x, y: westProbe.y, z: westProbe.z },
           eastProbe: { x: eastProbe.x, y: eastProbe.y, z: eastProbe.z },
           farEastProbe: { x: farEastProbe.x, y: farEastProbe.y, z: farEastProbe.z },
+          westEdgeProbe: { x: westEdgeProbe.x, y: westEdgeProbe.y, z: westEdgeProbe.z },
+          eastEdgeProbe: { x: eastEdgeProbe.x, y: eastEdgeProbe.y, z: eastEdgeProbe.z },
           floorsClosed,
           floorProbes: { southWestFloor, southEastFloor, northMidFloor, northWestFloor, northEastFloor, westSideFloor, eastSideFloor },
           leakedZoneHook,
@@ -2605,7 +2614,7 @@ async function runTestSuite(url) {
     `);
     console.log(`[TEST 31] Carnival plaza and favela campinho:`, carnivalCampinhoTested);
     if (!carnivalCampinhoTested.ok) {
-      throw new Error(`TEST 31 FAILED: carnival plaza and favela campinho must keep off-centre north walls, a crest-height connector, closed floor gaps, no ZoneManager production hooks, and the original zone/geometry contracts. ${JSON.stringify(carnivalCampinhoTested)}`);
+      throw new Error(`TEST 31 FAILED: carnival plaza and favela campinho must seal world-bound north edges, walk a hillside-to-plateau connector, close reachable floor gaps, and keep the original zone/geometry contracts. ${JSON.stringify(carnivalCampinhoTested)}`);
     }
 
     // Check Console Errors

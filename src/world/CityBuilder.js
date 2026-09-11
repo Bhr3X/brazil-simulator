@@ -3890,20 +3890,20 @@ export class CityBuilder {
       new THREE.Vector3(58.0, 10, 0.0),
       'solid'
     );
-    // North crest wings stay near z≈-82; only the campinho corridor x -22..22 opens north.
+    // North crest wings stay near z≈-82 across full world X; only x -22..22 opens north.
     this.physics.addBoxCollider(
-      new THREE.Vector3(-60.0, 0, -88.0),
+      new THREE.Vector3(-70.0, 0, -88.0),
       new THREE.Vector3(-22.0, 15, -82.0),
       'solid'
     );
     this.physics.addBoxCollider(
       new THREE.Vector3(22.0, 0, -88.0),
-      new THREE.Vector3(175.0, 15, -82.0),
+      new THREE.Vector3(180.0, 15, -82.0),
       'solid'
     );
     this.physics.addBoxCollider(
-      new THREE.Vector3(-60.0, 0, -118.0),
-      new THREE.Vector3(175.0, 15, -114.0),
+      new THREE.Vector3(-70.0, 0, -118.0),
+      new THREE.Vector3(180.0, 15, -114.0),
       'solid'
     );
   }
@@ -4895,10 +4895,13 @@ export class CityBuilder {
       'walkable'
     );
 
-    // Closed floor: south hill-to-plateau apron, north plateau-to-boundary, and side shoulders
-    const southApron = new THREE.Mesh(new THREE.BoxGeometry(44, 0.28, 6.2), dirtMat);
-    southApron.position.set(0, 9.36, -84);
-    group.add(southApron);
+    // Closed floor: split south aprons around the connector so tops do not z-fight
+    const southApronW = new THREE.Mesh(new THREE.BoxGeometry(14, 0.28, 6.2), dirtMat);
+    southApronW.position.set(-15, 9.36, -84);
+    group.add(southApronW);
+    const southApronE = new THREE.Mesh(new THREE.BoxGeometry(14, 0.28, 6.2), dirtMat);
+    southApronE.position.set(15, 9.36, -84);
+    group.add(southApronE);
     const northApron = new THREE.Mesh(new THREE.BoxGeometry(44, 0.28, 3.2), dirtMat);
     northApron.position.set(0, 9.36, -112.6);
     group.add(northApron);
