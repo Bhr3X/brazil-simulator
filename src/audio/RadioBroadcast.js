@@ -39,6 +39,22 @@ export const VINHETAS_CATALOGUE = [
   { id: 'transmatrix', title: 'TransMatrix FM', src: 'media/audio/vinhetas/vinheta_transmatrix.mp3' }
 ];
 
+export const CANONICAL_TRACK_ORDER = [
+  'rap_sp',                // 0: CLASSE_DE (Muleke de Quebrada) starting track: Rap Boom Bap
+  'pagode_romantico',      // 1: CLASSE_C (Trabalhador CLT) starting track: Pagode Romântico
+  'bossa_mpb',             // 2: CLASSE_AB (Faria Lima) starting track: Bossa Nova MPB
+  'sertanejo_sofrencia',   // 3: Sertanejo Sofrência
+  'forro_xote',            // 4: Forró Pé de Serra
+  'samba_raiz',            // 5: Samba de Raiz
+  'axe_micareta',          // 6: Axé Micareta
+  'funk_bonde',            // 7: Funk Bonde do Tigrão
+  'brega_romantico',       // 8: Brega Romântico
+  'manguebeat',            // 9: Manguebeat Maracatu
+  'rock_80s',              // 10: Rock Nacional 80s
+  'choro',                 // 11: Chorinho Tradicional
+  'samba_carnaval'         // 12: Samba Enredo Carnaval
+];
+
 export class RadioBroadcast {
   constructor(ctx, spatialSystem, newsDesk, proceduralFallback) {
     this.ctx = ctx;
@@ -71,8 +87,10 @@ export class RadioBroadcast {
 
     // Program rotation state
     this.currentTrack = null;
+    this.currentStreamIndex = 0;
+    this.vinhetaIndex = 0;
     this.songsPlayedInBlock = 0;
-    this.songsPerNewsBlock = 2; // News after every 2 songs
+    this.songsPerNewsBlock = 1; // Intermission (vinheta + news & banter) after each song
     this.isBroadcastingNews = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration = 0;
@@ -81,7 +99,7 @@ export class RadioBroadcast {
 
     this.audioElement.addEventListener('error', (e) => {
       console.warn('[RadioBroadcast] Track load error, using procedural fallback:', e);
-      if (this.fallback) this.fallback.start();
+      if (this.fallback && !this.isBroadcastingNews) this.fallback.start();
       this.handleAudioEnded();
     });
   }
@@ -135,10 +153,13 @@ export class RadioBroadcast {
       if (this.fallback) this.fallback.setStation('AUTO');
     }
 
-    // Update spatial mode: Keep radio pristine
+    // Update spatial mode: in AUTO mode, use 3D city projection nodes; in manual dials, use personal radio
     if (this.spatial) {
-      this.spatial.setPersonalRadio(stationId !== 'OFF');
+      this.spatial.setPersonalRadio(stationId !== 'AUTO' && stationId !== 'OFF');
     }
+
+    this.songsPlayedInBlock = 0;
+    this.songsPerNewsBlock = 1;
 
     this.isPlaying = true;
     this.playNextProgramItem();
@@ -157,16 +178,27 @@ export class RadioBroadcast {
     if (['MPB', 'PAGODE', 'FUNK'].includes(genre)) {
       this.effectiveGenre = genre;
       this.cachedAutoGenre = genre;
-      let classTrack = null;
+      let trackIndex = -1;
       if (preferredTrackId) {
-        classTrack = TRACKS_CATALOGUE.find(t => t.id === preferredTrackId);
+        trackIndex = CANONICAL_TRACK_ORDER.indexOf(preferredTrackId);
       }
-      if (!classTrack) {
-        classTrack = TRACKS_CATALOGUE.find(t => t.genre === genre);
+      if (trackIndex === -1) {
+        trackIndex = CANONICAL_TRACK_ORDER.findIndex(id => {
+          const t = TRACKS_CATALOGUE.find(item => item.id === id);
+          return t && t.genre === genre;
+        });
       }
+      if (trackIndex !== -1) {
+        this.currentStreamIndex = trackIndex;
+      }
+      const classTrack = TRACKS_CATALOGUE.find(t => t.id === CANONICAL_TRACK_ORDER[this.currentStreamIndex]);
       if (classTrack) {
         this.currentTrack = classTrack;
         this.isPlaying = true;
+        this.isBroadcastingNews = false;
+        // Make sure after this first music, an intermission (news & banter) is guaranteed to play!
+        this.songsPlayedInBlock = 0;
+        this.songsPerNewsBlock = 1;
         this.playAudioFile(classTrack.src);
       }
     }
@@ -201,6 +233,7 @@ export class RadioBroadcast {
   }
 
   onSongEnded() {
+    if (this.isBroadcastingNews) return;
     this.songsPlayedInBlock++;
     if (this.songsPlayedInBlock >= this.songsPerNewsBlock) {
       this.songsPlayedInBlock = 0;
@@ -221,17 +254,19 @@ export class RadioBroadcast {
     this.onSongEnded();
   }
 
-  // Intermission: Vinheta -> News & Weather -> Return Vinheta -> Next Song
+  // Intermission: Vinheta -> News & Weather -> Next Song
   startRadioIntermission() {
     if (this.isBroadcastingNews) return;
     this.isBroadcastingNews = true;
 
-    // Duck volume to 12%
-    const t = this.ctx.currentTime;
-    this.duckingGain.gain.setTargetAtTime(0.12, t, 0.5);
+    // Full volume for radio vinheta and speech
+    if (this.duckingGain && this.ctx) {
+      this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.1);
+    }
 
     // 1. Play Station Vinheta
-    const vinheta = VINHETAS_CATALOGUE[Math.floor(Math.random() * VINHETAS_CATALOGUE.length)];
+    const vinheta = VINHETAS_CATALOGUE[this.vinhetaIndex % VINHETAS_CATALOGUE.length];
+    this.vinhetaIndex++;
     this.playAudioFile(vinheta.src, () => {
       if (!this.isPlaying || this.activeStation === 'OFF') {
         this.isBroadcastingNews = false;
@@ -243,7 +278,9 @@ export class RadioBroadcast {
           this.isBroadcastingNews = false;
           return;
         }
-        this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.8);
+        if (this.duckingGain && this.ctx) {
+          this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.2);
+        }
         this.isBroadcastingNews = false;
         this.playNextSong();
       };
@@ -261,26 +298,25 @@ export class RadioBroadcast {
   }
 
   playNextSong() {
-    if (!this.isPlaying || this.activeStation === 'OFF') return;
+    if (!this.isPlaying || this.activeStation === 'OFF' || this.isBroadcastingNews) return;
 
-    let pool = TRACKS_CATALOGUE;
-    if (this.activeStation !== 'AUTO' && this.activeStation !== 'TODAS') {
-      pool = TRACKS_CATALOGUE.filter(tr => tr.genre === this.activeStation);
+    if (this.activeStation === 'AUTO' || !this.activeStation) {
+      // Advance cyclically in canonical rolling stream
+      this.currentStreamIndex = (this.currentStreamIndex + 1) % CANONICAL_TRACK_ORDER.length;
+      const nextId = CANONICAL_TRACK_ORDER[this.currentStreamIndex];
+      const pick = TRACKS_CATALOGUE.find(tr => tr.id === nextId) || TRACKS_CATALOGUE[0];
+      this.currentTrack = pick;
+      this.playAudioFile(pick.src);
+    } else {
+      // Manual dial station (MPB, PAGODE, FUNK): cycle within station's genre
+      let pool = TRACKS_CATALOGUE.filter(tr => tr.genre === this.activeStation);
       if (pool.length === 0) pool = TRACKS_CATALOGUE;
-    } else if (this.activeStation === 'AUTO') {
-      // Pick based on zone / time-of-day genre
-      const matching = TRACKS_CATALOGUE.filter(tr => tr.genre === this.effectiveGenre);
-      if (matching.length > 0) pool = matching;
+      let pick = pool.find(tr => tr.id !== this.currentTrack?.id) || pool[0];
+      this.currentTrack = pick;
+      const idx = CANONICAL_TRACK_ORDER.indexOf(pick.id);
+      if (idx !== -1) this.currentStreamIndex = idx;
+      this.playAudioFile(pick.src);
     }
-
-    // Pick a random track (avoid repeating immediate last track)
-    let pick = pool[Math.floor(Math.random() * pool.length)];
-    if (pool.length > 1 && this.currentTrack && pick.id === this.currentTrack.id) {
-      pick = pool.find(tr => tr.id !== this.currentTrack.id) || pick;
-    }
-
-    this.currentTrack = pick;
-    this.playAudioFile(pick.src);
   }
 
   playAudioFile(src, onEndCallback = null) {
@@ -311,3 +347,4 @@ export class RadioBroadcast {
 
 RadioBroadcast.TRACKS_CATALOGUE = TRACKS_CATALOGUE;
 RadioBroadcast.VINHETAS_CATALOGUE = VINHETAS_CATALOGUE;
+RadioBroadcast.CANONICAL_TRACK_ORDER = CANONICAL_TRACK_ORDER;

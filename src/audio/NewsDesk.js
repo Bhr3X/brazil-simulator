@@ -271,11 +271,22 @@ export class NewsDesk {
           clearTimeout(advanceTimer);
           advanceTimer = null;
         }
-        setTimeout(playNextLine, 350);
+        setTimeout(playNextLine, 220);
       };
 
-      // Try playing high-fidelity ElevenLabs pre-rendered MP3
-      if (item.clipId && typeof Audio !== 'undefined') {
+      // Play through RadioBroadcast's authoritative single audio pipeline to guarantee 0 audio overlap
+      const radio = this.sound && this.sound.radioBroadcast;
+      if (item.clipId && radio && typeof radio.playAudioFile === 'function') {
+        const audioSrc = `media/audio/news/${item.clipId}.mp3`;
+        radio.playAudioFile(audioSrc, advance);
+
+        // Safety fallback timer if file doesn't load or decode
+        advanceTimer = setTimeout(() => {
+          if (!advanced) {
+            this.speakFallback(item, advance);
+          }
+        }, 15000);
+      } else if (item.clipId && typeof Audio !== 'undefined') {
         const audioSrc = `media/audio/news/${item.clipId}.mp3`;
         const audio = new Audio(audioSrc);
         this.currentAudio = audio;
@@ -289,7 +300,6 @@ export class NewsDesk {
           const playPromise = audio.play();
           if (playPromise !== undefined) {
             playPromise.catch(() => {
-              // Autoplay policy or file decode error -> fallback
               this.speakFallback(item, advance);
             });
           }
@@ -307,14 +317,13 @@ export class NewsDesk {
           }
         };
 
-        // Safety fallback timer if file doesn't load or hangs
         advanceTimer = setTimeout(() => {
           if (!audioStarted) {
             this.speakFallback(item, advance);
           } else {
             advance();
           }
-        }, 18000);
+        }, 15000);
       } else {
         this.speakFallback(item, advance);
       }

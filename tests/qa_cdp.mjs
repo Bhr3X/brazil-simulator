@@ -4260,6 +4260,129 @@ async function runTestSuite(url) {
       throw new Error(`TEST 37 FAILED: Av. Ministro Petrônio Portela Extension & 3D Establishment NPCs failed. ${JSON.stringify(petronioAndNpcTested)}`);
     }
 
+    // TEST 38: Single Rolling Radio Stream, Class Offsets, Intermission Guarantee & 23 Spatial Projection Nodes
+    const radioArchitectureTested = await evaluate(`
+      (() => {
+        const sound = window.app && window.app.sound;
+        const radio = sound && sound.radioBroadcast;
+        const spatial = sound && sound.spatialSystem;
+        const news = sound && sound.newsDesk;
+        if (!sound || !radio || !spatial || !news) {
+          return { ok: false, reason: 'sound, radio, spatial or news missing' };
+        }
+
+        const canonicalOrder = radio.constructor.CANONICAL_TRACK_ORDER;
+        if (!Array.isArray(canonicalOrder) || canonicalOrder.length !== 13) {
+          return { ok: false, reason: 'CANONICAL_TRACK_ORDER must expose 13 tracks', count: canonicalOrder && canonicalOrder.length };
+        }
+
+        const classDEOffset = canonicalOrder.indexOf('rap_sp');
+        const classCOffset = canonicalOrder.indexOf('pagode_romantico');
+        const classABOffset = canonicalOrder.indexOf('bossa_mpb');
+        if (classDEOffset !== 0 || classCOffset !== 1 || classABOffset !== 2) {
+          return { ok: false, reason: 'Class track offsets must be 0 (rap_sp), 1 (pagode_romantico), 2 (bossa_mpb)', classDEOffset, classCOffset, classABOffset };
+        }
+
+        // Test class selection sets correct track & stream index
+        sound.playClassMusic('FUNK', 'rap_sp');
+        const deTrack = radio.currentTrack ? radio.currentTrack.id : null;
+        const deIndex = radio.currentStreamIndex;
+
+        sound.playClassMusic('PAGODE', 'pagode_romantico');
+        const cTrack = radio.currentTrack ? radio.currentTrack.id : null;
+        const cIndex = radio.currentStreamIndex;
+
+        sound.playClassMusic('MPB', 'bossa_mpb');
+        const abTrack = radio.currentTrack ? radio.currentTrack.id : null;
+        const abIndex = radio.currentStreamIndex;
+
+        // Reset to Muleke de Quebrada (CLASSE_DE) for stream roll test
+        sound.playClassMusic('FUNK', 'rap_sp');
+        const openingTrackOk = radio.currentTrack && radio.currentTrack.id === 'rap_sp' && radio.songsPlayedInBlock === 0 && radio.songsPerNewsBlock === 1;
+
+        // Test post-first-song intermission trigger
+        const origIntermission = radio.startRadioIntermission.bind(radio);
+        let intermissionFired = false;
+        radio.startRadioIntermission = () => { intermissionFired = true; origIntermission(); };
+
+        // Simulate song end
+        radio.audioElement.dispatchEvent(new Event('ended'));
+        const intermissionTriggered = intermissionFired && radio.isBroadcastingNews === true;
+        radio.startRadioIntermission = origIntermission;
+
+        // Simulate vinheta ended
+        let newsReceivedCallback = false;
+        const origBroadcast = news.broadcastBreakingNews.bind(news);
+        news.broadcastBreakingNews = (state, cb) => {
+          newsReceivedCallback = typeof cb === 'function';
+          if (typeof cb === 'function') cb();
+        };
+
+        radio.audioElement.dispatchEvent(new Event('ended'));
+        news.broadcastBreakingNews = origBroadcast;
+
+        // After news completion, stream must have advanced to index 1 (pagode_romantico)
+        const advancedTrackId = radio.currentTrack ? radio.currentTrack.id : null;
+        const advancedStreamIndex = radio.currentStreamIndex;
+
+        // Test 23 spatial sound nodes
+        const emitterCount = spatial.emitters.length;
+        const hasTiao = spatial.emitters.some(e => e.id === 'BAR_DO_TIAO');
+        const hasAdega = spatial.emitters.some(e => e.id === 'ADEGA_DO_ZE');
+        const hasPadaria = spatial.emitters.some(e => e.id === 'PADARIA_ESTRELA');
+        const hasPosto = spatial.emitters.some(e => e.id === 'POSTO_PIRITUBA');
+        const hasIgreja = spatial.emitters.some(e => e.id === 'IGREJA_DO_MORRO');
+        const hasWellington = spatial.emitters.some(e => e.id === 'COLEGIO_WELLINGTON');
+        const hasMercado = spatial.emitters.some(e => e.id === 'MERCADO_PYRITUBA');
+        const hasPicui = spatial.emitters.some(e => e.id === 'AMIGOS_DO_PICUI');
+        const hasFarmacia = spatial.emitters.some(e => e.id === 'FARMACIA_PETRONIO');
+        const hasSobradoSul = spatial.emitters.some(e => e.id === 'SOBRADOS_PETRONIO_SUL');
+
+        // Test distance attenuation near Picuí (X=160, Z=318)
+        spatial.setPersonalRadio(false);
+        spatial.update({ x: 160.0, y: 1.2, z: 318.0 });
+        const picuiGain = Number(spatial.currentAudibleGain ?? spatial.spatialGain.gain.value);
+        const picuiFreq = Number(spatial.currentAudibleFreq ?? spatial.spatialFilter.frequency.value);
+
+        // Test distance attenuation out in the open street (Z=0, X=0)
+        spatial.update({ x: 0.0, y: 1.2, z: 0.0 });
+        const streetGain = Number(spatial.currentAudibleGain ?? spatial.spatialGain.gain.value);
+        const streetFreq = Number(spatial.currentAudibleFreq ?? spatial.spatialFilter.frequency.value);
+
+        const ok = deTrack === 'rap_sp' && deIndex === 0
+          && cTrack === 'pagode_romantico' && cIndex === 1
+          && abTrack === 'bossa_mpb' && abIndex === 2
+          && openingTrackOk
+          && intermissionTriggered
+          && newsReceivedCallback
+          && advancedTrackId === 'pagode_romantico'
+          && advancedStreamIndex === 1
+          && emitterCount === 23
+          && hasTiao && hasAdega && hasPadaria && hasPosto && hasIgreja && hasWellington && hasMercado && hasPicui && hasFarmacia && hasSobradoSul
+          && picuiGain >= 0.90 && picuiFreq >= 18000
+          && streetGain >= 0.20 && streetFreq >= 2000;
+
+        return {
+          ok,
+          deTrack, deIndex,
+          cTrack, cIndex,
+          abTrack, abIndex,
+          openingTrackOk,
+          intermissionTriggered,
+          newsReceivedCallback,
+          advancedTrackId,
+          advancedStreamIndex,
+          emitterCount,
+          picuiGain, picuiFreq,
+          streetGain, streetFreq
+        };
+      })()
+    `);
+    console.log(`[TEST 38] Single Rolling Radio Stream & 23 Spatial Projection Nodes:`, radioArchitectureTested);
+    if (!radioArchitectureTested.ok) {
+      throw new Error(`TEST 38 FAILED: Single Rolling Radio Stream & 23 Spatial Projection Nodes failed. ${JSON.stringify(radioArchitectureTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

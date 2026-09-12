@@ -7034,7 +7034,7 @@ const CITY_EMITTERS = [
     name: 'Bar do Tião (Radinho do Balcão)',
     x: 12.0,
     y: 1.2,
-    z: 42.0,
+    z: 41.5,
     refDist: 4.5,
     maxDist: 42.0,
     preferredGenre: 'PAGODE',
@@ -7045,32 +7045,32 @@ const CITY_EMITTERS = [
     name: 'Adega do Zé (Caixa da Calçada)',
     x: -14.0,
     y: 1.2,
-    z: 42.0,
+    z: 37.8,
     refDist: 4.0,
     maxDist: 36.0,
     preferredGenre: 'SERTANEJO',
     ambienceFile: 'media/audio/ambience/papo_calcada.mp3'
   },
   {
-    id: 'BAILE_LAJE',
-    name: 'Baile da Laje (Paredão de Som)',
-    x: -15.0,
-    y: 7.2,
-    z: -78.0,
-    refDist: 8.0,
-    maxDist: 70.0,
-    preferredGenre: 'FUNK',
-    ambienceFile: null
-  },
-  {
     id: 'PADARIA_ESTRELA',
     name: 'Padaria Estrela (Som Ambiente)',
     x: 32.0,
     y: 1.2,
-    z: 41.0,
+    z: 37.8,
     refDist: 4.0,
-    maxDist: 35.0,
+    maxDist: 36.0,
     preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'POSTO_PIRITUBA',
+    name: 'Posto Pirituba 24h (Rádio da Conveniência)',
+    x: -42.0,
+    y: 1.2,
+    z: 41.0,
+    refDist: 5.0,
+    maxDist: 45.0,
+    preferredGenre: 'ROCK',
     ambienceFile: null
   },
   {
@@ -7083,6 +7083,204 @@ const CITY_EMITTERS = [
     maxDist: 46.0,
     preferredGenre: 'ROCK',
     ambienceFile: 'media/audio/ambience/feira_ambulante.mp3'
+  },
+  {
+    id: 'BANCA_JORNAL',
+    name: 'Banca do Seu Mário (Radinho de Pilha)',
+    x: 7.5,
+    y: 1.2,
+    z: 35.8,
+    refDist: 3.5,
+    maxDist: 32.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'BAILE_LAJE',
+    name: 'Baile da Laje no Escadão (Paredão de Som)',
+    x: 0.0,
+    y: 8.4,
+    z: -66.0,
+    refDist: 8.0,
+    maxDist: 70.0,
+    preferredGenre: 'FUNK',
+    ambienceFile: null
+  },
+  {
+    id: 'CAMPINHO_FAVELA',
+    name: 'Campinho da Favela (Radinho da Roda de Samba)',
+    x: 0.0,
+    y: 9.5,
+    z: -99.0,
+    refDist: 6.0,
+    maxDist: 55.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'BAR_FRANGO',
+    name: 'O Lendário Bar Frangó (Som do Casarão)',
+    x: 20.5,
+    y: 9.6,
+    z: 183.0,
+    refDist: 6.0,
+    maxDist: 55.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'BOTECO_SETE_BARRAS',
+    name: 'Boteco das 7 Barras (Caixa da Calçada)',
+    x: 18.0,
+    y: 1.2,
+    z: 68.0,
+    refDist: 4.5,
+    maxDist: 40.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'CASA_DO_NORTE',
+    name: 'Casa do Norte Asa Branca (Rádio do Balcão)',
+    x: -27.0,
+    y: 1.2,
+    z: 38.0,
+    refDist: 4.0,
+    maxDist: 36.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'PASTELARIA_BETO',
+    name: 'Pastelaria do Beto (Caixinha de Som)',
+    x: 74.5,
+    y: 1.2,
+    z: 38.0,
+    refDist: 4.0,
+    maxDist: 38.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'ESCOLA_LOURENCO',
+    name: 'E.E. Prof. Lourenço Filho (Som da Portaria)',
+    x: 131.5,
+    y: 1.2,
+    z: 74.0,
+    refDist: 5.0,
+    maxDist: 45.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'PARQUE_PETRONIO',
+    name: 'Parque Linear Petrônio Portela (Radinho da Pipoca)',
+    x: 160.5,
+    y: 1.2,
+    z: 72.0,
+    refDist: 5.0,
+    maxDist: 48.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'ESPETINHO_PETRONIO',
+    name: 'Bar & Espetinho da Petrônio (Caixa da Calçada)',
+    x: 129.8,
+    y: 1.2,
+    z: 125.0,
+    refDist: 4.5,
+    maxDist: 42.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'PAPELARIA_BAZAR',
+    name: 'Autoescola & Papelaria (Rádio do Uno)',
+    x: 159.0,
+    y: 1.2,
+    z: 145.0,
+    refDist: 4.5,
+    maxDist: 42.0,
+    preferredGenre: 'ROCK',
+    ambienceFile: null
+  },
+  {
+    id: 'IGREJA_DO_MORRO',
+    name: 'Igrejinha no Morro (Rádio da Sacristia)',
+    x: 176.0,
+    y: 4.5,
+    z: 205.0,
+    refDist: 5.5,
+    maxDist: 50.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'COLEGIO_WELLINGTON',
+    name: 'Colégio Wellington (Som da Cantina)',
+    x: 160.0,
+    y: 1.2,
+    z: 248.0,
+    refDist: 5.5,
+    maxDist: 48.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'MERCADO_PYRITUBA',
+    name: 'Mercado Municipal de Pyrituba (Rádio dos Pastéis)',
+    x: 160.0,
+    y: 1.2,
+    z: 285.0,
+    refDist: 5.5,
+    maxDist: 50.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'AMIGOS_DO_PICUI',
+    name: 'Restaurante Amigos do Picuí (Som da Varanda)',
+    x: 160.0,
+    y: 1.2,
+    z: 318.0,
+    refDist: 5.5,
+    maxDist: 50.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'FARMACIA_PETRONIO',
+    name: 'Drogaria & Farmácia Petrônio (Som Ambiente)',
+    x: 131.0,
+    y: 1.2,
+    z: 218.0,
+    refDist: 4.5,
+    maxDist: 42.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'SOBRADOS_PAULA_FERREIRA',
+    name: 'Sobrado Residencial (Janela do 1º Andar)',
+    x: -10.0,
+    y: 2.5,
+    z: 0.0,
+    refDist: 4.0,
+    maxDist: 38.0,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'SOBRADOS_PETRONIO_SUL',
+    name: 'Sobrado Comercial Sul (Rádio da Oficina)',
+    x: 131.0,
+    y: 2.5,
+    z: 285.0,
+    refDist: 4.5,
+    maxDist: 42.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
   }
 ];
 
@@ -7110,8 +7308,9 @@ class SpatialSoundSystem {
     this.initChatterStreams();
 
     this.currentAudibleGain = 1.0;
+    this.currentAudibleFreq = 20000;
     this.nearestEmitter = null;
-    this.isPersonalRadio = true; // When true (personal radio), radio station is pristine (full volume & 20kHz bandwidth)
+    this.isPersonalRadio = false; // When false, radio broadcast is projected by 3D nodes across Pirituba
   }
 
   // Pre-load ambient audio loops for locations (disabled to ensure pristine radio broadcast)
@@ -7147,43 +7346,51 @@ class SpatialSoundSystem {
       const t = this.ctx.currentTime;
       this.spatialGain.gain.setTargetAtTime(1.0, t, 0.2);
       this.spatialFilter.frequency.setTargetAtTime(20000, t, 0.2);
+      this.spatialGain.gain.value = 1.0;
+      this.spatialFilter.frequency.value = 20000;
       this.currentAudibleGain = 1.0;
+      this.currentAudibleFreq = 20000;
     } else {
+      // 2. Find closest emitter to player among all 23 citywide nodes
+      let closest = null;
+      let minDist = Infinity;
 
-    // 2. Find closest emitter to player
-    let closest = null;
-    let minDist = Infinity;
-
-    for (const em of this.emitters) {
-      const dist = Math.hypot(playerPos.x - em.x, playerPos.z - em.z);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = em;
+      for (const em of this.emitters) {
+        const dist = Math.hypot(playerPos.x - em.x, playerPos.z - em.z);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = em;
+        }
       }
-    }
 
-    this.nearestEmitter = closest;
-    const t = this.ctx.currentTime;
+      this.nearestEmitter = closest;
+      const t = this.ctx.currentTime;
 
-    if (!closest || minDist > closest.maxDist) {
-      // Out of range of all emitters: faint background murmur (5% volume, muffled)
-      const ambientFloor = 0.06;
-      this.spatialGain.gain.setTargetAtTime(ambientFloor, t, 0.35);
-      this.spatialFilter.frequency.setTargetAtTime(750, t, 0.35);
-      this.currentAudibleGain = ambientFloor;
-    } else {
-      // Smooth distance attenuation (inverse-power curve)
-      const range = closest.maxDist - closest.refDist;
-      const distDelta = Math.max(0, minDist - closest.refDist);
-      const factor = Math.max(0.0, 1.0 - (distDelta / range));
-      // Organic curve: volume swells quickly as you get close
-      const calculatedGain = Math.pow(factor, 1.6);
-      // Frequency opens up: from 700 Hz (distant muffled thud) up to 20,000 Hz (clear acoustic highs)
-      const targetFreq = 700 + 19300 * Math.pow(factor, 2.0);
+      if (!closest || minDist > closest.maxDist) {
+        // Out of range of all emitters: warm distant neighborhood echo
+        const ambientFloor = 0.22;
+        this.spatialGain.gain.setTargetAtTime(ambientFloor, t, 0.3);
+        this.spatialFilter.frequency.setTargetAtTime(2200, t, 0.3);
+        this.spatialGain.gain.value = ambientFloor;
+        this.spatialFilter.frequency.value = 2200;
+        this.currentAudibleGain = ambientFloor;
+        this.currentAudibleFreq = 2200;
+      } else {
+        // Smooth distance attenuation (inverse-power curve)
+        const range = closest.maxDist - closest.refDist;
+        const distDelta = Math.max(0, minDist - closest.refDist);
+        const factor = Math.max(0.0, 1.0 - (distDelta / range));
+        // Organic curve: volume swells smoothly as you approach (minimum 0.25 on open street, 1.0 near node)
+        const calculatedGain = 0.25 + 0.75 * Math.pow(factor, 1.4);
+        // Frequency opens up: from 2,200 Hz (warm muffled street sound) up to 20,000 Hz (crisp, pristine near node)
+        const targetFreq = 2200 + 17800 * Math.pow(factor, 1.5);
 
-        this.spatialGain.gain.setTargetAtTime(Math.max(0.05, calculatedGain), t, 0.18);
+        this.spatialGain.gain.setTargetAtTime(calculatedGain, t, 0.18);
         this.spatialFilter.frequency.setTargetAtTime(targetFreq, t, 0.18);
+        this.spatialGain.gain.value = calculatedGain;
+        this.spatialFilter.frequency.value = targetFreq;
         this.currentAudibleGain = calculatedGain;
+        this.currentAudibleFreq = targetFreq;
       }
     }
 
@@ -7501,11 +7708,22 @@ class NewsDesk {
           clearTimeout(advanceTimer);
           advanceTimer = null;
         }
-        setTimeout(playNextLine, 350);
+        setTimeout(playNextLine, 220);
       };
 
-      // Try playing high-fidelity ElevenLabs pre-rendered MP3
-      if (item.clipId && typeof Audio !== 'undefined') {
+      // Play through RadioBroadcast's authoritative single audio pipeline to guarantee 0 audio overlap
+      const radio = this.sound && this.sound.radioBroadcast;
+      if (item.clipId && radio && typeof radio.playAudioFile === 'function') {
+        const audioSrc = `media/audio/news/${item.clipId}.mp3`;
+        radio.playAudioFile(audioSrc, advance);
+
+        // Safety fallback timer if file doesn't load or decode
+        advanceTimer = setTimeout(() => {
+          if (!advanced) {
+            this.speakFallback(item, advance);
+          }
+        }, 15000);
+      } else if (item.clipId && typeof Audio !== 'undefined') {
         const audioSrc = `media/audio/news/${item.clipId}.mp3`;
         const audio = new Audio(audioSrc);
         this.currentAudio = audio;
@@ -7519,7 +7737,6 @@ class NewsDesk {
           const playPromise = audio.play();
           if (playPromise !== undefined) {
             playPromise.catch(() => {
-              // Autoplay policy or file decode error -> fallback
               this.speakFallback(item, advance);
             });
           }
@@ -7537,14 +7754,13 @@ class NewsDesk {
           }
         };
 
-        // Safety fallback timer if file doesn't load or hangs
         advanceTimer = setTimeout(() => {
           if (!audioStarted) {
             this.speakFallback(item, advance);
           } else {
             advance();
           }
-        }, 18000);
+        }, 15000);
       } else {
         this.speakFallback(item, advance);
       }
@@ -7633,6 +7849,22 @@ const VINHETAS_CATALOGUE = [
   { id: 'transmatrix', title: 'TransMatrix FM', src: 'media/audio/vinhetas/vinheta_transmatrix.mp3' }
 ];
 
+const CANONICAL_TRACK_ORDER = [
+  'rap_sp',                // 0: CLASSE_DE (Muleke de Quebrada) starting track: Rap Boom Bap
+  'pagode_romantico',      // 1: CLASSE_C (Trabalhador CLT) starting track: Pagode Romântico
+  'bossa_mpb',             // 2: CLASSE_AB (Faria Lima) starting track: Bossa Nova MPB
+  'sertanejo_sofrencia',   // 3: Sertanejo Sofrência
+  'forro_xote',            // 4: Forró Pé de Serra
+  'samba_raiz',            // 5: Samba de Raiz
+  'axe_micareta',          // 6: Axé Micareta
+  'funk_bonde',            // 7: Funk Bonde do Tigrão
+  'brega_romantico',       // 8: Brega Romântico
+  'manguebeat',            // 9: Manguebeat Maracatu
+  'rock_80s',              // 10: Rock Nacional 80s
+  'choro',                 // 11: Chorinho Tradicional
+  'samba_carnaval'         // 12: Samba Enredo Carnaval
+];
+
 class RadioBroadcast {
   constructor(ctx, spatialSystem, newsDesk, proceduralFallback) {
     this.ctx = ctx;
@@ -7665,8 +7897,10 @@ class RadioBroadcast {
 
     // Program rotation state
     this.currentTrack = null;
+    this.currentStreamIndex = 0;
+    this.vinhetaIndex = 0;
     this.songsPlayedInBlock = 0;
-    this.songsPerNewsBlock = 2; // News after every 2 songs
+    this.songsPerNewsBlock = 1; // Intermission (vinheta + news & banter) after each song
     this.isBroadcastingNews = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration = 0;
@@ -7675,7 +7909,7 @@ class RadioBroadcast {
 
     this.audioElement.addEventListener('error', (e) => {
       console.warn('[RadioBroadcast] Track load error, using procedural fallback:', e);
-      if (this.fallback) this.fallback.start();
+      if (this.fallback && !this.isBroadcastingNews) this.fallback.start();
       this.handleAudioEnded();
     });
   }
@@ -7729,10 +7963,13 @@ class RadioBroadcast {
       if (this.fallback) this.fallback.setStation('AUTO');
     }
 
-    // Update spatial mode: Keep radio pristine
+    // Update spatial mode: in AUTO mode, use 3D city projection nodes; in manual dials, use personal radio
     if (this.spatial) {
-      this.spatial.setPersonalRadio(stationId !== 'OFF');
+      this.spatial.setPersonalRadio(stationId !== 'AUTO' && stationId !== 'OFF');
     }
+
+    this.songsPlayedInBlock = 0;
+    this.songsPerNewsBlock = 1;
 
     this.isPlaying = true;
     this.playNextProgramItem();
@@ -7751,16 +7988,27 @@ class RadioBroadcast {
     if (['MPB', 'PAGODE', 'FUNK'].includes(genre)) {
       this.effectiveGenre = genre;
       this.cachedAutoGenre = genre;
-      let classTrack = null;
+      let trackIndex = -1;
       if (preferredTrackId) {
-        classTrack = TRACKS_CATALOGUE.find(t => t.id === preferredTrackId);
+        trackIndex = CANONICAL_TRACK_ORDER.indexOf(preferredTrackId);
       }
-      if (!classTrack) {
-        classTrack = TRACKS_CATALOGUE.find(t => t.genre === genre);
+      if (trackIndex === -1) {
+        trackIndex = CANONICAL_TRACK_ORDER.findIndex(id => {
+          const t = TRACKS_CATALOGUE.find(item => item.id === id);
+          return t && t.genre === genre;
+        });
       }
+      if (trackIndex !== -1) {
+        this.currentStreamIndex = trackIndex;
+      }
+      const classTrack = TRACKS_CATALOGUE.find(t => t.id === CANONICAL_TRACK_ORDER[this.currentStreamIndex]);
       if (classTrack) {
         this.currentTrack = classTrack;
         this.isPlaying = true;
+        this.isBroadcastingNews = false;
+        // Make sure after this first music, an intermission (news & banter) is guaranteed to play!
+        this.songsPlayedInBlock = 0;
+        this.songsPerNewsBlock = 1;
         this.playAudioFile(classTrack.src);
       }
     }
@@ -7795,6 +8043,7 @@ class RadioBroadcast {
   }
 
   onSongEnded() {
+    if (this.isBroadcastingNews) return;
     this.songsPlayedInBlock++;
     if (this.songsPlayedInBlock >= this.songsPerNewsBlock) {
       this.songsPlayedInBlock = 0;
@@ -7815,17 +8064,19 @@ class RadioBroadcast {
     this.onSongEnded();
   }
 
-  // Intermission: Vinheta -> News & Weather -> Return Vinheta -> Next Song
+  // Intermission: Vinheta -> News & Weather -> Next Song
   startRadioIntermission() {
     if (this.isBroadcastingNews) return;
     this.isBroadcastingNews = true;
 
-    // Duck volume to 12%
-    const t = this.ctx.currentTime;
-    this.duckingGain.gain.setTargetAtTime(0.12, t, 0.5);
+    // Full volume for radio vinheta and speech
+    if (this.duckingGain && this.ctx) {
+      this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.1);
+    }
 
     // 1. Play Station Vinheta
-    const vinheta = VINHETAS_CATALOGUE[Math.floor(Math.random() * VINHETAS_CATALOGUE.length)];
+    const vinheta = VINHETAS_CATALOGUE[this.vinhetaIndex % VINHETAS_CATALOGUE.length];
+    this.vinhetaIndex++;
     this.playAudioFile(vinheta.src, () => {
       if (!this.isPlaying || this.activeStation === 'OFF') {
         this.isBroadcastingNews = false;
@@ -7837,7 +8088,9 @@ class RadioBroadcast {
           this.isBroadcastingNews = false;
           return;
         }
-        this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.8);
+        if (this.duckingGain && this.ctx) {
+          this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.2);
+        }
         this.isBroadcastingNews = false;
         this.playNextSong();
       };
@@ -7855,26 +8108,25 @@ class RadioBroadcast {
   }
 
   playNextSong() {
-    if (!this.isPlaying || this.activeStation === 'OFF') return;
+    if (!this.isPlaying || this.activeStation === 'OFF' || this.isBroadcastingNews) return;
 
-    let pool = TRACKS_CATALOGUE;
-    if (this.activeStation !== 'AUTO' && this.activeStation !== 'TODAS') {
-      pool = TRACKS_CATALOGUE.filter(tr => tr.genre === this.activeStation);
+    if (this.activeStation === 'AUTO' || !this.activeStation) {
+      // Advance cyclically in canonical rolling stream
+      this.currentStreamIndex = (this.currentStreamIndex + 1) % CANONICAL_TRACK_ORDER.length;
+      const nextId = CANONICAL_TRACK_ORDER[this.currentStreamIndex];
+      const pick = TRACKS_CATALOGUE.find(tr => tr.id === nextId) || TRACKS_CATALOGUE[0];
+      this.currentTrack = pick;
+      this.playAudioFile(pick.src);
+    } else {
+      // Manual dial station (MPB, PAGODE, FUNK): cycle within station's genre
+      let pool = TRACKS_CATALOGUE.filter(tr => tr.genre === this.activeStation);
       if (pool.length === 0) pool = TRACKS_CATALOGUE;
-    } else if (this.activeStation === 'AUTO') {
-      // Pick based on zone / time-of-day genre
-      const matching = TRACKS_CATALOGUE.filter(tr => tr.genre === this.effectiveGenre);
-      if (matching.length > 0) pool = matching;
+      let pick = pool.find(tr => tr.id !== this.currentTrack?.id) || pool[0];
+      this.currentTrack = pick;
+      const idx = CANONICAL_TRACK_ORDER.indexOf(pick.id);
+      if (idx !== -1) this.currentStreamIndex = idx;
+      this.playAudioFile(pick.src);
     }
-
-    // Pick a random track (avoid repeating immediate last track)
-    let pick = pool[Math.floor(Math.random() * pool.length)];
-    if (pool.length > 1 && this.currentTrack && pick.id === this.currentTrack.id) {
-      pick = pool.find(tr => tr.id !== this.currentTrack.id) || pick;
-    }
-
-    this.currentTrack = pick;
-    this.playAudioFile(pick.src);
   }
 
   playAudioFile(src, onEndCallback = null) {
@@ -7905,6 +8157,7 @@ class RadioBroadcast {
 
 RadioBroadcast.TRACKS_CATALOGUE = TRACKS_CATALOGUE;
 RadioBroadcast.VINHETAS_CATALOGUE = VINHETAS_CATALOGUE;
+RadioBroadcast.CANONICAL_TRACK_ORDER = CANONICAL_TRACK_ORDER;
 
 /**
  * Brazilian Style Procedural Music Engine
