@@ -38,6 +38,7 @@ export class InteractableSystem {
     this.activeQuickOptions = [];
     this.doors = [];
     this.residentNpcs = [];
+    this.houseItems = [];
 
     // Keyboard hotkeys [1], [2], [3] for seamless NPC Quick Actions
     if (typeof window !== 'undefined') {
@@ -387,7 +388,12 @@ export class InteractableSystem {
       isDoor: true,
       prompt: d.prompt || 'ARROMBAR / ABRIR PORTA NO SOCO'
     }));
-    const allTargets = [...this.anchors, ...npcTargets, ...extNpcTargets, ...residentTargets, ...doorTargets];
+    const houseItemTargets = (this.houseItems || []).filter(item => !item.isStolen).map(item => ({
+      ...item,
+      isHouseItem: true,
+      isOpen: true
+    }));
+    const allTargets = [...this.anchors, ...npcTargets, ...extNpcTargets, ...residentTargets, ...doorTargets, ...houseItemTargets];
 
     for (const anchor of allTargets) {
       const dx = anchor.position.x - playerPos.x;
@@ -406,7 +412,7 @@ export class InteractableSystem {
           let isOpen = true;
           if (anchor.isDoor) {
             isOpen = true; // doors are interactable while closed
-          } else if (anchor.isNpc) {
+          } else if (anchor.isNpc || anchor.isHouseItem) {
             isOpen = true;
           } else {
             // Check if zone is currently open
@@ -435,7 +441,7 @@ export class InteractableSystem {
 
     if (closestTarget) {
       const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
-      const loc = closestTarget.anchor.isDoor
+      const loc = (closestTarget.anchor.isDoor || closestTarget.anchor.isHouseItem)
         ? null
         : (closestTarget.anchor.isNpc
           ? getLocalizedNpc(closestTarget.anchor.id)
@@ -451,6 +457,13 @@ export class InteractableSystem {
         const promptStr = isEn
           ? `[E] PUNCH / BASH DOOR OPEN (${doorName})`
           : `[E] ARROMBAR / ABRIR PORTA NO SOCO (${doorName})`;
+        this.showPrompt(promptStr);
+      } else if (closestTarget.anchor.isHouseItem) {
+        this.hideNpcQuickDock();
+        const itemName = closestTarget.anchor.name || 'OBJETO';
+        const promptStr = isEn
+          ? `[E] ${itemName} (STEAL OR LEAVE)`
+          : `[E] ${closestTarget.anchor.prompt || itemName}`;
         this.showPrompt(promptStr);
       } else {
         // Static location interactable (Padaria, Bar, Elevador, Semáforo)
@@ -686,6 +699,10 @@ export class InteractableSystem {
     this.residentNpcs = npcs || [];
   }
 
+  setHouseItems(items) {
+    this.houseItems = items || [];
+  }
+
   setDoors(doors) {
     this.doors = doors || [];
   }
@@ -732,6 +749,30 @@ export class InteractableSystem {
       );
     }
     this.hidePrompt();
+
+    // Check if this door leads to a house with an entry intent encounter (steal or respect)
+    if (door.entryEncounterId && this.dialog && !this.dialog.isOpen) {
+      const enc = BRAZILIAN_ENCOUNTERS[door.entryEncounterId];
+      if (enc && game?.state) {
+        setTimeout(() => {
+          if (!this.dialog.isOpen) {
+            this.dialog.open({
+              id: enc.id,
+              encounterId: enc.id,
+              _state: game.state,
+              title: enc.title,
+              text: enc.getIntroText(game.state),
+              options: enc.getOptions(game.state)
+            }, (opt) => {
+              const outcome = opt.execute(game.state, this.sound);
+              if (outcome && game.hud) {
+                game.hud.showToast(outcome, 4000);
+              }
+            });
+          }
+        }, 350);
+      }
+    }
   }
 
   trigger(gameState) {
@@ -746,6 +787,43 @@ export class InteractableSystem {
     // If aiming at an interactive door, punch/bash it open
     if (this.currentTarget.anchor.isDoor) {
       this.triggerDoor(this.currentTarget.anchor);
+      return;
+    }
+
+    // If aiming at an interactive house item (TV, Botijão, Stanley, iPhone, etc.)
+    if (this.currentTarget.anchor.isHouseItem) {
+      if (this.dialog && this.dialog.isOpen) return;
+      const item = this.currentTarget.anchor;
+      const encId = item.encounterId;
+      const enc = BRAZILIAN_ENCOUNTERS[encId];
+      if (!enc) return;
+
+      this.dialog.open({
+        id: encId,
+        encounterId: encId,
+        _state: gameState,
+        title: enc.title,
+        text: enc.getIntroText(gameState),
+        options: enc.getOptions(gameState)
+      }, (chosenOption) => {
+        const outcomeText = chosenOption.execute(gameState, this.sound);
+        if (chosenOption.id.startsWith('furtar_')) {
+          item.isStolen = true;
+          if (item.mesh) {
+            item.mesh.visible = false;
+          }
+        }
+        if (outcomeText) {
+          const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
+          this.dialog.open({
+            title: isEn ? 'ITEM INTERACTION' : 'INTERAÇÃO COM OBJETO',
+            text: `<p>${outcomeText}</p>`,
+            options: [
+              { label: isEn ? 'Continue' : 'Continuar', execute: () => {} }
+            ]
+          }, () => {});
+        }
+      });
       return;
     }
 
@@ -787,6 +865,30 @@ export class InteractableSystem {
             : '🛗 <strong>ELEVADOR:</strong> Você subiu para a Cobertura no 12º andar (vista 180° do Pico do Jaraguá)!',
           3500
         );
+      }
+
+      // Trigger Penthouse entry intent encounter
+      if (this.dialog && !this.dialog.isOpen && game?.state) {
+        const enc = BRAZILIAN_ENCOUNTERS.HOUSE_ENTRY_PENTHOUSE;
+        if (enc) {
+          setTimeout(() => {
+            if (!this.dialog.isOpen) {
+              this.dialog.open({
+                id: enc.id,
+                encounterId: enc.id,
+                _state: game.state,
+                title: enc.title,
+                text: enc.getIntroText(game.state),
+                options: enc.getOptions(game.state)
+              }, (opt) => {
+                const outcome = opt.execute(game.state, this.sound);
+                if (outcome && game.hud) {
+                  game.hud.showToast(outcome, 4000);
+                }
+              });
+            }
+          }, 400);
+        }
       }
       return;
     }

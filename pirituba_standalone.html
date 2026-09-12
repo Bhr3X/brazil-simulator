@@ -14762,6 +14762,7 @@ class CityBuilder {
     this.beaconLights = [];
     this.interactiveDoors = [];
     this.residentNpcs = [];
+    this.houseItems = [];
     this.blocoTrioGroup = null;
     this.campinhoGroup = null;
     this.illusionWalls = [];
@@ -15149,7 +15150,8 @@ class CityBuilder {
       doorMesh: doorPivot,
       collider: doorCollider,
       isOpen: false,
-      openAngle: -Math.PI / 2
+      openAngle: -Math.PI / 2,
+      entryEncounterId: 'HOUSE_ENTRY_FAVELA'
     });
 
     // 6. Warm Interior Lighting
@@ -15209,6 +15211,49 @@ class CityBuilder {
     const mattress = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.2, 1.9), colchaMat);
     mattress.position.set(x + halfW - 1.2, baseElevation + 0.4, z + 0.2);
     this.scene.add(mattress);
+
+    // Interactive Items inside House (Steal or Leave)
+    this.houseItems.push({
+      id: `botijao_${Math.round(x)}_${Math.round(z)}`,
+      name: 'BOTIJÃO DE GÁS ULTRAGAZ P-13',
+      prompt: 'INTERAGIR COM BOTIJÃO DE GÁS (FURTAR OU RESPEITAR)',
+      position: new THREE.Vector3(x + halfW - 0.8, baseElevation + 0.5, backZ - 0.8),
+      maxDist: 2.5,
+      mesh: gasTank,
+      valueCentavos: 11000,
+      perigo: 26,
+      encounterId: 'ITEM_THEFT_BOTIJAO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: `filtro_${Math.round(x)}_${Math.round(z)}`,
+      name: 'FILTRO DE BARRO SÃO JOÃO',
+      prompt: 'INTERAGIR COM FILTRO DE BARRO (BEBER OU FURTAR)',
+      position: new THREE.Vector3(x + halfW - 0.8, baseElevation + 1.0, backZ - 0.8),
+      maxDist: 2.5,
+      mesh: filtro,
+      valueCentavos: 5000,
+      perigo: 18,
+      encounterId: 'ITEM_THEFT_FILTRO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: `reserva_${Math.round(x)}_${Math.round(z)}`,
+      name: 'RESERVA SOB O COLCHÃO',
+      prompt: 'VASCULHAR SOB O COLCHÃO (FURTAR OU DEIXAR)',
+      position: new THREE.Vector3(x + halfW - 1.2, baseElevation + 0.6, z + 0.2),
+      maxDist: 2.5,
+      mesh: mattress,
+      valueCentavos: 6000,
+      perigo: 24,
+      encounterId: 'ITEM_THEFT_RESERVA',
+      isOpen: true,
+      isHouseItem: true
+    });
 
     // 8. Living Resident NPC inside House!
     const shirtCols = [0x1155cc, 0xd95b96, 0x009944, 0xffaa00, 0x772299];
@@ -18754,6 +18799,12 @@ class CityBuilder {
     carne.position.set(x - 1.7, floorY + 0.42, z - 0.05);
     this.scene.add(carne);
 
+    // Leather Wallet with Cash
+    const carteiraMat = new THREE.MeshLambertMaterial({ color: 0x2e1d11 });
+    const carteira = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.04, 0.14), carteiraMat);
+    carteira.position.set(x - 2.3, floorY + 0.42, z - 0.25);
+    this.scene.add(carteira);
+
     // 3. Wooden TV Rack with Vintage CRT Color TV
     const rackMat = new THREE.MeshLambertMaterial({ color: 0x4a2e1b });
     const tvRack = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.6), rackMat);
@@ -18785,6 +18836,77 @@ class CityBuilder {
     const fridge = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 0.85), fridgeMat);
     fridge.position.set(x + 2.5, floorY + 0.9, z + 1.6);
     this.scene.add(fridge);
+
+    // --- INTERACTIVE HOUSE ITEMS (STEAL OR RESPECT) ---
+    this.houseItems.push({
+      id: 'item_tv_tio_wilson',
+      name: 'TELEVISÃO CRT 20" CCE',
+      prompt: 'INTERAGIR COM A TV DE TUBO (FURTAR OU RESPEITAR)',
+      position: new THREE.Vector3(x + 2.0, floorY + 0.9, z - 0.1),
+      maxDist: 2.5,
+      mesh: tv,
+      valueCentavos: 12000,
+      perigo: 22,
+      encounterId: 'ITEM_THEFT_TV_TUBO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_croche_tio_wilson',
+      name: 'TOALHINHA DE CROCHÊ DA VOVÓ',
+      prompt: 'INTERAGIR COM A TOALHINHA DE CROCHÊ',
+      position: new THREE.Vector3(x + 2.0, floorY + 1.26, z - 0.1),
+      maxDist: 2.5,
+      mesh: crochet,
+      valueCentavos: 2000,
+      perigo: 10,
+      encounterId: 'ITEM_THEFT_CROCHE',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_boleto_tio_wilson',
+      name: 'BOLETOS DA ENEL & CARNÊ CASAS BAHIA',
+      prompt: 'VASCULHAR A MESINHA DE CENTRO',
+      position: new THREE.Vector3(x - 2.0, floorY + 0.5, z - 0.1),
+      maxDist: 2.4,
+      mesh: boleto,
+      valueCentavos: 3500,
+      perigo: 14,
+      encounterId: 'ITEM_THEFT_BOLETO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_carteira_tio_wilson',
+      name: 'CARTEIRA DE COURO COM ECONOMIAS',
+      prompt: 'VASCULHAR CARTEIRA DO TIO WILSON',
+      position: new THREE.Vector3(x - 2.3, floorY + 0.42, z - 0.25),
+      maxDist: 2.3,
+      mesh: carteira,
+      valueCentavos: 8500,
+      perigo: 25,
+      encounterId: 'ITEM_THEFT_CARTEIRA',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_litrao_tio_wilson',
+      name: 'GELADEIRA BRANCA COM LITRÃO',
+      prompt: 'ABRIR A GELADEIRA (PEGAR LITRÃO OU DEIXAR)',
+      position: new THREE.Vector3(x + 2.5, floorY + 0.9, z + 1.6),
+      maxDist: 2.4,
+      mesh: fridge,
+      valueCentavos: 1400,
+      perigo: 10,
+      encounterId: 'ITEM_THEFT_LITRAO',
+      isOpen: true,
+      isHouseItem: true
+    });
 
     // 5. Cozy Warm Overhead Ceiling Light
     const warmLight = new THREE.PointLight(0xffd59e, 1.3, 9);
@@ -18860,7 +18982,8 @@ class CityBuilder {
       doorMesh: doorPivot,
       collider: doorCollider,
       isOpen: false,
-      openAngle: Math.PI / 2
+      openAngle: Math.PI / 2,
+      entryEncounterId: 'HOUSE_ENTRY_MID_CLASS'
     });
 
     // 8. Resident: Tio Wilson relaxing on the sofa
@@ -19143,6 +19266,63 @@ class CityBuilder {
     const espresso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.55, 0.5), chromeMat);
     espresso.position.set(x - 2.0, pY + 1.38, z + 2.5);
     this.scene.add(espresso);
+
+    // --- PENTHOUSE INTERACTIVE ITEMS (STEAL OR RESPECT) ---
+    this.houseItems.push({
+      id: 'item_iphone_penthouse',
+      name: 'IPHONE 16 PRO MAX TITÂNIO',
+      prompt: 'INTERAGIR COM IPHONE 16 PRO MAX',
+      position: new THREE.Vector3(x + 2.7, pY + 0.45, z - 0.15),
+      maxDist: 2.3,
+      mesh: phone,
+      valueCentavos: 65000,
+      perigo: 30,
+      encounterId: 'ITEM_THEFT_IPHONE',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_stanley_penthouse',
+      name: 'COPO STANLEY TÉRMICO VERDE',
+      prompt: 'INTERAGIR COM COPO STANLEY TÉRMICO',
+      position: new THREE.Vector3(x + 2.2, pY + 0.56, z - 0.2),
+      maxDist: 2.3,
+      mesh: stanley,
+      valueCentavos: 15000,
+      perigo: 18,
+      encounterId: 'ITEM_THEFT_STANLEY',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_centurion_penthouse',
+      name: 'CARTÃO BLACK CENTURION',
+      prompt: 'INTERAGIR COM CARTÃO BLACK CENTURION',
+      position: new THREE.Vector3(x + 2.8, pY + 0.45, z - 0.3),
+      maxDist: 2.3,
+      mesh: card,
+      valueCentavos: 45000,
+      perigo: 32,
+      encounterId: 'ITEM_THEFT_CENTURION',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_espresso_penthouse',
+      name: 'MÁQUINA DE CAFÉ EXPRESSO ITALIANA',
+      prompt: 'INTERAGIR COM A MÁQUINA DE EXPRESSO',
+      position: new THREE.Vector3(x - 2.0, pY + 1.4, z + 2.5),
+      maxDist: 2.5,
+      mesh: espresso,
+      valueCentavos: 32000,
+      perigo: 26,
+      encounterId: 'ITEM_THEFT_ESPRESSO',
+      isOpen: true,
+      isHouseItem: true
+    });
 
     // 4. Designer Arc Floor Lamp & Warm Mood Light
     const pentLight = new THREE.PointLight(0xffecd0, 1.4, 14);
@@ -24016,6 +24196,106 @@ const EN_ENCOUNTER_TEXTS = {
         outcome: 'Rapid hydration packed with minerals and steady stamina from wholesome nuts to keep walking through São Paulo (+24% Stomach, +18% Sanity).'
       }
     }
+  },
+
+  HOUSE_ENTRY_MID_CLASS: {
+    title: '🏡 ENTERING TIO WILSON\'S HOUSE',
+    intro: (state) => `
+      The wooden door swings open onto polished parquet floor in Tio Wilson's living room.<br>
+      The CRT TV blares João Kléber's Fidelity Test, the coffee table has overdue Enel bills, and the kitchen fridge hums softly.<br>
+      <em>What is your intent in this household?</em><br>
+      <small style="color:#ffcc00">Thefts on record: ${state.theftCount || 0} | Heat / Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      modo_furto: {
+        label: '🥷 THIEF MODE: Sneak in and pocket whatever valuables you can find!',
+        outcome: '🚨 <strong>THIEF MODE ACTIVATED:</strong> Your eyes scan the household for valuable loot. Watch out: watchful neighbors might call 190!'
+      },
+      modo_respeito: {
+        label: '🤝 VISITOR MODE: Enter peacefully and respect the family home',
+        outcome: '🤝 <strong>PEACEFUL VISIT:</strong> You entered with a clean conscience. Peace of mind and respect earned (+12% Sanity, +6 Ginga).'
+      },
+      modo_vasculhar: {
+        label: '🔍 LOOK AROUND: Quietly explore the rooms without touching anything',
+        outcome: '🔍 <strong>CASUAL EXPLORATION:</strong> You stroll through the house, examining the furnishings with curiosity.'
+      }
+    }
+  },
+
+  HOUSE_ENTRY_FAVELA: {
+    title: '🏠 ENTERING COMMUNITY RESIDENCE',
+    intro: (state) => `
+      The wooden door creaks open to reveal a humble exposed brick hillside home.<br>
+      The comforting aroma of homemade beans and cloth-drip coffee fills the air. A blue Ultragaz tank, clay water filter, and bed savings are visible.<br>
+      <em>What is your intent in this home?</em><br>
+      <small style="color:#ffcc00">Thefts on record: ${state.theftCount || 0} | Heat / Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      modo_furto: {
+        label: '🥷 THIEF MODE: Steal the gas cylinder, mattress savings, or household goods',
+        outcome: '🚨 <strong>THIEF MODE ACTIVATED:</strong> You focus on the family\'s belongings. Police cruisers might seal the alleyway if anyone sounds the alarm!'
+      },
+      modo_respeito: {
+        label: '🤝 RESPECT MODE: Honor the hardworking family and enter with discipline',
+        outcome: '🤝 <strong>FAVELA DISCIPLINE:</strong> "In the community, respect is the supreme law!" Your humility earns neighborhood respect (+14% Sanity, +8 Ginga).'
+      },
+      modo_vasculhar: {
+        label: '🔍 LOOK AROUND: Look around discreetly without taking anything',
+        outcome: '🔍 <strong>DISCREET LOOK:</strong> You walk through the house, admiring the warmth of popular Brazilian architecture.'
+      }
+    }
+  },
+
+  HOUSE_ENTRY_PENTHOUSE: {
+    title: '🏙️ JARAGUÁ TOWER LUXURY PENTHOUSE',
+    intro: (state) => `
+      The brushed steel elevator opens into a high-end duplex with Italian leather, marble counters, and a panoramic view of Pico do Jaraguá.<br>
+      High-tech electronics, titanium iPhone 16, Stanley tumbler, Black card, and chrome espresso machine decorate the space.<br>
+      <em>What is your intent in this multimillionaire penthouse?</em><br>
+      <small style="color:#ffcc00">Thefts on record: ${state.theftCount || 0} | Heat / Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      modo_furto: {
+        label: '🥷 THIEF MODE: Loot designer luxury goods, electronics, and cards!',
+        outcome: '🚨 <strong>HIGH-END BURGLARY MODE:</strong> Maximum alert! If private security or police are alerted, sirens will arrive fast!'
+      },
+      modo_respeito: {
+        label: '🤝 VISITOR MODE: Just admire the stunning view and luxury decor',
+        outcome: '🥂 <strong>CIVILIZED VISIT:</strong> You relax taking in the panoramic mountain view without breaking the law (+18% Sanity, +5 Ginga).'
+      },
+      modo_vasculhar: {
+        label: '🔍 LOOK AROUND: Inspect the modern design with caution',
+        outcome: '🔍 <strong>CAREFUL INSPECTION:</strong> You walk through the penthouse admiring the designer Italian furniture.'
+      }
+    }
+  },
+
+  POLICE_INTERCEPTION_BURGLARY: {
+    title: '🚔 MILITARY POLICE INTERCEPTION // BURGLARY SUSPECT',
+    intro: (state) => `
+      A Military Police cruiser (87th Battalion Pirituba) screeches to a halt right in front of you with flashing strobes and wailing sirens!<br>
+      Two tactical patrol officers step out holding clipboards and clipboard reports:<br>
+      <em>"— STOP RIGHT THERE! HANDS ON YOUR HEAD! Dispatch received neighbor calls reporting home burglaries in the sector. You match the exact description!"</em><br>
+      <small style="color:#ff3333;font-weight:bold">🚨 Heat Level: ${state.perigo}% | Thefts: ${state.theftCount || 0} items | Loot: ${state.stolenItems && state.stolenItems.length > 0 ? state.stolenItems.map(i => i.name).join(', ') : 'None'}</small>
+    `,
+    options: {
+      entregar_bens: {
+        label: '🤝 Surrender all stolen loot, pay legal processing fee, and cooperate',
+        outcome: '🚔 <strong>LOOT CONFISCATED:</strong> You cooperated, returned the stolen items, and paid administrative fees. The patrol let you go under strict warning (-35% Danger, theft heat cleared).'
+      },
+      dar_migue: {
+        label: '🗣️ Try smooth-talking your way out (Claim you bought it at the Sunday flea market)',
+        outcome: (state, ptResult) => ptResult.includes('ESPETACULAR')
+          ? '🗣️ <strong>SMOOTH TALK VICTORY:</strong> With pure Brazilian street hustle, you spun an elaborate tale about distant cousins and market receipts. The sergeant warned you to move along (+20 Ginga, +10 Sanity)!'
+          : '🚨 <strong>COP DIDN\'T BUY IT:</strong> "— Who do you think you\'re kidding?!" The sergeant seized your suspicious goods and logged your name in the precinct database (+40% Danger)!'
+      },
+      meter_o_pe: {
+        label: '🏃 RUN FOR IT! High-speed sprint through the narrow favela alleyways!',
+        outcome: (state, ptResult) => ptResult.includes('CINEMATOGRÁFICA')
+          ? '🏃 <strong>CINEMATIC ESCAPE:</strong> You sprinted through narrow alleys, vaulted a brick wall, and vanished into Pirituba\'s labyrinth (+25 Ginga, -12% Stomach, +12% Sanity)!'
+          : '🚨 <strong>CORNERED:</strong> You tripped over a storm drain and the police car pinned you against the wall! Arrested on the spot for residential burglary!'
+      }
+    }
   }
 };
 
@@ -24950,8 +25230,56 @@ class GameState {
     this.actionTracker = new Map();
     this.lastDiminishing = null;
 
+    // Burglary, theft, and police heat tracking
+    this.theftCount = 0;
+    this.theftValue = 0; // accumulated value in centavos
+    this.stolenItems = []; // [{ id, name, valueCentavos }]
+    this.houseIntents = new Map(); // houseId -> 'steal' | 'respect' | 'explore'
+
     // Change listener
     this.listeners = [];
+  }
+
+  // Record a residential theft, increasing heat and probability of PM interception
+  recordTheft(item, valueCentavos = 0, perigoGain = 20) {
+    this.theftCount += 1;
+    this.theftValue += (valueCentavos || 0);
+    this.stolenItems.push({
+      id: item.id || `stolen_${this.theftCount}`,
+      name: item.name || 'Objeto furtado',
+      valueCentavos: valueCentavos || 0
+    });
+    const deltas = {
+      perigo: perigoGain
+    };
+    if (valueCentavos > 0) {
+      deltas.grana = valueCentavos;
+    }
+    this.apply(deltas, `Furto residencial: ${item.name || 'Item'}`);
+    return this;
+  }
+
+  // Dynamic probability calculation for PMESP police pursuit based on theft count
+  getPoliceTheftChance() {
+    if (!this.theftCount || this.theftCount <= 0) return 0;
+    const base = 0.18 * this.theftCount;
+    const perigoFactor = (this.perigo || 0) / 250;
+    return Math.min(0.88, Math.max(0.15, base + perigoFactor));
+  }
+
+  // Surrender goods to police, dropping perigo and resetting theft count
+  surrenderStolenGoods(fineCentavos = 0) {
+    const surrenderedCount = this.stolenItems.length;
+    this.stolenItems = [];
+    this.theftCount = 0;
+    const deltas = {
+      perigo: -35
+    };
+    if (fineCentavos > 0) {
+      deltas.grana = -fineCentavos;
+    }
+    this.apply(deltas, 'Apreensão policial / Devolução de bens furtados');
+    return surrenderedCount;
   }
 
   // Diminishing returns calculation for repetitive actions
@@ -29181,6 +29509,693 @@ const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  // =========================================================================
+  // HOUSE ENTRY INTENT ENCOUNTERS (STEAL VS. RESPECT)
+  // =========================================================================
+  HOUSE_ENTRY_MID_CLASS: {
+    id: 'HOUSE_ENTRY_MID_CLASS',
+    title: '🏡 ENTRANDO NA CASA DO TIO WILSON',
+    getIntroText: (state) => `
+      A porta se abre para o piso de taco encerado da sala de estar do Tio Wilson.<br>
+      A TV de tubo está sintonizada no Teste de Fidelidade do João Kléber, a mesinha tem boletos da Enel e a geladeira branca guarda mantimentos.<br>
+      <em>Qual a sua intenção nesta residência?</em><br>
+      <small style="color:#ffcc00">Furtos no histórico: ${state.theftCount || 0} | Nível de B.O.: ${state.perigo}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'modo_furto',
+        label: '🥷 MODO FURTO: Invadir com malícia para afanar o que puder!',
+        costLabel: 'Risco de B.O. (+15% Perigo)',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.houseIntents.set('mid_class_house', 'steal');
+          state.apply({ perigo: 15 }, 'Invasão domiciliar com dolo');
+          return '🚨 <strong>MODO FURTO ATIVADO:</strong> Seus olhos examinam os pertences valiosos da casa. Cuidado: vizinhos alertas podem acionar o 190!';
+        }
+      },
+      {
+        id: 'modo_respeito',
+        label: '🤝 MODO VISITA: Entrar na moral e respeitar o lar da família',
+        costLabel: 'Paz de espírito (+12% Sanidade, +6 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('mid_class_house', 'respect');
+          state.apply({ sanidade: 12, ginga: 6 }, 'Visita respeitosa à residência');
+          return '🤝 <strong>VISITA DE BOA:</strong> Você entrou de coração limpo. Consciência tranquila e respeito garantido com os moradores da rua.';
+        }
+      },
+      {
+        id: 'modo_vasculhar',
+        label: '🔍 APENAS OLHAR: Circular com discrição sem compromisso prévio',
+        costLabel: 'Exploração neutra (+5 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('mid_class_house', 'explore');
+          state.apply({ ginga: 5 }, 'Exploração cautelosa de residência');
+          return '🔍 <strong>EXPLORAÇÃO LIVRE:</strong> Você caminha pela casa analisando os cômodos e móveis com atenção.';
+        }
+      }
+    ]
+  },
+
+  HOUSE_ENTRY_FAVELA: {
+    id: 'HOUSE_ENTRY_FAVELA',
+    title: '🏠 ENTRANDO NA RESIDÊNCIA DA COMUNIDADE',
+    getIntroText: (state) => `
+      A porta de madeira bate e revela o interior acolhedor de uma casa humilde de tijolo baiano.<br>
+      O aroma de feijão caseiro e café coado no pano perfuma o ar. Há um botijão Ultragaz, filtro de barro tradicional e economias no quarto.<br>
+      <em>Qual a sua intenção nesta casa?</em><br>
+      <small style="color:#ffcc00">Furtos no histórico: ${state.theftCount || 0} | Nível de B.O.: ${state.perigo}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'modo_furto',
+        label: '🥷 MODO FURTO: Afanar o botijão, economias ou objetos da casa',
+        costLabel: 'Risco de B.O. (+15% Perigo)',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.houseIntents.set('favela_house', 'steal');
+          state.apply({ perigo: 15 }, 'Invasão de residência popular');
+          return '🚨 <strong>MODO FURTO ATIVADO:</strong> Você foca nos bens da casa. O rádio-patrulha da PMESP pode cercar a viela se alguém desconfiar!';
+        }
+      },
+      {
+        id: 'modo_respeito',
+        label: '🤝 MODO RESPEITO: Respeitar a luta dos moradores e entrar em paz',
+        costLabel: 'Humildade (+14% Sanidade, +8 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('favela_house', 'respect');
+          state.apply({ sanidade: 14, ginga: 8 }, 'Respeito aos moradores da favela');
+          return '🤝 <strong>DISCIPLINA DA QUEBRADA:</strong> "Na quebrada o respeito é a lei principal!" Sua atitude nobre eleva sua moral com a comunidade.';
+        }
+      },
+      {
+        id: 'modo_vasculhar',
+        label: '🔍 APENAS VASCULHAR: Dar uma olhada sem tocar em nada',
+        costLabel: 'Discrição neutra (+5 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('favela_house', 'explore');
+          state.apply({ ginga: 5 }, 'Olhada discreta na residência');
+          return '🔍 <strong>OLHADA DISCRETA:</strong> Você transita pela casa admirando os detalhes da arquitetura popular.';
+        }
+      }
+    ]
+  },
+
+  HOUSE_ENTRY_PENTHOUSE: {
+    id: 'HOUSE_ENTRY_PENTHOUSE',
+    title: '🏙️ COBERTURA LUXUOSA DO EDIFÍCIO JARAGUÁ',
+    getIntroText: (state) => `
+      As portas de aço escovado do elevador revelam o duplex cinematográfico com piso de mármore branco e vista panorâmica do Pico do Jaraguá.<br>
+      Eletrônicos topo de linha, iPhone 16 Pro Max, copo Stanley, cartão Black e cafeteira italiana decoram os ambientes.<br>
+      <em>Qual a sua intenção nesta cobertura milionária?</em><br>
+      <small style="color:#ffcc00">Furtos no histórico: ${state.theftCount || 0} | Nível de B.O.: ${state.perigo}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'modo_furto',
+        label: '🥷 MODO FURTO: Saquear os artigos de luxo, eletrônicos e cartões!',
+        costLabel: 'Alto Risco (+25% Perigo)',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.houseIntents.set('penthouse', 'steal');
+          state.apply({ perigo: 25 }, 'Invasão a cobertura de luxo');
+          return '🚨 <strong>MODO FURTO ALTO PADRÃO:</strong> Alerta máximo! Se a segurança privada ou o 87º BPM/M forem acionados, a viatura chega rápido!';
+        }
+      },
+      {
+        id: 'modo_respeito',
+        label: '🤝 MODO VISITA: Apenas contemplar a vista deslumbrante e o luxo',
+        costLabel: 'Paz de espírito (+18% Sanidade, +5 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('penthouse', 'respect');
+          state.apply({ sanidade: 18, ginga: 5 }, 'Contemplação pacífica da cobertura');
+          return '🥂 <strong>VISITA CIVILIZADA:</strong> Você relaxa contemplando a vista deslumbrante da Serra da Cantareira sem cometer infrações.';
+        }
+      },
+      {
+        id: 'modo_vasculhar',
+        label: '🔍 APENAS VASCULHAR: Examinar o design moderno com cautela',
+        costLabel: 'Curiosidade (+6 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('penthouse', 'explore');
+          state.apply({ ginga: 6 }, 'Inspeção do duplex luxuoso');
+          return '🔍 <strong>INSPEÇÃO ATENTA:</strong> Você circula pela cobertura examinando a mobília de design.';
+        }
+      }
+    ]
+  },
+
+  // =========================================================================
+  // HOUSE ITEM THEFT ENCOUNTERS (TV, BOTIJÃO, STANLEY, IPHONE, CARTEIRA, ETC)
+  // =========================================================================
+  ITEM_THEFT_TV_TUBO: {
+    id: 'ITEM_THEFT_TV_TUBO',
+    title: '📺 TELEVISÃO CRT 20" CCE // COM TOALHINHA DE CROCHÊ',
+    getIntroText: () => `
+      A clássica TV de tubo colorida com carcaça de plástico escuro e botões de canal analógicos.<br>
+      A tela fosfórica irradia as pegadinhas e o Teste de Fidelidade. No topo, a toalhinha de crochê da vovó.<br>
+      <em>Valor de mercado na Feira do Rolo: R$ 120,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_tv',
+        label: '🥷 Furtar TV de Tubo CCE (+R$ 120,00)',
+        costLabel: '🚨 +22% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'tv_tubo_cce', name: 'TV de Tubo 20" CCE' }, 12000, 22);
+          return '📺 <strong>TV AFANADA:</strong> Você desconectou os cabos e abraçou a TV de tubo! Pesada como chumbo, mas vale R$ 120,00 na feira do rolo (+R$ 120, +22% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_tv',
+        label: '✋ Deixar a TV no rack (Respeitar o entretenimento do Tio Wilson)',
+        costLabel: 'Consciência limpa (+6 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 6 }, 'Respeitou a TV da família');
+          return '✋ <strong>INTACTA:</strong> Você deixou a TV ligada no João Kléber. O Tio Wilson merece curtir a aposentadoria em paz (+6 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_tv',
+        label: '🔍 Examinar a imagem e o chiado dos alto-falantes',
+        costLabel: 'Nostalgia brasileira',
+        execute: () => '🔍 <strong>DETALHES:</strong> Imagem de tubo entrelaçada clássica, botão de volume rangendo e aquele cheiro nostróico de eletrônico quente.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_BOLETO: {
+    id: 'ITEM_THEFT_BOLETO',
+    title: '📄 BOLETO DA ENEL & CARNÊ DAS CASAS BAHIA',
+    getIntroText: () => `
+      Sobre a mesinha de centro de mogno repousam a conta de luz da Enel e o carnê de 24 prestações da geladeira.<br>
+      Junto aos papéis, há um envelope com notas amassadas separadas para o pagamento da lotérica.<br>
+      <em>Total em dinheiro trocado no envelope: R$ 35,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_envelope',
+        label: '🥷 Afanar o envelope com as notas trocadas (+R$ 35,00)',
+        costLabel: '🚨 +14% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'envelope_boletos', name: 'Economias das Contas' }, 3500, 14);
+          return '💸 <strong>ENVELOPE AFANADO:</strong> Você pegou as notas de R$ 10 e R$ 5 que estavam separadas para a lotérica (+R$ 35,00, +14% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_boleto',
+        label: '✋ Deixar o envelope e os boletos na mesa',
+        costLabel: 'Empatia com o trabalhador (+8 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Não mexeu no dinheiro das contas');
+          return '✋ <strong>RESPEITO:</strong> Deixar o dinheiro do boleto do trabalhador intocado faz bem para a alma (+8 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_boleto',
+        label: '🔍 Ler o valor da fatura de luz',
+        costLabel: 'Indignação paulistana',
+        execute: () => '🔍 <strong>ENEL:</strong> "Fatura vencida com juros de mora: R$ 142,50". A eterna luta do brasileiro contra a tarifa de energia.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_CROCHE: {
+    id: 'ITEM_THEFT_CROCHE',
+    title: '🧶 TOALHINHA DE CROCHÊ FEITA À MÃO PELA VOVÓ',
+    getIntroText: () => `
+      Toalhinha branca de crochê bordada com linha fina de algodão, colocada com esmero sobre o móvel.<br>
+      Uma verdadeira relíquia da hospitalidade familiar brasileira.<br>
+      <em>Valor sentimental inestimável / R$ 20,00 no brechó</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_croche',
+        label: '🥷 Furtar a toalhinha de crochê (+R$ 20,00)',
+        costLabel: '🚨 +10% Perigo & Peso na Consciência',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'toalhinha_croche', name: 'Toalhinha de Crochê da Vovó' }, 2000, 10);
+          return '🧶 <strong>CROCHÊ AFANADO:</strong> Você guardou a toalhinha de crochê no bolso. Roubar peça da vovó é sacanagem (+R$ 20,00, +10% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_croche',
+        label: '✋ Deixar a toalhinha no móvel',
+        costLabel: 'Respeito à tradição (+10 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Respeitou a toalhinha da vovó');
+          return '🧶 <strong>BENÇÃO DA VOVÓ:</strong> Respeitar a memória e o artesanato traz um afago no peito (+10 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_croche',
+        label: '🔍 Admirar os pontos de tricô da toalha',
+        costLabel: 'Apreciação estética',
+        execute: () => '🔍 <strong>PONTO CRUZ:</strong> Pontos firmes, tecido alvejado impecável e aquele carinho de casa de avó.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_LITRAO: {
+    id: 'ITEM_THEFT_LITRAO',
+    title: '🍺 LITRÃO DE CERVEJA TRINCANDO NA GELADEIRA',
+    getIntroText: () => `
+      Abrindo a geladeira branca, reluz uma garrafa de 1 Litro de Skol Pilsen trincando de gelada com gotas escorrendo.<br>
+      <em>Preço do Litrão no boteco: R$ 14,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_litrao',
+        label: '🥷 Afanar e beber o Litrão gelado agora!',
+        costLabel: '🚨 +10% Perigo | +30 Sanidade & +15 Bucho',
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playDrinkGulp?.(); }
+          state.recordTheft({ id: 'litrao_skol', name: 'Litrão de Skol Gelada' }, 1400, 10);
+          state.apply({ sanidade: 30, fome: 15 }, 'Bebeu cerveja furtada da geladeira');
+          return '🍺 <strong>GOLE REFRESCANTE:</strong> Você estalou a tampa e virou o Litrão geladinho! Refresco imediato (+30 Sanidade, +15 Bucho, +10% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_litrao',
+        label: '✋ Fechar a geladeira e deixar a cerveja intocada',
+        costLabel: 'Sobriedade (+6 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 6 }, 'Respeitou a cerveja alheia');
+          return '✋ <strong>GELADEIRA FECHADA:</strong> A cerveja do dono permanece gelando para a noitada (+6 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_litrao',
+        label: '🔍 Tocar na garrafa para ver se está realmente trincando',
+        costLabel: 'Teste térmico',
+        execute: () => '🔍 <strong>GELADA:</strong> Quase no ponto de formar véu de noiva! Geladíssima.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_CARTEIRA: {
+    id: 'ITEM_THEFT_CARTEIRA',
+    title: '💰 CARTEIRA DE COURO COM ECONOMIAS DO TRABALHO',
+    getIntroText: () => `
+      Sobre a mesinha há uma carteira de couro desgastada pelo bolso traseiro da calça jeans.<br>
+      Dentro dela, notas de cinquenta e vinte reais acumuladas com o suor do trabalho do mês.<br>
+      <em>Valor em espécie na carteira: R$ 85,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_carteira',
+        label: '🥷 Afanar as cédulas da carteira (+R$ 85,00)',
+        costLabel: '🚨 +25% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'carteira_notas', name: 'Carteira com Cédulas' }, 8500, 25);
+          return '💸 <strong>CARTEIRA LIMPA:</strong> Você surrupiou as notas de cinquenta e vinte da carteira (+R$ 85,00, +25% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_carteira',
+        label: '✋ Deixar a carteira no lugar (Não roubar o salário do trabalhador)',
+        costLabel: 'Honra (+14 Sanidade, +5 Ginga)',
+        execute: (state) => {
+          state.apply({ sanidade: 14, ginga: 5 }, 'Preservou a carteira do trabalhador');
+          return '🤝 <strong>HONRA INABALÁVEL:</strong> Não mexer no sustento de outro cidadão te faz manter a cabeça erguida (+14 Sanidade, +5 Ginga).';
+        }
+      },
+      {
+        id: 'examinar_carteira',
+        label: '🔍 Olhar os documentos e cartões sem tirar nada',
+        costLabel: 'Observação neutra',
+        execute: () => '🔍 <strong>DOCUMENTOS:</strong> RG antigo plastificado, cartão da firma e fotos 3x4 dos filhos.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_BOTIJAO: {
+    id: 'ITEM_THEFT_BOTIJAO',
+    title: '🔵 BOTIJÃO DE GÁS ULTRAGAZ P-13 CHEIO',
+    getIntroText: () => `
+      O clássico botijão de 13kg pintado no azul royal da Ultragaz, com lacre de segurança intacto.<br>
+      Artigo de alto valor na quebrada, essencial para o feijão de todo dia.<br>
+      <em>Preço de revenda na favela: R$ 110,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_botijao',
+        label: '🥷 Furtar o Botijão de Gás P-13 (+R$ 110,00)',
+        costLabel: '🚨 +26% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'botijao_ultragaz', name: 'Botijão de Gás P-13' }, 11000, 26);
+          return '🔵 <strong>BOTIJÃO LEVADO:</strong> Você desrosqueou a mangueira e colocou o botijão pesado nas costas (+R$ 110,00, +26% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_botijao',
+        label: '✋ Deixar o botijão instalado no fogão',
+        costLabel: 'Respeito ao almoço da família (+12 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 12 }, 'Deixou o botijão intacto');
+          return '✋ <strong>RESPEITO:</strong> Sem o botijão a família não cozinha o rango. Deixá-lo no lugar é dever moral (+12 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_botijao',
+        label: '🔍 Conferir o lacre de plástico e a data de validade',
+        costLabel: 'Segurança residencial',
+        execute: () => '🔍 <strong>ULTRAGAZ:</strong> Lacre brilhante com numeração gravada, pronto para queimar na chama azul do fogão.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_FILTRO: {
+    id: 'ITEM_THEFT_FILTRO',
+    title: '🏺 FILTRO DE BARRO SÃO JOÃO TRADICIONAL',
+    getIntroText: () => `
+      O filtro de terracota marrom com vela de carvão ativado e torneirinha marrom.<br>
+      Considerado pelos cientistas como o melhor sistema de filtragem de água do planeta.<br>
+      <em>Valor de mercado: R$ 50,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_filtro',
+        label: '🥷 Furtar o Filtro de Barro São João (+R$ 50,00)',
+        costLabel: '🚨 +18% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'filtro_barro', name: 'Filtro de Barro São João' }, 5000, 18);
+          return '🏺 <strong>FILTRO AFANADO:</strong> Você esvaziou a água fresca e levou o filtro de argila (+R$ 50,00, +18% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_filtro',
+        label: '✋ Beber um copo d\'água e deixar o filtro no lugar',
+        costLabel: 'Hidratação (+15 Bucho, +15 Sanidade)',
+        execute: (state, sound) => {
+          if (sound && sound.playDrinkGulp) sound.playDrinkGulp();
+          state.apply({ fome: 15, sanidade: 15 }, 'Bebeu água pura do filtro de barro');
+          return '💧 <strong>ÁGUA PURÍSSIMA:</strong> Um gole fresco com gosto inconfundível de cerâmica. Hidratado e em paz (+15 Bucho, +15 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_filtro',
+        label: '🔍 Examinar a vela filtrante e a umidade do barro',
+        costLabel: 'Inspeção de pureza',
+        execute: () => '🔍 <strong>FILTRAGEM:</strong> Gotejamento constante e cerâmica fresca mesmo no calor sufocante de São Paulo.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_RADIO: {
+    id: 'ITEM_THEFT_RADIO',
+    title: '📻 RÁDIO DE PILHA AM/FM PORTÁTIL',
+    getIntroText: () => `
+      Pequeno rádio transistorizado prateado com antena telescópica esticada, sintonizado na Rádio Pirituba FM.<br>
+      <em>Valor de revenda: R$ 35,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_radio',
+        label: '🥷 Furtar o rádio de pilha portátil (+R$ 35,00)',
+        costLabel: '🚨 +14% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'radio_pilha', name: 'Rádio de Pilha Transistor' }, 3500, 14);
+          return '📻 <strong>RÁDIO AFANADO:</strong> Você desligou o radinho e enfiou na jaqueta (+R$ 35,00, +14% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_radio',
+        label: '✋ Deixar o rádio tocando samba e pagode',
+        costLabel: 'Curtir o som (+8 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Deixou o rádio animando a casa');
+          return '🎶 <strong>SOM DA QUEBRADA:</strong> Deixar o samba rolando alegra a vizinhança (+8 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_radio',
+        label: '🔍 Ajustar o dial de sintonia fina',
+        costLabel: 'Sintonia radial',
+        execute: () => '🔍 <strong>DIAL:</strong> A agulha vermelha marca 94.7 FM com chiado característico de ondas curtas.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_RESERVA: {
+    id: 'ITEM_THEFT_RESERVA',
+    title: '💵 RESERVA DE EMERGÊNCIA SOB O COLCHÃO',
+    getIntroText: () => `
+      Levantando discretamente o canto do colchão de casal com colcha florida, surge uma meia velha com notas enroladas.<br>
+      As economias da família guardadas para emergências médicas ou reforma do telhado.<br>
+      <em>Total da reserva: R$ 60,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_reserva',
+        label: '🥷 Furtar a reserva sob o colchão (+R$ 60,00)',
+        costLabel: '🚨 +24% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'reserva_colchao', name: 'Economias do Colchão' }, 6000, 24);
+          return '💸 <strong>MEIA LEVADA:</strong> Você embolsou as notas da meia velha sob a cama (+R$ 60,00, +24% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_reserva',
+        label: '✋ Baixar o colchão e não tocar no dinheiro sagrado',
+        costLabel: 'Caráter ilibado (+15 Sanidade, +10 Ginga)',
+        execute: (state) => {
+          state.apply({ sanidade: 15, ginga: 10 }, 'Protegeu a reserva da família');
+          return '🤝 <strong>CARÁTER DE OURO:</strong> Resistir à tentação de furtar de quem tem pouco consolida sua ginga moral (+15 Sanidade, +10 Ginga).';
+        }
+      },
+      {
+        id: 'examinar_reserva',
+        label: '🔍 Conferir o esconderijo sem retirar as notas',
+        costLabel: 'Discrição',
+        execute: () => '🔍 <strong>ESCONDERIJO:</strong> O clássico esconderijo brasileiro: seguro contra ladrão amador, mas manjado por quem é da rua.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_IPHONE: {
+    id: 'ITEM_THEFT_IPHONE',
+    title: '📱 IPHONE 16 PRO MAX TITÂNIO // COBERTURA',
+    getIntroText: () => `
+      Sobre a mesa de centro de vidro temperado da cobertura, repousa o mais novo iPhone de titânio natural.<br>
+      A tela OLED Always-On exibe cotações do dólar e notificações de dividendos de fundos imobiliários.<br>
+      <em>Valor de receptação de luxo: R$ 650,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_iphone',
+        label: '🥷 Afanar o iPhone 16 Pro Max (+R$ 650,00)',
+        costLabel: '🚨 +30% Perigo & Rastreamento por GPS',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'iphone_16_penthouse', name: 'iPhone 16 Pro Max Titânio' }, 65000, 30);
+          return '📱 <strong>IPHONE AFANADO:</strong> Você embolsou o aparelho de titânio! A grana é alta, mas o Find My iPhone pode alertar o COPOM a qualquer segundo (+R$ 650,00, +30% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_iphone',
+        label: '✋ Deixar o aparelho na mesa de vidro',
+        costLabel: 'Sem rastreamento (+8 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Não mexeu no smartphone rastreado');
+          return '✋ <strong>SEM B.O.:</strong> Evitar eletrônico com rastreador GPS em cobertura vigiada é sabedoria de sobrevivência (+8 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_iphone',
+        label: '🔍 Ver o nível de bateria e a carcaça de titânio',
+        costLabel: 'Curiosidade tech',
+        execute: () => '🔍 <strong>ESPECIFICAÇÕES:</strong> Bordas finíssimas de titânio aeroespacial, câmera tripla de 48MP e bateria em 98%.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_STANLEY: {
+    id: 'ITEM_THEFT_STANLEY',
+    title: '🥤 COPO STANLEY TÉRMICO VERDE // 473ML',
+    getIntroText: () => `
+      O lendário copo térmico verde-floresta com tampa de pressão e logotipo prateado gravado a laser.<br>
+      O símbolo máximo do status Faria Limer da capital.<br>
+      <em>Valor de revenda: R$ 150,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_stanley',
+        label: '🥷 Furtar o Copo Stanley Térmico (+R$ 150,00)',
+        costLabel: '🚨 +18% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'copo_stanley_verde', name: 'Copo Stanley Verde' }, 15000, 18);
+          return '🥤 <strong>STANLEY LEVADO:</strong> Você agarrou o copo térmico de grife (+R$ 150,00, +18% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_stanley',
+        label: '✋ Deixar o copo na mesa',
+        costLabel: 'Desapego a modismos (+6 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 6 }, 'Não ligou para copo da moda');
+          return '✋ <strong>MODISMO DISPENSADO:</strong> Deixar o copo térmico para o dono playboy te poupa de dores de cabeça (+6 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_stanley',
+        label: '🔍 Testar a retenção térmica com o dedo',
+        costLabel: 'Teste de temperatura',
+        execute: () => '🔍 <strong>ISOLAMENTO:</strong> Aço inoxidável 18/8 com vácuo duplo. Mantém a cerveja trincando por 4 horas.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_CENTURION: {
+    id: 'ITEM_THEFT_CENTURION',
+    title: '💳 CARTÃO BLACK CENTURION SEM LIMITE',
+    getIntroText: () => `
+      Um cartão de metal preto acetinado com bordas pesadas e logo Centurion.<br>
+      Sem limite de compras pré-fixado, emitido para contas de patrimônio ultra-elevado.<br>
+      <em>Potencial de compras antes do bloqueio: R$ 450,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_cartao',
+        label: '🥷 Afanar o Cartão Black e passar compras rápidas (+R$ 450,00)',
+        costLabel: '🚨 +32% Perigo & Alerta de Fraude Bancária',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'cartao_centurion', name: 'Cartão Black Centurion' }, 45000, 32);
+          return '💳 <strong>COMPRAS APROVADAS:</strong> Você passou aproximações em estabelecimentos antes do titular bloquear pelo app (+R$ 450,00, +32% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_cartao',
+        label: '✋ Deixar o cartão sobre o aparador de mármore',
+        costLabel: 'Sem crime financeiro (+10 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Evitou crime de estelionato');
+          return '✋ <strong>LIMPO:</strong> Mexer com cartão Black atrai a delegacia de crimes cibernéticos. Melhor deixar no lugar (+10 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_cartao',
+        label: '🔍 Sentir o peso do metal titânio do cartão',
+        costLabel: 'Sensação tátil',
+        execute: () => '🔍 <strong>PESO:</strong> Pesa quase 18 gramas de puro metal escuro. Um cartão com peso de barra de ouro.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_ESPRESSO: {
+    id: 'ITEM_THEFT_ESPRESSO',
+    title: '☕ MÁQUINA DE CAFÉ EXPRESSO ITALIANA CROMADA',
+    getIntroText: () => `
+      Máquina profissional de expresso em aço inox polido com porta-filtro de latão e bomba de 15 bar.<br>
+      <em>Valor de mercado gastronômico: R$ 320,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_espresso',
+        label: '🥷 Furtar a Máquina de Expresso Italiana (+R$ 320,00)',
+        costLabel: '🚨 +26% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'maquina_espresso', name: 'Cafeteira Italiana Cromada' }, 32000, 26);
+          return '☕ <strong>MÁQUINA AFANADA:</strong> Você desconectou o cabo de força e levou a cafeteira cromada (+R$ 320,00, +26% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_espresso',
+        label: '✋ Tirar um expresso curto e deixar a máquina intacta',
+        costLabel: 'Cafeína gourmet (+20 Sanidade, +10 Bucho)',
+        execute: (state, sound) => {
+          if (sound && sound.playDrinkGulp) sound.playDrinkGulp();
+          state.apply({ sanidade: 20, fome: 10 }, 'Tomou café expresso italiano da cobertura');
+          return '☕ <strong>EXPRESSO CREMOSO:</strong> Um café denso com crema aveludada tirado na hora. Foco e energia renovados (+20 Sanidade, +10 Bucho).';
+        }
+      },
+      {
+        id: 'examinar_espresso',
+        label: '🔍 Olhar os manômetros de pressão da caldeira',
+        costLabel: 'Engenharia italiana',
+        execute: () => '🔍 <strong>PRESSÃO:</strong> Caldeira em cobre com manômetro marcando exatos 9 bar de pressão de extração.'
+      }
+    ]
+  },
+
+  // =========================================================================
+  // DYNAMIC POLICE PURSUIT ENCOUNTER (THE MORE YOU STEAL, THE HIGHER THE CHANCE)
+  // =========================================================================
+  POLICE_INTERCEPTION_BURGLARY: {
+    id: 'POLICE_INTERCEPTION_BURGLARY',
+    title: '🚔 ENQUADRO DA PMESP // SUSPEITA DE FURTO RESIDENCIAL',
+    getIntroText: (state) => `
+      A viatura da Polícia Militar (87º BPM/M de Pirituba) freia bruscamente na sua frente com o giroflex ligado e a sirene estalando!<br>
+      Dois policiais do pelotão de patrulhamento descem de prancheta em punho e postura tática:<br>
+      <em>"— PARADO AÍ! MÃOS NA CABEÇA! A central do 190 recebeu ligações de vizinhos denunciando invasão e furto na região. Você preenche todas as características passadas pelo COPOM!"</em><br>
+      <small style="color:#ff3333;font-weight:bold">🚨 Nível de B.O.: ${state.perigo}% | Furtos Cometidos: ${state.theftCount || 0} objetos | Bens Furtados: ${state.stolenItems && state.stolenItems.length > 0 ? state.stolenItems.map(i => i.name).join(', ') : 'Nenhum'}</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'entregar_bens',
+        label: `🤝 Entregar todos os bens furtados e pagar taxa de fiança administrativa (R$ ${(Math.min(state.grana || 0, Math.max(4000, (state.theftCount || 1) * 3000)) / 100).toFixed(2)})`,
+        costLabel: 'Apreensão legal (-35% Perigo & zera furtos)',
+        execute: (state, sound) => {
+          if (sound) sound.playSiren();
+          const fineCentavos = Math.min(state.grana || 0, Math.max(4000, (state.theftCount || 1) * 3000));
+          state.surrenderStolenGoods(fineCentavos);
+          return '🚔 <strong>BENS APREENDIDOS:</strong> Você colaborou, entregou os pertences furtados e arcou com as taxas legais. A viatura apreendeu os materiais e te liberou sob advertência severa. A chapa esfriou (-35% Perigo, histórico de furto zerado).';
+        }
+      },
+      {
+        id: 'dar_migue',
+        label: '🗣️ Tentar dar um migué de malandro (Alegar que comprou tudo na Feira do Rolo)',
+        costLabel: 'Teste de Ginga (Risco de agravamento)',
+        execute: (state, sound) => {
+          const penalty = (state.theftCount || 1) * 12;
+          const successChance = Math.max(0.15, Math.min(0.85, (state.ginga - penalty) / 100));
+          const roll = state.rng.chance(successChance);
+
+          if (roll) {
+            state.apply({ ginga: 20, sanidade: 10 }, 'Migué bem-sucedido na polícia');
+            return '🗣️ <strong>MIGUÉ ESPETACULAR:</strong> Com a mais pura ginga paulistana, você desenrolou uma história convincente sobre parentes no interior e notas da feira. O sargento franziu a testa, mandou você circular e não dar bobeira (+20 Ginga, +10 Sanidade)!';
+          } else {
+            if (sound) sound.playSiren();
+            state.apply({ perigo: 40 }, 'Desacato e contradição no enquadro policial');
+            const defeat = state.checkDefeat();
+            if (defeat) {
+              return '🚨 <strong>MIGUÉ DESMASCARADO:</strong> O cabo cruzou os dados no tablet e pegou sua contradição! Você foi algemado e conduzido imediatamente ao 87º DP de Pirituba!';
+            }
+            return '🚨 <strong>O CABO NÃO ENGOLIU:</strong> "— Tá querendo ensinar padre a rezar missa?!" O sargento confiscou seus pertences suspeitos e anotou seu nome no B.O. da região (+40% Perigo)!';
+          }
+        }
+      },
+      {
+        id: 'meter_o_pe',
+        label: '🏃 METER O PÉ! Fuga alucinada pelas vielas e escadões da quebrada!',
+        costLabel: 'Adrenalina extrema (50% base de fuga)',
+        execute: (state, sound) => {
+          const escapeChance = Math.max(0.20, Math.min(0.85, 0.50 + (state.ginga / 250) - ((state.theftCount || 1) * 0.08)));
+          const roll = state.rng.chance(escapeChance);
+
+          if (roll) {
+            state.apply({ ginga: 25, fome: -12, sanidade: 12 }, 'Fuga cinematográfica da PM');
+            return '🏃 <strong>FUGA CINEMATOGRÁFICA:</strong> Você disparou pelas vielas apertadas, pulou um muro de bloco e despistou a viatura nos labirintos de Pirituba! O coração bateu a mil na boca (+25 Ginga, -12% Bucho, +12% Sanidade)!';
+          } else {
+            if (sound) sound.playSiren();
+            state.apply({ perigo: 100 }, 'Capturado na fuga pela viatura');
+            return '🚨 <strong>CERCO FECHADO:</strong> Você tropeçou numa tampa de bueiro e a viatura te prensou na parede do escadão! Preso em flagrante delito!';
+          }
+        }
+      }
+    ]
   }
 };
 
@@ -31656,6 +32671,7 @@ class InteractableSystem {
     this.activeQuickOptions = [];
     this.doors = [];
     this.residentNpcs = [];
+    this.houseItems = [];
 
     // Keyboard hotkeys [1], [2], [3] for seamless NPC Quick Actions
     if (typeof window !== 'undefined') {
@@ -32005,7 +33021,12 @@ class InteractableSystem {
       isDoor: true,
       prompt: d.prompt || 'ARROMBAR / ABRIR PORTA NO SOCO'
     }));
-    const allTargets = [...this.anchors, ...npcTargets, ...extNpcTargets, ...residentTargets, ...doorTargets];
+    const houseItemTargets = (this.houseItems || []).filter(item => !item.isStolen).map(item => ({
+      ...item,
+      isHouseItem: true,
+      isOpen: true
+    }));
+    const allTargets = [...this.anchors, ...npcTargets, ...extNpcTargets, ...residentTargets, ...doorTargets, ...houseItemTargets];
 
     for (const anchor of allTargets) {
       const dx = anchor.position.x - playerPos.x;
@@ -32024,7 +33045,7 @@ class InteractableSystem {
           let isOpen = true;
           if (anchor.isDoor) {
             isOpen = true; // doors are interactable while closed
-          } else if (anchor.isNpc) {
+          } else if (anchor.isNpc || anchor.isHouseItem) {
             isOpen = true;
           } else {
             // Check if zone is currently open
@@ -32053,7 +33074,7 @@ class InteractableSystem {
 
     if (closestTarget) {
       const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
-      const loc = closestTarget.anchor.isDoor
+      const loc = (closestTarget.anchor.isDoor || closestTarget.anchor.isHouseItem)
         ? null
         : (closestTarget.anchor.isNpc
           ? getLocalizedNpc(closestTarget.anchor.id)
@@ -32069,6 +33090,13 @@ class InteractableSystem {
         const promptStr = isEn
           ? `[E] PUNCH / BASH DOOR OPEN (${doorName})`
           : `[E] ARROMBAR / ABRIR PORTA NO SOCO (${doorName})`;
+        this.showPrompt(promptStr);
+      } else if (closestTarget.anchor.isHouseItem) {
+        this.hideNpcQuickDock();
+        const itemName = closestTarget.anchor.name || 'OBJETO';
+        const promptStr = isEn
+          ? `[E] ${itemName} (STEAL OR LEAVE)`
+          : `[E] ${closestTarget.anchor.prompt || itemName}`;
         this.showPrompt(promptStr);
       } else {
         // Static location interactable (Padaria, Bar, Elevador, Semáforo)
@@ -32304,6 +33332,10 @@ class InteractableSystem {
     this.residentNpcs = npcs || [];
   }
 
+  setHouseItems(items) {
+    this.houseItems = items || [];
+  }
+
   setDoors(doors) {
     this.doors = doors || [];
   }
@@ -32350,6 +33382,30 @@ class InteractableSystem {
       );
     }
     this.hidePrompt();
+
+    // Check if this door leads to a house with an entry intent encounter (steal or respect)
+    if (door.entryEncounterId && this.dialog && !this.dialog.isOpen) {
+      const enc = BRAZILIAN_ENCOUNTERS[door.entryEncounterId];
+      if (enc && game?.state) {
+        setTimeout(() => {
+          if (!this.dialog.isOpen) {
+            this.dialog.open({
+              id: enc.id,
+              encounterId: enc.id,
+              _state: game.state,
+              title: enc.title,
+              text: enc.getIntroText(game.state),
+              options: enc.getOptions(game.state)
+            }, (opt) => {
+              const outcome = opt.execute(game.state, this.sound);
+              if (outcome && game.hud) {
+                game.hud.showToast(outcome, 4000);
+              }
+            });
+          }
+        }, 350);
+      }
+    }
   }
 
   trigger(gameState) {
@@ -32364,6 +33420,43 @@ class InteractableSystem {
     // If aiming at an interactive door, punch/bash it open
     if (this.currentTarget.anchor.isDoor) {
       this.triggerDoor(this.currentTarget.anchor);
+      return;
+    }
+
+    // If aiming at an interactive house item (TV, Botijão, Stanley, iPhone, etc.)
+    if (this.currentTarget.anchor.isHouseItem) {
+      if (this.dialog && this.dialog.isOpen) return;
+      const item = this.currentTarget.anchor;
+      const encId = item.encounterId;
+      const enc = BRAZILIAN_ENCOUNTERS[encId];
+      if (!enc) return;
+
+      this.dialog.open({
+        id: encId,
+        encounterId: encId,
+        _state: gameState,
+        title: enc.title,
+        text: enc.getIntroText(gameState),
+        options: enc.getOptions(gameState)
+      }, (chosenOption) => {
+        const outcomeText = chosenOption.execute(gameState, this.sound);
+        if (chosenOption.id.startsWith('furtar_')) {
+          item.isStolen = true;
+          if (item.mesh) {
+            item.mesh.visible = false;
+          }
+        }
+        if (outcomeText) {
+          const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
+          this.dialog.open({
+            title: isEn ? 'ITEM INTERACTION' : 'INTERAÇÃO COM OBJETO',
+            text: `<p>${outcomeText}</p>`,
+            options: [
+              { label: isEn ? 'Continue' : 'Continuar', execute: () => {} }
+            ]
+          }, () => {});
+        }
+      });
       return;
     }
 
@@ -32405,6 +33498,30 @@ class InteractableSystem {
             : '🛗 <strong>ELEVADOR:</strong> Você subiu para a Cobertura no 12º andar (vista 180° do Pico do Jaraguá)!',
           3500
         );
+      }
+
+      // Trigger Penthouse entry intent encounter
+      if (this.dialog && !this.dialog.isOpen && game?.state) {
+        const enc = BRAZILIAN_ENCOUNTERS.HOUSE_ENTRY_PENTHOUSE;
+        if (enc) {
+          setTimeout(() => {
+            if (!this.dialog.isOpen) {
+              this.dialog.open({
+                id: enc.id,
+                encounterId: enc.id,
+                _state: game.state,
+                title: enc.title,
+                text: enc.getIntroText(game.state),
+                options: enc.getOptions(game.state)
+              }, (opt) => {
+                const outcome = opt.execute(game.state, this.sound);
+                if (outcome && game.hud) {
+                  game.hud.showToast(outcome, 4000);
+                }
+              });
+            }
+          }, 400);
+        }
       }
       return;
     }
@@ -33577,6 +34694,9 @@ class GameManager {
     if (this.city && this.city.residentNpcs) {
       this.interactables.setResidentNpcs(this.city.residentNpcs);
     }
+    if (this.city && this.city.houseItems) {
+      this.interactables.setHouseItems(this.city.houseItems);
+    }
     this.hud = new HudGame();
     this.hands = new HandsSystem(this.scene, this.camera, this.sound);
     if (this.controls) {
@@ -33614,6 +34734,7 @@ class GameManager {
     this.lastThunderTime = 0;
     this.blitzCount = 0;
     this.lastBlitzHour = -99;
+    this.policeTheftTimer = 0;
     this.collisionImmunityTimer = 2.0;
     this.dialog.onClose = () => {
       this.collisionImmunityTimer = 2.5;
@@ -33828,6 +34949,21 @@ class GameManager {
       }
     }
 
+    // 8b2. Dynamic Police Pursuit for Residential Burglary / Theft (The more you steal, the higher the chance!)
+    if (this.state && this.state.theftCount > 0) {
+      this.policeTheftTimer += delta;
+      if (this.policeTheftTimer >= 6.5) {
+        this.policeTheftTimer = 0;
+        const alertChance = this.state.getPoliceTheftChance();
+        if (this.rng.chance(alertChance)) {
+          const isSV = typeof document !== 'undefined' && document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
+          if (!this.dialog?.isOpen && !isSV && !this.isAnyModalActive()) {
+            this.triggerBurglaryPoliceInterception();
+          }
+        }
+      }
+    }
+
     // 8c. Update bank bankruptcy timer if account balance is negative
     if (this.state) {
       if (this.state.grana < 0) {
@@ -33972,6 +35108,47 @@ class GameManager {
       const outcome = opt.execute(this.state, this.sound);
       if (outcome) {
         this.hud.showToast(`🚔 ${outcome}`, 6000);
+      }
+    });
+  }
+
+  triggerBurglaryPoliceInterception() {
+    if (this.isAnyModalActive()) return;
+    if (this.sound) {
+      this.sound.playSiren();
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('ENCOUNTER', 'Perseguição policial e cerco da PMESP por furto residencial');
+      }
+    }
+
+    const enc = BRAZILIAN_ENCOUNTERS.POLICE_INTERCEPTION_BURGLARY;
+    if (!enc) return;
+
+    const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
+    if (this.hud) {
+      this.hud.showToast(
+        isEn
+          ? '🚨 <strong>POLICE PURSUIT!</strong> Sirens wailing! Military Police patrol vehicle intercepted you!'
+          : '🚨 <strong>SIRENE DA POLÍCIA!</strong> A viatura da PMESP bloqueou a passagem! Enquadro por furto residencial!',
+        4000
+      );
+    }
+
+    this.dialog.open({
+      id: 'POLICE_INTERCEPTION_BURGLARY',
+      encounterId: 'POLICE_INTERCEPTION_BURGLARY',
+      _state: this.state,
+      title: enc.title,
+      text: enc.getIntroText(this.state),
+      options: enc.getOptions(this.state)
+    }, (opt) => {
+      const outcome = opt.execute(this.state, this.sound);
+      if (outcome) {
+        this.hud.showToast(outcome, 5000);
+      }
+      const defeat = this.state.checkDefeat();
+      if (defeat) {
+        this.handleRunEnd(false, defeat);
       }
     });
   }

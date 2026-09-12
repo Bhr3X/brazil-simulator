@@ -3424,6 +3424,693 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  // =========================================================================
+  // HOUSE ENTRY INTENT ENCOUNTERS (STEAL VS. RESPECT)
+  // =========================================================================
+  HOUSE_ENTRY_MID_CLASS: {
+    id: 'HOUSE_ENTRY_MID_CLASS',
+    title: '🏡 ENTRANDO NA CASA DO TIO WILSON',
+    getIntroText: (state) => `
+      A porta se abre para o piso de taco encerado da sala de estar do Tio Wilson.<br>
+      A TV de tubo está sintonizada no Teste de Fidelidade do João Kléber, a mesinha tem boletos da Enel e a geladeira branca guarda mantimentos.<br>
+      <em>Qual a sua intenção nesta residência?</em><br>
+      <small style="color:#ffcc00">Furtos no histórico: ${state.theftCount || 0} | Nível de B.O.: ${state.perigo}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'modo_furto',
+        label: '🥷 MODO FURTO: Invadir com malícia para afanar o que puder!',
+        costLabel: 'Risco de B.O. (+15% Perigo)',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.houseIntents.set('mid_class_house', 'steal');
+          state.apply({ perigo: 15 }, 'Invasão domiciliar com dolo');
+          return '🚨 <strong>MODO FURTO ATIVADO:</strong> Seus olhos examinam os pertences valiosos da casa. Cuidado: vizinhos alertas podem acionar o 190!';
+        }
+      },
+      {
+        id: 'modo_respeito',
+        label: '🤝 MODO VISITA: Entrar na moral e respeitar o lar da família',
+        costLabel: 'Paz de espírito (+12% Sanidade, +6 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('mid_class_house', 'respect');
+          state.apply({ sanidade: 12, ginga: 6 }, 'Visita respeitosa à residência');
+          return '🤝 <strong>VISITA DE BOA:</strong> Você entrou de coração limpo. Consciência tranquila e respeito garantido com os moradores da rua.';
+        }
+      },
+      {
+        id: 'modo_vasculhar',
+        label: '🔍 APENAS OLHAR: Circular com discrição sem compromisso prévio',
+        costLabel: 'Exploração neutra (+5 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('mid_class_house', 'explore');
+          state.apply({ ginga: 5 }, 'Exploração cautelosa de residência');
+          return '🔍 <strong>EXPLORAÇÃO LIVRE:</strong> Você caminha pela casa analisando os cômodos e móveis com atenção.';
+        }
+      }
+    ]
+  },
+
+  HOUSE_ENTRY_FAVELA: {
+    id: 'HOUSE_ENTRY_FAVELA',
+    title: '🏠 ENTRANDO NA RESIDÊNCIA DA COMUNIDADE',
+    getIntroText: (state) => `
+      A porta de madeira bate e revela o interior acolhedor de uma casa humilde de tijolo baiano.<br>
+      O aroma de feijão caseiro e café coado no pano perfuma o ar. Há um botijão Ultragaz, filtro de barro tradicional e economias no quarto.<br>
+      <em>Qual a sua intenção nesta casa?</em><br>
+      <small style="color:#ffcc00">Furtos no histórico: ${state.theftCount || 0} | Nível de B.O.: ${state.perigo}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'modo_furto',
+        label: '🥷 MODO FURTO: Afanar o botijão, economias ou objetos da casa',
+        costLabel: 'Risco de B.O. (+15% Perigo)',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.houseIntents.set('favela_house', 'steal');
+          state.apply({ perigo: 15 }, 'Invasão de residência popular');
+          return '🚨 <strong>MODO FURTO ATIVADO:</strong> Você foca nos bens da casa. O rádio-patrulha da PMESP pode cercar a viela se alguém desconfiar!';
+        }
+      },
+      {
+        id: 'modo_respeito',
+        label: '🤝 MODO RESPEITO: Respeitar a luta dos moradores e entrar em paz',
+        costLabel: 'Humildade (+14% Sanidade, +8 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('favela_house', 'respect');
+          state.apply({ sanidade: 14, ginga: 8 }, 'Respeito aos moradores da favela');
+          return '🤝 <strong>DISCIPLINA DA QUEBRADA:</strong> "Na quebrada o respeito é a lei principal!" Sua atitude nobre eleva sua moral com a comunidade.';
+        }
+      },
+      {
+        id: 'modo_vasculhar',
+        label: '🔍 APENAS VASCULHAR: Dar uma olhada sem tocar em nada',
+        costLabel: 'Discrição neutra (+5 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('favela_house', 'explore');
+          state.apply({ ginga: 5 }, 'Olhada discreta na residência');
+          return '🔍 <strong>OLHADA DISCRETA:</strong> Você transita pela casa admirando os detalhes da arquitetura popular.';
+        }
+      }
+    ]
+  },
+
+  HOUSE_ENTRY_PENTHOUSE: {
+    id: 'HOUSE_ENTRY_PENTHOUSE',
+    title: '🏙️ COBERTURA LUXUOSA DO EDIFÍCIO JARAGUÁ',
+    getIntroText: (state) => `
+      As portas de aço escovado do elevador revelam o duplex cinematográfico com piso de mármore branco e vista panorâmica do Pico do Jaraguá.<br>
+      Eletrônicos topo de linha, iPhone 16 Pro Max, copo Stanley, cartão Black e cafeteira italiana decoram os ambientes.<br>
+      <em>Qual a sua intenção nesta cobertura milionária?</em><br>
+      <small style="color:#ffcc00">Furtos no histórico: ${state.theftCount || 0} | Nível de B.O.: ${state.perigo}%</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'modo_furto',
+        label: '🥷 MODO FURTO: Saquear os artigos de luxo, eletrônicos e cartões!',
+        costLabel: 'Alto Risco (+25% Perigo)',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.houseIntents.set('penthouse', 'steal');
+          state.apply({ perigo: 25 }, 'Invasão a cobertura de luxo');
+          return '🚨 <strong>MODO FURTO ALTO PADRÃO:</strong> Alerta máximo! Se a segurança privada ou o 87º BPM/M forem acionados, a viatura chega rápido!';
+        }
+      },
+      {
+        id: 'modo_respeito',
+        label: '🤝 MODO VISITA: Apenas contemplar a vista deslumbrante e o luxo',
+        costLabel: 'Paz de espírito (+18% Sanidade, +5 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('penthouse', 'respect');
+          state.apply({ sanidade: 18, ginga: 5 }, 'Contemplação pacífica da cobertura');
+          return '🥂 <strong>VISITA CIVILIZADA:</strong> Você relaxa contemplando a vista deslumbrante da Serra da Cantareira sem cometer infrações.';
+        }
+      },
+      {
+        id: 'modo_vasculhar',
+        label: '🔍 APENAS VASCULHAR: Examinar o design moderno com cautela',
+        costLabel: 'Curiosidade (+6 Ginga)',
+        execute: (state) => {
+          state.houseIntents.set('penthouse', 'explore');
+          state.apply({ ginga: 6 }, 'Inspeção do duplex luxuoso');
+          return '🔍 <strong>INSPEÇÃO ATENTA:</strong> Você circula pela cobertura examinando a mobília de design.';
+        }
+      }
+    ]
+  },
+
+  // =========================================================================
+  // HOUSE ITEM THEFT ENCOUNTERS (TV, BOTIJÃO, STANLEY, IPHONE, CARTEIRA, ETC)
+  // =========================================================================
+  ITEM_THEFT_TV_TUBO: {
+    id: 'ITEM_THEFT_TV_TUBO',
+    title: '📺 TELEVISÃO CRT 20" CCE // COM TOALHINHA DE CROCHÊ',
+    getIntroText: () => `
+      A clássica TV de tubo colorida com carcaça de plástico escuro e botões de canal analógicos.<br>
+      A tela fosfórica irradia as pegadinhas e o Teste de Fidelidade. No topo, a toalhinha de crochê da vovó.<br>
+      <em>Valor de mercado na Feira do Rolo: R$ 120,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_tv',
+        label: '🥷 Furtar TV de Tubo CCE (+R$ 120,00)',
+        costLabel: '🚨 +22% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'tv_tubo_cce', name: 'TV de Tubo 20" CCE' }, 12000, 22);
+          return '📺 <strong>TV AFANADA:</strong> Você desconectou os cabos e abraçou a TV de tubo! Pesada como chumbo, mas vale R$ 120,00 na feira do rolo (+R$ 120, +22% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_tv',
+        label: '✋ Deixar a TV no rack (Respeitar o entretenimento do Tio Wilson)',
+        costLabel: 'Consciência limpa (+6 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 6 }, 'Respeitou a TV da família');
+          return '✋ <strong>INTACTA:</strong> Você deixou a TV ligada no João Kléber. O Tio Wilson merece curtir a aposentadoria em paz (+6 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_tv',
+        label: '🔍 Examinar a imagem e o chiado dos alto-falantes',
+        costLabel: 'Nostalgia brasileira',
+        execute: () => '🔍 <strong>DETALHES:</strong> Imagem de tubo entrelaçada clássica, botão de volume rangendo e aquele cheiro nostróico de eletrônico quente.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_BOLETO: {
+    id: 'ITEM_THEFT_BOLETO',
+    title: '📄 BOLETO DA ENEL & CARNÊ DAS CASAS BAHIA',
+    getIntroText: () => `
+      Sobre a mesinha de centro de mogno repousam a conta de luz da Enel e o carnê de 24 prestações da geladeira.<br>
+      Junto aos papéis, há um envelope com notas amassadas separadas para o pagamento da lotérica.<br>
+      <em>Total em dinheiro trocado no envelope: R$ 35,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_envelope',
+        label: '🥷 Afanar o envelope com as notas trocadas (+R$ 35,00)',
+        costLabel: '🚨 +14% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'envelope_boletos', name: 'Economias das Contas' }, 3500, 14);
+          return '💸 <strong>ENVELOPE AFANADO:</strong> Você pegou as notas de R$ 10 e R$ 5 que estavam separadas para a lotérica (+R$ 35,00, +14% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_boleto',
+        label: '✋ Deixar o envelope e os boletos na mesa',
+        costLabel: 'Empatia com o trabalhador (+8 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Não mexeu no dinheiro das contas');
+          return '✋ <strong>RESPEITO:</strong> Deixar o dinheiro do boleto do trabalhador intocado faz bem para a alma (+8 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_boleto',
+        label: '🔍 Ler o valor da fatura de luz',
+        costLabel: 'Indignação paulistana',
+        execute: () => '🔍 <strong>ENEL:</strong> "Fatura vencida com juros de mora: R$ 142,50". A eterna luta do brasileiro contra a tarifa de energia.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_CROCHE: {
+    id: 'ITEM_THEFT_CROCHE',
+    title: '🧶 TOALHINHA DE CROCHÊ FEITA À MÃO PELA VOVÓ',
+    getIntroText: () => `
+      Toalhinha branca de crochê bordada com linha fina de algodão, colocada com esmero sobre o móvel.<br>
+      Uma verdadeira relíquia da hospitalidade familiar brasileira.<br>
+      <em>Valor sentimental inestimável / R$ 20,00 no brechó</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_croche',
+        label: '🥷 Furtar a toalhinha de crochê (+R$ 20,00)',
+        costLabel: '🚨 +10% Perigo & Peso na Consciência',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'toalhinha_croche', name: 'Toalhinha de Crochê da Vovó' }, 2000, 10);
+          return '🧶 <strong>CROCHÊ AFANADO:</strong> Você guardou a toalhinha de crochê no bolso. Roubar peça da vovó é sacanagem (+R$ 20,00, +10% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_croche',
+        label: '✋ Deixar a toalhinha no móvel',
+        costLabel: 'Respeito à tradição (+10 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Respeitou a toalhinha da vovó');
+          return '🧶 <strong>BENÇÃO DA VOVÓ:</strong> Respeitar a memória e o artesanato traz um afago no peito (+10 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_croche',
+        label: '🔍 Admirar os pontos de tricô da toalha',
+        costLabel: 'Apreciação estética',
+        execute: () => '🔍 <strong>PONTO CRUZ:</strong> Pontos firmes, tecido alvejado impecável e aquele carinho de casa de avó.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_LITRAO: {
+    id: 'ITEM_THEFT_LITRAO',
+    title: '🍺 LITRÃO DE CERVEJA TRINCANDO NA GELADEIRA',
+    getIntroText: () => `
+      Abrindo a geladeira branca, reluz uma garrafa de 1 Litro de Skol Pilsen trincando de gelada com gotas escorrendo.<br>
+      <em>Preço do Litrão no boteco: R$ 14,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_litrao',
+        label: '🥷 Afanar e beber o Litrão gelado agora!',
+        costLabel: '🚨 +10% Perigo | +30 Sanidade & +15 Bucho',
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playDrinkGulp?.(); }
+          state.recordTheft({ id: 'litrao_skol', name: 'Litrão de Skol Gelada' }, 1400, 10);
+          state.apply({ sanidade: 30, fome: 15 }, 'Bebeu cerveja furtada da geladeira');
+          return '🍺 <strong>GOLE REFRESCANTE:</strong> Você estalou a tampa e virou o Litrão geladinho! Refresco imediato (+30 Sanidade, +15 Bucho, +10% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_litrao',
+        label: '✋ Fechar a geladeira e deixar a cerveja intocada',
+        costLabel: 'Sobriedade (+6 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 6 }, 'Respeitou a cerveja alheia');
+          return '✋ <strong>GELADEIRA FECHADA:</strong> A cerveja do dono permanece gelando para a noitada (+6 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_litrao',
+        label: '🔍 Tocar na garrafa para ver se está realmente trincando',
+        costLabel: 'Teste térmico',
+        execute: () => '🔍 <strong>GELADA:</strong> Quase no ponto de formar véu de noiva! Geladíssima.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_CARTEIRA: {
+    id: 'ITEM_THEFT_CARTEIRA',
+    title: '💰 CARTEIRA DE COURO COM ECONOMIAS DO TRABALHO',
+    getIntroText: () => `
+      Sobre a mesinha há uma carteira de couro desgastada pelo bolso traseiro da calça jeans.<br>
+      Dentro dela, notas de cinquenta e vinte reais acumuladas com o suor do trabalho do mês.<br>
+      <em>Valor em espécie na carteira: R$ 85,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_carteira',
+        label: '🥷 Afanar as cédulas da carteira (+R$ 85,00)',
+        costLabel: '🚨 +25% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'carteira_notas', name: 'Carteira com Cédulas' }, 8500, 25);
+          return '💸 <strong>CARTEIRA LIMPA:</strong> Você surrupiou as notas de cinquenta e vinte da carteira (+R$ 85,00, +25% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_carteira',
+        label: '✋ Deixar a carteira no lugar (Não roubar o salário do trabalhador)',
+        costLabel: 'Honra (+14 Sanidade, +5 Ginga)',
+        execute: (state) => {
+          state.apply({ sanidade: 14, ginga: 5 }, 'Preservou a carteira do trabalhador');
+          return '🤝 <strong>HONRA INABALÁVEL:</strong> Não mexer no sustento de outro cidadão te faz manter a cabeça erguida (+14 Sanidade, +5 Ginga).';
+        }
+      },
+      {
+        id: 'examinar_carteira',
+        label: '🔍 Olhar os documentos e cartões sem tirar nada',
+        costLabel: 'Observação neutra',
+        execute: () => '🔍 <strong>DOCUMENTOS:</strong> RG antigo plastificado, cartão da firma e fotos 3x4 dos filhos.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_BOTIJAO: {
+    id: 'ITEM_THEFT_BOTIJAO',
+    title: '🔵 BOTIJÃO DE GÁS ULTRAGAZ P-13 CHEIO',
+    getIntroText: () => `
+      O clássico botijão de 13kg pintado no azul royal da Ultragaz, com lacre de segurança intacto.<br>
+      Artigo de alto valor na quebrada, essencial para o feijão de todo dia.<br>
+      <em>Preço de revenda na favela: R$ 110,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_botijao',
+        label: '🥷 Furtar o Botijão de Gás P-13 (+R$ 110,00)',
+        costLabel: '🚨 +26% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'botijao_ultragaz', name: 'Botijão de Gás P-13' }, 11000, 26);
+          return '🔵 <strong>BOTIJÃO LEVADO:</strong> Você desrosqueou a mangueira e colocou o botijão pesado nas costas (+R$ 110,00, +26% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_botijao',
+        label: '✋ Deixar o botijão instalado no fogão',
+        costLabel: 'Respeito ao almoço da família (+12 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 12 }, 'Deixou o botijão intacto');
+          return '✋ <strong>RESPEITO:</strong> Sem o botijão a família não cozinha o rango. Deixá-lo no lugar é dever moral (+12 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_botijao',
+        label: '🔍 Conferir o lacre de plástico e a data de validade',
+        costLabel: 'Segurança residencial',
+        execute: () => '🔍 <strong>ULTRAGAZ:</strong> Lacre brilhante com numeração gravada, pronto para queimar na chama azul do fogão.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_FILTRO: {
+    id: 'ITEM_THEFT_FILTRO',
+    title: '🏺 FILTRO DE BARRO SÃO JOÃO TRADICIONAL',
+    getIntroText: () => `
+      O filtro de terracota marrom com vela de carvão ativado e torneirinha marrom.<br>
+      Considerado pelos cientistas como o melhor sistema de filtragem de água do planeta.<br>
+      <em>Valor de mercado: R$ 50,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_filtro',
+        label: '🥷 Furtar o Filtro de Barro São João (+R$ 50,00)',
+        costLabel: '🚨 +18% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'filtro_barro', name: 'Filtro de Barro São João' }, 5000, 18);
+          return '🏺 <strong>FILTRO AFANADO:</strong> Você esvaziou a água fresca e levou o filtro de argila (+R$ 50,00, +18% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_filtro',
+        label: '✋ Beber um copo d\'água e deixar o filtro no lugar',
+        costLabel: 'Hidratação (+15 Bucho, +15 Sanidade)',
+        execute: (state, sound) => {
+          if (sound && sound.playDrinkGulp) sound.playDrinkGulp();
+          state.apply({ fome: 15, sanidade: 15 }, 'Bebeu água pura do filtro de barro');
+          return '💧 <strong>ÁGUA PURÍSSIMA:</strong> Um gole fresco com gosto inconfundível de cerâmica. Hidratado e em paz (+15 Bucho, +15 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_filtro',
+        label: '🔍 Examinar a vela filtrante e a umidade do barro',
+        costLabel: 'Inspeção de pureza',
+        execute: () => '🔍 <strong>FILTRAGEM:</strong> Gotejamento constante e cerâmica fresca mesmo no calor sufocante de São Paulo.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_RADIO: {
+    id: 'ITEM_THEFT_RADIO',
+    title: '📻 RÁDIO DE PILHA AM/FM PORTÁTIL',
+    getIntroText: () => `
+      Pequeno rádio transistorizado prateado com antena telescópica esticada, sintonizado na Rádio Pirituba FM.<br>
+      <em>Valor de revenda: R$ 35,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_radio',
+        label: '🥷 Furtar o rádio de pilha portátil (+R$ 35,00)',
+        costLabel: '🚨 +14% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'radio_pilha', name: 'Rádio de Pilha Transistor' }, 3500, 14);
+          return '📻 <strong>RÁDIO AFANADO:</strong> Você desligou o radinho e enfiou na jaqueta (+R$ 35,00, +14% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_radio',
+        label: '✋ Deixar o rádio tocando samba e pagode',
+        costLabel: 'Curtir o som (+8 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Deixou o rádio animando a casa');
+          return '🎶 <strong>SOM DA QUEBRADA:</strong> Deixar o samba rolando alegra a vizinhança (+8 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_radio',
+        label: '🔍 Ajustar o dial de sintonia fina',
+        costLabel: 'Sintonia radial',
+        execute: () => '🔍 <strong>DIAL:</strong> A agulha vermelha marca 94.7 FM com chiado característico de ondas curtas.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_RESERVA: {
+    id: 'ITEM_THEFT_RESERVA',
+    title: '💵 RESERVA DE EMERGÊNCIA SOB O COLCHÃO',
+    getIntroText: () => `
+      Levantando discretamente o canto do colchão de casal com colcha florida, surge uma meia velha com notas enroladas.<br>
+      As economias da família guardadas para emergências médicas ou reforma do telhado.<br>
+      <em>Total da reserva: R$ 60,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_reserva',
+        label: '🥷 Furtar a reserva sob o colchão (+R$ 60,00)',
+        costLabel: '🚨 +24% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'reserva_colchao', name: 'Economias do Colchão' }, 6000, 24);
+          return '💸 <strong>MEIA LEVADA:</strong> Você embolsou as notas da meia velha sob a cama (+R$ 60,00, +24% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_reserva',
+        label: '✋ Baixar o colchão e não tocar no dinheiro sagrado',
+        costLabel: 'Caráter ilibado (+15 Sanidade, +10 Ginga)',
+        execute: (state) => {
+          state.apply({ sanidade: 15, ginga: 10 }, 'Protegeu a reserva da família');
+          return '🤝 <strong>CARÁTER DE OURO:</strong> Resistir à tentação de furtar de quem tem pouco consolida sua ginga moral (+15 Sanidade, +10 Ginga).';
+        }
+      },
+      {
+        id: 'examinar_reserva',
+        label: '🔍 Conferir o esconderijo sem retirar as notas',
+        costLabel: 'Discrição',
+        execute: () => '🔍 <strong>ESCONDERIJO:</strong> O clássico esconderijo brasileiro: seguro contra ladrão amador, mas manjado por quem é da rua.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_IPHONE: {
+    id: 'ITEM_THEFT_IPHONE',
+    title: '📱 IPHONE 16 PRO MAX TITÂNIO // COBERTURA',
+    getIntroText: () => `
+      Sobre a mesa de centro de vidro temperado da cobertura, repousa o mais novo iPhone de titânio natural.<br>
+      A tela OLED Always-On exibe cotações do dólar e notificações de dividendos de fundos imobiliários.<br>
+      <em>Valor de receptação de luxo: R$ 650,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_iphone',
+        label: '🥷 Afanar o iPhone 16 Pro Max (+R$ 650,00)',
+        costLabel: '🚨 +30% Perigo & Rastreamento por GPS',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'iphone_16_penthouse', name: 'iPhone 16 Pro Max Titânio' }, 65000, 30);
+          return '📱 <strong>IPHONE AFANADO:</strong> Você embolsou o aparelho de titânio! A grana é alta, mas o Find My iPhone pode alertar o COPOM a qualquer segundo (+R$ 650,00, +30% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_iphone',
+        label: '✋ Deixar o aparelho na mesa de vidro',
+        costLabel: 'Sem rastreamento (+8 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Não mexeu no smartphone rastreado');
+          return '✋ <strong>SEM B.O.:</strong> Evitar eletrônico com rastreador GPS em cobertura vigiada é sabedoria de sobrevivência (+8 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_iphone',
+        label: '🔍 Ver o nível de bateria e a carcaça de titânio',
+        costLabel: 'Curiosidade tech',
+        execute: () => '🔍 <strong>ESPECIFICAÇÕES:</strong> Bordas finíssimas de titânio aeroespacial, câmera tripla de 48MP e bateria em 98%.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_STANLEY: {
+    id: 'ITEM_THEFT_STANLEY',
+    title: '🥤 COPO STANLEY TÉRMICO VERDE // 473ML',
+    getIntroText: () => `
+      O lendário copo térmico verde-floresta com tampa de pressão e logotipo prateado gravado a laser.<br>
+      O símbolo máximo do status Faria Limer da capital.<br>
+      <em>Valor de revenda: R$ 150,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_stanley',
+        label: '🥷 Furtar o Copo Stanley Térmico (+R$ 150,00)',
+        costLabel: '🚨 +18% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'copo_stanley_verde', name: 'Copo Stanley Verde' }, 15000, 18);
+          return '🥤 <strong>STANLEY LEVADO:</strong> Você agarrou o copo térmico de grife (+R$ 150,00, +18% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_stanley',
+        label: '✋ Deixar o copo na mesa',
+        costLabel: 'Desapego a modismos (+6 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 6 }, 'Não ligou para copo da moda');
+          return '✋ <strong>MODISMO DISPENSADO:</strong> Deixar o copo térmico para o dono playboy te poupa de dores de cabeça (+6 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_stanley',
+        label: '🔍 Testar a retenção térmica com o dedo',
+        costLabel: 'Teste de temperatura',
+        execute: () => '🔍 <strong>ISOLAMENTO:</strong> Aço inoxidável 18/8 com vácuo duplo. Mantém a cerveja trincando por 4 horas.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_CENTURION: {
+    id: 'ITEM_THEFT_CENTURION',
+    title: '💳 CARTÃO BLACK CENTURION SEM LIMITE',
+    getIntroText: () => `
+      Um cartão de metal preto acetinado com bordas pesadas e logo Centurion.<br>
+      Sem limite de compras pré-fixado, emitido para contas de patrimônio ultra-elevado.<br>
+      <em>Potencial de compras antes do bloqueio: R$ 450,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_cartao',
+        label: '🥷 Afanar o Cartão Black e passar compras rápidas (+R$ 450,00)',
+        costLabel: '🚨 +32% Perigo & Alerta de Fraude Bancária',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'cartao_centurion', name: 'Cartão Black Centurion' }, 45000, 32);
+          return '💳 <strong>COMPRAS APROVADAS:</strong> Você passou aproximações em estabelecimentos antes do titular bloquear pelo app (+R$ 450,00, +32% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_cartao',
+        label: '✋ Deixar o cartão sobre o aparador de mármore',
+        costLabel: 'Sem crime financeiro (+10 Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Evitou crime de estelionato');
+          return '✋ <strong>LIMPO:</strong> Mexer com cartão Black atrai a delegacia de crimes cibernéticos. Melhor deixar no lugar (+10 Sanidade).';
+        }
+      },
+      {
+        id: 'examinar_cartao',
+        label: '🔍 Sentir o peso do metal titânio do cartão',
+        costLabel: 'Sensação tátil',
+        execute: () => '🔍 <strong>PESO:</strong> Pesa quase 18 gramas de puro metal escuro. Um cartão com peso de barra de ouro.'
+      }
+    ]
+  },
+
+  ITEM_THEFT_ESPRESSO: {
+    id: 'ITEM_THEFT_ESPRESSO',
+    title: '☕ MÁQUINA DE CAFÉ EXPRESSO ITALIANA CROMADA',
+    getIntroText: () => `
+      Máquina profissional de expresso em aço inox polido com porta-filtro de latão e bomba de 15 bar.<br>
+      <em>Valor de mercado gastronômico: R$ 320,00</em>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'furtar_espresso',
+        label: '🥷 Furtar a Máquina de Expresso Italiana (+R$ 320,00)',
+        costLabel: '🚨 +26% Perigo & +1 Furto Registrado',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.recordTheft({ id: 'maquina_espresso', name: 'Cafeteira Italiana Cromada' }, 32000, 26);
+          return '☕ <strong>MÁQUINA AFANADA:</strong> Você desconectou o cabo de força e levou a cafeteira cromada (+R$ 320,00, +26% Perigo)!';
+        }
+      },
+      {
+        id: 'deixar_espresso',
+        label: '✋ Tirar um expresso curto e deixar a máquina intacta',
+        costLabel: 'Cafeína gourmet (+20 Sanidade, +10 Bucho)',
+        execute: (state, sound) => {
+          if (sound && sound.playDrinkGulp) sound.playDrinkGulp();
+          state.apply({ sanidade: 20, fome: 10 }, 'Tomou café expresso italiano da cobertura');
+          return '☕ <strong>EXPRESSO CREMOSO:</strong> Um café denso com crema aveludada tirado na hora. Foco e energia renovados (+20 Sanidade, +10 Bucho).';
+        }
+      },
+      {
+        id: 'examinar_espresso',
+        label: '🔍 Olhar os manômetros de pressão da caldeira',
+        costLabel: 'Engenharia italiana',
+        execute: () => '🔍 <strong>PRESSÃO:</strong> Caldeira em cobre com manômetro marcando exatos 9 bar de pressão de extração.'
+      }
+    ]
+  },
+
+  // =========================================================================
+  // DYNAMIC POLICE PURSUIT ENCOUNTER (THE MORE YOU STEAL, THE HIGHER THE CHANCE)
+  // =========================================================================
+  POLICE_INTERCEPTION_BURGLARY: {
+    id: 'POLICE_INTERCEPTION_BURGLARY',
+    title: '🚔 ENQUADRO DA PMESP // SUSPEITA DE FURTO RESIDENCIAL',
+    getIntroText: (state) => `
+      A viatura da Polícia Militar (87º BPM/M de Pirituba) freia bruscamente na sua frente com o giroflex ligado e a sirene estalando!<br>
+      Dois policiais do pelotão de patrulhamento descem de prancheta em punho e postura tática:<br>
+      <em>"— PARADO AÍ! MÃOS NA CABEÇA! A central do 190 recebeu ligações de vizinhos denunciando invasão e furto na região. Você preenche todas as características passadas pelo COPOM!"</em><br>
+      <small style="color:#ff3333;font-weight:bold">🚨 Nível de B.O.: ${state.perigo}% | Furtos Cometidos: ${state.theftCount || 0} objetos | Bens Furtados: ${state.stolenItems && state.stolenItems.length > 0 ? state.stolenItems.map(i => i.name).join(', ') : 'Nenhum'}</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'entregar_bens',
+        label: `🤝 Entregar todos os bens furtados e pagar taxa de fiança administrativa (R$ ${(Math.min(state.grana || 0, Math.max(4000, (state.theftCount || 1) * 3000)) / 100).toFixed(2)})`,
+        costLabel: 'Apreensão legal (-35% Perigo & zera furtos)',
+        execute: (state, sound) => {
+          if (sound) sound.playSiren();
+          const fineCentavos = Math.min(state.grana || 0, Math.max(4000, (state.theftCount || 1) * 3000));
+          state.surrenderStolenGoods(fineCentavos);
+          return '🚔 <strong>BENS APREENDIDOS:</strong> Você colaborou, entregou os pertences furtados e arcou com as taxas legais. A viatura apreendeu os materiais e te liberou sob advertência severa. A chapa esfriou (-35% Perigo, histórico de furto zerado).';
+        }
+      },
+      {
+        id: 'dar_migue',
+        label: '🗣️ Tentar dar um migué de malandro (Alegar que comprou tudo na Feira do Rolo)',
+        costLabel: 'Teste de Ginga (Risco de agravamento)',
+        execute: (state, sound) => {
+          const penalty = (state.theftCount || 1) * 12;
+          const successChance = Math.max(0.15, Math.min(0.85, (state.ginga - penalty) / 100));
+          const roll = state.rng.chance(successChance);
+
+          if (roll) {
+            state.apply({ ginga: 20, sanidade: 10 }, 'Migué bem-sucedido na polícia');
+            return '🗣️ <strong>MIGUÉ ESPETACULAR:</strong> Com a mais pura ginga paulistana, você desenrolou uma história convincente sobre parentes no interior e notas da feira. O sargento franziu a testa, mandou você circular e não dar bobeira (+20 Ginga, +10 Sanidade)!';
+          } else {
+            if (sound) sound.playSiren();
+            state.apply({ perigo: 40 }, 'Desacato e contradição no enquadro policial');
+            const defeat = state.checkDefeat();
+            if (defeat) {
+              return '🚨 <strong>MIGUÉ DESMASCARADO:</strong> O cabo cruzou os dados no tablet e pegou sua contradição! Você foi algemado e conduzido imediatamente ao 87º DP de Pirituba!';
+            }
+            return '🚨 <strong>O CABO NÃO ENGOLIU:</strong> "— Tá querendo ensinar padre a rezar missa?!" O sargento confiscou seus pertences suspeitos e anotou seu nome no B.O. da região (+40% Perigo)!';
+          }
+        }
+      },
+      {
+        id: 'meter_o_pe',
+        label: '🏃 METER O PÉ! Fuga alucinada pelas vielas e escadões da quebrada!',
+        costLabel: 'Adrenalina extrema (50% base de fuga)',
+        execute: (state, sound) => {
+          const escapeChance = Math.max(0.20, Math.min(0.85, 0.50 + (state.ginga / 250) - ((state.theftCount || 1) * 0.08)));
+          const roll = state.rng.chance(escapeChance);
+
+          if (roll) {
+            state.apply({ ginga: 25, fome: -12, sanidade: 12 }, 'Fuga cinematográfica da PM');
+            return '🏃 <strong>FUGA CINEMATOGRÁFICA:</strong> Você disparou pelas vielas apertadas, pulou um muro de bloco e despistou a viatura nos labirintos de Pirituba! O coração bateu a mil na boca (+25 Ginga, -12% Bucho, +12% Sanidade)!';
+          } else {
+            if (sound) sound.playSiren();
+            state.apply({ perigo: 100 }, 'Capturado na fuga pela viatura');
+            return '🚨 <strong>CERCO FECHADO:</strong> Você tropeçou numa tampa de bueiro e a viatura te prensou na parede do escadão! Preso em flagrante delito!';
+          }
+        }
+      }
+    ]
   }
 };
 

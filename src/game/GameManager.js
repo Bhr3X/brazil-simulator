@@ -44,6 +44,9 @@ export class GameManager {
     if (this.city && this.city.residentNpcs) {
       this.interactables.setResidentNpcs(this.city.residentNpcs);
     }
+    if (this.city && this.city.houseItems) {
+      this.interactables.setHouseItems(this.city.houseItems);
+    }
     this.hud = new HudGame();
     this.hands = new HandsSystem(this.scene, this.camera, this.sound);
     if (this.controls) {
@@ -81,6 +84,7 @@ export class GameManager {
     this.lastThunderTime = 0;
     this.blitzCount = 0;
     this.lastBlitzHour = -99;
+    this.policeTheftTimer = 0;
     this.collisionImmunityTimer = 2.0;
     this.dialog.onClose = () => {
       this.collisionImmunityTimer = 2.5;
@@ -295,6 +299,21 @@ export class GameManager {
       }
     }
 
+    // 8b2. Dynamic Police Pursuit for Residential Burglary / Theft (The more you steal, the higher the chance!)
+    if (this.state && this.state.theftCount > 0) {
+      this.policeTheftTimer += delta;
+      if (this.policeTheftTimer >= 6.5) {
+        this.policeTheftTimer = 0;
+        const alertChance = this.state.getPoliceTheftChance();
+        if (this.rng.chance(alertChance)) {
+          const isSV = typeof document !== 'undefined' && document.getElementById('street-view-modal') && !document.getElementById('street-view-modal').classList.contains('modal-hidden');
+          if (!this.dialog?.isOpen && !isSV && !this.isAnyModalActive()) {
+            this.triggerBurglaryPoliceInterception();
+          }
+        }
+      }
+    }
+
     // 8c. Update bank bankruptcy timer if account balance is negative
     if (this.state) {
       if (this.state.grana < 0) {
@@ -439,6 +458,47 @@ export class GameManager {
       const outcome = opt.execute(this.state, this.sound);
       if (outcome) {
         this.hud.showToast(`🚔 ${outcome}`, 6000);
+      }
+    });
+  }
+
+  triggerBurglaryPoliceInterception() {
+    if (this.isAnyModalActive()) return;
+    if (this.sound) {
+      this.sound.playSiren();
+      if (this.sound.newsDesk) {
+        this.sound.newsDesk.recordAction('ENCOUNTER', 'Perseguição policial e cerco da PMESP por furto residencial');
+      }
+    }
+
+    const enc = BRAZILIAN_ENCOUNTERS.POLICE_INTERCEPTION_BURGLARY;
+    if (!enc) return;
+
+    const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
+    if (this.hud) {
+      this.hud.showToast(
+        isEn
+          ? '🚨 <strong>POLICE PURSUIT!</strong> Sirens wailing! Military Police patrol vehicle intercepted you!'
+          : '🚨 <strong>SIRENE DA POLÍCIA!</strong> A viatura da PMESP bloqueou a passagem! Enquadro por furto residencial!',
+        4000
+      );
+    }
+
+    this.dialog.open({
+      id: 'POLICE_INTERCEPTION_BURGLARY',
+      encounterId: 'POLICE_INTERCEPTION_BURGLARY',
+      _state: this.state,
+      title: enc.title,
+      text: enc.getIntroText(this.state),
+      options: enc.getOptions(this.state)
+    }, (opt) => {
+      const outcome = opt.execute(this.state, this.sound);
+      if (outcome) {
+        this.hud.showToast(outcome, 5000);
+      }
+      const defeat = this.state.checkDefeat();
+      if (defeat) {
+        this.handleRunEnd(false, defeat);
       }
     });
   }

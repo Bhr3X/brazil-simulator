@@ -1169,6 +1169,106 @@ export const EN_ENCOUNTER_TEXTS = {
         outcome: 'Rapid hydration packed with minerals and steady stamina from wholesome nuts to keep walking through São Paulo (+24% Stomach, +18% Sanity).'
       }
     }
+  },
+
+  HOUSE_ENTRY_MID_CLASS: {
+    title: '🏡 ENTERING TIO WILSON\'S HOUSE',
+    intro: (state) => `
+      The wooden door swings open onto polished parquet floor in Tio Wilson's living room.<br>
+      The CRT TV blares João Kléber's Fidelity Test, the coffee table has overdue Enel bills, and the kitchen fridge hums softly.<br>
+      <em>What is your intent in this household?</em><br>
+      <small style="color:#ffcc00">Thefts on record: ${state.theftCount || 0} | Heat / Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      modo_furto: {
+        label: '🥷 THIEF MODE: Sneak in and pocket whatever valuables you can find!',
+        outcome: '🚨 <strong>THIEF MODE ACTIVATED:</strong> Your eyes scan the household for valuable loot. Watch out: watchful neighbors might call 190!'
+      },
+      modo_respeito: {
+        label: '🤝 VISITOR MODE: Enter peacefully and respect the family home',
+        outcome: '🤝 <strong>PEACEFUL VISIT:</strong> You entered with a clean conscience. Peace of mind and respect earned (+12% Sanity, +6 Ginga).'
+      },
+      modo_vasculhar: {
+        label: '🔍 LOOK AROUND: Quietly explore the rooms without touching anything',
+        outcome: '🔍 <strong>CASUAL EXPLORATION:</strong> You stroll through the house, examining the furnishings with curiosity.'
+      }
+    }
+  },
+
+  HOUSE_ENTRY_FAVELA: {
+    title: '🏠 ENTERING COMMUNITY RESIDENCE',
+    intro: (state) => `
+      The wooden door creaks open to reveal a humble exposed brick hillside home.<br>
+      The comforting aroma of homemade beans and cloth-drip coffee fills the air. A blue Ultragaz tank, clay water filter, and bed savings are visible.<br>
+      <em>What is your intent in this home?</em><br>
+      <small style="color:#ffcc00">Thefts on record: ${state.theftCount || 0} | Heat / Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      modo_furto: {
+        label: '🥷 THIEF MODE: Steal the gas cylinder, mattress savings, or household goods',
+        outcome: '🚨 <strong>THIEF MODE ACTIVATED:</strong> You focus on the family\'s belongings. Police cruisers might seal the alleyway if anyone sounds the alarm!'
+      },
+      modo_respeito: {
+        label: '🤝 RESPECT MODE: Honor the hardworking family and enter with discipline',
+        outcome: '🤝 <strong>FAVELA DISCIPLINE:</strong> "In the community, respect is the supreme law!" Your humility earns neighborhood respect (+14% Sanity, +8 Ginga).'
+      },
+      modo_vasculhar: {
+        label: '🔍 LOOK AROUND: Look around discreetly without taking anything',
+        outcome: '🔍 <strong>DISCREET LOOK:</strong> You walk through the house, admiring the warmth of popular Brazilian architecture.'
+      }
+    }
+  },
+
+  HOUSE_ENTRY_PENTHOUSE: {
+    title: '🏙️ JARAGUÁ TOWER LUXURY PENTHOUSE',
+    intro: (state) => `
+      The brushed steel elevator opens into a high-end duplex with Italian leather, marble counters, and a panoramic view of Pico do Jaraguá.<br>
+      High-tech electronics, titanium iPhone 16, Stanley tumbler, Black card, and chrome espresso machine decorate the space.<br>
+      <em>What is your intent in this multimillionaire penthouse?</em><br>
+      <small style="color:#ffcc00">Thefts on record: ${state.theftCount || 0} | Heat / Danger: ${state.perigo}%</small>
+    `,
+    options: {
+      modo_furto: {
+        label: '🥷 THIEF MODE: Loot designer luxury goods, electronics, and cards!',
+        outcome: '🚨 <strong>HIGH-END BURGLARY MODE:</strong> Maximum alert! If private security or police are alerted, sirens will arrive fast!'
+      },
+      modo_respeito: {
+        label: '🤝 VISITOR MODE: Just admire the stunning view and luxury decor',
+        outcome: '🥂 <strong>CIVILIZED VISIT:</strong> You relax taking in the panoramic mountain view without breaking the law (+18% Sanity, +5 Ginga).'
+      },
+      modo_vasculhar: {
+        label: '🔍 LOOK AROUND: Inspect the modern design with caution',
+        outcome: '🔍 <strong>CAREFUL INSPECTION:</strong> You walk through the penthouse admiring the designer Italian furniture.'
+      }
+    }
+  },
+
+  POLICE_INTERCEPTION_BURGLARY: {
+    title: '🚔 MILITARY POLICE INTERCEPTION // BURGLARY SUSPECT',
+    intro: (state) => `
+      A Military Police cruiser (87th Battalion Pirituba) screeches to a halt right in front of you with flashing strobes and wailing sirens!<br>
+      Two tactical patrol officers step out holding clipboards and clipboard reports:<br>
+      <em>"— STOP RIGHT THERE! HANDS ON YOUR HEAD! Dispatch received neighbor calls reporting home burglaries in the sector. You match the exact description!"</em><br>
+      <small style="color:#ff3333;font-weight:bold">🚨 Heat Level: ${state.perigo}% | Thefts: ${state.theftCount || 0} items | Loot: ${state.stolenItems && state.stolenItems.length > 0 ? state.stolenItems.map(i => i.name).join(', ') : 'None'}</small>
+    `,
+    options: {
+      entregar_bens: {
+        label: '🤝 Surrender all stolen loot, pay legal processing fee, and cooperate',
+        outcome: '🚔 <strong>LOOT CONFISCATED:</strong> You cooperated, returned the stolen items, and paid administrative fees. The patrol let you go under strict warning (-35% Danger, theft heat cleared).'
+      },
+      dar_migue: {
+        label: '🗣️ Try smooth-talking your way out (Claim you bought it at the Sunday flea market)',
+        outcome: (state, ptResult) => ptResult.includes('ESPETACULAR')
+          ? '🗣️ <strong>SMOOTH TALK VICTORY:</strong> With pure Brazilian street hustle, you spun an elaborate tale about distant cousins and market receipts. The sergeant warned you to move along (+20 Ginga, +10 Sanity)!'
+          : '🚨 <strong>COP DIDN\'T BUY IT:</strong> "— Who do you think you\'re kidding?!" The sergeant seized your suspicious goods and logged your name in the precinct database (+40% Danger)!'
+      },
+      meter_o_pe: {
+        label: '🏃 RUN FOR IT! High-speed sprint through the narrow favela alleyways!',
+        outcome: (state, ptResult) => ptResult.includes('CINEMATOGRÁFICA')
+          ? '🏃 <strong>CINEMATIC ESCAPE:</strong> You sprinted through narrow alleys, vaulted a brick wall, and vanished into Pirituba\'s labyrinth (+25 Ginga, -12% Stomach, +12% Sanity)!'
+          : '🚨 <strong>CORNERED:</strong> You tripped over a storm drain and the police car pinned you against the wall! Arrested on the spot for residential burglary!'
+      }
+    }
   }
 };
 

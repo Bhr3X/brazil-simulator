@@ -39,8 +39,56 @@ export class GameState {
     this.actionTracker = new Map();
     this.lastDiminishing = null;
 
+    // Burglary, theft, and police heat tracking
+    this.theftCount = 0;
+    this.theftValue = 0; // accumulated value in centavos
+    this.stolenItems = []; // [{ id, name, valueCentavos }]
+    this.houseIntents = new Map(); // houseId -> 'steal' | 'respect' | 'explore'
+
     // Change listener
     this.listeners = [];
+  }
+
+  // Record a residential theft, increasing heat and probability of PM interception
+  recordTheft(item, valueCentavos = 0, perigoGain = 20) {
+    this.theftCount += 1;
+    this.theftValue += (valueCentavos || 0);
+    this.stolenItems.push({
+      id: item.id || `stolen_${this.theftCount}`,
+      name: item.name || 'Objeto furtado',
+      valueCentavos: valueCentavos || 0
+    });
+    const deltas = {
+      perigo: perigoGain
+    };
+    if (valueCentavos > 0) {
+      deltas.grana = valueCentavos;
+    }
+    this.apply(deltas, `Furto residencial: ${item.name || 'Item'}`);
+    return this;
+  }
+
+  // Dynamic probability calculation for PMESP police pursuit based on theft count
+  getPoliceTheftChance() {
+    if (!this.theftCount || this.theftCount <= 0) return 0;
+    const base = 0.18 * this.theftCount;
+    const perigoFactor = (this.perigo || 0) / 250;
+    return Math.min(0.88, Math.max(0.15, base + perigoFactor));
+  }
+
+  // Surrender goods to police, dropping perigo and resetting theft count
+  surrenderStolenGoods(fineCentavos = 0) {
+    const surrenderedCount = this.stolenItems.length;
+    this.stolenItems = [];
+    this.theftCount = 0;
+    const deltas = {
+      perigo: -35
+    };
+    if (fineCentavos > 0) {
+      deltas.grana = -fineCentavos;
+    }
+    this.apply(deltas, 'Apreensão policial / Devolução de bens furtados');
+    return surrenderedCount;
   }
 
   // Diminishing returns calculation for repetitive actions

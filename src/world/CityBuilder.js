@@ -17,6 +17,7 @@ export class CityBuilder {
     this.beaconLights = [];
     this.interactiveDoors = [];
     this.residentNpcs = [];
+    this.houseItems = [];
     this.blocoTrioGroup = null;
     this.campinhoGroup = null;
     this.illusionWalls = [];
@@ -404,7 +405,8 @@ export class CityBuilder {
       doorMesh: doorPivot,
       collider: doorCollider,
       isOpen: false,
-      openAngle: -Math.PI / 2
+      openAngle: -Math.PI / 2,
+      entryEncounterId: 'HOUSE_ENTRY_FAVELA'
     });
 
     // 6. Warm Interior Lighting
@@ -464,6 +466,49 @@ export class CityBuilder {
     const mattress = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.2, 1.9), colchaMat);
     mattress.position.set(x + halfW - 1.2, baseElevation + 0.4, z + 0.2);
     this.scene.add(mattress);
+
+    // Interactive Items inside House (Steal or Leave)
+    this.houseItems.push({
+      id: `botijao_${Math.round(x)}_${Math.round(z)}`,
+      name: 'BOTIJÃO DE GÁS ULTRAGAZ P-13',
+      prompt: 'INTERAGIR COM BOTIJÃO DE GÁS (FURTAR OU RESPEITAR)',
+      position: new THREE.Vector3(x + halfW - 0.8, baseElevation + 0.5, backZ - 0.8),
+      maxDist: 2.5,
+      mesh: gasTank,
+      valueCentavos: 11000,
+      perigo: 26,
+      encounterId: 'ITEM_THEFT_BOTIJAO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: `filtro_${Math.round(x)}_${Math.round(z)}`,
+      name: 'FILTRO DE BARRO SÃO JOÃO',
+      prompt: 'INTERAGIR COM FILTRO DE BARRO (BEBER OU FURTAR)',
+      position: new THREE.Vector3(x + halfW - 0.8, baseElevation + 1.0, backZ - 0.8),
+      maxDist: 2.5,
+      mesh: filtro,
+      valueCentavos: 5000,
+      perigo: 18,
+      encounterId: 'ITEM_THEFT_FILTRO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: `reserva_${Math.round(x)}_${Math.round(z)}`,
+      name: 'RESERVA SOB O COLCHÃO',
+      prompt: 'VASCULHAR SOB O COLCHÃO (FURTAR OU DEIXAR)',
+      position: new THREE.Vector3(x + halfW - 1.2, baseElevation + 0.6, z + 0.2),
+      maxDist: 2.5,
+      mesh: mattress,
+      valueCentavos: 6000,
+      perigo: 24,
+      encounterId: 'ITEM_THEFT_RESERVA',
+      isOpen: true,
+      isHouseItem: true
+    });
 
     // 8. Living Resident NPC inside House!
     const shirtCols = [0x1155cc, 0xd95b96, 0x009944, 0xffaa00, 0x772299];
@@ -4009,6 +4054,12 @@ export class CityBuilder {
     carne.position.set(x - 1.7, floorY + 0.42, z - 0.05);
     this.scene.add(carne);
 
+    // Leather Wallet with Cash
+    const carteiraMat = new THREE.MeshLambertMaterial({ color: 0x2e1d11 });
+    const carteira = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.04, 0.14), carteiraMat);
+    carteira.position.set(x - 2.3, floorY + 0.42, z - 0.25);
+    this.scene.add(carteira);
+
     // 3. Wooden TV Rack with Vintage CRT Color TV
     const rackMat = new THREE.MeshLambertMaterial({ color: 0x4a2e1b });
     const tvRack = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.6), rackMat);
@@ -4040,6 +4091,77 @@ export class CityBuilder {
     const fridge = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 0.85), fridgeMat);
     fridge.position.set(x + 2.5, floorY + 0.9, z + 1.6);
     this.scene.add(fridge);
+
+    // --- INTERACTIVE HOUSE ITEMS (STEAL OR RESPECT) ---
+    this.houseItems.push({
+      id: 'item_tv_tio_wilson',
+      name: 'TELEVISÃO CRT 20" CCE',
+      prompt: 'INTERAGIR COM A TV DE TUBO (FURTAR OU RESPEITAR)',
+      position: new THREE.Vector3(x + 2.0, floorY + 0.9, z - 0.1),
+      maxDist: 2.5,
+      mesh: tv,
+      valueCentavos: 12000,
+      perigo: 22,
+      encounterId: 'ITEM_THEFT_TV_TUBO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_croche_tio_wilson',
+      name: 'TOALHINHA DE CROCHÊ DA VOVÓ',
+      prompt: 'INTERAGIR COM A TOALHINHA DE CROCHÊ',
+      position: new THREE.Vector3(x + 2.0, floorY + 1.26, z - 0.1),
+      maxDist: 2.5,
+      mesh: crochet,
+      valueCentavos: 2000,
+      perigo: 10,
+      encounterId: 'ITEM_THEFT_CROCHE',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_boleto_tio_wilson',
+      name: 'BOLETOS DA ENEL & CARNÊ CASAS BAHIA',
+      prompt: 'VASCULHAR A MESINHA DE CENTRO',
+      position: new THREE.Vector3(x - 2.0, floorY + 0.5, z - 0.1),
+      maxDist: 2.4,
+      mesh: boleto,
+      valueCentavos: 3500,
+      perigo: 14,
+      encounterId: 'ITEM_THEFT_BOLETO',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_carteira_tio_wilson',
+      name: 'CARTEIRA DE COURO COM ECONOMIAS',
+      prompt: 'VASCULHAR CARTEIRA DO TIO WILSON',
+      position: new THREE.Vector3(x - 2.3, floorY + 0.42, z - 0.25),
+      maxDist: 2.3,
+      mesh: carteira,
+      valueCentavos: 8500,
+      perigo: 25,
+      encounterId: 'ITEM_THEFT_CARTEIRA',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_litrao_tio_wilson',
+      name: 'GELADEIRA BRANCA COM LITRÃO',
+      prompt: 'ABRIR A GELADEIRA (PEGAR LITRÃO OU DEIXAR)',
+      position: new THREE.Vector3(x + 2.5, floorY + 0.9, z + 1.6),
+      maxDist: 2.4,
+      mesh: fridge,
+      valueCentavos: 1400,
+      perigo: 10,
+      encounterId: 'ITEM_THEFT_LITRAO',
+      isOpen: true,
+      isHouseItem: true
+    });
 
     // 5. Cozy Warm Overhead Ceiling Light
     const warmLight = new THREE.PointLight(0xffd59e, 1.3, 9);
@@ -4115,7 +4237,8 @@ export class CityBuilder {
       doorMesh: doorPivot,
       collider: doorCollider,
       isOpen: false,
-      openAngle: Math.PI / 2
+      openAngle: Math.PI / 2,
+      entryEncounterId: 'HOUSE_ENTRY_MID_CLASS'
     });
 
     // 8. Resident: Tio Wilson relaxing on the sofa
@@ -4398,6 +4521,63 @@ export class CityBuilder {
     const espresso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.55, 0.5), chromeMat);
     espresso.position.set(x - 2.0, pY + 1.38, z + 2.5);
     this.scene.add(espresso);
+
+    // --- PENTHOUSE INTERACTIVE ITEMS (STEAL OR RESPECT) ---
+    this.houseItems.push({
+      id: 'item_iphone_penthouse',
+      name: 'IPHONE 16 PRO MAX TITÂNIO',
+      prompt: 'INTERAGIR COM IPHONE 16 PRO MAX',
+      position: new THREE.Vector3(x + 2.7, pY + 0.45, z - 0.15),
+      maxDist: 2.3,
+      mesh: phone,
+      valueCentavos: 65000,
+      perigo: 30,
+      encounterId: 'ITEM_THEFT_IPHONE',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_stanley_penthouse',
+      name: 'COPO STANLEY TÉRMICO VERDE',
+      prompt: 'INTERAGIR COM COPO STANLEY TÉRMICO',
+      position: new THREE.Vector3(x + 2.2, pY + 0.56, z - 0.2),
+      maxDist: 2.3,
+      mesh: stanley,
+      valueCentavos: 15000,
+      perigo: 18,
+      encounterId: 'ITEM_THEFT_STANLEY',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_centurion_penthouse',
+      name: 'CARTÃO BLACK CENTURION',
+      prompt: 'INTERAGIR COM CARTÃO BLACK CENTURION',
+      position: new THREE.Vector3(x + 2.8, pY + 0.45, z - 0.3),
+      maxDist: 2.3,
+      mesh: card,
+      valueCentavos: 45000,
+      perigo: 32,
+      encounterId: 'ITEM_THEFT_CENTURION',
+      isOpen: true,
+      isHouseItem: true
+    });
+
+    this.houseItems.push({
+      id: 'item_espresso_penthouse',
+      name: 'MÁQUINA DE CAFÉ EXPRESSO ITALIANA',
+      prompt: 'INTERAGIR COM A MÁQUINA DE EXPRESSO',
+      position: new THREE.Vector3(x - 2.0, pY + 1.4, z + 2.5),
+      maxDist: 2.5,
+      mesh: espresso,
+      valueCentavos: 32000,
+      perigo: 26,
+      encounterId: 'ITEM_THEFT_ESPRESSO',
+      isOpen: true,
+      isHouseItem: true
+    });
 
     // 4. Designer Arc Floor Lamp & Warm Mood Light
     const pentLight = new THREE.PointLight(0xffecd0, 1.4, 14);
