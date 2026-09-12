@@ -1938,12 +1938,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
    MOBILE TOUCH CONTROLS & RESPONSIVE SUBSYSTEM
    ========================================================= */
 
-/* Prevent default touch gestures (pinch-zoom, bounce) */
+/* Prevent default touch gestures (pinch-zoom, bounce) across all viewport canvases and containers */
 html,
 body,
 #canvas-container,
-canvas#c {
-  touch-action: none;
+#canvas-container canvas,
+canvas {
+  touch-action: none !important;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -1952,8 +1953,9 @@ canvas#c {
 
 body.mobile-touch-active,
 body.mobile-touch-active #canvas-container,
-body.mobile-touch-active canvas#c {
-  touch-action: none;
+body.mobile-touch-active #canvas-container canvas,
+body.mobile-touch-active canvas {
+  touch-action: none !important;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -2133,10 +2135,129 @@ body.mobile-touch-active canvas#c {
   background: rgba(0, 0, 0, 0.25);
 }
 
-/* Action Buttons Cluster (Right Zone) */
+/* Visible Right Virtual Thumbstick ("Stick to Look / Câmera 360°") */
+#touch-look-base {
+  position: absolute;
+  bottom: 28px;
+  right: 28px;
+  width: 124px;
+  height: 124px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.22) 0%, rgba(5, 10, 16, 0.75) 75%);
+  border: 2px solid rgba(0, 240, 255, 0.65);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: auto;
+  touch-action: none !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: 0.38;
+  transition: opacity 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform, right, top;
+}
+
+#touch-look-base.active,
+#touch-look-base.floating {
+  opacity: 0.95;
+}
+
+#touch-look-base.floating {
+  position: absolute;
+  bottom: auto;
+  right: auto;
+  transform: translate(-50%, -50%);
+}
+
+#touch-look-ring {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 240, 255, 0.4);
+  pointer-events: none;
+}
+
+.stick-tick.look-tick-up,
+#look-tick-up {
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(0, 240, 255, 0.45);
+}
+
+.stick-tick.look-tick-down,
+#look-tick-down {
+  bottom: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(0, 240, 255, 0.45);
+}
+
+.stick-tick.look-tick-left,
+#look-tick-left {
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0, 240, 255, 0.45);
+}
+
+.stick-tick.look-tick-right,
+#look-tick-right {
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0, 240, 255, 0.45);
+}
+
+.stick-tick.look-tick-up.active,
+#look-tick-up.active,
+.stick-tick.look-tick-down.active,
+#look-tick-down.active {
+  transform: translateX(-50%) scale(1.35);
+  color: #ffffff;
+  text-shadow: 0 0 10px #00f0ff, 0 0 15px #00f0ff;
+}
+
+.stick-tick.look-tick-left.active,
+#look-tick-left.active,
+.stick-tick.look-tick-right.active,
+#look-tick-right.active {
+  transform: translateY(-50%) scale(1.35);
+  color: #ffffff;
+  text-shadow: 0 0 10px #00f0ff, 0 0 15px #00f0ff;
+}
+
+#touch-look-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #66ffff, #00b0cc 60%, #005577 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.7), inset 0 0 8px rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+}
+
+.look-knob-reticle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 240, 255, 0.35);
+}
+
+/* Action Buttons Cluster (Positioned Ergonomically above Right Look Stick) */
 #touch-actions-cluster {
   position: absolute;
-  bottom: 22px;
+  bottom: 164px;
   right: 22px;
   pointer-events: auto;
   display: flex;
@@ -2144,6 +2265,7 @@ body.mobile-touch-active canvas#c {
   align-items: flex-end;
   gap: 12px;
   z-index: 60;
+  touch-action: none !important;
 }
 
 .touch-actions-subgroup {
@@ -2436,9 +2558,10 @@ body.mobile-touch-active #hud-objective {
 
 body.mobile-touch-active #touch-actions-cluster {
   position: fixed !important;
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important;
   right: 14px !important;
   z-index: 60 !important;
+  touch-action: none !important;
 }
 
 /* =========================================================

@@ -16,17 +16,22 @@ export class TouchController {
     this.moveTouchId = null;
     this.lookTouchId = null;
 
-    // Joystick coordinates
+    // Movement Joystick coordinates
     this.joystickOrigin = { x: 0, y: 0 };
     this.maxRadius = 48; // Max displacement in pixels
     this.isFloating = false;
+
+    // Look Joystick coordinates & state
+    this.lookOrigin = { x: 0, y: 0 };
+    this.isUsingLookStick = false;
+    this.isLookFloating = false;
 
     // Look tracking
     this.lastLookX = 0;
     this.lastLookY = 0;
     this.lookSensitivity = 0.0036;
 
-    // DOM Elements
+    // DOM Elements - Movement Stick (Left)
     this.container = null;
     this.joystickBase = null;
     this.joystickKnob = null;
@@ -34,6 +39,16 @@ export class TouchController {
     this.tickDown = null;
     this.tickLeft = null;
     this.tickRight = null;
+
+    // DOM Elements - Look Stick (Right)
+    this.lookBase = null;
+    this.lookKnob = null;
+    this.lookTickUp = null;
+    this.lookTickDown = null;
+    this.lookTickLeft = null;
+    this.lookTickRight = null;
+
+    // Action buttons & menus
     this.btnInteract = null;
     this.btnJump = null;
     this.btnCrouch = null;
@@ -62,6 +77,14 @@ export class TouchController {
     this.tickDown = document.getElementById('stick-tick-down');
     this.tickLeft = document.getElementById('stick-tick-left');
     this.tickRight = document.getElementById('stick-tick-right');
+
+    this.lookBase = document.getElementById('touch-look-base');
+    this.lookKnob = document.getElementById('touch-look-knob');
+    this.lookTickUp = document.getElementById('look-tick-up');
+    this.lookTickDown = document.getElementById('look-tick-down');
+    this.lookTickLeft = document.getElementById('look-tick-left');
+    this.lookTickRight = document.getElementById('look-tick-right');
+
     this.btnInteract = document.getElementById('touch-btn-interact');
     this.btnJump = document.getElementById('touch-btn-jump');
     this.btnCrouch = document.getElementById('touch-btn-crouch');
@@ -84,6 +107,9 @@ export class TouchController {
     if (this.joystickBase) {
       this.joystickBase.style.display = 'block';
     }
+    if (this.lookBase) {
+      this.lookBase.style.display = 'block';
+    }
     if (this.btnMenu) {
       this.btnMenu.classList.remove('touch-hidden');
     }
@@ -97,6 +123,9 @@ export class TouchController {
     }
     if (this.joystickBase) {
       this.joystickBase.style.display = 'none';
+    }
+    if (this.lookBase) {
+      this.lookBase.style.display = 'none';
     }
     if (this.btnMenu) {
       this.btnMenu.classList.add('touch-hidden');
@@ -116,7 +145,7 @@ export class TouchController {
   }
 
   bindEvents() {
-    // 1. Direct Touchstart on Joystick Base (guarantees stick never misses touch start)
+    // 1. Direct Touchstart on Left Movement Joystick Base
     if (this.joystickBase) {
       this.joystickBase.addEventListener('touchstart', (e) => {
         if (!this.isEnabled) this.enable();
@@ -135,6 +164,35 @@ export class TouchController {
             this.joystickOrigin = { x: anchor.x, y: anchor.y };
             this.isFloating = false;
             this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
+            break;
+          }
+        }
+      }, { passive: false });
+    }
+
+    // 2. Direct Touchstart on Right Look Joystick Base ("Stick to Look")
+    if (this.lookBase) {
+      this.lookBase.addEventListener('touchstart', (e) => {
+        if (!this.isEnabled) this.enable();
+        if (this.controls && typeof this.controls.refreshFreeze === 'function') {
+          this.controls.refreshFreeze();
+        }
+        if (this.controls && this.controls.freeze) return;
+
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          if (this.lookTouchId === null) {
+            if (e.cancelable) e.preventDefault();
+            e.stopPropagation();
+            this.lookTouchId = touch.identifier;
+            this.isUsingLookStick = true;
+            const anchor = this.getLookAnchorCenter();
+            this.lookOrigin = { x: anchor.x, y: anchor.y };
+            this.isLookFloating = false;
+            this.lastLookX = touch.clientX;
+            this.lastLookY = touch.clientY;
+            if (this.lookBase) this.lookBase.classList.add('active');
+            this.updateLookKnobAndLook(touch.clientX, touch.clientY);
             break;
           }
         }
@@ -282,6 +340,15 @@ export class TouchController {
     };
   }
 
+  getLookAnchorCenter() {
+    if (!this.lookBase) return { x: window.innerWidth - 80, y: window.innerHeight - 80 };
+    const rect = this.lookBase.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    };
+  }
+
   handleTouchStart(e) {
     if (!this.isEnabled) return;
     if (this.controls && typeof this.controls.refreshFreeze === 'function') {
@@ -290,7 +357,6 @@ export class TouchController {
     if (this.controls && this.controls.freeze) return;
 
     const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
 
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
@@ -299,44 +365,58 @@ export class TouchController {
       // Ignore touches on HUD buttons, active modals or action buttons
       if (this.isInteractiveElement(target)) continue;
 
-      // Movement Zone: Virtual Thumbstick ("Stick to Walk")
-      // Confined strictly to bottom-left quadrant (left 45% of width, bottom 75% of height)
-      const isMoveZone = touch.clientX < screenWidth * 0.45 && touch.clientY > screenHeight * 0.25;
+      const isLeftZone = touch.clientX < screenWidth * 0.48;
 
-      if (isMoveZone && this.moveTouchId === null) {
-        if (e.cancelable) e.preventDefault();
-        this.moveTouchId = touch.identifier;
+      if (isLeftZone) {
+        // Left Zone: Movement Thumbstick (Walk / Run) — 100% independent of look
+        if (this.moveTouchId === null) {
+          if (e.cancelable) e.preventDefault();
+          this.moveTouchId = touch.identifier;
 
-        const anchor = this.getStickAnchorCenter();
-        const distFromAnchor = Math.hypot(touch.clientX - anchor.x, touch.clientY - anchor.y);
+          const anchor = this.getStickAnchorCenter();
+          const distFromAnchor = Math.hypot(touch.clientX - anchor.x, touch.clientY - anchor.y);
 
-        // If touched directly on or near the stick (<= 90px), keep fixed anchor
-        if (distFromAnchor <= 90) {
-          this.joystickOrigin = { x: anchor.x, y: anchor.y };
-          this.isFloating = false;
-        } else {
-          // If touched further out in the movement zone, float stick to thumb
-          this.joystickOrigin = { x: touch.clientX, y: touch.clientY };
-          this.isFloating = true;
+          // If touched directly on or near the stick (<= 90px), keep fixed anchor
+          if (distFromAnchor <= 90) {
+            this.joystickOrigin = { x: anchor.x, y: anchor.y };
+            this.isFloating = false;
+          } else {
+            // If touched further out in the movement zone, float stick to thumb
+            this.joystickOrigin = { x: touch.clientX, y: touch.clientY };
+            this.isFloating = true;
+            if (this.joystickBase) {
+              this.joystickBase.style.left = `${touch.clientX}px`;
+              this.joystickBase.style.top = `${touch.clientY}px`;
+              this.joystickBase.classList.add('floating');
+            }
+          }
           if (this.joystickBase) {
-            this.joystickBase.style.left = `${touch.clientX}px`;
-            this.joystickBase.style.top = `${touch.clientY}px`;
-            this.joystickBase.classList.add('floating');
+            this.joystickBase.classList.add('active');
+          }
+
+          this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
+        }
+      } else {
+        // Right Zone: Look Thumbstick & Swipe Camera Orbit — 100% independent of move
+        if (this.lookTouchId === null) {
+          if (e.cancelable) e.preventDefault();
+          this.lookTouchId = touch.identifier;
+          this.lastLookX = touch.clientX;
+          this.lastLookY = touch.clientY;
+
+          const lookAnchor = this.getLookAnchorCenter();
+          const distFromLookAnchor = Math.hypot(touch.clientX - lookAnchor.x, touch.clientY - lookAnchor.y);
+
+          if (distFromLookAnchor <= 90) {
+            this.isUsingLookStick = true;
+            this.lookOrigin = { x: lookAnchor.x, y: lookAnchor.y };
+            this.isLookFloating = false;
+            if (this.lookBase) this.lookBase.classList.add('active');
+            this.updateLookKnobAndLook(touch.clientX, touch.clientY);
+          } else {
+            this.isUsingLookStick = false;
           }
         }
-        if (this.joystickBase) {
-          this.joystickBase.classList.add('active');
-        }
-
-        this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
-      }
-      // Camera Look Drag Zone: Independent Right Thumb / Look Zone
-      // Any touch outside the movement zone (or subsequent touch if move is active)
-      else if (this.lookTouchId === null) {
-        if (e.cancelable) e.preventDefault();
-        this.lookTouchId = touch.identifier;
-        this.lastLookX = touch.clientX;
-        this.lastLookY = touch.clientY;
       }
     }
   }
@@ -376,19 +456,23 @@ export class TouchController {
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
 
-      // Handle Virtual Stick Movement
+      // 1. Handle Virtual Stick Movement (Left Thumb)
       if (touch.identifier === this.moveTouchId) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         this.updateStickKnobAndMovement(touch.clientX, touch.clientY);
       }
-      // Handle Camera Drag Look
+      // 2. Handle Camera Look (Right Thumb) — completely independent
       else if (touch.identifier === this.lookTouchId) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         const deltaX = touch.clientX - this.lastLookX;
         const deltaY = touch.clientY - this.lastLookY;
 
         this.lastLookX = touch.clientX;
         this.lastLookY = touch.clientY;
+
+        if (this.isUsingLookStick) {
+          this.updateLookKnobAndLook(touch.clientX, touch.clientY);
+        }
 
         if (this.controls) {
           this.controls.addTouchRotation(
@@ -442,6 +526,41 @@ export class TouchController {
     }
   }
 
+  updateLookKnobAndLook(clientX, clientY) {
+    const dx = clientX - this.lookOrigin.x;
+    const dy = clientY - this.lookOrigin.y;
+    const dist = Math.hypot(dx, dy);
+
+    const clampedDist = Math.min(dist, this.maxRadius);
+    const angle = Math.atan2(dy, dx);
+    const clampedX = Math.cos(angle) * clampedDist;
+    const clampedY = Math.sin(angle) * clampedDist;
+
+    if (this.lookKnob) {
+      this.lookKnob.style.transform = `translate(calc(-50% + ${clampedX.toFixed(1)}px), calc(-50% + ${clampedY.toFixed(1)}px))`;
+    }
+
+    // Normalize look vector between -1.0 and 1.0
+    let vx = clampedX / this.maxRadius;
+    let vy = clampedY / this.maxRadius;
+
+    // Deadzone threshold (0.08) to prevent micro-jitter
+    if (Math.hypot(vx, vy) < 0.08) {
+      vx = 0;
+      vy = 0;
+    }
+
+    // Update directional indicator tick highlights
+    if (this.lookTickUp) this.lookTickUp.classList.toggle('active', vy < -0.32);
+    if (this.lookTickDown) this.lookTickDown.classList.toggle('active', vy > 0.32);
+    if (this.lookTickLeft) this.lookTickLeft.classList.toggle('active', vx < -0.32);
+    if (this.lookTickRight) this.lookTickRight.classList.toggle('active', vx > 0.32);
+
+    if (this.controls) {
+      this.controls.setTouchLook(vx, vy);
+    }
+  }
+
   handleTouchEnd(e) {
     for (let i = 0; i < e.changedTouches.length; i++) {
       const touch = e.changedTouches[i];
@@ -482,6 +601,27 @@ export class TouchController {
 
   resetLook() {
     this.lookTouchId = null;
+    this.isUsingLookStick = false;
+    this.isLookFloating = false;
+
+    if (this.lookBase) {
+      this.lookBase.style.left = '';
+      this.lookBase.style.top = '';
+      this.lookBase.classList.remove('floating', 'active');
+    }
+
+    if (this.lookKnob) {
+      this.lookKnob.style.transform = 'translate(-50%, -50%)';
+    }
+
+    if (this.lookTickUp) this.lookTickUp.classList.remove('active');
+    if (this.lookTickDown) this.lookTickDown.classList.remove('active');
+    if (this.lookTickLeft) this.lookTickLeft.classList.remove('active');
+    if (this.lookTickRight) this.lookTickRight.classList.remove('active');
+
+    if (this.controls) {
+      this.controls.setTouchLook(0, 0);
+    }
   }
 
   updateInteractionState(hasActiveTarget) {

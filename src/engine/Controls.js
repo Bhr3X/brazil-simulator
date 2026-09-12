@@ -71,6 +71,8 @@ export class FirstPersonControls {
     this.isCrouching = false;
     this.canJump = false;
     this.touchMoveVector = null;
+    this.touchLookVector = null;
+    this.touchLookSpeed = 2.4; // radians/sec for analog stick look
 
     // Arrow keys rotation state (look up, down, left, right)
     this.lookUp = false;
@@ -185,7 +187,7 @@ export class FirstPersonControls {
     document.addEventListener('click', (e) => {
       // Don't re-lock if clicking buttons, links, active modals or mobile touch controls
       if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select, .touch-btn, .touch-action-btn, #touch-controls-container, #mobile-menu-drawer')) return;
-      if (window.app && window.app.touch && window.app.touch.isEnabled) return;
+      if (window.app && window.app.touch && window.app.touch.isEnabled && !document.pointerLockElement) return;
       if (this.freeze) return;
       if (!this.hasStarted) return;
       if (!this.isLocked) {
@@ -203,8 +205,8 @@ export class FirstPersonControls {
 
     document.addEventListener('mousedown', (e) => {
       if (this.freeze) return;
-      // On touch devices / mobile mode, ignore synthetic mousedown to prevent camera fighting
-      if (window.app && window.app.touch && window.app.touch.isEnabled) return;
+      // On touch devices / mobile mode, ignore synthetic mousedown unless true desktop pointer lock is held
+      if (window.app && window.app.touch && window.app.touch.isEnabled && !document.pointerLockElement) return;
       if (e.target.closest && e.target.closest('.hud-btn, #roulette-modal, #dialogue-modal, #street-view-modal, #end-run-modal, #visuals-modal, button, a, input, select, .touch-btn, .touch-action-btn, #touch-controls-container, #mobile-menu-drawer')) return;
       this.isMouseDown = true;
       this.lastMouseX = e.clientX;
@@ -242,12 +244,12 @@ export class FirstPersonControls {
     document.addEventListener('mousemove', (e) => {
       if (!this.hasStarted || this.freeze) return;
       // On touch devices / mobile mode, do not process synthetic mouse movement unless in true desktop pointer lock
-      if (window.app && window.app.touch && window.app.touch.isEnabled && !this.isLocked) return;
+      if (window.app && window.app.touch && window.app.touch.isEnabled && !document.pointerLockElement) return;
 
       let movementX = 0;
       let movementY = 0;
 
-      if (this.isLocked || (typeof document !== 'undefined' && !!document.pointerLockElement)) {
+      if (document.pointerLockElement) {
         movementX = e.movementX || 0;
         movementY = e.movementY || 0;
       } else if (this.isMouseDown) {
@@ -525,6 +527,13 @@ export class FirstPersonControls {
     this.touchMoveVector.set(vx, vy);
   }
 
+  setTouchLook(vx, vy) {
+    if (!this.touchLookVector) {
+      this.touchLookVector = new THREE.Vector2();
+    }
+    this.touchLookVector.set(vx, vy);
+  }
+
   addTouchRotation(rotX, rotY) {
     if (this.freeze) return;
     this.euler.x += rotX;
@@ -562,13 +571,19 @@ export class FirstPersonControls {
       return;
     }
 
-    // 0. Arrow Keys Rotation (Look Up, Down, Left, Right)
+    // 0. Arrow Keys & Analog Touch Stick Rotation (Look Up, Down, Left, Right)
     let rotX = 0;
     let rotY = 0;
     if (this.lookUp) rotX += this.keyRotateSpeed * delta;
     if (this.lookDown) rotX -= this.keyRotateSpeed * delta;
     if (this.lookLeft) rotY += this.keyRotateSpeed * delta;
     if (this.lookRight) rotY -= this.keyRotateSpeed * delta;
+
+    // Continuous analog rotation from right touch thumbstick
+    if (this.touchLookVector && (this.touchLookVector.x !== 0 || this.touchLookVector.y !== 0)) {
+      rotY -= this.touchLookVector.x * this.touchLookSpeed * delta;
+      rotX -= this.touchLookVector.y * this.touchLookSpeed * delta;
+    }
 
     if (rotX !== 0 || rotY !== 0) {
       this.euler.x += rotX;

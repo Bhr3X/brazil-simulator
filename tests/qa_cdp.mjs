@@ -1589,17 +1589,29 @@ async function runTestSuite(url) {
         document.getElementById('btn-close-mobile-menu').click();
         const drawerClosed = touch.menuDrawer.classList.contains('modal-hidden');
 
-        // Check stick ticks & base elements
+        // Check stick ticks & base elements (both left movement and right look sticks)
         const hasTicks = !!document.getElementById('stick-tick-up') && !!document.getElementById('stick-tick-down');
         const hasBase = !!document.getElementById('touch-joystick-base');
+        const hasLookBase = !!document.getElementById('touch-look-base');
+        const hasLookTicks = !!document.getElementById('look-tick-up') && !!document.getElementById('look-tick-down');
+
+        // Test Right Stick Dedicated Touch Simulation
+        const lookCenter = touch.getLookAnchorCenter();
+        simulateTouch('handleTouchStart', 103, lookCenter.x, lookCenter.y);
+        const lookBaseActive = touch.lookBase.classList.contains('active');
+        simulateTouch('handleTouchMove', 103, lookCenter.x - 30, lookCenter.y);
+        const hasLookVector = controls.touchLookVector && controls.touchLookVector.x < -0.4;
+        simulateTouch('handleTouchEnd', 103, lookCenter.x - 30, lookCenter.y);
+        const lookReset = touch.lookTouchId === null && controls.touchLookVector && controls.touchLookVector.x === 0;
 
         // Restore state
         touch.disable();
-        const disabledDisplayNone = touch.joystickBase.style.display === 'none';
+        const disabledDisplayNone = touch.joystickBase.style.display === 'none' && touch.lookBase.style.display === 'none';
 
         return {
           ok: isEnabled && containerVisible && bodyClass && baseDisplayed && hasMoveVector && moveReset &&
               lookAcquiredSolo && yawChanged && pitchChanged && lookReleased &&
+              hasLookBase && hasLookTicks && lookBaseActive && hasLookVector && lookReset &&
               isCardInteractive && isPromptInteractive && orientationBannerAbsent &&
               jumpTriggered && crouchToggled && camToggled && drawerOpen && drawerClosed &&
               hasTicks && hasBase && disabledDisplayNone,
@@ -1613,6 +1625,11 @@ async function runTestSuite(url) {
           yawChanged,
           pitchChanged,
           lookReleased,
+          hasLookBase,
+          hasLookTicks,
+          lookBaseActive,
+          hasLookVector,
+          lookReset,
           isCardInteractive,
           isPromptInteractive,
           orientationBannerAbsent,
