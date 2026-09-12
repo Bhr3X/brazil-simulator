@@ -9,9 +9,9 @@ export const WORLD_ZONES = [
     name: 'BAR DO TIÃO (SINUCA & BALCÃO)',
     min: { x: 6.0, y: 0.0, z: 37.5 },
     max: { x: 18.0, y: 6.0, z: 47.0 },
-    openHour: 16.0,
-    closeHour: 2.0, // overnight
-    description: 'Botecão clássico. Mesa de sinuca no centro, salgados na estufa e cerveja trincando.'
+    openHour: 0.0,
+    closeHour: 24.0, // 24 hours - boteco nunca fecha!
+    description: 'Botecão clássico 24h. Mesa de sinuca no centro, salgados na estufa, jogo do bicho e cerveja trincando.'
   },
   {
     id: 'ADEGA_DO_ZE',

@@ -2414,7 +2414,7 @@ async function runTestSuite(url) {
         })();
 
         const preservedHours = {
-          BAR_DO_TIAO: [16, 2],
+          BAR_DO_TIAO: [0, 24],
           ADEGA_DO_ZE: [8, 24],
           PADARIA_ESTRELA: [5, 20],
           POSTO_PIRITUBA: [0, 24],
