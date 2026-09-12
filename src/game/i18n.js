@@ -155,6 +155,7 @@ export const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'PADARIA ESTRELA DE PIRITUBA', prompt: 'ENTRAR NA PADOCA E PEDIR PÃO NA CHAPA' },
+      padaria_counter: { name: 'BALCÃO DA PADARIA ESTRELA', prompt: 'PEDIR NO BALCÃO DO SEU MANUEL' },
       bar_sinuca: { name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)', prompt: 'PEDIR NO BALCÃO DO SEU TIÃO OU JOGAR SINUCA' },
       adega: { name: 'ADEGA DO ZÉ (BEBIDAS & LITRÃO)', prompt: 'COMPRAR LITRÃO OU VENDER LATINHAS' },
       flanelinha: { name: 'FLANELINHA NO CRUZAMENTO', prompt: 'CONVERSAR COM O FLANELINHA' },
@@ -396,6 +397,7 @@ export const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'ESTRELA BAKERY OF PIRITUBA', prompt: 'ENTER BAKERY & ORDER TOASTED FRENCH BREAD' },
+      padaria_counter: { name: 'ESTRELA BAKERY COUNTER', prompt: 'ORDER AT SEU MANUEL\'S COUNTER' },
       bar_sinuca: { name: 'TIÃO\'S CORNER PUB (POOL TABLE & BAR)', prompt: 'ORDER AT SEU TIÃO\'S COUNTER OR PLAY POOL' },
       adega: { name: 'ZÉ\'S LIQUOR & BEVERAGE SHOP', prompt: 'BUY 1L BEER BOTTLE OR SELL CRUSHED CANS' },
       flanelinha: { name: 'UNOFFICIAL PARKING VALET', prompt: 'TALK TO THE PARKING HUSTLER' },

@@ -152,9 +152,9 @@ export const CITY_EMITTERS = [
     x: 32.0,
     y: 1.2,
     z: 37.8,
-    refDist: 3.0,
-    maxDist: 15.0,
-    power: 0.55,
+    refDist: 6.0,
+    maxDist: 26.0,
+    power: 1.0,
     preferredGenre: 'MPB',
     ambienceFile: null
   },
@@ -399,10 +399,10 @@ export class SpatialSoundSystem {
       this.nearestEmitter = dominantEmitter;
       const t = this.ctx.currentTime;
 
-      // When player is far from music sources, maintain a subtle muffled city acoustic floor (0.05)
-      // so open streets feel atmospheric while never dropping into uncanny dead silence
-      const calculatedGain = Math.min(1.0, Math.max(0.05, maxAudibleGain));
-      const calculatedFreq = Math.min(20000, Math.max(800, targetFreq));
+      // When player is far from music sources, maintain a warm, crisp city acoustic baseline (0.20 gain, 3500 Hz)
+      // so open streets and sidewalks feel alive and music never drops into inaudible dead silence
+      const calculatedGain = Math.min(1.0, Math.max(0.20, maxAudibleGain));
+      const calculatedFreq = Math.min(20000, Math.max(3500, targetFreq));
 
       this.spatialGain.gain.setTargetAtTime(calculatedGain, t, 0.15);
       this.spatialFilter.frequency.setTargetAtTime(calculatedFreq, t, 0.15);

@@ -285,7 +285,7 @@ export class NewsDesk {
           if (!advanced) {
             this.speakFallback(item, advance);
           }
-        }, 15000);
+        }, 6000);
       } else if (item.clipId && typeof Audio !== 'undefined') {
         const audioSrc = `media/audio/news/${item.clipId}.mp3`;
         const audio = new Audio(audioSrc);
@@ -323,7 +323,7 @@ export class NewsDesk {
           } else {
             advance();
           }
-        }, 15000);
+        }, 6000);
       } else {
         this.speakFallback(item, advance);
       }
@@ -334,6 +334,13 @@ export class NewsDesk {
   }
 
   speakFallback(item, callback) {
+    let called = false;
+    const safeCallback = () => {
+      if (called) return;
+      called = true;
+      callback();
+    };
+
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       try {
         window.speechSynthesis.cancel();
@@ -347,15 +354,17 @@ export class NewsDesk {
           utterance.voice = this.ptVoices[voiceIdx];
         }
 
-        utterance.onend = () => callback();
-        utterance.onerror = () => callback();
+        utterance.onend = safeCallback;
+        utterance.onerror = safeCallback;
         window.speechSynthesis.speak(utterance);
+        // Guarantee progression even if speech synthesis stalls in background/headless
+        setTimeout(safeCallback, 3500);
         return;
       } catch (e) {
         // Ignore and use timer
       }
     }
-    setTimeout(callback, 4000);
+    setTimeout(safeCallback, 2500);
   }
 
   stop() {

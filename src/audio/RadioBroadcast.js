@@ -96,11 +96,20 @@ export class RadioBroadcast {
     this.playbackGeneration = 0;
     this.sessionGeneration = 0;
 
+    // Continuous Watchdog & Resilience Tracking
+    this.newsBroadcastTimer = 0;
+    this.pausedWatchdogTimer = 0;
+    this.lastAudioTime = 0;
+    this.stallWatchdogTimer = 0;
+    this.consecutivePlayFailures = 0;
+
     this.audioElement.addEventListener('ended', () => this.handleAudioEnded());
 
     this.audioElement.addEventListener('error', (e) => {
       console.warn('[RadioBroadcast] Track load error, using procedural fallback:', e);
-      if (this.fallback && !this.isBroadcastingNews) this.fallback.start();
+      if (this.fallback && !this.isBroadcastingNews && typeof this.fallback.start === 'function') {
+        this.fallback.start();
+      }
       this.handleAudioEnded();
     });
   }
@@ -236,7 +245,8 @@ export class RadioBroadcast {
   }
 
   onSongEnded() {
-    if (this.isBroadcastingNews) return;
+    if (this.isBroadcastingNews && this.newsDesk && this.newsDesk.isPlayingNews) return;
+    this.isBroadcastingNews = false;
     this.songsPlayedInBlock++;
     if (this.songsPlayedInBlock >= this.songsPerNewsBlock) {
       this.songsPlayedInBlock = 0;
@@ -257,10 +267,84 @@ export class RadioBroadcast {
     this.onSongEnded();
   }
 
+  // Continuous frame-by-frame watchdog
+  update(delta = 0.016) {
+    if (!this.isPlaying || this.activeStation === 'OFF') return;
+
+    // 1. News broadcast duration watchdog: prevent news intermission from hanging forever
+    if (this.isBroadcastingNews) {
+      this.newsBroadcastTimer += delta;
+      // If news intermission runs for more than 20 seconds, or newsDesk finished without triggering callback
+      if (this.newsBroadcastTimer > 20.0 || (this.newsDesk && !this.newsDesk.isPlayingNews && this.newsBroadcastTimer > 2.0)) {
+        console.warn('[RadioBroadcast] News intermission watchdog timeout, resuming music playback');
+        if (this.newsDesk && typeof this.newsDesk.stop === 'function') {
+          this.newsDesk.stop();
+        }
+        if (this.duckingGain && this.ctx) {
+          this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.2);
+        }
+        this.isBroadcastingNews = false;
+        this.newsBroadcastTimer = 0;
+        this.playNextSong();
+        return;
+      }
+    } else {
+      this.newsBroadcastTimer = 0;
+
+      // 2. Audio playback & stall watchdog
+      if (this.audioElement) {
+        // Did the song reach the end without an ended event being caught?
+        if (this.audioElement.ended) {
+          this.handleAudioEnded();
+          return;
+        }
+
+        // Is the audio element paused while we are supposed to be playing?
+        if (this.audioElement.paused) {
+          this.pausedWatchdogTimer += delta;
+          if (this.pausedWatchdogTimer > 1.8) {
+            this.pausedWatchdogTimer = 0;
+            const playPromise = this.audioElement.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(err => {
+                this.consecutivePlayFailures++;
+                console.warn('[RadioBroadcast] Watchdog resume failed:', err);
+                if (this.consecutivePlayFailures >= 2 && this.fallback && typeof this.fallback.start === 'function') {
+                  this.fallback.start();
+                }
+              });
+            }
+          }
+        } else {
+          this.pausedWatchdogTimer = 0;
+          this.consecutivePlayFailures = 0;
+
+          // Check for audio buffer stall (currentTime unchanged while playing)
+          const curTime = this.audioElement.currentTime;
+          if (curTime > 0 && Math.abs(curTime - this.lastAudioTime) < 0.001) {
+            this.stallWatchdogTimer += delta;
+            if (this.stallWatchdogTimer > 4.5) {
+              console.warn('[RadioBroadcast] Audio stream stalled for > 4.5s, skipping to next track or fallback');
+              this.stallWatchdogTimer = 0;
+              if (this.fallback && typeof this.fallback.start === 'function') {
+                this.fallback.start();
+              }
+              this.handleAudioEnded();
+            }
+          } else {
+            this.stallWatchdogTimer = 0;
+            this.lastAudioTime = curTime;
+          }
+        }
+      }
+    }
+  }
+
   // Intermission: Vinheta -> News & Weather -> Next Song
   startRadioIntermission() {
     if (this.isBroadcastingNews) return;
     this.isBroadcastingNews = true;
+    this.newsBroadcastTimer = 0;
 
     // Full volume for radio vinheta and speech
     if (this.duckingGain && this.ctx) {
@@ -285,6 +369,7 @@ export class RadioBroadcast {
           this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.2);
         }
         this.isBroadcastingNews = false;
+        this.newsBroadcastTimer = 0;
         this.playNextSong();
       };
       // 2. Broadcast Breaking News with dual journalists & Weather
@@ -335,20 +420,23 @@ export class RadioBroadcast {
           onEndCallback();
         }
       : null;
+    this.pausedWatchdogTimer = 0;
+    this.stallWatchdogTimer = 0;
     this.audioElement.pause();
     this.audioElement.src = src;
     const playPromise = this.audioElement.play();
     if (playPromise !== undefined) {
       playPromise.catch(err => {
-        if (err.name !== 'AbortError') {
-          console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
-          // Safety recovery watchdog: if play failed or was blocked, recover after brief delay
-          setTimeout(() => {
-            if (this.playbackGeneration === gen && this.isPlaying && this.activeStation !== 'OFF') {
-              this.handleAudioEnded();
+        console.warn('[RadioBroadcast] Autoplay blocked or load error:', err);
+        // Safety recovery watchdog: if play failed or was blocked, recover after brief delay
+        setTimeout(() => {
+          if (this.playbackGeneration === gen && this.isPlaying && this.activeStation !== 'OFF') {
+            if (this.fallback && typeof this.fallback.start === 'function' && !this.isBroadcastingNews) {
+              this.fallback.start();
             }
-          }, 1200);
-        }
+            this.handleAudioEnded();
+          }
+        }, 1200);
       });
     }
   }

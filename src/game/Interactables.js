@@ -60,7 +60,16 @@ export class InteractableSystem {
         name: 'PADARIA ESTRELA DE PIRITUBA',
         prompt: 'ENTRAR NA PADOCA E PEDIR PÃO NA CHAPA',
         position: new THREE.Vector3(32.0, 1.2, 37.8),
-        maxDist: 3.2,
+        maxDist: 3.5,
+        encounterId: 'PADARIA_ESTRELA',
+        zoneId: 'PADARIA_ESTRELA'
+      },
+      {
+        id: 'padaria_counter',
+        name: 'BALCÃO DA PADARIA ESTRELA',
+        prompt: 'PEDIR NO BALCÃO DO SEU MANUEL',
+        position: new THREE.Vector3(33.2, 1.2, 43.6),
+        maxDist: 3.5,
         encounterId: 'PADARIA_ESTRELA',
         zoneId: 'PADARIA_ESTRELA'
       },
@@ -556,6 +565,9 @@ export class InteractableSystem {
       flanelinha: '🚙',
       // Living residents & domestic animals
       tio_wilson: '📺',
+      manuel_padeiro: '🥖',
+      padaria: '🥖',
+      padaria_counter: '🥖',
       louro_varanda: '🦜',
       galo_quintal: '🐔',
       mecanico_beto: '🔧',

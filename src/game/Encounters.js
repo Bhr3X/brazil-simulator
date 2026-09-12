@@ -50,6 +50,18 @@ export const BRAZILIAN_ENCOUNTERS = {
         }
       },
       {
+        id: 'pao_frances_quente',
+        label: 'Comprar 5 pães franceses quentinhos no saquinho',
+        costLabel: 'R$ 4,50',
+        costCentavos: 450,
+        disabled: !state.canAfford(450),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -450, fome: 28, sanidade: 15 }, 'Pão francês quentinho da Padaria Estrela');
+          return 'O saquinho de papel pardo veio pelando de quente! Casca crocante estalando e miolo macio. Bucho forrado (+28%) e Sanidade renovada (+15%).';
+        }
+      },
+      {
         id: 'nota_100',
         label: state.flags.tentouNota100
           ? 'Pagar com nota de R$ 100 (O caixa já te avisou que está sem troco hoje)'

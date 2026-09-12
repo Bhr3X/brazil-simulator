@@ -1724,7 +1724,7 @@ export class NpcSystem {
         stationary: true,
         defaultYaw: Math.PI,
         waypoints: [{ x: 33.2, y: 0.25, z: 44.6 }],
-        interactable: false,
+        interactable: false, // Handled authoritatively by padaria_counter anchor in Interactables
         animationMode: 'WIPE',
         baseY: 0.25
       }),

@@ -1987,7 +1987,7 @@ export class CityBuilder {
     );
   }
 
-  // 18.2b Walkable "Padaria Estrela de Pirituba" with Glass Estufa, Pão Francês & Pingado Machine
+  // 18.2b Walkable "Padaria Estrela de Pirituba" — Authentic Paulistano Padoca de Bairro
   buildWalkablePadaria(x, y, z) {
     const w = 11.5;
     const h = 4.8;
@@ -1997,29 +1997,45 @@ export class CityBuilder {
     const floorY = y;
     const roofY = y + h;
 
-    const wallMat = new THREE.MeshLambertMaterial({ color: 0xfaebd7 }); // Warm antique cream
-    const floorMat = new THREE.MeshLambertMaterial({ color: 0xede4d3 }); // Clean bakery ceramic tiles
-    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0x8a847b });
-    const glassMat = new THREE.MeshLambertMaterial({ color: 0x99ddff, transparent: true, opacity: 0.35 });
+    // Authentic Paulistano bakery materials
+    const floorMat = new THREE.MeshLambertMaterial({ map: this.textures.createPadariaFloorTiles() });
+    const wallMat = new THREE.MeshLambertMaterial({ map: this.textures.createPadariaWallTiles() });
+    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0x3d2716 }); // Warm dark wood beam ceiling
+    const glassMat = new THREE.MeshLambertMaterial({ color: 0xa5e2ff, transparent: true, opacity: 0.35 });
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xe2e8f0 });
+    const topMat = new THREE.MeshLambertMaterial({ color: 0xfffaed }); // Polished cream marble/formica
+    const redMat = new THREE.MeshLambertMaterial({ color: 0xbe123c }); // Red vinyl
+    const woodMat = new THREE.MeshLambertMaterial({ color: 0x6e3d16 }); // Warm bakery timber
+    const wickerMat = new THREE.MeshLambertMaterial({ color: 0x92400e }); // Wicker baskets
+    const breadMat = new THREE.MeshLambertMaterial({ color: 0xd97706 }); // Golden crust pão francês
+    const snackGoldenMat = new THREE.MeshLambertMaterial({ color: 0xb45309 }); // Coxinhas
 
-    // Floor
+    // --- 1. FLOOR ---
     const floor = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, d), floorMat);
     floor.position.set(x, floorY + 0.05, z);
     this.scene.add(floor);
 
-    // Register walkable interior floor
+    // Register walkable interior floor collider
     this.physics.addBoxCollider(
       new THREE.Vector3(x - halfW, 0, z - halfD),
       new THREE.Vector3(x + halfW, floorY + 0.15, z + halfD),
       'walkable'
     );
 
-    // Ceiling / Laje with Water Tank
+    // --- 2. CEILING & WATER TANK ---
     const ceiling = new THREE.Mesh(new THREE.BoxGeometry(w, 0.2, d), ceilingMat);
     ceiling.position.set(x, roofY, z);
     this.scene.add(ceiling);
     this.buildWaterTank(x + 2.0, roofY + 0.1, z);
 
+    // Ceiling exposed dark timber beams (3 transverse beams)
+    for (let b = 0; b < 3; b++) {
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, 0.32), woodMat);
+      beam.position.set(x, roofY - 0.12, z - 2.5 + b * 2.5);
+      this.scene.add(beam);
+    }
+
+    // --- 3. SOLID WALLS ---
     // Back wall (Z = z + halfD)
     const backWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.3), wallMat);
     backWall.position.set(x, floorY + h / 2, z + halfD);
@@ -2050,8 +2066,8 @@ export class CityBuilder {
       'solid'
     );
 
-    // Front Facade with wide double glass door opening (entrance width 4.0m)
-    const doorW = 4.0;
+    // Front Facade with wide double glass door opening (entrance width 3.8m)
+    const doorW = 3.8;
     const sideWallW = (w - doorW) / 2;
 
     const fLeft = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, h, 0.3), wallMat);
@@ -2072,46 +2088,206 @@ export class CityBuilder {
       'solid'
     );
 
-    // Front Glass Window Panes on pillars
-    const winL = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.6, 2.6), glassMat);
-    winL.position.set(x - halfW + sideWallW / 2, floorY + 2.0, z - halfD - 0.16);
+    // Front Storefront Glass Display Windows
+    const winL = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.8, 2.7), glassMat);
+    winL.position.set(x - halfW + sideWallW / 2, floorY + 2.1, z - halfD - 0.16);
     this.scene.add(winL);
 
-    const winR = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.6, 2.6), glassMat);
-    winR.position.set(x + halfW - sideWallW / 2, floorY + 2.0, z - halfD - 0.16);
+    const winR = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.8, 2.7), glassMat);
+    winR.position.set(x + halfW - sideWallW / 2, floorY + 2.1, z - halfD - 0.16);
     this.scene.add(winR);
 
-    // Storefront Overhead Illuminated Banner ("PADARIA ESTRELA DE PIRITUBA")
-    const signGeo = new THREE.PlaneGeometry(9.4, 1.8);
+    // Window Frames (dark brown timber trim)
+    [x - halfW + sideWallW / 2, x + halfW - sideWallW / 2].forEach(wx => {
+      const wFrame = new THREE.Mesh(new THREE.BoxGeometry(sideWallW - 0.7, 0.08, 0.1), woodMat);
+      wFrame.position.set(wx, floorY + 0.75, z - halfD - 0.16);
+      this.scene.add(wFrame);
+      const tFrame = new THREE.Mesh(new THREE.BoxGeometry(sideWallW - 0.7, 0.08, 0.1), woodMat);
+      tFrame.position.set(wx, floorY + 3.45, z - halfD - 0.16);
+      this.scene.add(tFrame);
+    });
+
+    // --- 4. STOREFRONT OVERHEAD ILLUMINATED BANNER ---
+    const signGeo = new THREE.PlaneGeometry(10.2, 1.5);
     const signMat = new THREE.MeshBasicMaterial({
       map: this.textures.createStoreSign('PADARIA ESTRELA DE PIRITUBA', '#8a3c20', '#ffe89e')
     });
     const sign = new THREE.Mesh(signGeo, signMat);
-    sign.position.set(x, floorY + h - 1.05, z - halfD - 0.16);
+    sign.position.set(x, floorY + h - 0.85, z - halfD - 0.18);
     sign.rotation.y = Math.PI;
     this.scene.add(sign);
 
-    // Warm Interior Ceiling Light
-    const intLight = new THREE.PointLight(0xfffae0, 2.4, 15, 1.2);
-    intLight.position.set(x, floorY + 3.6, z);
-    this.scene.add(intLight);
+    // Warm spotlights lighting the sign
+    const signLight = new THREE.PointLight(0xffea9f, 1.8, 6);
+    signLight.position.set(x, floorY + h - 0.2, z - halfD - 0.8);
+    this.scene.add(signLight);
 
-    // --- BAKERY COUNTER (BALCÃO DE FÓRMICA EM "L") ---
+    // --- 5. TRADITIONAL STRIPED CANVAS AWNING (TOLDO DE LONA LISTRADO) ---
+    const awningMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createStripedAwningTexture('#15803d', '#fef9c3'),
+      side: THREE.DoubleSide
+    });
+    // Slanted main canvas panel
+    const awningWidth = 11.2;
+    const awningDepth = 2.3;
+    const awningSlope = new THREE.Mesh(new THREE.PlaneGeometry(awningWidth, awningDepth), awningMat);
+    awningSlope.rotation.x = Math.PI / 2 + 0.32; // Slanted down
+    awningSlope.position.set(x, floorY + 3.3, z - halfD - 1.15);
+    this.scene.add(awningSlope);
+
+    // Scalloped front valance flap hanging vertically
+    const valance = new THREE.Mesh(new THREE.PlaneGeometry(awningWidth, 0.32), awningMat);
+    valance.position.set(x, floorY + 2.8, z - halfD - 2.28);
+    valance.rotation.y = Math.PI;
+    this.scene.add(valance);
+
+    // Black metal support brackets for the awning
+    const bracketMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
+    [-5.4, 0, 5.4].forEach(offX => {
+      const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.4, 6), bracketMat);
+      strut.rotation.x = 0.55;
+      strut.position.set(x + offX, floorY + 3.0, z - halfD - 1.1);
+      this.scene.add(strut);
+    });
+
+    // --- 6. "TELEVISÃO DE CACHORRO" (ROTISSERIE ROAST CHICKEN WARMER) BESIDE ENTRANCE ---
+    const frangoGroup = new THREE.Group();
+    const frangoBody = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.4, 0.85), chromeMat);
+    frangoGroup.add(frangoBody);
+
+    const frangoGlass = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.0, 1.3),
+      new THREE.MeshBasicMaterial({ map: this.textures.createFrangoAssadoTexture() })
+    );
+    frangoGlass.position.set(0, 0, -0.44);
+    frangoGlass.rotation.y = Math.PI;
+    frangoGroup.add(frangoGlass);
+
+    // Rotisserie glowing heating light
+    const frangoLight = new THREE.PointLight(0xff6600, 2.2, 4);
+    frangoLight.position.set(0, 0, -0.3);
+    frangoGroup.add(frangoLight);
+
+    frangoGroup.position.set(x + halfW - 1.2, floorY + 0.8, z - halfD - 0.25);
+    this.scene.add(frangoGroup);
+
+    // --- 7. SIDEWALK A-FRAME CHALKBOARD MENU (CAVALETE DE CALÇADA) ---
+    const cavaleteGroup = new THREE.Group();
+    const menuTex = this.textures.createPadariaMenuBoardTexture();
+    const chalkFaceL = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.1), new THREE.MeshBasicMaterial({ map: menuTex }));
+    chalkFaceL.rotation.x = 0.18;
+    chalkFaceL.rotation.y = Math.PI;
+    chalkFaceL.position.set(0, 0.65, -0.1);
+    cavaleteGroup.add(chalkFaceL);
+
+    const chalkFaceR = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.1), new THREE.MeshBasicMaterial({ map: menuTex }));
+    chalkFaceR.rotation.x = -0.18;
+    chalkFaceR.position.set(0, 0.65, 0.1);
+    cavaleteGroup.add(chalkFaceR);
+
+    // Wooden A-frame legs
+    const aLegL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.3, 0.05), woodMat);
+    aLegL.position.set(-0.42, 0.65, 0);
+    cavaleteGroup.add(aLegL);
+    const aLegR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.3, 0.05), woodMat);
+    aLegR.position.set(0.42, 0.65, 0);
+    cavaleteGroup.add(aLegR);
+
+    cavaleteGroup.position.set(x - 3.4, floorY, z - halfD - 1.5);
+    cavaleteGroup.rotation.y = 0.25;
+    this.scene.add(cavaleteGroup);
+
+    // --- 8. SIDEWALK BISTRO CAFE TABLES & CHAIRS OUTSIDE ---
+    const tableYellowMat = new THREE.MeshLambertMaterial({ color: 0xf59e0b });
+    const chairRedMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+    [-1.8, 1.8].forEach(offX => {
+      const tx = x + offX;
+      const tz = z - halfD - 1.6;
+
+      // Table top & pedestal
+      const bTable = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.04, 16), tableYellowMat);
+      bTable.position.set(tx, floorY + 0.72, tz);
+      this.scene.add(bTable);
+      const bPost = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.7, 8), chromeMat);
+      bPost.position.set(tx, floorY + 0.35, tz);
+      this.scene.add(bPost);
+      const bBase = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.03, 12), chromeMat);
+      bBase.position.set(tx, floorY + 0.02, tz);
+      this.scene.add(bBase);
+
+      // Sugar shaker on table
+      const shaker = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.09, 8), glassMat);
+      shaker.position.set(tx, floorY + 0.78, tz);
+      this.scene.add(shaker);
+
+      // 2 Red outdoor chairs
+      [-0.48, 0.48].forEach((czOff, cIdx) => {
+        const chair = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.04, 0.36), chairRedMat);
+        chair.position.set(tx, floorY + 0.44, tz + czOff);
+        this.scene.add(chair);
+        const cBack = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.42, 0.04), chairRedMat);
+        cBack.position.set(tx, floorY + 0.65, tz + czOff + (cIdx === 0 ? -0.16 : 0.16));
+        this.scene.add(cBack);
+      });
+    });
+
+    // --- 9. INTERIOR PENDANT LIGHTING & AMBIANCE ---
+    // 4 Brass dome pendant lamps casting warm bakery illumination
+    const brassMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+    const lampCoords = [
+      { lx: x - 0.5, lz: z + 1.6 },
+      { lx: x + 2.2, lz: z + 1.6 },
+      { lx: x - 3.4, lz: z - 1.2 },
+      { lx: x - 3.4, lz: z + 1.4 }
+    ];
+
+    lampCoords.forEach(c => {
+      // Hanging cord
+      const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 1.4, 4), bracketMat);
+      cord.position.set(c.lx, floorY + 4.1, c.lz);
+      this.scene.add(cord);
+
+      // Brass dome shade
+      const shade = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.2, 12, 1, true), brassMat);
+      shade.rotation.x = Math.PI;
+      shade.position.set(c.lx, floorY + 3.3, c.lz);
+      this.scene.add(shade);
+
+      // Warm interior point light
+      const pLight = new THREE.PointLight(0xfff0c4, 1.6, 7.5);
+      pLight.position.set(c.lx, floorY + 3.1, c.lz);
+      this.scene.add(pLight);
+    });
+
+    // --- 10. BAKERY COUNTER (BALCÃO EM 'L' COM VITRINE ILUMINADA DE DOCES) ---
     const counterH = 1.05;
-    const counterMat = new THREE.MeshLambertMaterial({ color: 0x4a2411 });
-    const topMat = new THREE.MeshLambertMaterial({ color: 0xeae2cf }); // polished marble/formica
+    const counterBaseMat = new THREE.MeshLambertMaterial({ color: 0x451a03 });
 
-    // Main Counter section
-    const mainSection = new THREE.Mesh(new THREE.BoxGeometry(5.2, counterH, 0.85), counterMat);
+    // Main Counter section along X
+    const mainSection = new THREE.Mesh(new THREE.BoxGeometry(5.2, counterH, 0.85), counterBaseMat);
     mainSection.position.set(x + 1.2, floorY + counterH / 2, z + 1.8);
     this.scene.add(mainSection);
 
+    // Front-facing illuminated Glass Pastry Showcase (Vitrine de Doces: Sonhos, Bolos, Brigadeiros)
+    const vitrineMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createPadariaPastryVitrineTexture()
+    });
+    const vitrineFront = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 0.82), vitrineMat);
+    vitrineFront.position.set(x + 1.2, floorY + 0.48, z + 1.36);
+    this.scene.add(vitrineFront);
+
+    // Showcase warm inner illumination
+    const vitrineLight = new THREE.PointLight(0xfffae0, 1.4, 3.5);
+    vitrineLight.position.set(x + 1.2, floorY + 0.55, z + 1.45);
+    this.scene.add(vitrineLight);
+
+    // Marble / polished formica top slab
     const mainTop = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.08, 1.0), topMat);
     mainTop.position.set(x + 1.2, floorY + counterH + 0.04, z + 1.8);
     this.scene.add(mainTop);
 
-    // Return Counter Section (L-shape towards back)
-    const returnSection = new THREE.Mesh(new THREE.BoxGeometry(0.85, counterH, 2.0), counterMat);
+    // Return Counter Section along Z (L-shape towards back wall)
+    const returnSection = new THREE.Mesh(new THREE.BoxGeometry(0.85, counterH, 2.0), counterBaseMat);
     returnSection.position.set(x + 3.4, floorY + counterH / 2, z + 2.8);
     this.scene.add(returnSection);
 
@@ -2126,12 +2302,10 @@ export class CityBuilder {
       'solid'
     );
 
-    // --- 4 ROUND CHROME SWIVEL BARSTOOLS (BANQUETAS DE INOX) ---
-    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xd6dde4 });
-    const stoolRedMat = new THREE.MeshLambertMaterial({ color: 0xb71c1c });
+    // --- 11. 4 ROUND CHROME SWIVEL BARSTOOLS (BANQUETAS DE INOX) ---
     for (let i = 0; i < 4; i++) {
-      const sx = x - 1.0 + i * 1.2;
-      const sz = z + 0.95;
+      const sx = x - 0.8 + i * 1.15;
+      const sz = z + 0.85;
 
       const stoolPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.72, 8), chromeMat);
       stoolPost.position.set(sx, floorY + 0.36, sz);
@@ -2141,95 +2315,198 @@ export class CityBuilder {
       stoolBase.position.set(sx, floorY + 0.02, sz);
       this.scene.add(stoolBase);
 
-      const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.08, 12), stoolRedMat);
+      const footRing = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.015, 6, 12), chromeMat);
+      footRing.rotation.x = Math.PI / 2;
+      footRing.position.set(sx, floorY + 0.22, sz);
+      this.scene.add(footRing);
+
+      const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.09, 14), redMat);
       stoolSeat.position.set(sx, floorY + 0.76, sz);
       this.scene.add(stoolSeat);
     }
 
-    // --- ESTUFA AQUECIDA DE SALGADOS (COXINHAS, EMPADAS, PÃO DE QUEIJO) ---
+    // --- 12. ESTUFA AQUECIDA DE SALGADOS (COXINHAS, EMPADAS, PÃO DE QUEIJO) ---
     const estufaMat = new THREE.MeshBasicMaterial({
       map: this.textures.createPadariaEstufaTexture()
     });
-    const estufaBox = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 0.55), estufaMat);
-    estufaBox.position.set(x + 0.2, floorY + counterH + 0.35, z + 1.8);
+    const estufaBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.58, 0.55), estufaMat);
+    estufaBox.position.set(x - 0.3, floorY + counterH + 0.35, z + 1.8);
     this.scene.add(estufaBox);
 
     // Warm inner tungsten glow of estufa
-    const estufaLight = new THREE.PointLight(0xffa834, 1.8, 4);
-    estufaLight.position.set(x + 0.2, floorY + counterH + 0.4, z + 1.8);
+    const estufaLight = new THREE.PointLight(0xff9900, 2.4, 4.5);
+    estufaLight.position.set(x - 0.3, floorY + counterH + 0.4, z + 1.8);
     this.scene.add(estufaLight);
 
-    // --- COMMERCIAL ESPRESSO & PINGADO MACHINE (MÁQUINA DE CAFÉ INOX) ---
+    // 3D modeled snacks inside estufa
+    for (let c = 0; c < 4; c++) {
+      // Golden pointy coxinhas
+      const cox = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.08, 8), snackGoldenMat);
+      cox.position.set(x - 0.8 + c * 0.18, floorY + counterH + 0.2, z + 1.8);
+      this.scene.add(cox);
+
+      // Pães de queijo
+      const pdq = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), breadMat);
+      pdq.position.set(x - 0.8 + c * 0.18, floorY + counterH + 0.38, z + 1.8);
+      this.scene.add(pdq);
+    }
+
+    // --- 13. COMMERCIAL ESPRESSO & PINGADO MACHINE (MÁQUINA DE CAFÉ INOX PROFISSIONAL) ---
     const coffeeGroup = new THREE.Group();
-    const cBody = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.65, 0.55), chromeMat);
-    cBody.position.y = 0.325;
+    const cBody = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.72, 0.58), chromeMat);
+    cBody.position.y = 0.36;
     coffeeGroup.add(cBody);
 
-    // Steam wands and pressure gauges
-    const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    // Chrome portafilters (grupos de café)
+    [-0.2, 0.2].forEach(px => {
+      const portafilter = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.08, 8), chromeMat);
+      portafilter.position.set(px, 0.24, -0.32);
+      coffeeGroup.add(portafilter);
+      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 6), woodMat);
+      handle.rotation.x = Math.PI / 2;
+      handle.position.set(px, 0.24, -0.44);
+      coffeeGroup.add(handle);
+    });
+
+    // Steam wands and pressure dials
+    const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.02, 10), new THREE.MeshBasicMaterial({ color: 0xffffff }));
     dial.rotation.x = Math.PI / 2;
-    dial.position.set(-0.2, 0.45, -0.28);
+    dial.position.set(0, 0.52, -0.3);
     coffeeGroup.add(dial);
 
-    // Demitasse coffee cups stacked on top
+    // Demitasse ceramic coffee cups stacked on warming tray
     const cupMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-    for (let c = 0; c < 6; c++) {
-      const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.025, 0.06, 6), cupMat);
-      cup.position.set(-0.25 + (c % 3) * 0.14, 0.68, -0.1 + Math.floor(c / 3) * 0.12);
+    for (let c = 0; c < 8; c++) {
+      const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.025, 0.06, 8), cupMat);
+      cup.position.set(-0.3 + (c % 4) * 0.18, 0.75, -0.12 + Math.floor(c / 4) * 0.14);
       coffeeGroup.add(cup);
     }
-    coffeeGroup.position.set(x + 2.5, floorY + counterH + 0.08, z + 1.8);
+    coffeeGroup.position.set(x + 1.6, floorY + counterH + 0.08, z + 1.8);
     this.scene.add(coffeeGroup);
 
-    // --- BREAD RACK WITH PÃO FRANCÊS (CESTOS DE PÃO ATRÁS DO BALCÃO) ---
-    const rackWoodMat = new THREE.MeshLambertMaterial({ color: 0x6e4726 });
-    const breadMat = new THREE.MeshLambertMaterial({ color: 0xd49b45 }); // Golden crust pão francês
-    const rack = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.2, 0.4), rackWoodMat);
+    // --- 14. CHAPA DE LANCHES (GRIDDLE) & SERVED FOOD ITEMS ---
+    const chapaGroup = new THREE.Group();
+    const chapaBase = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.12, 0.55), chromeMat);
+    chapaGroup.add(chapaBase);
+    const griddlePlate = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.02, 0.48), new THREE.MeshLambertMaterial({ color: 0x1f2937 }));
+    griddlePlate.position.y = 0.07;
+    chapaGroup.add(griddlePlate);
+
+    // Sandwich press weight
+    const press = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.04, 0.16), bracketMat);
+    press.position.set(0.15, 0.12, 0);
+    chapaGroup.add(press);
+
+    chapaGroup.position.set(x + 2.7, floorY + counterH + 0.06, z + 1.8);
+    this.scene.add(chapaGroup);
+
+    // Served Pão na Chapa quentinho
+    const paoPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.02, 12), cupMat);
+    paoPlate.position.set(x - 0.7, floorY + counterH + 0.06, z + 1.8);
+    this.scene.add(paoPlate);
+    const pao = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.045, 0.11), breadMat);
+    pao.position.set(x - 0.7, floorY + counterH + 0.09, z + 1.8);
+    this.scene.add(pao);
+
+    // Served Pingado no copo americano
+    const pingado = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.11, 8), glassMat);
+    pingado.position.set(x - 1.0, floorY + counterH + 0.09, z + 1.8);
+    this.scene.add(pingado);
+    const pingadoLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.028, 0.09, 8), new THREE.MeshLambertMaterial({ color: 0xb58055 }));
+    pingadoLiquid.position.set(x - 1.0, floorY + counterH + 0.08, z + 1.8);
+    this.scene.add(pingadoLiquid);
+
+    // --- 15. BALANÇA FILIZOLA & CAIXA REGISTRADORA (RETURN COUNTER) ---
+    const scaleGroup = new THREE.Group();
+    const scaleBody = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.28, 0.32), redMat);
+    scaleGroup.add(scaleBody);
+    const platter = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.02, 12), chromeMat);
+    platter.position.y = 0.16;
+    scaleGroup.add(platter);
+    const scaleDial = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 12), cupMat);
+    scaleDial.rotation.x = Math.PI / 2;
+    scaleDial.position.set(0, 0.22, 0.14);
+    scaleGroup.add(scaleDial);
+    scaleGroup.position.set(x + 3.4, floorY + counterH + 0.18, z + 2.5);
+    this.scene.add(scaleGroup);
+
+    // --- 16. BREAD RACK WITH WOVEN BASKETS & PÃO FRANCÊS (BACK WALL) ---
+    const rack = new THREE.Mesh(new THREE.BoxGeometry(3.8, 2.4, 0.45), woodMat);
     rack.position.set(x + 1.2, floorY + 1.6, z + halfD - 0.25);
     this.scene.add(rack);
 
-    // Baskets of baguettes / pães franceses
-    for (let row = 0; row < 2; row++) {
-      for (let col = 0; col < 5; col++) {
-        const loaf = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.45, 6), breadMat);
+    // 3 Tiered Wicker Baskets with golden pães franceses
+    for (let row = 0; row < 3; row++) {
+      const basket = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.18, 0.38), wickerMat);
+      basket.position.set(x + 1.2, floorY + 0.8 + row * 0.75, z + halfD - 0.38);
+      this.scene.add(basket);
+
+      for (let col = 0; col < 6; col++) {
+        const loaf = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.42, 6), breadMat);
         loaf.rotation.x = Math.PI / 2;
-        loaf.position.set(x - 0.4 + col * 0.55, floorY + 1.1 + row * 0.8, z + halfD - 0.45);
+        loaf.position.set(x - 0.3 + col * 0.52, floorY + 0.95 + row * 0.75, z + halfD - 0.42);
         this.scene.add(loaf);
       }
     }
 
-    // --- CHALKBOARD PRICE MENU ON THE WALL ---
+    // --- 17. CHALKBOARD PRICE MENU ON THE WALL ---
     const menuBoard = new THREE.Mesh(
       new THREE.PlaneGeometry(2.4, 2.0),
       new THREE.MeshBasicMaterial({ map: this.textures.createPadariaMenuBoardTexture() })
     );
     menuBoard.position.set(x - 2.8, floorY + 2.4, z + halfD - 0.14);
-    menuBoard.rotation.y = 0;
     this.scene.add(menuBoard);
 
-    // --- BAKERY ATTENDANT: SEU MANUEL ---
-    this.buildResidentNpc(x + 1.4, floorY, z + 2.8, 0xffffff, 0x9c653d, 0x223344, false, Math.PI);
-    // Baker white paper hat
-    const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.15, 8), new THREE.MeshLambertMaterial({ color: 0xffffff }));
-    hat.position.set(x + 1.4, floorY + 1.82, z + 2.8);
-    this.scene.add(hat);
+    // Wall Clock
+    const clockBody = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.04, 16), woodMat);
+    clockBody.rotation.x = Math.PI / 2;
+    clockBody.position.set(x - 4.4, floorY + 3.2, z + halfD - 0.14);
+    this.scene.add(clockBody);
+    const clockFace = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.045, 16), cupMat);
+    clockFace.rotation.x = Math.PI / 2;
+    clockFace.position.set(x - 4.4, floorY + 3.2, z + halfD - 0.135);
+    this.scene.add(clockFace);
 
-    // --- COLLECTIBLE FOOD ITEMS ON THE COUNTER ---
-    // 1. Pão na Chapa quentinho
-    const paoPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.02, 10), cupMat);
-    paoPlate.position.set(x - 0.4, floorY + counterH + 0.06, z + 1.8);
-    this.scene.add(paoPlate);
-    const pao = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.05, 0.1), breadMat);
-    pao.position.set(x - 0.4, floorY + counterH + 0.09, z + 1.8);
-    this.scene.add(pao);
+    // --- 18. INTERIOR SALÃO DINING TABLES & CHAIRS ---
+    [-1.0, 1.4].forEach(tzOff => {
+      const tx = x - 3.4;
+      const tz = z + tzOff;
 
-    // 2. Pingado no copo americano
-    const pingado = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.11, 8), glassMat);
-    pingado.position.set(x - 0.7, floorY + counterH + 0.09, z + 1.8);
-    this.scene.add(pingado);
-    const pingadoLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.028, 0.09, 8), new THREE.MeshLambertMaterial({ color: 0xb58055 }));
-    pingadoLiquid.position.set(x - 0.7, floorY + counterH + 0.08, z + 1.8);
-    this.scene.add(pingadoLiquid);
+      // Formica square table
+      const tTable = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.04, 0.95), topMat);
+      tTable.position.set(tx, floorY + 0.74, tz);
+      this.scene.add(tTable);
+      const tPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.72, 8), chromeMat);
+      tPost.position.set(tx, floorY + 0.36, tz);
+      this.scene.add(tPost);
+      const tBase = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.04, 12), chromeMat);
+      tBase.position.set(tx, floorY + 0.02, tz);
+      this.scene.add(tBase);
+
+      // Napkin holder & sugar shaker
+      const napkin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.06), chromeMat);
+      napkin.position.set(tx - 0.15, floorY + 0.81, tz);
+      this.scene.add(napkin);
+      const sugar = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.1, 8), glassMat);
+      sugar.position.set(tx + 0.15, floorY + 0.81, tz);
+      this.scene.add(sugar);
+
+      // Diner chairs with red cushions
+      [-0.58, 0.58].forEach((czOff, cIdx) => {
+        const chair = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.05, 0.38), redMat);
+        chair.position.set(tx, floorY + 0.44, tz + czOff);
+        this.scene.add(chair);
+        const cBack = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.04), redMat);
+        cBack.position.set(tx, floorY + 0.65, tz + czOff + (cIdx === 0 ? -0.17 : 0.17));
+        this.scene.add(cBack);
+      });
+    });
+
+    // Seated patron eating misto quente & reading newspaper
+    this.buildResidentNpc(x - 3.4, floorY, z + 0.85, 0x3b82f6, 0xb4794e, 0x1e293b, true, 0);
+    const newspaper = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.01, 0.38), cupMat);
+    newspaper.position.set(x - 3.4, floorY + 0.77, z + 1.25);
+    this.scene.add(newspaper);
   }
 
   // 18.2c Walkable "Borracharia & Lava-Rápido do Beto" with Hydraulic Car Lift, Tools & Tires

@@ -1916,6 +1916,356 @@ export class TextureGenerator {
     return texture;
   }
 
+  // 61b. Classic Paulistano Hydraulic Checkered Floor Tiles (Ladrilho Hidráulico Preto e Branco/Creme)
+  createPadariaFloorTiles() {
+    const key = 'padaria_floor_tiles';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    const tileSize = 32;
+    const cols = 8;
+    const rows = 8;
+
+    ctx.fillStyle = '#222222'; // Grout
+    ctx.fillRect(0, 0, 256, 256);
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const isDark = (r + c) % 2 === 0;
+        const x = c * tileSize + 1;
+        const y = r * tileSize + 1;
+        const s = tileSize - 2;
+
+        if (isDark) {
+          // Polished dark charcoal/black tile with subtle marble fleck
+          const grad = ctx.createLinearGradient(x, y, x + s, y + s);
+          grad.addColorStop(0, '#2d3134');
+          grad.addColorStop(0.5, '#1e2022');
+          grad.addColorStop(1, '#151718');
+          ctx.fillStyle = grad;
+          ctx.fillRect(x, y, s, s);
+          // Highlight edge
+          ctx.fillStyle = 'rgba(255,255,255,0.06)';
+          ctx.fillRect(x, y, s, 2);
+          ctx.fillRect(x, y, 2, s);
+        } else {
+          // Warm cream/ivory ceramic tile
+          const grad = ctx.createLinearGradient(x, y, x + s, y + s);
+          grad.addColorStop(0, '#fefbf3');
+          grad.addColorStop(0.5, '#f4ece1');
+          grad.addColorStop(1, '#ebe0d0');
+          ctx.fillStyle = grad;
+          ctx.fillRect(x, y, s, s);
+          // Highlight edge
+          ctx.fillStyle = 'rgba(255,255,255,0.4)';
+          ctx.fillRect(x, y, s, 2);
+          ctx.fillRect(x, y, 2, s);
+        }
+      }
+    }
+
+    const texture = this.toThreeTexture(canvas, 4, 4);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61c. Authentic Padoca Azulejo Wainscot & Warm Yellow Wall (Azulejo Branco + Friso + Parede Amarela)
+  createPadariaWallTiles() {
+    const key = 'padaria_wall_tiles';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Upper 45%: Warm pastel bakery butter-yellow paint
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillRect(0, 0, 256, 116);
+    // Subtle plaster texture
+    ctx.fillStyle = 'rgba(217, 119, 6, 0.05)';
+    for (let i = 0; i < 400; i++) {
+      ctx.fillRect(Math.random() * 256, Math.random() * 116, 2, 2);
+    }
+
+    // Decorative Portuguese / Brazilian ceramic border trim (faixa decorativa)
+    ctx.fillStyle = '#1e3a8a'; // Deep cobalt blue
+    ctx.fillRect(0, 116, 256, 16);
+    ctx.fillStyle = '#f59e0b'; // Amber diamonds
+    for (let bx = 4; bx < 256; bx += 16) {
+      ctx.beginPath();
+      ctx.moveTo(bx + 6, 118);
+      ctx.lineTo(bx + 12, 124);
+      ctx.lineTo(bx + 6, 130);
+      ctx.lineTo(bx, 124);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // Gold trim lines
+    ctx.fillStyle = '#d97706';
+    ctx.fillRect(0, 115, 256, 2);
+    ctx.fillRect(0, 131, 256, 2);
+
+    // Lower 55%: Clean white subway tiles (azulejos)
+    ctx.fillStyle = '#eae5dc'; // Grout
+    ctx.fillRect(0, 133, 256, 123);
+
+    const tileW = 42;
+    const tileH = 20;
+    let rowIdx = 0;
+    for (let ty = 134; ty < 256; ty += tileH + 1) {
+      const offset = (rowIdx % 2 === 1) ? -(tileW / 2) : 0;
+      for (let tx = offset; tx < 256 + tileW; tx += tileW + 1) {
+        if (tx + tileW < 0 || tx > 256) continue;
+        const w = Math.min(tileW, 256 - tx);
+        const grad = ctx.createLinearGradient(tx, ty, tx, ty + tileH);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.7, '#f8fafc');
+        grad.addColorStop(1, '#e2e8f0');
+        ctx.fillStyle = grad;
+        ctx.fillRect(tx, ty, w, Math.min(tileH, 256 - ty));
+
+        // Ceramic gloss reflection
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fillRect(tx, ty, w, 1);
+        ctx.fillRect(tx, ty, 1, Math.min(tileH, 256 - ty));
+      }
+      rowIdx++;
+    }
+
+    const texture = this.toThreeTexture(canvas, 2, 2);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61d. Striped Canvas Awning (Toldo de Lona Listrado Verde e Amarelo Creme)
+  createStripedAwningTexture(c1 = '#15803d', c2 = '#fef9c3') {
+    const key = `striped_awning_${c1}_${c2}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    const stripeW = 32;
+
+    for (let x = 0; x < 256; x += stripeW) {
+      const isAlt = (x / stripeW) % 2 === 1;
+      const baseCol = isAlt ? c1 : c2;
+      ctx.fillStyle = baseCol;
+      ctx.fillRect(x, 0, stripeW, 256);
+
+      // Canvas fold cylinder shadow & highlight
+      const grad = ctx.createLinearGradient(x, 0, x + stripeW, 0);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0.22)');
+      grad.addColorStop(0.3, 'rgba(255, 255, 255, 0.18)');
+      grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.05)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, 0, stripeW, 256);
+    }
+
+    // Scalloped bottom valance border
+    ctx.fillStyle = c1;
+    ctx.fillRect(0, 240, 256, 16);
+    ctx.fillStyle = '#ffffff';
+    for (let sx = 0; sx < 256; sx += 16) {
+      ctx.beginPath();
+      ctx.arc(sx + 8, 256, 8, Math.PI, 0);
+      ctx.fillStyle = c2;
+      ctx.fill();
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61e. Glass Pastry Showcase (Vitrine Iluminada de Doces da Padoca: Sonhos, Bolos & Brigadeiros)
+  createPadariaPastryVitrineTexture() {
+    const key = 'padaria_pastry_vitrine';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Warm lit glass showcase interior
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, 256);
+    bgGrad.addColorStop(0, '#fffbeb');
+    bgGrad.addColorStop(0.6, '#fef3c7');
+    bgGrad.addColorStop(1, '#fde68a');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Glass shelves
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 4;
+    [80, 165].forEach(y => {
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(256, y);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillRect(0, y - 2, 256, 2);
+    });
+
+    // TOP SHELF: Sonhos de Creme & Fatias de Bolo de Cenoura com Chocolate
+    // 3 Golden Sonhos with powdered sugar
+    for (let i = 0; i < 3; i++) {
+      const sx = 28 + i * 44;
+      const sy = 60;
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.ellipse(sx, sy, 18, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Cream filling line
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(sx - 16, sy - 2, 32, 5);
+      // Powdered sugar
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(sx, sy - 6, 12, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Bolo de Cenoura slices with shiny chocolate ganache
+    for (let i = 0; i < 3; i++) {
+      const bx = 160 + i * 32;
+      const by = 48;
+      // Orange carrot cake triangle
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(bx, by + 6, 24, 22);
+      // Chocolate ganache top & drip
+      ctx.fillStyle = '#3e1a06';
+      ctx.fillRect(bx - 2, by, 28, 8);
+      ctx.fillRect(bx + 4, by + 8, 4, 10);
+      ctx.fillRect(bx + 16, by + 8, 4, 7);
+    }
+
+    // MIDDLE SHELF: Bombas de Chocolate (Éclairs) & Carolinas
+    for (let i = 0; i < 4; i++) {
+      const ex = 24 + i * 58;
+      const ey = 142;
+      // Éclair golden pastry
+      ctx.fillStyle = '#b45309';
+      ctx.beginPath();
+      ctx.roundRect(ex, ey, 48, 16, 8);
+      ctx.fill();
+      // Shiny dark chocolate glaze
+      ctx.fillStyle = '#2b1004';
+      ctx.beginPath();
+      ctx.roundRect(ex + 2, ey + 1, 44, 10, 5);
+      ctx.fill();
+      // White glaze streak
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(ex + 6, ey + 6); ctx.lineTo(ex + 40, ey + 6);
+      ctx.stroke();
+    }
+
+    // BOTTOM SHELF: Brigadeiros Gourmet & Pudim de Leite
+    // 5 Brigadeiros with chocolate sprinkles
+    for (let i = 0; i < 5; i++) {
+      const brx = 22 + i * 32;
+      const bry = 224;
+      // White paper cup
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(brx - 12, bry + 14);
+      ctx.lineTo(brx + 12, bry + 14);
+      ctx.lineTo(brx + 9, bry + 24);
+      ctx.lineTo(brx - 9, bry + 24);
+      ctx.closePath();
+      ctx.fill();
+      // Dark brigadeiro sphere
+      ctx.fillStyle = '#1c0a00';
+      ctx.beginPath();
+      ctx.arc(brx, bry + 8, 12, 0, Math.PI * 2);
+      ctx.fill();
+      // Sprinkles (granulado)
+      ctx.fillStyle = '#451a03';
+      for (let s = 0; s < 8; s++) {
+        ctx.fillRect(brx - 8 + (s * 3) % 16, bry + 2 + (s * 4) % 12, 3, 1.5);
+      }
+    }
+    // Whole Brazilian Pudim de Leite with amber caramel crown
+    const px = 205;
+    const py = 226;
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 8, 32, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Amber dripping caramel
+    ctx.fillStyle = '#b45309';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 4, 30, 13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 2, 22, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Front glass sheen
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(120, 0); ctx.lineTo(40, 256); ctx.lineTo(0, 256);
+    ctx.fill();
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61f. Brazilian "Televisão de Cachorro" (Rotisserie Chicken Glass Warmer / Frango Assado)
+  createFrangoAssadoTexture() {
+    const key = 'frango_assado_rotisserie';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Glowing infrared heated rotisserie chamber
+    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#f97316');
+    grad.addColorStop(0.4, '#ea580c');
+    grad.addColorStop(1, '#9a3412');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Chrome rotisserie spit rods
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 4;
+    [55, 125, 195].forEach(y => {
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(256, y);
+      ctx.stroke();
+    });
+
+    // Spinning golden roast chickens on each spit
+    for (let row = 0; row < 3; row++) {
+      const cy = 55 + row * 70;
+      for (let col = 0; col < 3; col++) {
+        const cx = 45 + col * 82;
+        // Plump chicken body
+        ctx.fillStyle = '#c2410c'; // Crisp golden brown
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 26, 18, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Darker charred skin highlights
+        ctx.fillStyle = '#7c2d12';
+        ctx.beginPath();
+        ctx.ellipse(cx + 4, cy - 2, 14, 8, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        // Drumstick bone & meat
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath();
+        ctx.ellipse(cx - 18, cy + 8, 8, 12, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(cx - 24, cy + 14, 5, 5);
+      }
+    }
+
+    // Glass reflection gleam
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(90, 0); ctx.lineTo(20, 256); ctx.lineTo(0, 256);
+    ctx.fill();
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
   // 62. Wooden House Door with Weathered Planks & Metal Knob
   createWoodenHouseDoorTexture() {
     const key = 'wooden_house_door';

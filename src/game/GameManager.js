@@ -257,7 +257,7 @@ export class GameManager {
 
     // Update 3D spatial radio emitters (distance falloff & lowpass acoustic muffling)
     if (this.sound && this.sound.updateSpatial) {
-      this.sound.updateSpatial(playerPos, this.state ? this.state.perigo : 0);
+      this.sound.updateSpatial(playerPos, this.state ? this.state.perigo : 0, delta);
     }
 
     // 5b. Update autonomous roaming NPCs (Clodoaldo, Caramelo, Juninho, Dona Neide)

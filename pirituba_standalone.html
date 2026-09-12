@@ -5272,6 +5272,356 @@ class TextureGenerator {
     return texture;
   }
 
+  // 61b. Classic Paulistano Hydraulic Checkered Floor Tiles (Ladrilho Hidráulico Preto e Branco/Creme)
+  createPadariaFloorTiles() {
+    const key = 'padaria_floor_tiles';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    const tileSize = 32;
+    const cols = 8;
+    const rows = 8;
+
+    ctx.fillStyle = '#222222'; // Grout
+    ctx.fillRect(0, 0, 256, 256);
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const isDark = (r + c) % 2 === 0;
+        const x = c * tileSize + 1;
+        const y = r * tileSize + 1;
+        const s = tileSize - 2;
+
+        if (isDark) {
+          // Polished dark charcoal/black tile with subtle marble fleck
+          const grad = ctx.createLinearGradient(x, y, x + s, y + s);
+          grad.addColorStop(0, '#2d3134');
+          grad.addColorStop(0.5, '#1e2022');
+          grad.addColorStop(1, '#151718');
+          ctx.fillStyle = grad;
+          ctx.fillRect(x, y, s, s);
+          // Highlight edge
+          ctx.fillStyle = 'rgba(255,255,255,0.06)';
+          ctx.fillRect(x, y, s, 2);
+          ctx.fillRect(x, y, 2, s);
+        } else {
+          // Warm cream/ivory ceramic tile
+          const grad = ctx.createLinearGradient(x, y, x + s, y + s);
+          grad.addColorStop(0, '#fefbf3');
+          grad.addColorStop(0.5, '#f4ece1');
+          grad.addColorStop(1, '#ebe0d0');
+          ctx.fillStyle = grad;
+          ctx.fillRect(x, y, s, s);
+          // Highlight edge
+          ctx.fillStyle = 'rgba(255,255,255,0.4)';
+          ctx.fillRect(x, y, s, 2);
+          ctx.fillRect(x, y, 2, s);
+        }
+      }
+    }
+
+    const texture = this.toThreeTexture(canvas, 4, 4);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61c. Authentic Padoca Azulejo Wainscot & Warm Yellow Wall (Azulejo Branco + Friso + Parede Amarela)
+  createPadariaWallTiles() {
+    const key = 'padaria_wall_tiles';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Upper 45%: Warm pastel bakery butter-yellow paint
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillRect(0, 0, 256, 116);
+    // Subtle plaster texture
+    ctx.fillStyle = 'rgba(217, 119, 6, 0.05)';
+    for (let i = 0; i < 400; i++) {
+      ctx.fillRect(Math.random() * 256, Math.random() * 116, 2, 2);
+    }
+
+    // Decorative Portuguese / Brazilian ceramic border trim (faixa decorativa)
+    ctx.fillStyle = '#1e3a8a'; // Deep cobalt blue
+    ctx.fillRect(0, 116, 256, 16);
+    ctx.fillStyle = '#f59e0b'; // Amber diamonds
+    for (let bx = 4; bx < 256; bx += 16) {
+      ctx.beginPath();
+      ctx.moveTo(bx + 6, 118);
+      ctx.lineTo(bx + 12, 124);
+      ctx.lineTo(bx + 6, 130);
+      ctx.lineTo(bx, 124);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // Gold trim lines
+    ctx.fillStyle = '#d97706';
+    ctx.fillRect(0, 115, 256, 2);
+    ctx.fillRect(0, 131, 256, 2);
+
+    // Lower 55%: Clean white subway tiles (azulejos)
+    ctx.fillStyle = '#eae5dc'; // Grout
+    ctx.fillRect(0, 133, 256, 123);
+
+    const tileW = 42;
+    const tileH = 20;
+    let rowIdx = 0;
+    for (let ty = 134; ty < 256; ty += tileH + 1) {
+      const offset = (rowIdx % 2 === 1) ? -(tileW / 2) : 0;
+      for (let tx = offset; tx < 256 + tileW; tx += tileW + 1) {
+        if (tx + tileW < 0 || tx > 256) continue;
+        const w = Math.min(tileW, 256 - tx);
+        const grad = ctx.createLinearGradient(tx, ty, tx, ty + tileH);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.7, '#f8fafc');
+        grad.addColorStop(1, '#e2e8f0');
+        ctx.fillStyle = grad;
+        ctx.fillRect(tx, ty, w, Math.min(tileH, 256 - ty));
+
+        // Ceramic gloss reflection
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fillRect(tx, ty, w, 1);
+        ctx.fillRect(tx, ty, 1, Math.min(tileH, 256 - ty));
+      }
+      rowIdx++;
+    }
+
+    const texture = this.toThreeTexture(canvas, 2, 2);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61d. Striped Canvas Awning (Toldo de Lona Listrado Verde e Amarelo Creme)
+  createStripedAwningTexture(c1 = '#15803d', c2 = '#fef9c3') {
+    const key = `striped_awning_${c1}_${c2}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    const stripeW = 32;
+
+    for (let x = 0; x < 256; x += stripeW) {
+      const isAlt = (x / stripeW) % 2 === 1;
+      const baseCol = isAlt ? c1 : c2;
+      ctx.fillStyle = baseCol;
+      ctx.fillRect(x, 0, stripeW, 256);
+
+      // Canvas fold cylinder shadow & highlight
+      const grad = ctx.createLinearGradient(x, 0, x + stripeW, 0);
+      grad.addColorStop(0, 'rgba(0, 0, 0, 0.22)');
+      grad.addColorStop(0.3, 'rgba(255, 255, 255, 0.18)');
+      grad.addColorStop(0.7, 'rgba(255, 255, 255, 0.05)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, 0, stripeW, 256);
+    }
+
+    // Scalloped bottom valance border
+    ctx.fillStyle = c1;
+    ctx.fillRect(0, 240, 256, 16);
+    ctx.fillStyle = '#ffffff';
+    for (let sx = 0; sx < 256; sx += 16) {
+      ctx.beginPath();
+      ctx.arc(sx + 8, 256, 8, Math.PI, 0);
+      ctx.fillStyle = c2;
+      ctx.fill();
+    }
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61e. Glass Pastry Showcase (Vitrine Iluminada de Doces da Padoca: Sonhos, Bolos & Brigadeiros)
+  createPadariaPastryVitrineTexture() {
+    const key = 'padaria_pastry_vitrine';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Warm lit glass showcase interior
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, 256);
+    bgGrad.addColorStop(0, '#fffbeb');
+    bgGrad.addColorStop(0.6, '#fef3c7');
+    bgGrad.addColorStop(1, '#fde68a');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Glass shelves
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 4;
+    [80, 165].forEach(y => {
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(256, y);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillRect(0, y - 2, 256, 2);
+    });
+
+    // TOP SHELF: Sonhos de Creme & Fatias de Bolo de Cenoura com Chocolate
+    // 3 Golden Sonhos with powdered sugar
+    for (let i = 0; i < 3; i++) {
+      const sx = 28 + i * 44;
+      const sy = 60;
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.ellipse(sx, sy, 18, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Cream filling line
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(sx - 16, sy - 2, 32, 5);
+      // Powdered sugar
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(sx, sy - 6, 12, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Bolo de Cenoura slices with shiny chocolate ganache
+    for (let i = 0; i < 3; i++) {
+      const bx = 160 + i * 32;
+      const by = 48;
+      // Orange carrot cake triangle
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(bx, by + 6, 24, 22);
+      // Chocolate ganache top & drip
+      ctx.fillStyle = '#3e1a06';
+      ctx.fillRect(bx - 2, by, 28, 8);
+      ctx.fillRect(bx + 4, by + 8, 4, 10);
+      ctx.fillRect(bx + 16, by + 8, 4, 7);
+    }
+
+    // MIDDLE SHELF: Bombas de Chocolate (Éclairs) & Carolinas
+    for (let i = 0; i < 4; i++) {
+      const ex = 24 + i * 58;
+      const ey = 142;
+      // Éclair golden pastry
+      ctx.fillStyle = '#b45309';
+      ctx.beginPath();
+      ctx.roundRect(ex, ey, 48, 16, 8);
+      ctx.fill();
+      // Shiny dark chocolate glaze
+      ctx.fillStyle = '#2b1004';
+      ctx.beginPath();
+      ctx.roundRect(ex + 2, ey + 1, 44, 10, 5);
+      ctx.fill();
+      // White glaze streak
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(ex + 6, ey + 6); ctx.lineTo(ex + 40, ey + 6);
+      ctx.stroke();
+    }
+
+    // BOTTOM SHELF: Brigadeiros Gourmet & Pudim de Leite
+    // 5 Brigadeiros with chocolate sprinkles
+    for (let i = 0; i < 5; i++) {
+      const brx = 22 + i * 32;
+      const bry = 224;
+      // White paper cup
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(brx - 12, bry + 14);
+      ctx.lineTo(brx + 12, bry + 14);
+      ctx.lineTo(brx + 9, bry + 24);
+      ctx.lineTo(brx - 9, bry + 24);
+      ctx.closePath();
+      ctx.fill();
+      // Dark brigadeiro sphere
+      ctx.fillStyle = '#1c0a00';
+      ctx.beginPath();
+      ctx.arc(brx, bry + 8, 12, 0, Math.PI * 2);
+      ctx.fill();
+      // Sprinkles (granulado)
+      ctx.fillStyle = '#451a03';
+      for (let s = 0; s < 8; s++) {
+        ctx.fillRect(brx - 8 + (s * 3) % 16, bry + 2 + (s * 4) % 12, 3, 1.5);
+      }
+    }
+    // Whole Brazilian Pudim de Leite with amber caramel crown
+    const px = 205;
+    const py = 226;
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 8, 32, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Amber dripping caramel
+    ctx.fillStyle = '#b45309';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 4, 30, 13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#78350f';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 2, 22, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Front glass sheen
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(120, 0); ctx.lineTo(40, 256); ctx.lineTo(0, 256);
+    ctx.fill();
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 61f. Brazilian "Televisão de Cachorro" (Rotisserie Chicken Glass Warmer / Frango Assado)
+  createFrangoAssadoTexture() {
+    const key = 'frango_assado_rotisserie';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Glowing infrared heated rotisserie chamber
+    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#f97316');
+    grad.addColorStop(0.4, '#ea580c');
+    grad.addColorStop(1, '#9a3412');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Chrome rotisserie spit rods
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 4;
+    [55, 125, 195].forEach(y => {
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(256, y);
+      ctx.stroke();
+    });
+
+    // Spinning golden roast chickens on each spit
+    for (let row = 0; row < 3; row++) {
+      const cy = 55 + row * 70;
+      for (let col = 0; col < 3; col++) {
+        const cx = 45 + col * 82;
+        // Plump chicken body
+        ctx.fillStyle = '#c2410c'; // Crisp golden brown
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 26, 18, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Darker charred skin highlights
+        ctx.fillStyle = '#7c2d12';
+        ctx.beginPath();
+        ctx.ellipse(cx + 4, cy - 2, 14, 8, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        // Drumstick bone & meat
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath();
+        ctx.ellipse(cx - 18, cy + 8, 8, 12, -0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(cx - 24, cy + 14, 5, 5);
+      }
+    }
+
+    // Glass reflection gleam
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(90, 0); ctx.lineTo(20, 256); ctx.lineTo(0, 256);
+    ctx.fill();
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
   // 62. Wooden House Door with Weathered Planks & Metal Knob
   createWoodenHouseDoorTexture() {
     const key = 'wooden_house_door';
@@ -7809,9 +8159,9 @@ const CITY_EMITTERS = [
     x: 32.0,
     y: 1.2,
     z: 37.8,
-    refDist: 3.0,
-    maxDist: 15.0,
-    power: 0.55,
+    refDist: 6.0,
+    maxDist: 26.0,
+    power: 1.0,
     preferredGenre: 'MPB',
     ambienceFile: null
   },
@@ -8056,10 +8406,10 @@ class SpatialSoundSystem {
       this.nearestEmitter = dominantEmitter;
       const t = this.ctx.currentTime;
 
-      // When player is far from music sources, maintain a subtle muffled city acoustic floor (0.05)
-      // so open streets feel atmospheric while never dropping into uncanny dead silence
-      const calculatedGain = Math.min(1.0, Math.max(0.05, maxAudibleGain));
-      const calculatedFreq = Math.min(20000, Math.max(800, targetFreq));
+      // When player is far from music sources, maintain a warm, crisp city acoustic baseline (0.20 gain, 3500 Hz)
+      // so open streets and sidewalks feel alive and music never drops into inaudible dead silence
+      const calculatedGain = Math.min(1.0, Math.max(0.20, maxAudibleGain));
+      const calculatedFreq = Math.min(20000, Math.max(3500, targetFreq));
 
       this.spatialGain.gain.setTargetAtTime(calculatedGain, t, 0.15);
       this.spatialFilter.frequency.setTargetAtTime(calculatedFreq, t, 0.15);
@@ -8397,7 +8747,7 @@ class NewsDesk {
           if (!advanced) {
             this.speakFallback(item, advance);
           }
-        }, 15000);
+        }, 6000);
       } else if (item.clipId && typeof Audio !== 'undefined') {
         const audioSrc = `media/audio/news/${item.clipId}.mp3`;
         const audio = new Audio(audioSrc);
@@ -8435,7 +8785,7 @@ class NewsDesk {
           } else {
             advance();
           }
-        }, 15000);
+        }, 6000);
       } else {
         this.speakFallback(item, advance);
       }
@@ -8446,6 +8796,13 @@ class NewsDesk {
   }
 
   speakFallback(item, callback) {
+    let called = false;
+    const safeCallback = () => {
+      if (called) return;
+      called = true;
+      callback();
+    };
+
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       try {
         window.speechSynthesis.cancel();
@@ -8459,15 +8816,17 @@ class NewsDesk {
           utterance.voice = this.ptVoices[voiceIdx];
         }
 
-        utterance.onend = () => callback();
-        utterance.onerror = () => callback();
+        utterance.onend = safeCallback;
+        utterance.onerror = safeCallback;
         window.speechSynthesis.speak(utterance);
+        // Guarantee progression even if speech synthesis stalls in background/headless
+        setTimeout(safeCallback, 3500);
         return;
       } catch (e) {
         // Ignore and use timer
       }
     }
-    setTimeout(callback, 4000);
+    setTimeout(safeCallback, 2500);
   }
 
   stop() {
@@ -8581,11 +8940,20 @@ class RadioBroadcast {
     this.playbackGeneration = 0;
     this.sessionGeneration = 0;
 
+    // Continuous Watchdog & Resilience Tracking
+    this.newsBroadcastTimer = 0;
+    this.pausedWatchdogTimer = 0;
+    this.lastAudioTime = 0;
+    this.stallWatchdogTimer = 0;
+    this.consecutivePlayFailures = 0;
+
     this.audioElement.addEventListener('ended', () => this.handleAudioEnded());
 
     this.audioElement.addEventListener('error', (e) => {
       console.warn('[RadioBroadcast] Track load error, using procedural fallback:', e);
-      if (this.fallback && !this.isBroadcastingNews) this.fallback.start();
+      if (this.fallback && !this.isBroadcastingNews && typeof this.fallback.start === 'function') {
+        this.fallback.start();
+      }
       this.handleAudioEnded();
     });
   }
@@ -8721,7 +9089,8 @@ class RadioBroadcast {
   }
 
   onSongEnded() {
-    if (this.isBroadcastingNews) return;
+    if (this.isBroadcastingNews && this.newsDesk && this.newsDesk.isPlayingNews) return;
+    this.isBroadcastingNews = false;
     this.songsPlayedInBlock++;
     if (this.songsPlayedInBlock >= this.songsPerNewsBlock) {
       this.songsPlayedInBlock = 0;
@@ -8742,10 +9111,84 @@ class RadioBroadcast {
     this.onSongEnded();
   }
 
+  // Continuous frame-by-frame watchdog
+  update(delta = 0.016) {
+    if (!this.isPlaying || this.activeStation === 'OFF') return;
+
+    // 1. News broadcast duration watchdog: prevent news intermission from hanging forever
+    if (this.isBroadcastingNews) {
+      this.newsBroadcastTimer += delta;
+      // If news intermission runs for more than 20 seconds, or newsDesk finished without triggering callback
+      if (this.newsBroadcastTimer > 20.0 || (this.newsDesk && !this.newsDesk.isPlayingNews && this.newsBroadcastTimer > 2.0)) {
+        console.warn('[RadioBroadcast] News intermission watchdog timeout, resuming music playback');
+        if (this.newsDesk && typeof this.newsDesk.stop === 'function') {
+          this.newsDesk.stop();
+        }
+        if (this.duckingGain && this.ctx) {
+          this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.2);
+        }
+        this.isBroadcastingNews = false;
+        this.newsBroadcastTimer = 0;
+        this.playNextSong();
+        return;
+      }
+    } else {
+      this.newsBroadcastTimer = 0;
+
+      // 2. Audio playback & stall watchdog
+      if (this.audioElement) {
+        // Did the song reach the end without an ended event being caught?
+        if (this.audioElement.ended) {
+          this.handleAudioEnded();
+          return;
+        }
+
+        // Is the audio element paused while we are supposed to be playing?
+        if (this.audioElement.paused) {
+          this.pausedWatchdogTimer += delta;
+          if (this.pausedWatchdogTimer > 1.8) {
+            this.pausedWatchdogTimer = 0;
+            const playPromise = this.audioElement.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(err => {
+                this.consecutivePlayFailures++;
+                console.warn('[RadioBroadcast] Watchdog resume failed:', err);
+                if (this.consecutivePlayFailures >= 2 && this.fallback && typeof this.fallback.start === 'function') {
+                  this.fallback.start();
+                }
+              });
+            }
+          }
+        } else {
+          this.pausedWatchdogTimer = 0;
+          this.consecutivePlayFailures = 0;
+
+          // Check for audio buffer stall (currentTime unchanged while playing)
+          const curTime = this.audioElement.currentTime;
+          if (curTime > 0 && Math.abs(curTime - this.lastAudioTime) < 0.001) {
+            this.stallWatchdogTimer += delta;
+            if (this.stallWatchdogTimer > 4.5) {
+              console.warn('[RadioBroadcast] Audio stream stalled for > 4.5s, skipping to next track or fallback');
+              this.stallWatchdogTimer = 0;
+              if (this.fallback && typeof this.fallback.start === 'function') {
+                this.fallback.start();
+              }
+              this.handleAudioEnded();
+            }
+          } else {
+            this.stallWatchdogTimer = 0;
+            this.lastAudioTime = curTime;
+          }
+        }
+      }
+    }
+  }
+
   // Intermission: Vinheta -> News & Weather -> Next Song
   startRadioIntermission() {
     if (this.isBroadcastingNews) return;
     this.isBroadcastingNews = true;
+    this.newsBroadcastTimer = 0;
 
     // Full volume for radio vinheta and speech
     if (this.duckingGain && this.ctx) {
@@ -8770,6 +9213,7 @@ class RadioBroadcast {
           this.duckingGain.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.2);
         }
         this.isBroadcastingNews = false;
+        this.newsBroadcastTimer = 0;
         this.playNextSong();
       };
       // 2. Broadcast Breaking News with dual journalists & Weather
@@ -8820,20 +9264,23 @@ class RadioBroadcast {
           onEndCallback();
         }
       : null;
+    this.pausedWatchdogTimer = 0;
+    this.stallWatchdogTimer = 0;
     this.audioElement.pause();
     this.audioElement.src = src;
     const playPromise = this.audioElement.play();
     if (playPromise !== undefined) {
       playPromise.catch(err => {
-        if (err.name !== 'AbortError') {
-          console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
-          // Safety recovery watchdog: if play failed or was blocked, recover after brief delay
-          setTimeout(() => {
-            if (this.playbackGeneration === gen && this.isPlaying && this.activeStation !== 'OFF') {
-              this.handleAudioEnded();
+        console.warn('[RadioBroadcast] Autoplay blocked or load error:', err);
+        // Safety recovery watchdog: if play failed or was blocked, recover after brief delay
+        setTimeout(() => {
+          if (this.playbackGeneration === gen && this.isPlaying && this.activeStation !== 'OFF') {
+            if (this.fallback && typeof this.fallback.start === 'function' && !this.isBroadcastingNews) {
+              this.fallback.start();
             }
-          }, 1200);
-        }
+            this.handleAudioEnded();
+          }
+        }, 1200);
       });
     }
   }
@@ -9597,9 +10044,12 @@ class SoundEngine {
     }
   }
 
-  updateSpatial(playerPos, dangerLevel = 0) {
+  updateSpatial(playerPos, dangerLevel = 0, delta = 0.016) {
     if (this.spatialSystem) {
       this.spatialSystem.update(playerPos, dangerLevel);
+    }
+    if (this.radioBroadcast && typeof this.radioBroadcast.update === 'function') {
+      this.radioBroadcast.update(delta);
     }
   }
 
@@ -16760,7 +17210,7 @@ class CityBuilder {
     );
   }
 
-  // 18.2b Walkable "Padaria Estrela de Pirituba" with Glass Estufa, Pão Francês & Pingado Machine
+  // 18.2b Walkable "Padaria Estrela de Pirituba" — Authentic Paulistano Padoca de Bairro
   buildWalkablePadaria(x, y, z) {
     const w = 11.5;
     const h = 4.8;
@@ -16770,29 +17220,45 @@ class CityBuilder {
     const floorY = y;
     const roofY = y + h;
 
-    const wallMat = new THREE.MeshLambertMaterial({ color: 0xfaebd7 }); // Warm antique cream
-    const floorMat = new THREE.MeshLambertMaterial({ color: 0xede4d3 }); // Clean bakery ceramic tiles
-    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0x8a847b });
-    const glassMat = new THREE.MeshLambertMaterial({ color: 0x99ddff, transparent: true, opacity: 0.35 });
+    // Authentic Paulistano bakery materials
+    const floorMat = new THREE.MeshLambertMaterial({ map: this.textures.createPadariaFloorTiles() });
+    const wallMat = new THREE.MeshLambertMaterial({ map: this.textures.createPadariaWallTiles() });
+    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0x3d2716 }); // Warm dark wood beam ceiling
+    const glassMat = new THREE.MeshLambertMaterial({ color: 0xa5e2ff, transparent: true, opacity: 0.35 });
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xe2e8f0 });
+    const topMat = new THREE.MeshLambertMaterial({ color: 0xfffaed }); // Polished cream marble/formica
+    const redMat = new THREE.MeshLambertMaterial({ color: 0xbe123c }); // Red vinyl
+    const woodMat = new THREE.MeshLambertMaterial({ color: 0x6e3d16 }); // Warm bakery timber
+    const wickerMat = new THREE.MeshLambertMaterial({ color: 0x92400e }); // Wicker baskets
+    const breadMat = new THREE.MeshLambertMaterial({ color: 0xd97706 }); // Golden crust pão francês
+    const snackGoldenMat = new THREE.MeshLambertMaterial({ color: 0xb45309 }); // Coxinhas
 
-    // Floor
+    // --- 1. FLOOR ---
     const floor = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, d), floorMat);
     floor.position.set(x, floorY + 0.05, z);
     this.scene.add(floor);
 
-    // Register walkable interior floor
+    // Register walkable interior floor collider
     this.physics.addBoxCollider(
       new THREE.Vector3(x - halfW, 0, z - halfD),
       new THREE.Vector3(x + halfW, floorY + 0.15, z + halfD),
       'walkable'
     );
 
-    // Ceiling / Laje with Water Tank
+    // --- 2. CEILING & WATER TANK ---
     const ceiling = new THREE.Mesh(new THREE.BoxGeometry(w, 0.2, d), ceilingMat);
     ceiling.position.set(x, roofY, z);
     this.scene.add(ceiling);
     this.buildWaterTank(x + 2.0, roofY + 0.1, z);
 
+    // Ceiling exposed dark timber beams (3 transverse beams)
+    for (let b = 0; b < 3; b++) {
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, 0.32), woodMat);
+      beam.position.set(x, roofY - 0.12, z - 2.5 + b * 2.5);
+      this.scene.add(beam);
+    }
+
+    // --- 3. SOLID WALLS ---
     // Back wall (Z = z + halfD)
     const backWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.3), wallMat);
     backWall.position.set(x, floorY + h / 2, z + halfD);
@@ -16823,8 +17289,8 @@ class CityBuilder {
       'solid'
     );
 
-    // Front Facade with wide double glass door opening (entrance width 4.0m)
-    const doorW = 4.0;
+    // Front Facade with wide double glass door opening (entrance width 3.8m)
+    const doorW = 3.8;
     const sideWallW = (w - doorW) / 2;
 
     const fLeft = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, h, 0.3), wallMat);
@@ -16845,46 +17311,206 @@ class CityBuilder {
       'solid'
     );
 
-    // Front Glass Window Panes on pillars
-    const winL = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.6, 2.6), glassMat);
-    winL.position.set(x - halfW + sideWallW / 2, floorY + 2.0, z - halfD - 0.16);
+    // Front Storefront Glass Display Windows
+    const winL = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.8, 2.7), glassMat);
+    winL.position.set(x - halfW + sideWallW / 2, floorY + 2.1, z - halfD - 0.16);
     this.scene.add(winL);
 
-    const winR = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.6, 2.6), glassMat);
-    winR.position.set(x + halfW - sideWallW / 2, floorY + 2.0, z - halfD - 0.16);
+    const winR = new THREE.Mesh(new THREE.PlaneGeometry(sideWallW - 0.8, 2.7), glassMat);
+    winR.position.set(x + halfW - sideWallW / 2, floorY + 2.1, z - halfD - 0.16);
     this.scene.add(winR);
 
-    // Storefront Overhead Illuminated Banner ("PADARIA ESTRELA DE PIRITUBA")
-    const signGeo = new THREE.PlaneGeometry(9.4, 1.8);
+    // Window Frames (dark brown timber trim)
+    [x - halfW + sideWallW / 2, x + halfW - sideWallW / 2].forEach(wx => {
+      const wFrame = new THREE.Mesh(new THREE.BoxGeometry(sideWallW - 0.7, 0.08, 0.1), woodMat);
+      wFrame.position.set(wx, floorY + 0.75, z - halfD - 0.16);
+      this.scene.add(wFrame);
+      const tFrame = new THREE.Mesh(new THREE.BoxGeometry(sideWallW - 0.7, 0.08, 0.1), woodMat);
+      tFrame.position.set(wx, floorY + 3.45, z - halfD - 0.16);
+      this.scene.add(tFrame);
+    });
+
+    // --- 4. STOREFRONT OVERHEAD ILLUMINATED BANNER ---
+    const signGeo = new THREE.PlaneGeometry(10.2, 1.5);
     const signMat = new THREE.MeshBasicMaterial({
       map: this.textures.createStoreSign('PADARIA ESTRELA DE PIRITUBA', '#8a3c20', '#ffe89e')
     });
     const sign = new THREE.Mesh(signGeo, signMat);
-    sign.position.set(x, floorY + h - 1.05, z - halfD - 0.16);
+    sign.position.set(x, floorY + h - 0.85, z - halfD - 0.18);
     sign.rotation.y = Math.PI;
     this.scene.add(sign);
 
-    // Warm Interior Ceiling Light
-    const intLight = new THREE.PointLight(0xfffae0, 2.4, 15, 1.2);
-    intLight.position.set(x, floorY + 3.6, z);
-    this.scene.add(intLight);
+    // Warm spotlights lighting the sign
+    const signLight = new THREE.PointLight(0xffea9f, 1.8, 6);
+    signLight.position.set(x, floorY + h - 0.2, z - halfD - 0.8);
+    this.scene.add(signLight);
 
-    // --- BAKERY COUNTER (BALCÃO DE FÓRMICA EM "L") ---
+    // --- 5. TRADITIONAL STRIPED CANVAS AWNING (TOLDO DE LONA LISTRADO) ---
+    const awningMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createStripedAwningTexture('#15803d', '#fef9c3'),
+      side: THREE.DoubleSide
+    });
+    // Slanted main canvas panel
+    const awningWidth = 11.2;
+    const awningDepth = 2.3;
+    const awningSlope = new THREE.Mesh(new THREE.PlaneGeometry(awningWidth, awningDepth), awningMat);
+    awningSlope.rotation.x = Math.PI / 2 + 0.32; // Slanted down
+    awningSlope.position.set(x, floorY + 3.3, z - halfD - 1.15);
+    this.scene.add(awningSlope);
+
+    // Scalloped front valance flap hanging vertically
+    const valance = new THREE.Mesh(new THREE.PlaneGeometry(awningWidth, 0.32), awningMat);
+    valance.position.set(x, floorY + 2.8, z - halfD - 2.28);
+    valance.rotation.y = Math.PI;
+    this.scene.add(valance);
+
+    // Black metal support brackets for the awning
+    const bracketMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
+    [-5.4, 0, 5.4].forEach(offX => {
+      const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.4, 6), bracketMat);
+      strut.rotation.x = 0.55;
+      strut.position.set(x + offX, floorY + 3.0, z - halfD - 1.1);
+      this.scene.add(strut);
+    });
+
+    // --- 6. "TELEVISÃO DE CACHORRO" (ROTISSERIE ROAST CHICKEN WARMER) BESIDE ENTRANCE ---
+    const frangoGroup = new THREE.Group();
+    const frangoBody = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.4, 0.85), chromeMat);
+    frangoGroup.add(frangoBody);
+
+    const frangoGlass = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.0, 1.3),
+      new THREE.MeshBasicMaterial({ map: this.textures.createFrangoAssadoTexture() })
+    );
+    frangoGlass.position.set(0, 0, -0.44);
+    frangoGlass.rotation.y = Math.PI;
+    frangoGroup.add(frangoGlass);
+
+    // Rotisserie glowing heating light
+    const frangoLight = new THREE.PointLight(0xff6600, 2.2, 4);
+    frangoLight.position.set(0, 0, -0.3);
+    frangoGroup.add(frangoLight);
+
+    frangoGroup.position.set(x + halfW - 1.2, floorY + 0.8, z - halfD - 0.25);
+    this.scene.add(frangoGroup);
+
+    // --- 7. SIDEWALK A-FRAME CHALKBOARD MENU (CAVALETE DE CALÇADA) ---
+    const cavaleteGroup = new THREE.Group();
+    const menuTex = this.textures.createPadariaMenuBoardTexture();
+    const chalkFaceL = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.1), new THREE.MeshBasicMaterial({ map: menuTex }));
+    chalkFaceL.rotation.x = 0.18;
+    chalkFaceL.rotation.y = Math.PI;
+    chalkFaceL.position.set(0, 0.65, -0.1);
+    cavaleteGroup.add(chalkFaceL);
+
+    const chalkFaceR = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.1), new THREE.MeshBasicMaterial({ map: menuTex }));
+    chalkFaceR.rotation.x = -0.18;
+    chalkFaceR.position.set(0, 0.65, 0.1);
+    cavaleteGroup.add(chalkFaceR);
+
+    // Wooden A-frame legs
+    const aLegL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.3, 0.05), woodMat);
+    aLegL.position.set(-0.42, 0.65, 0);
+    cavaleteGroup.add(aLegL);
+    const aLegR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.3, 0.05), woodMat);
+    aLegR.position.set(0.42, 0.65, 0);
+    cavaleteGroup.add(aLegR);
+
+    cavaleteGroup.position.set(x - 3.4, floorY, z - halfD - 1.5);
+    cavaleteGroup.rotation.y = 0.25;
+    this.scene.add(cavaleteGroup);
+
+    // --- 8. SIDEWALK BISTRO CAFE TABLES & CHAIRS OUTSIDE ---
+    const tableYellowMat = new THREE.MeshLambertMaterial({ color: 0xf59e0b });
+    const chairRedMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+    [-1.8, 1.8].forEach(offX => {
+      const tx = x + offX;
+      const tz = z - halfD - 1.6;
+
+      // Table top & pedestal
+      const bTable = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.04, 16), tableYellowMat);
+      bTable.position.set(tx, floorY + 0.72, tz);
+      this.scene.add(bTable);
+      const bPost = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.7, 8), chromeMat);
+      bPost.position.set(tx, floorY + 0.35, tz);
+      this.scene.add(bPost);
+      const bBase = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.03, 12), chromeMat);
+      bBase.position.set(tx, floorY + 0.02, tz);
+      this.scene.add(bBase);
+
+      // Sugar shaker on table
+      const shaker = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.09, 8), glassMat);
+      shaker.position.set(tx, floorY + 0.78, tz);
+      this.scene.add(shaker);
+
+      // 2 Red outdoor chairs
+      [-0.48, 0.48].forEach((czOff, cIdx) => {
+        const chair = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.04, 0.36), chairRedMat);
+        chair.position.set(tx, floorY + 0.44, tz + czOff);
+        this.scene.add(chair);
+        const cBack = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.42, 0.04), chairRedMat);
+        cBack.position.set(tx, floorY + 0.65, tz + czOff + (cIdx === 0 ? -0.16 : 0.16));
+        this.scene.add(cBack);
+      });
+    });
+
+    // --- 9. INTERIOR PENDANT LIGHTING & AMBIANCE ---
+    // 4 Brass dome pendant lamps casting warm bakery illumination
+    const brassMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+    const lampCoords = [
+      { lx: x - 0.5, lz: z + 1.6 },
+      { lx: x + 2.2, lz: z + 1.6 },
+      { lx: x - 3.4, lz: z - 1.2 },
+      { lx: x - 3.4, lz: z + 1.4 }
+    ];
+
+    lampCoords.forEach(c => {
+      // Hanging cord
+      const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 1.4, 4), bracketMat);
+      cord.position.set(c.lx, floorY + 4.1, c.lz);
+      this.scene.add(cord);
+
+      // Brass dome shade
+      const shade = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.2, 12, 1, true), brassMat);
+      shade.rotation.x = Math.PI;
+      shade.position.set(c.lx, floorY + 3.3, c.lz);
+      this.scene.add(shade);
+
+      // Warm interior point light
+      const pLight = new THREE.PointLight(0xfff0c4, 1.6, 7.5);
+      pLight.position.set(c.lx, floorY + 3.1, c.lz);
+      this.scene.add(pLight);
+    });
+
+    // --- 10. BAKERY COUNTER (BALCÃO EM 'L' COM VITRINE ILUMINADA DE DOCES) ---
     const counterH = 1.05;
-    const counterMat = new THREE.MeshLambertMaterial({ color: 0x4a2411 });
-    const topMat = new THREE.MeshLambertMaterial({ color: 0xeae2cf }); // polished marble/formica
+    const counterBaseMat = new THREE.MeshLambertMaterial({ color: 0x451a03 });
 
-    // Main Counter section
-    const mainSection = new THREE.Mesh(new THREE.BoxGeometry(5.2, counterH, 0.85), counterMat);
+    // Main Counter section along X
+    const mainSection = new THREE.Mesh(new THREE.BoxGeometry(5.2, counterH, 0.85), counterBaseMat);
     mainSection.position.set(x + 1.2, floorY + counterH / 2, z + 1.8);
     this.scene.add(mainSection);
 
+    // Front-facing illuminated Glass Pastry Showcase (Vitrine de Doces: Sonhos, Bolos, Brigadeiros)
+    const vitrineMat = new THREE.MeshBasicMaterial({
+      map: this.textures.createPadariaPastryVitrineTexture()
+    });
+    const vitrineFront = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 0.82), vitrineMat);
+    vitrineFront.position.set(x + 1.2, floorY + 0.48, z + 1.36);
+    this.scene.add(vitrineFront);
+
+    // Showcase warm inner illumination
+    const vitrineLight = new THREE.PointLight(0xfffae0, 1.4, 3.5);
+    vitrineLight.position.set(x + 1.2, floorY + 0.55, z + 1.45);
+    this.scene.add(vitrineLight);
+
+    // Marble / polished formica top slab
     const mainTop = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.08, 1.0), topMat);
     mainTop.position.set(x + 1.2, floorY + counterH + 0.04, z + 1.8);
     this.scene.add(mainTop);
 
-    // Return Counter Section (L-shape towards back)
-    const returnSection = new THREE.Mesh(new THREE.BoxGeometry(0.85, counterH, 2.0), counterMat);
+    // Return Counter Section along Z (L-shape towards back wall)
+    const returnSection = new THREE.Mesh(new THREE.BoxGeometry(0.85, counterH, 2.0), counterBaseMat);
     returnSection.position.set(x + 3.4, floorY + counterH / 2, z + 2.8);
     this.scene.add(returnSection);
 
@@ -16899,12 +17525,10 @@ class CityBuilder {
       'solid'
     );
 
-    // --- 4 ROUND CHROME SWIVEL BARSTOOLS (BANQUETAS DE INOX) ---
-    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xd6dde4 });
-    const stoolRedMat = new THREE.MeshLambertMaterial({ color: 0xb71c1c });
+    // --- 11. 4 ROUND CHROME SWIVEL BARSTOOLS (BANQUETAS DE INOX) ---
     for (let i = 0; i < 4; i++) {
-      const sx = x - 1.0 + i * 1.2;
-      const sz = z + 0.95;
+      const sx = x - 0.8 + i * 1.15;
+      const sz = z + 0.85;
 
       const stoolPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.72, 8), chromeMat);
       stoolPost.position.set(sx, floorY + 0.36, sz);
@@ -16914,95 +17538,198 @@ class CityBuilder {
       stoolBase.position.set(sx, floorY + 0.02, sz);
       this.scene.add(stoolBase);
 
-      const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.08, 12), stoolRedMat);
+      const footRing = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.015, 6, 12), chromeMat);
+      footRing.rotation.x = Math.PI / 2;
+      footRing.position.set(sx, floorY + 0.22, sz);
+      this.scene.add(footRing);
+
+      const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.09, 14), redMat);
       stoolSeat.position.set(sx, floorY + 0.76, sz);
       this.scene.add(stoolSeat);
     }
 
-    // --- ESTUFA AQUECIDA DE SALGADOS (COXINHAS, EMPADAS, PÃO DE QUEIJO) ---
+    // --- 12. ESTUFA AQUECIDA DE SALGADOS (COXINHAS, EMPADAS, PÃO DE QUEIJO) ---
     const estufaMat = new THREE.MeshBasicMaterial({
       map: this.textures.createPadariaEstufaTexture()
     });
-    const estufaBox = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 0.55), estufaMat);
-    estufaBox.position.set(x + 0.2, floorY + counterH + 0.35, z + 1.8);
+    const estufaBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.58, 0.55), estufaMat);
+    estufaBox.position.set(x - 0.3, floorY + counterH + 0.35, z + 1.8);
     this.scene.add(estufaBox);
 
     // Warm inner tungsten glow of estufa
-    const estufaLight = new THREE.PointLight(0xffa834, 1.8, 4);
-    estufaLight.position.set(x + 0.2, floorY + counterH + 0.4, z + 1.8);
+    const estufaLight = new THREE.PointLight(0xff9900, 2.4, 4.5);
+    estufaLight.position.set(x - 0.3, floorY + counterH + 0.4, z + 1.8);
     this.scene.add(estufaLight);
 
-    // --- COMMERCIAL ESPRESSO & PINGADO MACHINE (MÁQUINA DE CAFÉ INOX) ---
+    // 3D modeled snacks inside estufa
+    for (let c = 0; c < 4; c++) {
+      // Golden pointy coxinhas
+      const cox = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.08, 8), snackGoldenMat);
+      cox.position.set(x - 0.8 + c * 0.18, floorY + counterH + 0.2, z + 1.8);
+      this.scene.add(cox);
+
+      // Pães de queijo
+      const pdq = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), breadMat);
+      pdq.position.set(x - 0.8 + c * 0.18, floorY + counterH + 0.38, z + 1.8);
+      this.scene.add(pdq);
+    }
+
+    // --- 13. COMMERCIAL ESPRESSO & PINGADO MACHINE (MÁQUINA DE CAFÉ INOX PROFISSIONAL) ---
     const coffeeGroup = new THREE.Group();
-    const cBody = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.65, 0.55), chromeMat);
-    cBody.position.y = 0.325;
+    const cBody = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.72, 0.58), chromeMat);
+    cBody.position.y = 0.36;
     coffeeGroup.add(cBody);
 
-    // Steam wands and pressure gauges
-    const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    // Chrome portafilters (grupos de café)
+    [-0.2, 0.2].forEach(px => {
+      const portafilter = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.08, 8), chromeMat);
+      portafilter.position.set(px, 0.24, -0.32);
+      coffeeGroup.add(portafilter);
+      const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 6), woodMat);
+      handle.rotation.x = Math.PI / 2;
+      handle.position.set(px, 0.24, -0.44);
+      coffeeGroup.add(handle);
+    });
+
+    // Steam wands and pressure dials
+    const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.02, 10), new THREE.MeshBasicMaterial({ color: 0xffffff }));
     dial.rotation.x = Math.PI / 2;
-    dial.position.set(-0.2, 0.45, -0.28);
+    dial.position.set(0, 0.52, -0.3);
     coffeeGroup.add(dial);
 
-    // Demitasse coffee cups stacked on top
+    // Demitasse ceramic coffee cups stacked on warming tray
     const cupMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-    for (let c = 0; c < 6; c++) {
-      const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.025, 0.06, 6), cupMat);
-      cup.position.set(-0.25 + (c % 3) * 0.14, 0.68, -0.1 + Math.floor(c / 3) * 0.12);
+    for (let c = 0; c < 8; c++) {
+      const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.025, 0.06, 8), cupMat);
+      cup.position.set(-0.3 + (c % 4) * 0.18, 0.75, -0.12 + Math.floor(c / 4) * 0.14);
       coffeeGroup.add(cup);
     }
-    coffeeGroup.position.set(x + 2.5, floorY + counterH + 0.08, z + 1.8);
+    coffeeGroup.position.set(x + 1.6, floorY + counterH + 0.08, z + 1.8);
     this.scene.add(coffeeGroup);
 
-    // --- BREAD RACK WITH PÃO FRANCÊS (CESTOS DE PÃO ATRÁS DO BALCÃO) ---
-    const rackWoodMat = new THREE.MeshLambertMaterial({ color: 0x6e4726 });
-    const breadMat = new THREE.MeshLambertMaterial({ color: 0xd49b45 }); // Golden crust pão francês
-    const rack = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.2, 0.4), rackWoodMat);
+    // --- 14. CHAPA DE LANCHES (GRIDDLE) & SERVED FOOD ITEMS ---
+    const chapaGroup = new THREE.Group();
+    const chapaBase = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.12, 0.55), chromeMat);
+    chapaGroup.add(chapaBase);
+    const griddlePlate = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.02, 0.48), new THREE.MeshLambertMaterial({ color: 0x1f2937 }));
+    griddlePlate.position.y = 0.07;
+    chapaGroup.add(griddlePlate);
+
+    // Sandwich press weight
+    const press = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.04, 0.16), bracketMat);
+    press.position.set(0.15, 0.12, 0);
+    chapaGroup.add(press);
+
+    chapaGroup.position.set(x + 2.7, floorY + counterH + 0.06, z + 1.8);
+    this.scene.add(chapaGroup);
+
+    // Served Pão na Chapa quentinho
+    const paoPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.02, 12), cupMat);
+    paoPlate.position.set(x - 0.7, floorY + counterH + 0.06, z + 1.8);
+    this.scene.add(paoPlate);
+    const pao = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.045, 0.11), breadMat);
+    pao.position.set(x - 0.7, floorY + counterH + 0.09, z + 1.8);
+    this.scene.add(pao);
+
+    // Served Pingado no copo americano
+    const pingado = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.11, 8), glassMat);
+    pingado.position.set(x - 1.0, floorY + counterH + 0.09, z + 1.8);
+    this.scene.add(pingado);
+    const pingadoLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.028, 0.09, 8), new THREE.MeshLambertMaterial({ color: 0xb58055 }));
+    pingadoLiquid.position.set(x - 1.0, floorY + counterH + 0.08, z + 1.8);
+    this.scene.add(pingadoLiquid);
+
+    // --- 15. BALANÇA FILIZOLA & CAIXA REGISTRADORA (RETURN COUNTER) ---
+    const scaleGroup = new THREE.Group();
+    const scaleBody = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.28, 0.32), redMat);
+    scaleGroup.add(scaleBody);
+    const platter = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.02, 12), chromeMat);
+    platter.position.y = 0.16;
+    scaleGroup.add(platter);
+    const scaleDial = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 12), cupMat);
+    scaleDial.rotation.x = Math.PI / 2;
+    scaleDial.position.set(0, 0.22, 0.14);
+    scaleGroup.add(scaleDial);
+    scaleGroup.position.set(x + 3.4, floorY + counterH + 0.18, z + 2.5);
+    this.scene.add(scaleGroup);
+
+    // --- 16. BREAD RACK WITH WOVEN BASKETS & PÃO FRANCÊS (BACK WALL) ---
+    const rack = new THREE.Mesh(new THREE.BoxGeometry(3.8, 2.4, 0.45), woodMat);
     rack.position.set(x + 1.2, floorY + 1.6, z + halfD - 0.25);
     this.scene.add(rack);
 
-    // Baskets of baguettes / pães franceses
-    for (let row = 0; row < 2; row++) {
-      for (let col = 0; col < 5; col++) {
-        const loaf = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.45, 6), breadMat);
+    // 3 Tiered Wicker Baskets with golden pães franceses
+    for (let row = 0; row < 3; row++) {
+      const basket = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.18, 0.38), wickerMat);
+      basket.position.set(x + 1.2, floorY + 0.8 + row * 0.75, z + halfD - 0.38);
+      this.scene.add(basket);
+
+      for (let col = 0; col < 6; col++) {
+        const loaf = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.42, 6), breadMat);
         loaf.rotation.x = Math.PI / 2;
-        loaf.position.set(x - 0.4 + col * 0.55, floorY + 1.1 + row * 0.8, z + halfD - 0.45);
+        loaf.position.set(x - 0.3 + col * 0.52, floorY + 0.95 + row * 0.75, z + halfD - 0.42);
         this.scene.add(loaf);
       }
     }
 
-    // --- CHALKBOARD PRICE MENU ON THE WALL ---
+    // --- 17. CHALKBOARD PRICE MENU ON THE WALL ---
     const menuBoard = new THREE.Mesh(
       new THREE.PlaneGeometry(2.4, 2.0),
       new THREE.MeshBasicMaterial({ map: this.textures.createPadariaMenuBoardTexture() })
     );
     menuBoard.position.set(x - 2.8, floorY + 2.4, z + halfD - 0.14);
-    menuBoard.rotation.y = 0;
     this.scene.add(menuBoard);
 
-    // --- BAKERY ATTENDANT: SEU MANUEL ---
-    this.buildResidentNpc(x + 1.4, floorY, z + 2.8, 0xffffff, 0x9c653d, 0x223344, false, Math.PI);
-    // Baker white paper hat
-    const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.15, 8), new THREE.MeshLambertMaterial({ color: 0xffffff }));
-    hat.position.set(x + 1.4, floorY + 1.82, z + 2.8);
-    this.scene.add(hat);
+    // Wall Clock
+    const clockBody = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.04, 16), woodMat);
+    clockBody.rotation.x = Math.PI / 2;
+    clockBody.position.set(x - 4.4, floorY + 3.2, z + halfD - 0.14);
+    this.scene.add(clockBody);
+    const clockFace = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.045, 16), cupMat);
+    clockFace.rotation.x = Math.PI / 2;
+    clockFace.position.set(x - 4.4, floorY + 3.2, z + halfD - 0.135);
+    this.scene.add(clockFace);
 
-    // --- COLLECTIBLE FOOD ITEMS ON THE COUNTER ---
-    // 1. Pão na Chapa quentinho
-    const paoPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.02, 10), cupMat);
-    paoPlate.position.set(x - 0.4, floorY + counterH + 0.06, z + 1.8);
-    this.scene.add(paoPlate);
-    const pao = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.05, 0.1), breadMat);
-    pao.position.set(x - 0.4, floorY + counterH + 0.09, z + 1.8);
-    this.scene.add(pao);
+    // --- 18. INTERIOR SALÃO DINING TABLES & CHAIRS ---
+    [-1.0, 1.4].forEach(tzOff => {
+      const tx = x - 3.4;
+      const tz = z + tzOff;
 
-    // 2. Pingado no copo americano
-    const pingado = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.11, 8), glassMat);
-    pingado.position.set(x - 0.7, floorY + counterH + 0.09, z + 1.8);
-    this.scene.add(pingado);
-    const pingadoLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.028, 0.09, 8), new THREE.MeshLambertMaterial({ color: 0xb58055 }));
-    pingadoLiquid.position.set(x - 0.7, floorY + counterH + 0.08, z + 1.8);
-    this.scene.add(pingadoLiquid);
+      // Formica square table
+      const tTable = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.04, 0.95), topMat);
+      tTable.position.set(tx, floorY + 0.74, tz);
+      this.scene.add(tTable);
+      const tPost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.72, 8), chromeMat);
+      tPost.position.set(tx, floorY + 0.36, tz);
+      this.scene.add(tPost);
+      const tBase = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.04, 12), chromeMat);
+      tBase.position.set(tx, floorY + 0.02, tz);
+      this.scene.add(tBase);
+
+      // Napkin holder & sugar shaker
+      const napkin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.06), chromeMat);
+      napkin.position.set(tx - 0.15, floorY + 0.81, tz);
+      this.scene.add(napkin);
+      const sugar = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.1, 8), glassMat);
+      sugar.position.set(tx + 0.15, floorY + 0.81, tz);
+      this.scene.add(sugar);
+
+      // Diner chairs with red cushions
+      [-0.58, 0.58].forEach((czOff, cIdx) => {
+        const chair = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.05, 0.38), redMat);
+        chair.position.set(tx, floorY + 0.44, tz + czOff);
+        this.scene.add(chair);
+        const cBack = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.04), redMat);
+        cBack.position.set(tx, floorY + 0.65, tz + czOff + (cIdx === 0 ? -0.17 : 0.17));
+        this.scene.add(cBack);
+      });
+    });
+
+    // Seated patron eating misto quente & reading newspaper
+    this.buildResidentNpc(x - 3.4, floorY, z + 0.85, 0x3b82f6, 0xb4794e, 0x1e293b, true, 0);
+    const newspaper = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.01, 0.38), cupMat);
+    newspaper.position.set(x - 3.4, floorY + 0.77, z + 1.25);
+    this.scene.add(newspaper);
   }
 
   // 18.2c Walkable "Borracharia & Lava-Rápido do Beto" with Hydraulic Car Lift, Tools & Tires
@@ -24485,6 +25212,7 @@ const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'PADARIA ESTRELA DE PIRITUBA', prompt: 'ENTRAR NA PADOCA E PEDIR PÃO NA CHAPA' },
+      padaria_counter: { name: 'BALCÃO DA PADARIA ESTRELA', prompt: 'PEDIR NO BALCÃO DO SEU MANUEL' },
       bar_sinuca: { name: 'BAR DO TIÃO (MESA DE SINUCA & BALCÃO)', prompt: 'PEDIR NO BALCÃO DO SEU TIÃO OU JOGAR SINUCA' },
       adega: { name: 'ADEGA DO ZÉ (BEBIDAS & LITRÃO)', prompt: 'COMPRAR LITRÃO OU VENDER LATINHAS' },
       flanelinha: { name: 'FLANELINHA NO CRUZAMENTO', prompt: 'CONVERSAR COM O FLANELINHA' },
@@ -24726,6 +25454,7 @@ const TRANSLATIONS = {
 
     interactables: {
       padaria: { name: 'ESTRELA BAKERY OF PIRITUBA', prompt: 'ENTER BAKERY & ORDER TOASTED FRENCH BREAD' },
+      padaria_counter: { name: 'ESTRELA BAKERY COUNTER', prompt: 'ORDER AT SEU MANUEL\'S COUNTER' },
       bar_sinuca: { name: 'TIÃO\'S CORNER PUB (POOL TABLE & BAR)', prompt: 'ORDER AT SEU TIÃO\'S COUNTER OR PLAY POOL' },
       adega: { name: 'ZÉ\'S LIQUOR & BEVERAGE SHOP', prompt: 'BUY 1L BEER BOTTLE OR SELL CRUSHED CANS' },
       flanelinha: { name: 'UNOFFICIAL PARKING VALET', prompt: 'TALK TO THE PARKING HUSTLER' },
@@ -26160,6 +26889,18 @@ const BRAZILIAN_ENCOUNTERS = {
           return hasAzia
             ? 'A coxinha estava dourada, mas a gordura pesou na digestão. Ganhou 45% de bucho, mas bateu aquela queimação paulistana (-10% sanidade).'
             : 'Coxinha crocante, recheio farto e caldo de cana trincando de gelado com limão! Bucho quase cheio (+45%).';
+        }
+      },
+      {
+        id: 'pao_frances_quente',
+        label: 'Comprar 5 pães franceses quentinhos no saquinho',
+        costLabel: 'R$ 4,50',
+        costCentavos: 450,
+        disabled: !state.canAfford(450),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -450, fome: 28, sanidade: 15 }, 'Pão francês quentinho da Padaria Estrela');
+          return 'O saquinho de papel pardo veio pelando de quente! Casca crocante estalando e miolo macio. Bucho forrado (+28%) e Sanidade renovada (+15%).';
         }
       },
       {
@@ -31953,7 +32694,7 @@ class NpcSystem {
         stationary: true,
         defaultYaw: Math.PI,
         waypoints: [{ x: 33.2, y: 0.25, z: 44.6 }],
-        interactable: false,
+        interactable: false, // Handled authoritatively by padaria_counter anchor in Interactables
         animationMode: 'WIPE',
         baseY: 0.25
       }),
@@ -32721,7 +33462,16 @@ class InteractableSystem {
         name: 'PADARIA ESTRELA DE PIRITUBA',
         prompt: 'ENTRAR NA PADOCA E PEDIR PÃO NA CHAPA',
         position: new THREE.Vector3(32.0, 1.2, 37.8),
-        maxDist: 3.2,
+        maxDist: 3.5,
+        encounterId: 'PADARIA_ESTRELA',
+        zoneId: 'PADARIA_ESTRELA'
+      },
+      {
+        id: 'padaria_counter',
+        name: 'BALCÃO DA PADARIA ESTRELA',
+        prompt: 'PEDIR NO BALCÃO DO SEU MANUEL',
+        position: new THREE.Vector3(33.2, 1.2, 43.6),
+        maxDist: 3.5,
         encounterId: 'PADARIA_ESTRELA',
         zoneId: 'PADARIA_ESTRELA'
       },
@@ -33217,6 +33967,9 @@ class InteractableSystem {
       flanelinha: '🚙',
       // Living residents & domestic animals
       tio_wilson: '📺',
+      manuel_padeiro: '🥖',
+      padaria: '🥖',
+      padaria_counter: '🥖',
       louro_varanda: '🦜',
       galo_quintal: '🐔',
       mecanico_beto: '🔧',
@@ -34935,7 +35688,7 @@ class GameManager {
 
     // Update 3D spatial radio emitters (distance falloff & lowpass acoustic muffling)
     if (this.sound && this.sound.updateSpatial) {
-      this.sound.updateSpatial(playerPos, this.state ? this.state.perigo : 0);
+      this.sound.updateSpatial(playerPos, this.state ? this.state.perigo : 0, delta);
     }
 
     // 5b. Update autonomous roaming NPCs (Clodoaldo, Caramelo, Juninho, Dona Neide)

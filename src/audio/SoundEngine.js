@@ -152,9 +152,12 @@ export class SoundEngine {
     }
   }
 
-  updateSpatial(playerPos, dangerLevel = 0) {
+  updateSpatial(playerPos, dangerLevel = 0, delta = 0.016) {
     if (this.spatialSystem) {
       this.spatialSystem.update(playerPos, dangerLevel);
+    }
+    if (this.radioBroadcast && typeof this.radioBroadcast.update === 'function') {
+      this.radioBroadcast.update(delta);
     }
   }
 
