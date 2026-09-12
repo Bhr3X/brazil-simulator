@@ -37,6 +37,7 @@ export class InteractableSystem {
     this.activeQuickNpc = null;
     this.activeQuickOptions = [];
     this.doors = [];
+    this.residentNpcs = [];
 
     // Keyboard hotkeys [1], [2], [3] for seamless NPC Quick Actions
     if (typeof window !== 'undefined') {
@@ -375,12 +376,18 @@ export class InteractableSystem {
     let closestDist = Infinity;
 
     const npcTargets = (this.npcs && this.npcs.getInteractableTargets) ? this.npcs.getInteractableTargets() : [];
+    const extNpcTargets = (this.npcs && this.npcs.getExtendedInteractableTargets) ? this.npcs.getExtendedInteractableTargets() : [];
+    const residentTargets = (this.residentNpcs || []).map(r => ({
+      ...r,
+      isOpen: true,
+      isNpc: true
+    }));
     const doorTargets = (this.doors || []).filter(d => !d.isOpen).map(d => ({
       ...d,
       isDoor: true,
       prompt: d.prompt || 'ARROMBAR / ABRIR PORTA NO SOCO'
     }));
-    const allTargets = [...this.anchors, ...npcTargets, ...doorTargets];
+    const allTargets = [...this.anchors, ...npcTargets, ...extNpcTargets, ...residentTargets, ...doorTargets];
 
     for (const anchor of allTargets) {
       const dx = anchor.position.x - playerPos.x;
@@ -533,10 +540,48 @@ export class InteractableSystem {
       menor_corre: '🧢',
       mestre_bloco: '🥁',
       churrasqueiro_campo: '🍖',
-      flanelinha: '🚙'
+      flanelinha: '🚙',
+      // Living residents & domestic animals
+      tio_wilson: '📺',
+      louro_varanda: '🦜',
+      galo_quintal: '🐔',
+      mecanico_beto: '🔧',
+      porteiro_valdir: '🏢',
+      guarda_silva: '🛡️',
+      caixa_banco: '🏦',
+      // Bar do Tião patrons
+      baixinho_sinuca: '🎱',
+      ze_taco: '🍺',
+      rubao_pinga: '🍶',
+      chicao_litrao: '😂',
+      seu_pedro_torresmo: '🥓',
+      // Pastelaria do Beto diners & staff
+      marquinhos_garcom: '🥟',
+      tio_carlinhos_cliente: '🥟',
+      dona_ivone_cliente: '👵',
+      luquinhas_balcao: '🧒',
+      // Citywide pedestrians
+      cabo_oliveira: '👮',
+      soldado_nascimento: '👮',
+      cabo_santos: '👮',
+      vitinho_grau: '🧢',
+      diguinho_noia: '🧢',
+      nelsinho_chapa: '🧢',
+      dona_carmem: '👵',
+      dona_lurdes: '👵',
+      dona_maria_parque: '👵',
+      seu_valdir: '👴',
+      seu_geraldo: '👴',
+      seu_osvaldo: '👴'
     };
 
-    if (avatarElem) avatarElem.textContent = avatarMap[target.anchor.id] || '👤';
+    let avatarIcon = avatarMap[target.anchor.id];
+    if (!avatarIcon && target.anchor.id && target.anchor.id.startsWith('favela_resident')) {
+      avatarIcon = '🏠';
+    }
+    if (!avatarIcon) avatarIcon = '👤';
+
+    if (avatarElem) avatarElem.textContent = avatarIcon;
     if (nameElem) nameElem.textContent = target.anchor.name;
 
     optionsElem.innerHTML = '';
@@ -635,6 +680,10 @@ export class InteractableSystem {
     if (this.currentTarget && this.currentTarget.anchor.isNpc) {
       this.renderNpcQuickActions(this.currentTarget);
     }
+  }
+
+  setResidentNpcs(npcs) {
+    this.residentNpcs = npcs || [];
   }
 
   setDoors(doors) {

@@ -14761,6 +14761,7 @@ class CityBuilder {
     this.kites = [];
     this.beaconLights = [];
     this.interactiveDoors = [];
+    this.residentNpcs = [];
     this.blocoTrioGroup = null;
     this.campinhoGroup = null;
     this.illusionWalls = [];
@@ -15212,7 +15213,7 @@ class CityBuilder {
     // 8. Living Resident NPC inside House!
     const shirtCols = [0x1155cc, 0xd95b96, 0x009944, 0xffaa00, 0x772299];
     const chosenShirt = shirtCols[Math.abs(Math.round(x + z)) % shirtCols.length];
-    this.buildResidentNpc(
+    const favGroup = this.buildResidentNpc(
       x - halfW + 1.4,
       baseElevation,
       z,
@@ -15222,6 +15223,17 @@ class CityBuilder {
       true, // Sitting on sofa
       0
     );
+    this.residentNpcs.push({
+      id: `favela_resident_${Math.round(x)}_${Math.round(z)}`,
+      name: 'MORADOR DA COMUNIDADE',
+      prompt: 'CONVERSAR COM MORADOR DA FAVELA',
+      encounterId: 'NPC_FAVELA_RESIDENT',
+      position: new THREE.Vector3(x - halfW + 1.4, baseElevation + 0.8, z),
+      maxDist: 3.2,
+      isOpen: true,
+      isNpc: true,
+      group: favGroup
+    });
 
     // 9. Domestic Animals:
     // A. Cat lounging on the laje mureta or windowsill
@@ -17121,7 +17133,18 @@ class CityBuilder {
     this.scene.add(eastFrame);
 
     // --- MECHANIC BETO NPC ---
-    this.buildResidentNpc(x + 0.2, floorY, z + 0.8, 0x114488, 0x8a5530, 0x1c2b3a, false, -Math.PI / 4);
+    const betoGroup = this.buildResidentNpc(x + 0.2, floorY, z + 0.8, 0x114488, 0x8a5530, 0x1c2b3a, false, -Math.PI / 4);
+    this.residentNpcs.push({
+      id: 'mecanico_beto',
+      name: 'MECÂNICO BETO (OFICINA)',
+      prompt: 'FALAR COM MECÂNICO BETO',
+      encounterId: 'NPC_MECANICO_BETO',
+      position: new THREE.Vector3(x + 0.2, floorY + 1.2, z + 0.8),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: betoGroup
+    });
   }
 
   // 18.2e Walkable "Pastelaria do Beto" with Dining Salon, Estufa, Sugarcane Press & Tables
@@ -17677,7 +17700,18 @@ class CityBuilder {
     );
 
     // Teller Attendant behind glass
-    this.buildResidentNpc(x - 2.5, floorY, z + 3.0, 0xffffff, 0x9e6840, 0x1a2430, true, 0);
+    const tellerGroup = this.buildResidentNpc(x - 2.5, floorY, z + 3.0, 0xffffff, 0x9e6840, 0x1a2430, true, 0);
+    this.residentNpcs.push({
+      id: 'caixa_banco',
+      name: 'CAIXA DA AGÊNCIA BANCÁRIA',
+      prompt: 'FALAR COM O CAIXA',
+      encounterId: 'NPC_CAIXA_BANCO',
+      position: new THREE.Vector3(x - 2.5, floorY + 1.0, z + 3.0),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: tellerGroup
+    });
 
     // --- MANAGER'S DESK WITH COMPUTER MONITOR & CHAIR ---
     const deskMat = new THREE.MeshLambertMaterial({ color: 0x3d2b1f });
@@ -17697,7 +17731,18 @@ class CityBuilder {
     this.scene.add(maleta);
 
     // --- SECURITY GUARD SILVA NPC ---
-    this.buildResidentNpc(x + 3.2, floorY, z - 0.8, 0x2b384a, 0x7a4d2c, 0x111620, false, -Math.PI / 2);
+    const guardGroup = this.buildResidentNpc(x + 3.2, floorY, z - 0.8, 0x2b384a, 0x7a4d2c, 0x111620, false, -Math.PI / 2);
+    this.residentNpcs.push({
+      id: 'guarda_silva',
+      name: 'GUARDA SILVA (SEGURANÇA DO BANCO)',
+      prompt: 'FALAR COM GUARDA SILVA',
+      encounterId: 'NPC_GUARDA_SILVA',
+      position: new THREE.Vector3(x + 3.2, floorY + 1.2, z - 0.8),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: guardGroup
+    });
     const vest = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.52, 0.32), new THREE.MeshLambertMaterial({ color: 0x111111 }));
     vest.position.set(x + 3.2, floorY + 1.05, z - 0.8);
     this.scene.add(vest);
@@ -18819,13 +18864,46 @@ class CityBuilder {
     });
 
     // 8. Resident: Tio Wilson relaxing on the sofa
-    this.buildResidentNpc(x - 2.0, floorY, z + 1.2, 0xd47a24, 0x9e6840, 0x1f2937, true, 0);
+    const tioWilsonGroup = this.buildResidentNpc(x - 2.0, floorY, z + 1.2, 0xd47a24, 0x9e6840, 0x1f2937, true, 0);
+    this.residentNpcs.push({
+      id: 'tio_wilson',
+      name: 'TIO WILSON (ASSISTINDO TV NO SOFÁ)',
+      prompt: 'CONVERSAR COM TIO WILSON',
+      encounterId: 'NPC_TIO_WILSON',
+      position: new THREE.Vector3(x - 2.0, floorY + 0.9, z + 1.2),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: tioWilsonGroup
+    });
 
     // 9. Domestic Parrot in cage on front porch
-    this.buildParrot(x + doorW / 2 + 0.6, floorY + 2.2, z - d / 2 - 0.3);
+    const louroGroup = this.buildParrot(x + doorW / 2 + 0.6, floorY + 2.2, z - d / 2 - 0.3);
+    this.residentNpcs.push({
+      id: 'louro_varanda',
+      name: 'LOURO (PAPAGAIO NA GAIOLA)',
+      prompt: 'FALAR COM O PAPAGAIO LOURO',
+      encounterId: 'NPC_LOURO',
+      position: new THREE.Vector3(x + doorW / 2 + 0.6, floorY + 2.2, z - d / 2 - 0.3),
+      maxDist: 3.0,
+      isOpen: true,
+      isNpc: true,
+      group: louroGroup
+    });
 
     // 10. Domestic Chicken in backyard
-    this.buildChicken(x + 2.0, floorY, z + d / 2 + 1.5, 0.8);
+    const galoGroup = this.buildChicken(x + 2.0, floorY, z + d / 2 + 1.5, 0.8);
+    this.residentNpcs.push({
+      id: 'galo_quintal',
+      name: 'GALO GARNELI (QUINTAL)',
+      prompt: 'INTERAGIR COM O GALO',
+      encounterId: 'NPC_GALO',
+      position: new THREE.Vector3(x + 2.0, floorY + 0.3, z + d / 2 + 1.5),
+      maxDist: 3.2,
+      isOpen: true,
+      isNpc: true,
+      group: galoGroup
+    });
   }
 
   // 26. High-Rise Luxury Apartment Tower & Penthouse with 180° Glass View of Pico do Jaraguá & Elevator
@@ -18917,7 +18995,18 @@ class CityBuilder {
     this.scene.add(desk);
 
     // Concierge / Porteiro Seu Valdir behind desk
-    this.buildResidentNpc(x + 3.0, 0.0, z + 2.6, 0x1a2430, 0x9e6840, 0x111620, false, 0);
+    const porteiroGroup = this.buildResidentNpc(x + 3.0, 0.0, z + 2.6, 0x1a2430, 0x9e6840, 0x111620, false, 0);
+    this.residentNpcs.push({
+      id: 'porteiro_valdir',
+      name: 'SEU VALDIR (PORTEIRO DO JARAGUÁ)',
+      prompt: 'FALAR COM PORTEIRO SEU VALDIR',
+      encounterId: 'NPC_PORTEIRO_VALDIR',
+      position: new THREE.Vector3(x + 3.0, 1.2, z + 2.6),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: porteiroGroup
+    });
 
     // Security turnstile
     const turnstile = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.2), chromeMat);
@@ -28231,6 +28320,867 @@ const BRAZILIAN_ENCOUNTERS = {
         }
       }
     ]
+  },
+
+  NPC_TIO_WILSON: {
+    id: 'NPC_TIO_WILSON',
+    title: '📺 TIO WILSON // ASSISTINDO TV NO SOFÁ',
+    getIntroText: (state) => `
+      Tio Wilson está esparramado no sofá de corvim marrom, de regata e bermuda, de olho vidrado na TV de tubo de 14 polegadas.<br>
+      Na tela, João Kléber gesticula freneticamente gritando <em>"PÁRA PÁRA PÁRA!"</em> no Teste de Fidelidade.<br>
+      <small style="color:#ffcc00">Bucho: ${state.fome}% | Sanidade: ${state.sanidade}% | Grana: ${state.formattedGrana}</small>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'sai_frente_tv',
+        label: 'Sai da frente da TV, muleque! (João Kléber)',
+        costLabel: 'Gritaria na sala',
+        execute: (state, sound) => {
+          if (sound && sound.playHit) sound.playHit();
+          state.apply({ ginga: 15, sanidade: 10 }, 'Bronca do Tio Wilson na TV');
+          return 'Tio Wilson esbraveja apontando o controle remoto: "— Sai da frente da TV muleque! PÁRA PÁRA PÁRA! O cara tá no Teste de Fidelidade do João Kléber e você aí na frente tampando a tela de 14 polegadas?!" (+15 Ginga, +10% Sanidade).';
+        }
+      },
+      {
+        id: 'pedir_grana_tio',
+        label: 'Pedir R$ 20 pro tio ajudar a pagar a conta de luz',
+        costLabel: '+R$ 5,00 trocados',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: 500, sanidade: 8, ginga: -5 }, 'Tio Wilson passou um troco');
+          return 'Tio Wilson bate a mão na testa: "— Tá achando que sou o Silvio Santos?! O carnê das Casas Bahia já tá vencido e você me vem pedir vinte contos?!" Ele resmunga, tira R$ 5,00 amassados da carteira e te entrega (+R$ 5,00, +8% Sanidade).';
+        }
+      },
+      {
+        id: 'assistir_junto_sofa',
+        label: 'Sentar no sofá e assistir as Pegadinhas comendo amendoim',
+        costLabel: 'Paz no lar (+Bucho & +Sanidade)',
+        execute: (state, sound) => {
+          if (sound) sound.playBite();
+          state.apply({ sanidade: 22, fome: 12 }, 'Assistiu TV junto com Tio Wilson');
+          return 'Você senta no braço do sofá, pega um punhado de amendoim salgado da mesa de centro e gargalha junto com a pegadinha da caveira na moto. Momento clássico de domingo em família (+22% Sanidade, +12% Bucho).';
+        }
+      }
+    ]
+  },
+
+  NPC_LOURO: {
+    id: 'NPC_LOURO',
+    title: '🦜 LOURO // PAPAGAIO DA GAIOLA NA VARANDA',
+    getIntroText: (state) => `
+      O papagaio verde de bico preto empoleirado na gaiola da varanda inclina a cabeça curioso e dá um assobio estridente.<br>
+      <em>"— Dá o pé, Louro! Curupaco! Quem é?!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'ensinar_corinthians',
+        label: 'Ensinar o Louro a berrar "VAI CORINTHIANS!"',
+        costLabel: 'Torcida fiel',
+        execute: (state) => {
+          state.apply({ sanidade: 18, ginga: 8 }, 'Louro corinthiano');
+          return 'O Louro estufa as penas verdes, bate as asas na gaiola e berra rouco: "— VAI CORINTHIANS! DÁ O PÉ LOURO! É O TIMÃO!" A vizinhança inteira ouve (+18% Sanidade, +8 Ginga).';
+        }
+      },
+      {
+        id: 'dar_farelo_pao',
+        label: 'Dar um naco de pão francês dormido pro Louro',
+        costLabel: 'Petisco caseiro',
+        execute: (state, sound) => {
+          if (sound) sound.playBite();
+          state.apply({ sanidade: 12, ginga: 5 }, 'Alimentou o papagaio');
+          return 'O Louro segura a casca do pão com a pata esquerda, mastiga estalando o bico e solta: "— Ô LOUCO BICHO! BÃO DEMAIS!" (+12% Sanidade, +5 Ginga).';
+        }
+      },
+      {
+        id: 'assobiar_hino',
+        label: 'Assobiar melodia pro Louro tentar imitar',
+        costLabel: 'Dueto musical',
+        execute: (state) => {
+          state.apply({ sanidade: 15 }, 'Assobio com o Louro');
+          return 'Você assobia e o Louro responde desafinando com um som que parece uma panela de pressão apitando. É hilário (+15% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_GALO: {
+    id: 'NPC_GALO',
+    title: '🐔 GALO GARNELI // GUARDIÃO DO QUINTAL',
+    getIntroText: (state) => `
+      Galo garneli de crista carmesim e penas brilhantes ciscando o quintal de terra batida ao lado das galinhas d angola.<br>
+      Ele te encara de lado, desconfiado com qualquer invasão de território.<br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'imitar_canto_galo',
+        label: 'Imitar o canto do galo (Cocoricó a plenos pulmões!)',
+        costLabel: 'Desafio vocal',
+        execute: (state) => {
+          state.apply({ sanidade: 14, ginga: 10 }, 'Duelo de cocoricó');
+          return 'Você enche o peito e solta um "COCORICÓÓÓ!". O galo estufa o peito vermelho, sobe num tijolo e responde na mesma moeda com imponência (+14% Sanidade, +10 Ginga).';
+        }
+      },
+      {
+        id: 'jogar_milho',
+        label: 'Jogar farelo de pão e sementes no terreiro',
+        costLabel: 'R$ 0,50',
+        costCentavos: 50,
+        disabled: !state.canAfford(50),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -50, sanidade: 16 }, 'Alimentou as aves do quintal');
+          return 'As galinhas correm cacarejando alegremente e ciscam o chão com avidez. Paz de roça no meio de São Paulo (+16% Sanidade).';
+        }
+      },
+      {
+        id: 'tentar_pegar_galo',
+        label: 'Tentar pegar o garneli no reflexo do pulo',
+        costLabel: 'Teste de agilidade',
+        execute: (state) => {
+          state.apply({ ginga: 14, sanidade: -4 }, 'Drible do galo');
+          return 'Você dá o bote mas o galo mete um drible desconcertante de asa, pula no muro e te deixa com a mão na poeira. Malandragem pura de terreiro (+14 Ginga, -4% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_BAIXINHO_SINUCA: {
+    id: 'NPC_BAIXINHO_SINUCA',
+    title: '🎱 BAIXINHO DA SINUCA // MESTRE DO EFEITO',
+    getIntroText: (state) => `
+      O Baixinho gira o giz azul no topo do taco e olha o alinhamento da caçapa do meio com olho clínico.<br>
+      <em>"— E aí meu parceiro! Vai arriscar uma fichinha ou tá com medo de perder pro velhinho aqui?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'apostar_sinuca',
+        label: 'Desafiar pra uma partida de sinuca valendo R$ 10,00',
+        costLabel: 'R$ 10,00 (Aposta)',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound && sound.playSnookerHit) sound.playSnookerHit();
+          const win = state.rng.chance(0.48 + (state.ginga / 300));
+          if (win) {
+            if (sound) sound.playCoin();
+            state.apply({ grana: 1000, sanidade: 25, ginga: 15 }, 'Vitória na sinuca contra o Baixinho');
+            return 'TAC! A bola 8 bate em duas tabelas e morre na caçapa da ponta! O Baixinho bate palmas: "— Caramba, jogou fino! Toma aí os dez reais merecidos!" (+R$ 10,00, +25% Sanidade, +15 Ginga).';
+          } else {
+            state.apply({ grana: -1000, sanidade: -8, ginga: 8 }, 'Derrota na sinuca');
+            return 'TAC! O Baixinho puxou o efeito de trás e limpou a mesa com maestria. "— O segredo tá no punho, garoto!" Valeu o aprendizado (-R$ 10,00, +8 Ginga).';
+          }
+        }
+      },
+      {
+        id: 'pagar_skol_baixinho',
+        label: 'Pagar uma garrafa de Skol trincando pro Baixinho',
+        costLabel: 'R$ 8,00',
+        costCentavos: 800,
+        disabled: !state.canAfford(800),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playCanOpen(); }
+          state.apply({ grana: -800, sanidade: 22, ginga: 12 }, 'Cerveja pro Baixinho da Sinuca');
+          return 'O Baixinho abre um sorriso radiante, te dá um giz azul novo de presente e ensina o macete da tabelada curta (+22% Sanidade, +12 Ginga).';
+        }
+      },
+      {
+        id: 'gritar_ta_valendo',
+        label: 'Gritar "TÁ VALENDO!" e mandar uma tacada de efeito',
+        costLabel: 'Espírito de boteco',
+        execute: (state, sound) => {
+          if (sound && sound.playSnookerHit) sound.playSnookerHit();
+          state.apply({ sanidade: 18, ginga: 10 }, 'Tacada espalhafatosa na sinuca');
+          return 'TAC! As bolas espalham com estalo alto pelo pano verde, quase derrubando o copo da bancada. A galera no bar cai na gargalhada (+18% Sanidade, +10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  NPC_ZE_TACO: {
+    id: 'NPC_ZE_TACO',
+    title: '🍺 ZÉ DO TACO // FILÓSOFO DO BALCÃO',
+    getIntroText: (state) => `
+      Zé do Taco descansa o taco de madeira na quina da mesa, segurando um copo lagoinha com colarinho branco.<br>
+      <em>"— O futebol e a vida são parecidos: às vezes você mira na bola e acerta o pano!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'brindar_cerveja',
+        label: 'Brindar com copo americano trincando de gelado',
+        costLabel: 'Saúde e sobrevivência',
+        execute: (state, sound) => {
+          if (sound) sound.playCanOpen();
+          state.apply({ sanidade: 24, fome: 10 }, 'Brinde com Zé do Taco');
+          return 'Tim-tim! O copo americano com cerveja gelada desce estalando no peito, lavando o calor do asfalto. Alívio autêntico de boteco (+24% Sanidade, +10% Bucho).';
+        }
+      },
+      {
+        id: 'reclamar_corinthians',
+        label: 'Desabafar sobre a escalação do Brasileirão',
+        costLabel: 'Resenha futebolística',
+        execute: (state) => {
+          state.apply({ sanidade: 20 }, 'Resenha de futebol no boteco');
+          return 'Zé gesticula com as mãos: "— Aquele técnico é um pardal! O ponta-esquerda não volta pra marcar nem se a vida dele depender disso!" Desabafo revigorante de torcedor (+20% Sanidade).';
+        }
+      },
+      {
+        id: 'gole_rabo_galo',
+        label: 'Pedir um gole do rabo de galo (51 com Cynar) dele',
+        costLabel: 'Química pesada (+Sanidade & +Ginga)',
+        execute: (state) => {
+          state.apply({ sanidade: 18, fome: -4, ginga: 10 }, 'Tomou rabo de galo');
+          return 'Cachaça com infusão amarga. Queima na garganta até aquecer o peito e dá aquela calibrada nas pernas (+18% Sanidade, +10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  NPC_RUBAO_51: {
+    id: 'NPC_RUBAO_51',
+    title: '🍶 RUBÃO DA 51 // PATRIMÔNIO DO BOTECO',
+    getIntroText: (state) => `
+      Rubão está debruçado no balcão de fórmica com o rádio de pilha chiando e os olhos marejados de tanta prosa.<br>
+      <em>"— Meu camarada... você acredita que em 97 eu vi um disco voador em cima do Pico do Jaraguá?!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'teoria_ovni',
+        label: 'Ouvir a teoria do Rubão sobre alienígenas no Jaraguá',
+        costLabel: 'Papo transcendental',
+        execute: (state) => {
+          state.apply({ sanidade: 26 }, 'Ouvir causos do Rubão');
+          return 'Rubão abre os braços: "— O disco desceu com uma luz verde no pico e os hominhos verdes pediram duas caipirinhas com limão cravo pro Seu Tião!" Histórias hilárias de boteco paulistano (+26% Sanidade).';
+        }
+      },
+      {
+        id: 'pagar_dose_rubao',
+        label: 'Pagar uma dose de cachaça pro Rubão no balcão',
+        costLabel: 'R$ 2,50',
+        costCentavos: 250,
+        disabled: !state.canAfford(250),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -250, ginga: 14 }, 'Dose pro Rubão');
+          return 'Rubão vira a dose num gole estalado, bate no balcão e te abraça com carinho de irmão: "— Você é um homem de ouro, que Deus te cubra de bênçãos!" (+14 Ginga).';
+        }
+      },
+      {
+        id: 'avisar_patroa_chegando',
+        label: 'Avisar o Rubão que a patroa dele tá dobrando a esquina',
+        costLabel: 'Susto preventivo',
+        execute: (state) => {
+          state.apply({ sanidade: 20 }, 'Trote no Rubão');
+          return 'Rubão arregala os olhos, ajeita a camisa amassada correndo e tenta esconder o copo atrás do pote de ovos rosa: "— Cadê a Neusa?! Fala que eu tô na padaria!" Rizada total (+20% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_CHICAO_LITRAO: {
+    id: 'NPC_CHICAO_LITRAO',
+    title: '😂 CHICÃO DO LITRÃO // A RISADA DO BAR',
+    getIntroText: (state) => `
+      Chicão sentado na banqueta giratória vermelha, dando tapas na coxa de tanto rir de piadas de almanaque.<br>
+      <em>"— Essa você não conhece! Chega aí pra ouvir a do papagaio e do guarda de trânsito!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'ouvir_piada',
+        label: 'Pedir pro Chicão contar a piada clássica do papagaio',
+        costLabel: 'Riso frouxo (+Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 28 }, 'Piada do Chicão');
+          return 'Chicão gesticula, faz vozes engraçadas e solta uma gargalhada tão explosiva que balança as garrafas da prateleira. Impossível não chorar de rir junto (+28% Sanidade).';
+        }
+      },
+      {
+        id: 'pegar_amendoim_alho',
+        label: 'Pegar um punhado do amendoim torrado com alho frito',
+        costLabel: 'Tira-gosto gratuito',
+        execute: (state, sound) => {
+          if (sound) sound.playBite();
+          state.apply({ fome: 14, sanidade: 10 }, 'Amendoim com alho');
+          return 'Crocante, bem salgadinho e com pedaços de alho dourado na casca. O tira-gosto clássico que forra o estômago (+14% Bucho, +10% Sanidade).';
+        }
+      },
+      {
+        id: 'dividir_garrafa_original',
+        label: 'Dividir uma garrafa gelada de Antarctica Original 600ml',
+        costLabel: 'R$ 6,00',
+        costCentavos: 600,
+        disabled: !state.canAfford(600),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playCanOpen(); }
+          state.apply({ grana: -600, sanidade: 22, fome: 8 }, 'Cerveja dividida com Chicão');
+          return 'Metade no seu copo, metade no dele. Colarinho espumando e conversa jogada fora com alegria contagiante (+22% Sanidade, +8% Bucho).';
+        }
+      }
+    ]
+  },
+
+  NPC_PEDRO_TORRESMO: {
+    id: 'NPC_PEDRO_TORRESMO',
+    title: '🥓 SEU PEDRO // O HOMEM DA PURURUCA',
+    getIntroText: (state) => `
+      Seu Pedro saboreia sua porção de torresmo crocante com rodelas de limão galego e sal grosso na mesinha amarela.<br>
+      <em>"— Quem não come torresmo com limão não sabe o que é a felicidade paulistana!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pegar_torresmo_limao',
+        label: 'Aceitar um naco de torresmo na pururuca com limão',
+        costLabel: 'Manjar dos deuses',
+        execute: (state, sound) => {
+          if (sound) sound.playBite();
+          state.apply({ fome: 20, sanidade: 18 }, 'Torresmo com limão galego');
+          return 'CROC! A pele pururuca estala nos dentes com o azedinho do limão cravo. Sabor inigualável de comida de boteco (+20% Bucho, +18% Sanidade).';
+        }
+      },
+      {
+        id: 'receita_secreta',
+        label: 'Pedir a receita secreta da pururuca crocante sem murchar',
+        costLabel: 'Segredo de família',
+        execute: (state) => {
+          state.apply({ ginga: 12 }, 'Receita do torresmo');
+          return 'Seu Pedro cochicha o segredo: "— Cozinha na banha em fogo brando, deixa esfriar na geladeira e dá o choque térmico no óleo fervendo com duas gotas de pinga!" Sabedoria popular valiosa (+12 Ginga).';
+        }
+      },
+      {
+        id: 'folhear_gazeta',
+        label: 'Folhear o caderno de esportes da Gazeta que está na mesa',
+        costLabel: 'Leitura relaxante',
+        execute: (state) => {
+          state.apply({ sanidade: 12 }, 'Leitura de jornal de boteco');
+          return 'Você vê as notas da rodada de futebol, tabela do campeonato e colunas esportivas de São Paulo (+12% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_MARQUINHOS_GARCOM: {
+    id: 'NPC_MARQUINHOS_GARCOM',
+    title: '🥟 MARQUINHOS // GARÇOM DA PASTELARIA DO BETO',
+    getIntroText: (state) => `
+      Marquinhos equilibra uma bandeja de alumínio com pastéis dourados fumegantes e copos suados de garapa.<br>
+      <em>"— Fala guerreiro! O pastel sai em dois minutos e a cana foi moída agorinha com limão!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pastel_especial_mesa',
+        label: 'Pedir um pastel de carne com queijo quentinho na mesa',
+        costLabel: 'R$ 10,00',
+        costCentavos: 1000,
+        disabled: !state.canAfford(1000),
+        execute: (state, sound) => {
+          if (sound) { sound.playCoin(); sound.playBite(); }
+          state.apply({ grana: -1000, fome: 38, sanidade: 18 }, 'Pastel na mesa com Marquinhos');
+          return 'Marquinhos desce a travessa com o pastel estalando de quente. Queijo derretendo e carne moída bem temperada com azeitona. Bucho forrado com louvor (+38% Bucho, +18% Sanidade).';
+        }
+      },
+      {
+        id: 'caldo_cana_500',
+        label: 'Pedir copo de 500ml de caldo de cana com gelo e limão',
+        costLabel: 'R$ 6,00',
+        costCentavos: 600,
+        disabled: !state.canAfford(600),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -600, fome: 20, sanidade: 22 }, 'Caldo de cana na pastelaria');
+          return 'Garapa verde clarinha, trincando de gelo com aquele toque cítrico de limão taiti. Hidratação doce e revigorante (+20% Bucho, +22% Sanidade).';
+        }
+      },
+      {
+        id: 'pedir_vinagrete_pimenta',
+        label: 'Pedir o vinagrete caseiro e o vidro de pimenta da casa',
+        costLabel: 'Tempero brasileiro',
+        execute: (state) => {
+          state.apply({ ginga: 10 }, 'Vinagrete especial');
+          return 'Marquinhos traz o potinho de vinagrete com cebola picada, tomate e azeite, mais o frasco de pimenta malagueta curtida. Sabor irresistível (+10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  NPC_TIO_CARLINHOS: {
+    id: 'NPC_TIO_CARLINHOS',
+    title: '🥟 TIO CARLINHOS // O MESTRE DO PASTEL DE 30CM',
+    getIntroText: (state) => `
+      Tio Carlinhos segura um pastel gigante de 30 centímetros com as duas mãos, soprando a fumaça do recheio.<br>
+      <em>"— Esse é o especial da casa: quatro queijos com bacon e palmito! Uma obra de arte da gastronomia!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'dividir_ponta_pastel',
+        label: 'Elogiar o pastel e pedir um pedaço da ponta crocante',
+        costLabel: 'Cortesía de pastelaria',
+        execute: (state, sound) => {
+          if (sound) sound.playBite();
+          state.apply({ fome: 16, sanidade: 16 }, 'Ponta de pastel do Carlinhos');
+          return 'Carlinhos sorri generoso, quebra um naco farto da ponta pururuca e te passa num guardanapo: "— Come aí que o Beto caprichou no recheio hoje!" (+16% Bucho, +16% Sanidade).';
+        }
+      },
+      {
+        id: 'pedir_guardanapo',
+        label: 'Pedir o dispenser de guardanapo emprestado',
+        costLabel: 'Etiqueta de boteco',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Guardanapo emprestado');
+          return 'Carlinhos empurra o suporte: "— Pega lá, rapaz! Pastel de feira sem pingar óleo na mesa não tem tradição!" (+8% Sanidade).';
+        }
+      },
+      {
+        id: 'perguntar_recheio_carne',
+        label: 'Perguntar se o pastel de carne é bem recheado até a ponta',
+        costLabel: 'Dica gastronômica',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Dica do pastel');
+          return 'Carlinhos atesta com convicção: "— Aqui não tem pastel de vento não, patrão! O Beto soca recheio de ponta a ponta!" (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_DONA_IVONE: {
+    id: 'NPC_DONA_IVONE',
+    title: '👵 DONA IVONE // DOMINGO NA PASTELARIA',
+    getIntroText: (state) => `
+      Dona Ivone aprecia seu caldo de cana com canudinho listrado, usando óculos de grau na ponta do nariz e casaquinho de crochê.<br>
+      <em>"— Bom dia, meu filho! Domingo sem pastel de feira e caldo de cana não é domingo de verdade, né?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'elogiar_croche',
+        label: 'Elogiar o casaquinho de crochê da dona',
+        costLabel: 'Gentileza que aquece',
+        execute: (state) => {
+          state.apply({ sanidade: 24, fome: 10 }, 'Gentileza com Dona Ivone');
+          return 'Dona Ivone fica encantada com sua educação: "— Que moço simpático! Minha neta quem bordou. Toma aqui um gole da minha garapa fresquinha!" (+24% Sanidade, +10% Bucho).';
+        }
+      },
+      {
+        id: 'perguntar_igreja',
+        label: 'Perguntar sobre a missa com Padre Bento na igrejinha',
+        costLabel: 'Conselho espiritual',
+        execute: (state) => {
+          state.apply({ sanidade: 26, perigo: -15 }, 'Bênção de Dona Ivone');
+          return 'Dona Ivone te entrega uma oração de São Cristóvão guardada na bolsa: "— Padre Bento vai rezar pelos motoristas e pedestres às dez. Que os anjos guardem seus passos!" (+26% Sanidade, -15% Perigo).';
+        }
+      },
+      {
+        id: 'avisar_piso_molhado',
+        label: 'Avisar a dona que o piso perto da estufa está molhado',
+        costLabel: 'Cuidado comunitário',
+        execute: (state) => {
+          state.apply({ ginga: 10 }, 'Cuidado com idosos');
+          return 'Dona Ivone segura na sua mão com carinho: "— Deus te pague pelo aviso, meu neto! Hoje em dia quase ninguém olha pelos mais velhos!" (+10 Ginga).';
+        }
+      }
+    ]
+  },
+
+  NPC_LUQUINHAS: {
+    id: 'NPC_LUQUINHAS',
+    title: '🧒 LUQUINHAS // O MOLEQUE DA PASTELARIA',
+    getIntroText: (state) => `
+      Luquinhas está sentado no banquinho alto do balcão, balançando as perninhas e de olho nos doces de abóbora e paçocas da vitrine.<br>
+      <em>"— E aí tio! Me ajuda a inteirar uma Pitchulinha gelada?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'pagar_pitchula',
+        label: 'Pagar um refrigerante Pitchula de guaraná pro moleque',
+        costLabel: 'R$ 3,00',
+        costCentavos: 300,
+        disabled: !state.canAfford(300),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -300, sanidade: 25, ginga: 12 }, 'Pagou pitchula pro moleque');
+          return 'Os olhos de Luquinhas brilham! Ele abre a garrafinha de guaraná na hora e comemora: "— Valeu tiozão! Você é o cara mais firmeza do bairro!" (+25% Sanidade, +12 Ginga).';
+        }
+      },
+      {
+        id: 'perguntar_futebol_favela',
+        label: 'Perguntar se ele joga bola no campinho da favela',
+        costLabel: 'Papo de moleque',
+        execute: (state) => {
+          state.apply({ sanidade: 16 }, 'Papo com Luquinhas');
+          return 'Luquinhas estufa o peito: "— Eu sou o camisa dez do dente-de-leite! Ninguém me pega na corrida quando eu parto pra cima da zaga!" (+16% Sanidade).';
+        }
+      },
+      {
+        id: 'dar_figurinha',
+        label: 'Presentear Luquinhas com uma figurinha de futebol',
+        costLabel: 'Alegria infantil',
+        execute: (state) => {
+          state.apply({ sanidade: 18 }, 'Presenteou com figurinha');
+          return 'Luquinhas pula do banco: "— Caraca, o atacante brilhante que faltava no meu álbum! Valeu demais tio!" (+18% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_MECANICO_BETO: {
+    id: 'NPC_MECANICO_BETO',
+    title: '🔧 BETO // O REI DO ALINHAMENTO & MUSA DA OFICINA',
+    getIntroText: (state) => `
+      Mecânico Beto limpa as mãos pretas de graxa numa estopa azul em frente ao elevador hidráulico.<br>
+      Ao lado, o lendário pôster vintage da Luma de Oliveira de 1998 brilha sob a lâmpada quente da bancada.<br>
+      <em>"— Fala chefe! Tá precisando calibrar, balancear ou trocar pastilha de freio?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'calibrar_pneus',
+        label: 'Pedir pra calibrar os 4 pneus com 30 libras no manômetro',
+        costLabel: 'R$ 2,00',
+        costCentavos: 200,
+        disabled: !state.canAfford(200),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -200, sanidade: 20, ginga: 10 }, 'Calibrou pneus na borracharia');
+          return 'Beto engata o bico de ar estalando: TSHHH! "— 30 libras na frente e 28 atrás. O Celta tá macio e econômico no asfalto!" (+20% Sanidade, +10 Ginga).';
+        }
+      },
+      {
+        id: 'elogiar_poster_luma',
+        label: 'Elogiar o pôster clássico da Luma de Oliveira de 1998 na parede',
+        costLabel: 'Cultura de oficina',
+        execute: (state) => {
+          state.apply({ sanidade: 26, ginga: 8 }, 'Elogiou a Musa da Oficina');
+          return 'Beto olha com reverência pro pôster de biquíni e coleira dourada: "— Essa mulher parava o Carnaval do Rio inteiro! Relíquia de ouro, ninguém tira essa estampa da minha oficina!" (+26% Sanidade, +8 Ginga).';
+        }
+      },
+      {
+        id: 'chave_roda_emprestada',
+        label: 'Pedir emprestada uma chave de roda cruz para emergência',
+        costLabel: 'Solidariedade mecânica',
+        execute: (state) => {
+          state.apply({ ginga: 14 }, 'Empréstimo de ferramenta');
+          return 'Beto te estende a pesada chave cruz de aço forjado: "— Só me devolve antes das seis, hein parceiro!" (+14 Ginga).';
+        }
+      }
+    ]
+  },
+
+  NPC_PORTEIRO_VALDIR: {
+    id: 'NPC_PORTEIRO_VALDIR',
+    title: '🏢 SEU VALDIR // PORTEIRO DO EDIFÍCIO JARAGUÁ',
+    getIntroText: (state) => `
+      Seu Valdir veste paletó azul-marinho impecável com crachá e prancheta de correspondências atrás do balcão de mármore do lobby.<br>
+      <em>"— Bom dia! Vai subir para a cobertura ou visitar algum apartamento?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'autorizacao_cobertura',
+        label: 'Pedir autorização para subir de elevador até a cobertura panorâmica',
+        costLabel: 'Acesso VIP',
+        execute: (state) => {
+          state.apply({ sanidade: 25 }, 'Acesso à cobertura do Jaraguá');
+          return 'Seu Valdir anota no livro de visitas e aperta o botão do elevador: "— Acesso liberado! A vista do Pico do Jaraguá e de toda a Zona Oeste tá espetacular lá em cima!" (+25% Sanidade).';
+        }
+      },
+      {
+        id: 'cafezinho_porteiro',
+        label: 'Pagar um cafezinho com pingado da padaria pro porteiro',
+        costLabel: 'R$ 3,50',
+        costCentavos: 350,
+        disabled: !state.canAfford(350),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -350, sanidade: 18, ginga: 16 }, 'Cafezinho pro porteiro');
+          return 'Seu Valdir agradece com a mão no peito: "— Salvou meu turno de doze horas, patrão! Precisando de qualquer desenrolo no prédio, conta comigo!" (+18% Sanidade, +16 Ginga).';
+        }
+      },
+      {
+        id: 'checar_correspondencia',
+        label: 'Verificar se tem cartas ou boletos no escaninho da portaria',
+        costLabel: 'Checagem rotineira',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Correspondência conferida');
+          return 'Seu Valdir confere as caixas: "— Nada além de panfleto de farmácia e o aviso de vencimento do IPTU. Tudo sob controle!" (+8% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_GUARDA_SILVA: {
+    id: 'NPC_GUARDA_SILVA',
+    title: '🛡️ GUARDA SILVA // SEGURANÇA DA AGÊNCIA BANCÁRIA',
+    getIntroText: (state) => `
+      Guarda Silva permanece vigilante com colete balístico, cinto tático e postura firme ao lado da porta giratória detectora de metais.<br>
+      <em>"— Bom dia cidadão. Celulares, chaves e objetos de metal no porta-objetos antes de passar."</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'passar_porta_giratoria',
+        label: 'Passar pela porta giratória sem fazer apitar o detector',
+        costLabel: 'Desafio de calma (+Ginga & +Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 16, ginga: 12 }, 'Passagem suave no banco');
+          return 'Você coloca o molho de chaves no cesto de acrílico com calma. A porta giratória verde roda suave e você entra sem nenhum bipe estridente (+16% Sanidade, +12 Ginga).';
+        }
+      },
+      {
+        id: 'pedir_senha_fila',
+        label: 'Pedir orientação sobre qual botão apertar no totem de senhas',
+        costLabel: 'Orientação bancária',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Orientação no banco');
+          return 'Guarda Silva aponta educado: "— Aperta a tecla azul pro pagamento de contas e boletos e aguarda chamar no visor digital central." (+10% Sanidade).';
+        }
+      },
+      {
+        id: 'cumprimentar_guarda',
+        label: 'Cumprimentar o segurança com aceno firme e respeitoso',
+        costLabel: 'Paz institucional',
+        execute: (state) => {
+          state.apply({ perigo: -12, sanidade: 10 }, 'Cumprimento ao segurança');
+          return 'Guarda Silva corresponde com um movimento firme de cabeça: "— Bom dia cidadão, atenção às bolsas e boa sorte nos seus trâmites." (-12% Perigo, +10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_CAIXA_BANCO: {
+    id: 'NPC_CAIXA_BANCO',
+    title: '🏦 CAIXA DA AGÊNCIA // BOCA DO CAIXA',
+    getIntroText: (state) => `
+      O caixa atende através do vidro blindado, organizando os carimbos mecânicos e as fitas de autenticação.<br>
+      <em>"— Próximo da fila! Boletos, saques ou depósitos?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'trocar_nota_moedas',
+        label: 'Trocar uma cédula de R$ 20 por moedas de R$ 1,00 para o dia a dia',
+        costLabel: 'Troco facilitado',
+        disabled: !state.canAfford(2000),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ ginga: 12, sanidade: 10 }, 'Trocou dinheiro no caixa');
+          return 'O caixa desliza vinte moedas brilhantes de R$ 1,00 pela gaveta de aço. Moeda no bolso pra orelhão, padaria e gorjeta (+12 Ginga, +10% Sanidade).';
+        }
+      },
+      {
+        id: 'tirar_extrato_matricial',
+        label: 'Solicitar extrato da conta na impressora matricial',
+        costLabel: 'Impressão térmica',
+        execute: (state) => {
+          state.apply({ sanidade: 8 }, 'Tirou extrato no banco');
+          return 'A máquina puxa o papel zebrado com o barulho clássico "tzzzt-tzzzt". Extrato na mão: cada centavo contado com rigor paulistano (+8% Sanidade).';
+        }
+      },
+      {
+        id: 'pagar_boleto_banco',
+        label: 'Autenticar pagamento de boleto vencido no guichê',
+        costLabel: 'R$ 124,50',
+        costCentavos: 12450,
+        disabled: !state.canAfford(12450) || state.flags.boletoPago || !state.hasItem('boleto_enel'),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({
+            grana: -12450,
+            sanidade: 38,
+            removeInventoryId: 'boleto_enel',
+            flags: { boletoPago: true }
+          }, 'Boleto Enel pago no banco');
+          return 'CLAC-CLAC! Carimbo mecânico com autenticação bancária indelével. Alívio monumental: a Enel não vai cortar a luz amanhã (+38% Sanidade)!';
+        }
+      }
+    ]
+  },
+
+  NPC_PMESP_PATRULHA: {
+    id: 'NPC_PMESP_PATRULHA',
+    title: '👮 GUARIÇÃO DA PMESP // RONDA OSTENSIVA',
+    getIntroText: (state) => `
+      A guarnição da Polícia Militar de São Paulo realiza patrulhamento a pé pela calçada da avenida, atenta ao fluxo de veículos e pedestres.<br>
+      <em>"— Bom dia cidadão. Alguma anormalidade ou ocorrência pela região?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'apresentar_rg_limpo',
+        label: 'Apresentar documento de identidade (RG) em ordem',
+        costLabel: 'Zera Risco / Perigo',
+        execute: (state) => {
+          state.apply({ perigo: -100, sanidade: 16 }, 'Apresentou documento à PM');
+          return 'O cabo confere os dados com tranquilidade no rádio portátil: "— Tudo em ordem com o cidadão, nada consta. Prossiga com segurança." Perigo de enquadro zerado (-100% Perigo, +16% Sanidade)!';
+        }
+      },
+      {
+        id: 'perguntar_blitz',
+        label: 'Perguntar sobre a blitz de trânsito na Edgar Facó',
+        costLabel: 'Informação tática',
+        execute: (state) => {
+          state.apply({ ginga: 12 }, 'Informação de trânsito da PM');
+          return 'O policial orienta: "— Estamos fiscalizando motos sem placa e veículos com licenciamento atrasado perto do pontilhão. Mantenha os faróis acesos." (+12 Ginga).';
+        }
+      },
+      {
+        id: 'continencia_respeitosa',
+        label: 'Prestar continência e desejar um bom turno à guarnição',
+        costLabel: 'Respeito mútuo',
+        execute: (state) => {
+          state.apply({ sanidade: 12 }, 'Cumprimento à polícia');
+          return 'O sargento acena de volta: "— Obrigado cidadão, bom dia e fique com Deus." (+12% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_MALANDRO_QUEBRADA: {
+    id: 'NPC_MALANDRO_QUEBRADA',
+    title: '🧢 CRIA DA QUEBRADA // O TOQUE DE MALANDRO',
+    getIntroText: (state) => `
+      Camisa de time, bermuda tactel e boné de aba reta, encostado na esquina fumando um cigarrinho e de olho no asfalto.<br>
+      <em>"— Salve truta! Tá na correria pelo asfalto também? Se liga no movimento das viaturas!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'salve_quebrada',
+        label: 'Fazer o toque de quebrada tradicional (Punho com estalo de dedos)',
+        costLabel: 'Respeito puro (+20 Ginga)',
+        execute: (state) => {
+          state.apply({ ginga: 20, perigo: -15 }, 'Toque de quebrada');
+          return 'Toque de mão preciso, bate o punho e estala o dedão: "— Firmeza total, cria! Aqui em Pirituba nóis fecha com quem é leal!" Respeito no morro garantido (+20 Ginga, -15% Perigo).';
+        }
+      },
+      {
+        id: 'comprar_juliet',
+        label: 'Comprar óculos Juliet com lente espelhada azul',
+        costLabel: 'R$ 15,00',
+        costCentavos: 1500,
+        disabled: !state.canAfford(1500),
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: -1500, ginga: 30, sanidade: 12 }, 'Comprou Juliet do malandro');
+          return 'Você coloca o Juliet espelhado. A visão fica azulada e o estilo no asfalto vai a patamares nunca antes vistos (+30 Ginga, +12% Sanidade).';
+        }
+      },
+      {
+        id: 'avisar_viatura_rota',
+        label: 'Avisar que a viatura da polícia acabou de passar na outra rua',
+        costLabel: 'Lealdade de rua (+R$ 10,00)',
+        execute: (state, sound) => {
+          if (sound) sound.playCoin();
+          state.apply({ grana: 1000, ginga: 15 }, 'Avisou a quebrada');
+          return 'O malandro pisca o olho, agradece o toque e te passa uma nota de dez amassada: "— Salvou meu corre, truta! Pega aí pro refrigerante!" (+R$ 10,00, +15 Ginga).';
+        }
+      }
+    ]
+  },
+
+  NPC_TIA_BAIRRO: {
+    id: 'NPC_TIA_BAIRRO',
+    title: '👵 TIA DO BAIRRO // A GUARDIÃ DA MORAL',
+    getIntroText: (state) => `
+      A senhora caminha devagar pela calçada com um carrinho de feira de duas rodinhas e óculos de cordinha no pescoço.<br>
+      <em>"— Bom dia, meu anjo! Como tá a sua mãe? Tem se alimentado direito nessa correria?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'tomar_bencao_tia',
+        label: 'Tomar a bênção respeitosa ("A bênção, tia!")',
+        costLabel: 'Bênção materna (+25% Sanidade)',
+        execute: (state) => {
+          state.apply({ sanidade: 25, perigo: -10 }, 'Tomou a bênção da tia');
+          return 'A senhorinha para, faz o sinal da cruz carinhoso na sua testa e sorri com ternura: "— Deus te abençoe e Nossa Senhora Aparecida guie seus passos, meu filho!" Sensação reconfortante de lar (+25% Sanidade, -10% Perigo).';
+        }
+      },
+      {
+        id: 'ajudar_carregar_feira',
+        label: 'Ajudar a tia a puxar o carrinho de feira na subida',
+        costLabel: 'Boa ação paulistana',
+        execute: (state) => {
+          state.apply({ fome: 15, sanidade: 15, ginga: 10 }, 'Ajudou a tia na feira');
+          return 'Você sobe a ladeira puxando o carrinho com cheiro de banana-nanica e pastel. A tia te entrega uma maçã gala fresquinha: "— Come aí pra dar energia, meu jovem!" (+15% Bucho, +15% Sanidade, +10 Ginga).';
+        }
+      },
+      {
+        id: 'ouvir_fofoca_vizinha',
+        label: 'Ouvir a fofoca da vizinha que comprou TV nova no carnê',
+        costLabel: 'Fofoca de calçada',
+        execute: (state) => {
+          state.apply({ sanidade: 16 }, 'Fofoca de bairro');
+          return 'A tia cochicha no seu ouvido: "— Menino, você soube? A Dona Cida da esquina parcelou uma TV de 60 polegadas em trinta vezes! Nem cabe na sala dela!" Fofoca clássica de calçada (+16% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_TIO_BAIRRO: {
+    id: 'NPC_TIO_BAIRRO',
+    title: '👴 TIOZÃO DA CALÇADA // CRÔNICAS DE PIRITUBA',
+    getIntroText: (state) => `
+      O senhor de camisa social de manga curta e chinelo de couro está encostado no muro vendo o movimento da rua.<br>
+      <em>"— E aí garoto! Já jogou na Mega acumulada hoje ou vai ficar dependendo de hora extra?"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'palpite_jogo_bicho',
+        label: 'Pedir um palpite certeiro pro Jogo do Bicho ou Mega-Sena',
+        costLabel: 'Palpite dos astros',
+        execute: (state) => {
+          state.apply({ ginga: 16, sanidade: 10 }, 'Palpite do tiozão');
+          return 'O tio puxa o papel do maço de cigarros: "— Sonhou com água limpa? Joga no macaco, grupo 17, centena 468 na cabeça das duas da tarde! É batata!" (+16 Ginga, +10% Sanidade).';
+        }
+      },
+      {
+        id: 'previsao_temporal_jaragua',
+        label: 'Perguntar sobre as nuvens escuras em cima do Pico do Jaraguá',
+        costLabel: 'Meteorologia empírica',
+        execute: (state) => {
+          state.apply({ sanidade: 14 }, 'Previsão do tempo do tio');
+          return 'O senhor aponta com o queixo pro morro: "— O vento tá virando do sul. Antes das quatro da tarde desaba aquela tempestade de lavar o asfalto. Fica esperto com os bueiros!" (+14% Sanidade).';
+        }
+      },
+      {
+        id: 'pedir_fosforo',
+        label: 'Pedir um fósforo pra acender algo ou trocar um cumprimento',
+        costLabel: 'Papo ligeiro',
+        execute: (state) => {
+          state.apply({ sanidade: 10 }, 'Troca de ideia com o tio');
+          return 'O tio risca o fósforo com habilidade contra o vento e te dá uma saudação calorosa: "— Juízo nessa rua, rapaz!" (+10% Sanidade).';
+        }
+      }
+    ]
+  },
+
+  NPC_FAVELA_RESIDENT: {
+    id: 'NPC_FAVELA_RESIDENT',
+    title: '🏠 MORADOR DA COMUNIDADE // HOSPITALIDADE DA LAJE',
+    getIntroText: (state) => `
+      O morador está sentado na soleira da casa de alvenaria na viela, com o rádio tocando pagode dos anos 90.<br>
+      <em>"— Salve meu bom! Sobe aqui na viela pra respirar o ar fresco da comunidade!"</em><br>
+    `,
+    getOptions: (state) => [
+      {
+        id: 'copo_agua_filtro_barro',
+        label: 'Pedir um copo de água fresca no filtro de barro São João',
+        costLabel: 'Água sagrada (+Bucho & +Sanidade)',
+        execute: (state) => {
+          state.apply({ fome: 16, sanidade: 22 }, 'Água do filtro de barro');
+          return 'Água geladinha saindo da torneirinha plástica marrom do filtro de argila. Gosto inconfundível de pureza e frescor da infância (+16% Bucho, +22% Sanidade).';
+        }
+      },
+      {
+        id: 'elogiar_churrasco_laje',
+        label: 'Elogiar o cheiro bom do churrasco de linguiça e a música da laje',
+        costLabel: 'Confraternização popular',
+        execute: (state, sound) => {
+          if (sound) sound.playBite();
+          state.apply({ fome: 24, sanidade: 18, ginga: 14 }, 'Churrasco na laje');
+          return 'O morador corta um pedaço suculento de linguiça toscana na tábua e te entrega com farofa: "— Quem chega com humildade aqui é sempre irmão!" (+24% Bucho, +18% Sanidade, +14 Ginga).';
+        }
+      },
+      {
+        id: 'horario_baile_funk',
+        label: 'Perguntar que horas começa o pancadão do paredão de som',
+        costLabel: 'Informação cultural',
+        execute: (state) => {
+          state.apply({ ginga: 12 }, 'Dica do baile');
+          return 'O cria sorri: "— Às dez da noite o grave estremece os tijolos até o sol raiar! Se for colar, cola na disciplina!" (+12 Ginga).';
+        }
+      }
+    ]
   }
 };
 
@@ -29510,6 +30460,87 @@ class NpcSystem {
     }));
   }
 
+  // Extended interactive targets for living boteco patrons, pastelaria diners, and citywide pedestrians
+  getExtendedInteractableTargets() {
+    const extended = [];
+    const barEncMap = {
+      baixinho_sinuca: { enc: 'NPC_BAIXINHO_SINUCA', prompt: 'JOGAR SINUCA COM O BAIXINHO' },
+      ze_taco: { enc: 'NPC_ZE_TACO', prompt: 'CONVERSAR COM ZÉ DO TACO' },
+      rubao_pinga: { enc: 'NPC_RUBAO_51', prompt: 'OUVIR CAUSOS DO RUBÃO DA 51' },
+      chicao_litrao: { enc: 'NPC_CHICAO_LITRAO', prompt: 'RIR DAS PIADAS DO CHICÃO' },
+      seu_pedro_torresmo: { enc: 'NPC_PEDRO_TORRESMO', prompt: 'PEDIR TORRESMO COM SEU PEDRO' }
+    };
+    (this.barTiaoNpcs || []).forEach(npc => {
+      const cfg = barEncMap[npc.id];
+      if (cfg && npc.group) {
+        extended.push({
+          id: npc.id,
+          name: npc.name,
+          prompt: cfg.prompt,
+          encounterId: cfg.enc,
+          position: npc.group.position,
+          maxDist: 3.5,
+          isOpen: true,
+          isNpc: true
+        });
+      }
+    });
+
+    const pastelEncMap = {
+      marquinhos_garcom: { enc: 'NPC_MARQUINHOS_GARCOM', prompt: 'PEDIR PASTEL COM MARQUINHOS' },
+      tio_carlinhos_cliente: { enc: 'NPC_TIO_CARLINHOS', prompt: 'FALAR COM TIO CARLINHOS' },
+      dona_ivone_cliente: { enc: 'NPC_DONA_IVONE', prompt: 'CUMPRIMENTAR DONA IVONE' },
+      luquinhas_balcao: { enc: 'NPC_LUQUINHAS', prompt: 'FALAR COM LUQUINHAS' }
+    };
+    (this.pastelariaNpcs || []).forEach(npc => {
+      const cfg = pastelEncMap[npc.id];
+      if (cfg && npc.group) {
+        extended.push({
+          id: npc.id,
+          name: npc.name,
+          prompt: cfg.prompt,
+          encounterId: cfg.enc,
+          position: npc.group.position,
+          maxDist: 3.5,
+          isOpen: true,
+          isNpc: true
+        });
+      }
+    });
+
+    const pedEncMap = {
+      cabo_oliveira: { enc: 'NPC_PMESP_PATRULHA', prompt: 'FALAR COM CABO OLIVEIRA (PMESP)' },
+      soldado_nascimento: { enc: 'NPC_PMESP_PATRULHA', prompt: 'FALAR COM SOLDADO NASCIMENTO (PMESP)' },
+      cabo_santos: { enc: 'NPC_PMESP_PATRULHA', prompt: 'FALAR COM CABO SANTOS (PMESP)' },
+      vitinho_grau: { enc: 'NPC_MALANDRO_QUEBRADA', prompt: 'SALVE COM VITINHO DO GRAU' },
+      diguinho_noia: { enc: 'NPC_MALANDRO_QUEBRADA', prompt: 'TROCAR IDEIA COM DIGUINHO NOIA' },
+      nelsinho_chapa: { enc: 'NPC_MALANDRO_QUEBRADA', prompt: 'FALAR COM NELSINHO CHAPA' },
+      dona_carmem: { enc: 'NPC_TIA_BAIRRO', prompt: 'TOMAR BÊNÇÃO DE DONA CARMEM' },
+      dona_lurdes: { enc: 'NPC_TIA_BAIRRO', prompt: 'CUMPRIMENTAR DONA LURDES' },
+      dona_maria_parque: { enc: 'NPC_TIA_BAIRRO', prompt: 'FALAR COM DONA MARIA DO PARQUE' },
+      seu_valdir: { enc: 'NPC_TIO_BAIRRO', prompt: 'TROCAR IDEIA COM SEU VALDIR' },
+      seu_geraldo: { enc: 'NPC_TIO_BAIRRO', prompt: 'BATER PAPO COM SEU GERALDO' },
+      seu_osvaldo: { enc: 'NPC_TIO_BAIRRO', prompt: 'CONVERSAR COM SEU OSVALDO' }
+    };
+    (this.cityPedestrians || []).forEach(npc => {
+      const cfg = pedEncMap[npc.id];
+      if (cfg && npc.group) {
+        extended.push({
+          id: npc.id,
+          name: npc.name,
+          prompt: cfg.prompt,
+          encounterId: cfg.enc,
+          position: npc.group.position,
+          maxDist: 3.5,
+          isOpen: true,
+          isNpc: true
+        });
+      }
+    });
+
+    return extended;
+  }
+
   isZoneNpcActive(npc, hour) {
     if (!npc.zoneId) return true;
     const zone = WORLD_ZONES.find((z) => z.id === npc.zoneId);
@@ -30624,6 +31655,7 @@ class InteractableSystem {
     this.activeQuickNpc = null;
     this.activeQuickOptions = [];
     this.doors = [];
+    this.residentNpcs = [];
 
     // Keyboard hotkeys [1], [2], [3] for seamless NPC Quick Actions
     if (typeof window !== 'undefined') {
@@ -30962,12 +31994,18 @@ class InteractableSystem {
     let closestDist = Infinity;
 
     const npcTargets = (this.npcs && this.npcs.getInteractableTargets) ? this.npcs.getInteractableTargets() : [];
+    const extNpcTargets = (this.npcs && this.npcs.getExtendedInteractableTargets) ? this.npcs.getExtendedInteractableTargets() : [];
+    const residentTargets = (this.residentNpcs || []).map(r => ({
+      ...r,
+      isOpen: true,
+      isNpc: true
+    }));
     const doorTargets = (this.doors || []).filter(d => !d.isOpen).map(d => ({
       ...d,
       isDoor: true,
       prompt: d.prompt || 'ARROMBAR / ABRIR PORTA NO SOCO'
     }));
-    const allTargets = [...this.anchors, ...npcTargets, ...doorTargets];
+    const allTargets = [...this.anchors, ...npcTargets, ...extNpcTargets, ...residentTargets, ...doorTargets];
 
     for (const anchor of allTargets) {
       const dx = anchor.position.x - playerPos.x;
@@ -31120,10 +32158,48 @@ class InteractableSystem {
       menor_corre: '🧢',
       mestre_bloco: '🥁',
       churrasqueiro_campo: '🍖',
-      flanelinha: '🚙'
+      flanelinha: '🚙',
+      // Living residents & domestic animals
+      tio_wilson: '📺',
+      louro_varanda: '🦜',
+      galo_quintal: '🐔',
+      mecanico_beto: '🔧',
+      porteiro_valdir: '🏢',
+      guarda_silva: '🛡️',
+      caixa_banco: '🏦',
+      // Bar do Tião patrons
+      baixinho_sinuca: '🎱',
+      ze_taco: '🍺',
+      rubao_pinga: '🍶',
+      chicao_litrao: '😂',
+      seu_pedro_torresmo: '🥓',
+      // Pastelaria do Beto diners & staff
+      marquinhos_garcom: '🥟',
+      tio_carlinhos_cliente: '🥟',
+      dona_ivone_cliente: '👵',
+      luquinhas_balcao: '🧒',
+      // Citywide pedestrians
+      cabo_oliveira: '👮',
+      soldado_nascimento: '👮',
+      cabo_santos: '👮',
+      vitinho_grau: '🧢',
+      diguinho_noia: '🧢',
+      nelsinho_chapa: '🧢',
+      dona_carmem: '👵',
+      dona_lurdes: '👵',
+      dona_maria_parque: '👵',
+      seu_valdir: '👴',
+      seu_geraldo: '👴',
+      seu_osvaldo: '👴'
     };
 
-    if (avatarElem) avatarElem.textContent = avatarMap[target.anchor.id] || '👤';
+    let avatarIcon = avatarMap[target.anchor.id];
+    if (!avatarIcon && target.anchor.id && target.anchor.id.startsWith('favela_resident')) {
+      avatarIcon = '🏠';
+    }
+    if (!avatarIcon) avatarIcon = '👤';
+
+    if (avatarElem) avatarElem.textContent = avatarIcon;
     if (nameElem) nameElem.textContent = target.anchor.name;
 
     optionsElem.innerHTML = '';
@@ -31222,6 +32298,10 @@ class InteractableSystem {
     if (this.currentTarget && this.currentTarget.anchor.isNpc) {
       this.renderNpcQuickActions(this.currentTarget);
     }
+  }
+
+  setResidentNpcs(npcs) {
+    this.residentNpcs = npcs || [];
   }
 
   setDoors(doors) {
@@ -32493,6 +33573,9 @@ class GameManager {
     this.interactables = new InteractableSystem(this.scene, this.camera, this.dialog, this.sound, this.traffic, this.npcs);
     if (this.city && this.city.interactiveDoors) {
       this.interactables.setDoors(this.city.interactiveDoors);
+    }
+    if (this.city && this.city.residentNpcs) {
+      this.interactables.setResidentNpcs(this.city.residentNpcs);
     }
     this.hud = new HudGame();
     this.hands = new HandsSystem(this.scene, this.camera, this.sound);

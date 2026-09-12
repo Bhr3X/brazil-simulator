@@ -1274,6 +1274,87 @@ export class NpcSystem {
     }));
   }
 
+  // Extended interactive targets for living boteco patrons, pastelaria diners, and citywide pedestrians
+  getExtendedInteractableTargets() {
+    const extended = [];
+    const barEncMap = {
+      baixinho_sinuca: { enc: 'NPC_BAIXINHO_SINUCA', prompt: 'JOGAR SINUCA COM O BAIXINHO' },
+      ze_taco: { enc: 'NPC_ZE_TACO', prompt: 'CONVERSAR COM ZÉ DO TACO' },
+      rubao_pinga: { enc: 'NPC_RUBAO_51', prompt: 'OUVIR CAUSOS DO RUBÃO DA 51' },
+      chicao_litrao: { enc: 'NPC_CHICAO_LITRAO', prompt: 'RIR DAS PIADAS DO CHICÃO' },
+      seu_pedro_torresmo: { enc: 'NPC_PEDRO_TORRESMO', prompt: 'PEDIR TORRESMO COM SEU PEDRO' }
+    };
+    (this.barTiaoNpcs || []).forEach(npc => {
+      const cfg = barEncMap[npc.id];
+      if (cfg && npc.group) {
+        extended.push({
+          id: npc.id,
+          name: npc.name,
+          prompt: cfg.prompt,
+          encounterId: cfg.enc,
+          position: npc.group.position,
+          maxDist: 3.5,
+          isOpen: true,
+          isNpc: true
+        });
+      }
+    });
+
+    const pastelEncMap = {
+      marquinhos_garcom: { enc: 'NPC_MARQUINHOS_GARCOM', prompt: 'PEDIR PASTEL COM MARQUINHOS' },
+      tio_carlinhos_cliente: { enc: 'NPC_TIO_CARLINHOS', prompt: 'FALAR COM TIO CARLINHOS' },
+      dona_ivone_cliente: { enc: 'NPC_DONA_IVONE', prompt: 'CUMPRIMENTAR DONA IVONE' },
+      luquinhas_balcao: { enc: 'NPC_LUQUINHAS', prompt: 'FALAR COM LUQUINHAS' }
+    };
+    (this.pastelariaNpcs || []).forEach(npc => {
+      const cfg = pastelEncMap[npc.id];
+      if (cfg && npc.group) {
+        extended.push({
+          id: npc.id,
+          name: npc.name,
+          prompt: cfg.prompt,
+          encounterId: cfg.enc,
+          position: npc.group.position,
+          maxDist: 3.5,
+          isOpen: true,
+          isNpc: true
+        });
+      }
+    });
+
+    const pedEncMap = {
+      cabo_oliveira: { enc: 'NPC_PMESP_PATRULHA', prompt: 'FALAR COM CABO OLIVEIRA (PMESP)' },
+      soldado_nascimento: { enc: 'NPC_PMESP_PATRULHA', prompt: 'FALAR COM SOLDADO NASCIMENTO (PMESP)' },
+      cabo_santos: { enc: 'NPC_PMESP_PATRULHA', prompt: 'FALAR COM CABO SANTOS (PMESP)' },
+      vitinho_grau: { enc: 'NPC_MALANDRO_QUEBRADA', prompt: 'SALVE COM VITINHO DO GRAU' },
+      diguinho_noia: { enc: 'NPC_MALANDRO_QUEBRADA', prompt: 'TROCAR IDEIA COM DIGUINHO NOIA' },
+      nelsinho_chapa: { enc: 'NPC_MALANDRO_QUEBRADA', prompt: 'FALAR COM NELSINHO CHAPA' },
+      dona_carmem: { enc: 'NPC_TIA_BAIRRO', prompt: 'TOMAR BÊNÇÃO DE DONA CARMEM' },
+      dona_lurdes: { enc: 'NPC_TIA_BAIRRO', prompt: 'CUMPRIMENTAR DONA LURDES' },
+      dona_maria_parque: { enc: 'NPC_TIA_BAIRRO', prompt: 'FALAR COM DONA MARIA DO PARQUE' },
+      seu_valdir: { enc: 'NPC_TIO_BAIRRO', prompt: 'TROCAR IDEIA COM SEU VALDIR' },
+      seu_geraldo: { enc: 'NPC_TIO_BAIRRO', prompt: 'BATER PAPO COM SEU GERALDO' },
+      seu_osvaldo: { enc: 'NPC_TIO_BAIRRO', prompt: 'CONVERSAR COM SEU OSVALDO' }
+    };
+    (this.cityPedestrians || []).forEach(npc => {
+      const cfg = pedEncMap[npc.id];
+      if (cfg && npc.group) {
+        extended.push({
+          id: npc.id,
+          name: npc.name,
+          prompt: cfg.prompt,
+          encounterId: cfg.enc,
+          position: npc.group.position,
+          maxDist: 3.5,
+          isOpen: true,
+          isNpc: true
+        });
+      }
+    });
+
+    return extended;
+  }
+
   isZoneNpcActive(npc, hour) {
     if (!npc.zoneId) return true;
     const zone = WORLD_ZONES.find((z) => z.id === npc.zoneId);

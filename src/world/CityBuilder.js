@@ -16,6 +16,7 @@ export class CityBuilder {
     this.kites = [];
     this.beaconLights = [];
     this.interactiveDoors = [];
+    this.residentNpcs = [];
     this.blocoTrioGroup = null;
     this.campinhoGroup = null;
     this.illusionWalls = [];
@@ -467,7 +468,7 @@ export class CityBuilder {
     // 8. Living Resident NPC inside House!
     const shirtCols = [0x1155cc, 0xd95b96, 0x009944, 0xffaa00, 0x772299];
     const chosenShirt = shirtCols[Math.abs(Math.round(x + z)) % shirtCols.length];
-    this.buildResidentNpc(
+    const favGroup = this.buildResidentNpc(
       x - halfW + 1.4,
       baseElevation,
       z,
@@ -477,6 +478,17 @@ export class CityBuilder {
       true, // Sitting on sofa
       0
     );
+    this.residentNpcs.push({
+      id: `favela_resident_${Math.round(x)}_${Math.round(z)}`,
+      name: 'MORADOR DA COMUNIDADE',
+      prompt: 'CONVERSAR COM MORADOR DA FAVELA',
+      encounterId: 'NPC_FAVELA_RESIDENT',
+      position: new THREE.Vector3(x - halfW + 1.4, baseElevation + 0.8, z),
+      maxDist: 3.2,
+      isOpen: true,
+      isNpc: true,
+      group: favGroup
+    });
 
     // 9. Domestic Animals:
     // A. Cat lounging on the laje mureta or windowsill
@@ -2376,7 +2388,18 @@ export class CityBuilder {
     this.scene.add(eastFrame);
 
     // --- MECHANIC BETO NPC ---
-    this.buildResidentNpc(x + 0.2, floorY, z + 0.8, 0x114488, 0x8a5530, 0x1c2b3a, false, -Math.PI / 4);
+    const betoGroup = this.buildResidentNpc(x + 0.2, floorY, z + 0.8, 0x114488, 0x8a5530, 0x1c2b3a, false, -Math.PI / 4);
+    this.residentNpcs.push({
+      id: 'mecanico_beto',
+      name: 'MECÂNICO BETO (OFICINA)',
+      prompt: 'FALAR COM MECÂNICO BETO',
+      encounterId: 'NPC_MECANICO_BETO',
+      position: new THREE.Vector3(x + 0.2, floorY + 1.2, z + 0.8),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: betoGroup
+    });
   }
 
   // 18.2e Walkable "Pastelaria do Beto" with Dining Salon, Estufa, Sugarcane Press & Tables
@@ -2932,7 +2955,18 @@ export class CityBuilder {
     );
 
     // Teller Attendant behind glass
-    this.buildResidentNpc(x - 2.5, floorY, z + 3.0, 0xffffff, 0x9e6840, 0x1a2430, true, 0);
+    const tellerGroup = this.buildResidentNpc(x - 2.5, floorY, z + 3.0, 0xffffff, 0x9e6840, 0x1a2430, true, 0);
+    this.residentNpcs.push({
+      id: 'caixa_banco',
+      name: 'CAIXA DA AGÊNCIA BANCÁRIA',
+      prompt: 'FALAR COM O CAIXA',
+      encounterId: 'NPC_CAIXA_BANCO',
+      position: new THREE.Vector3(x - 2.5, floorY + 1.0, z + 3.0),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: tellerGroup
+    });
 
     // --- MANAGER'S DESK WITH COMPUTER MONITOR & CHAIR ---
     const deskMat = new THREE.MeshLambertMaterial({ color: 0x3d2b1f });
@@ -2952,7 +2986,18 @@ export class CityBuilder {
     this.scene.add(maleta);
 
     // --- SECURITY GUARD SILVA NPC ---
-    this.buildResidentNpc(x + 3.2, floorY, z - 0.8, 0x2b384a, 0x7a4d2c, 0x111620, false, -Math.PI / 2);
+    const guardGroup = this.buildResidentNpc(x + 3.2, floorY, z - 0.8, 0x2b384a, 0x7a4d2c, 0x111620, false, -Math.PI / 2);
+    this.residentNpcs.push({
+      id: 'guarda_silva',
+      name: 'GUARDA SILVA (SEGURANÇA DO BANCO)',
+      prompt: 'FALAR COM GUARDA SILVA',
+      encounterId: 'NPC_GUARDA_SILVA',
+      position: new THREE.Vector3(x + 3.2, floorY + 1.2, z - 0.8),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: guardGroup
+    });
     const vest = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.52, 0.32), new THREE.MeshLambertMaterial({ color: 0x111111 }));
     vest.position.set(x + 3.2, floorY + 1.05, z - 0.8);
     this.scene.add(vest);
@@ -4074,13 +4119,46 @@ export class CityBuilder {
     });
 
     // 8. Resident: Tio Wilson relaxing on the sofa
-    this.buildResidentNpc(x - 2.0, floorY, z + 1.2, 0xd47a24, 0x9e6840, 0x1f2937, true, 0);
+    const tioWilsonGroup = this.buildResidentNpc(x - 2.0, floorY, z + 1.2, 0xd47a24, 0x9e6840, 0x1f2937, true, 0);
+    this.residentNpcs.push({
+      id: 'tio_wilson',
+      name: 'TIO WILSON (ASSISTINDO TV NO SOFÁ)',
+      prompt: 'CONVERSAR COM TIO WILSON',
+      encounterId: 'NPC_TIO_WILSON',
+      position: new THREE.Vector3(x - 2.0, floorY + 0.9, z + 1.2),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: tioWilsonGroup
+    });
 
     // 9. Domestic Parrot in cage on front porch
-    this.buildParrot(x + doorW / 2 + 0.6, floorY + 2.2, z - d / 2 - 0.3);
+    const louroGroup = this.buildParrot(x + doorW / 2 + 0.6, floorY + 2.2, z - d / 2 - 0.3);
+    this.residentNpcs.push({
+      id: 'louro_varanda',
+      name: 'LOURO (PAPAGAIO NA GAIOLA)',
+      prompt: 'FALAR COM O PAPAGAIO LOURO',
+      encounterId: 'NPC_LOURO',
+      position: new THREE.Vector3(x + doorW / 2 + 0.6, floorY + 2.2, z - d / 2 - 0.3),
+      maxDist: 3.0,
+      isOpen: true,
+      isNpc: true,
+      group: louroGroup
+    });
 
     // 10. Domestic Chicken in backyard
-    this.buildChicken(x + 2.0, floorY, z + d / 2 + 1.5, 0.8);
+    const galoGroup = this.buildChicken(x + 2.0, floorY, z + d / 2 + 1.5, 0.8);
+    this.residentNpcs.push({
+      id: 'galo_quintal',
+      name: 'GALO GARNELI (QUINTAL)',
+      prompt: 'INTERAGIR COM O GALO',
+      encounterId: 'NPC_GALO',
+      position: new THREE.Vector3(x + 2.0, floorY + 0.3, z + d / 2 + 1.5),
+      maxDist: 3.2,
+      isOpen: true,
+      isNpc: true,
+      group: galoGroup
+    });
   }
 
   // 26. High-Rise Luxury Apartment Tower & Penthouse with 180° Glass View of Pico do Jaraguá & Elevator
@@ -4172,7 +4250,18 @@ export class CityBuilder {
     this.scene.add(desk);
 
     // Concierge / Porteiro Seu Valdir behind desk
-    this.buildResidentNpc(x + 3.0, 0.0, z + 2.6, 0x1a2430, 0x9e6840, 0x111620, false, 0);
+    const porteiroGroup = this.buildResidentNpc(x + 3.0, 0.0, z + 2.6, 0x1a2430, 0x9e6840, 0x111620, false, 0);
+    this.residentNpcs.push({
+      id: 'porteiro_valdir',
+      name: 'SEU VALDIR (PORTEIRO DO JARAGUÁ)',
+      prompt: 'FALAR COM PORTEIRO SEU VALDIR',
+      encounterId: 'NPC_PORTEIRO_VALDIR',
+      position: new THREE.Vector3(x + 3.0, 1.2, z + 2.6),
+      maxDist: 3.5,
+      isOpen: true,
+      isNpc: true,
+      group: porteiroGroup
+    });
 
     // Security turnstile
     const turnstile = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.2), chromeMat);

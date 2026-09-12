@@ -41,6 +41,9 @@ export class GameManager {
     if (this.city && this.city.interactiveDoors) {
       this.interactables.setDoors(this.city.interactiveDoors);
     }
+    if (this.city && this.city.residentNpcs) {
+      this.interactables.setResidentNpcs(this.city.residentNpcs);
+    }
     this.hud = new HudGame();
     this.hands = new HandsSystem(this.scene, this.camera, this.sound);
     if (this.controls) {
