@@ -18598,7 +18598,9 @@ class CityBuilder {
     const w = 8.5;
     const h = 5.2;
     const d = 6.0;
-    const posY = y + h / 2;
+    // Solid elevated foundation: floor sits at Y = 0.28, completely above street/sidewalk level (0.25)
+    const floorY = 0.28;
+    const posY = floorY + h / 2;
 
     // Outer walls: Painted suburban warm beige / yellow ochre
     const wallMat = new THREE.MeshLambertMaterial({
@@ -18639,37 +18641,58 @@ class CityBuilder {
 
     // Lintel above front door
     const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorW, h - doorH, 0.3), wallMat);
-    lintel.position.set(x, y + doorH + (h - doorH) / 2, z - d / 2 + 0.15);
+    lintel.position.set(x, floorY + doorH + (h - doorH) / 2, z - d / 2 + 0.15);
     this.scene.add(lintel);
 
-    // Interior floor (Parquet / Taco de madeira)
-    const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.6, d - 0.6), woodFloorMat);
+    // Solid foundation slab: spans Y from -0.06 to 0.28 (0.34m thick solid concrete)
+    // Encapsulates and occludes any overlapping sidewalk or subfloor planes, completely eliminating z-fighting
+    const slabGeo = new THREE.BoxGeometry(w, 0.34, d);
+    const slabMat = new THREE.MeshLambertMaterial({ color: 0x3a3d40 });
+    const slab = new THREE.Mesh(slabGeo, slabMat);
+    slab.position.set(x, 0.11, z);
+    this.scene.add(slab);
+
+    // Interior floor (Parquet / Taco de madeira) mounted firmly on top of the slab
+    const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, d - 0.4), woodFloorMat);
     floorMesh.rotation.x = -Math.PI / 2;
-    floorMesh.position.set(x, y + 0.015, z);
+    floorMesh.position.set(x, floorY + 0.002, z);
     this.scene.add(floorMesh);
+
+    // Dedicated walkable floor collider across entire house interior
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - w / 2, 0, z - d / 2),
+      new THREE.Vector3(x + w / 2, floorY + 0.05, z + d / 2),
+      'walkable'
+    );
+
+    // Granite entrance threshold / soleira at front doorway
+    const soleiraMat = new THREE.MeshLambertMaterial({ color: 0x2b2b2b });
+    const soleira = new THREE.Mesh(new THREE.BoxGeometry(doorW + 0.2, 0.06, 0.35), soleiraMat);
+    soleira.position.set(x, 0.26, z - d / 2 + 0.05);
+    this.scene.add(soleira);
 
     // Ceiling / Flat Roof
     const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.3, d + 0.4), ceilingMat);
-    roof.position.set(x, y + h + 0.15, z);
+    roof.position.set(x, floorY + h + 0.15, z);
     this.scene.add(roof);
 
     // Blue Fortlev water tank on roof
-    this.buildWaterTank(x + 1.2, y + h + 0.3, z + 0.5);
+    this.buildWaterTank(x + 1.2, floorY + h + 0.3, z + 0.5);
 
     // --- INTERIOR FURNISHINGS ---
     // 1. Brown Faux-Leather Retro Sofa
     const sofaMat = new THREE.MeshLambertMaterial({ color: 0x5a341e });
     const sofaBase = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.45, 0.85), sofaMat);
-    sofaBase.position.set(x - 2.0, y + 0.225, z + 1.2);
+    sofaBase.position.set(x - 2.0, floorY + 0.225, z + 1.2);
     this.scene.add(sofaBase);
     const sofaBack = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.65, 0.25), sofaMat);
-    sofaBack.position.set(x - 2.0, y + 0.55, z + 1.5);
+    sofaBack.position.set(x - 2.0, floorY + 0.55, z + 1.5);
     this.scene.add(sofaBack);
 
     // 2. Coffee Table with Unpaid Bills (Boleto Enel & Carnê Casas Bahia)
     const tableMat = new THREE.MeshLambertMaterial({ color: 0x3d2716 });
     const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.7), tableMat);
-    table.position.set(x - 2.0, y + 0.2, z - 0.1);
+    table.position.set(x - 2.0, floorY + 0.2, z - 0.1);
     this.scene.add(table);
 
     // Boleto on table
@@ -18677,31 +18700,31 @@ class CityBuilder {
     const boleto = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), paperMat);
     boleto.rotation.x = -Math.PI / 2;
     boleto.rotation.z = 0.2;
-    boleto.position.set(x - 2.2, y + 0.41, z - 0.1);
+    boleto.position.set(x - 2.2, floorY + 0.41, z - 0.1);
     this.scene.add(boleto);
 
     // Carnê booklet
     const carneMat = new THREE.MeshLambertMaterial({ color: 0xcc2222 });
     const carne = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.28), carneMat);
-    carne.position.set(x - 1.7, y + 0.42, z - 0.05);
+    carne.position.set(x - 1.7, floorY + 0.42, z - 0.05);
     this.scene.add(carne);
 
     // 3. Wooden TV Rack with Vintage CRT Color TV
     const rackMat = new THREE.MeshLambertMaterial({ color: 0x4a2e1b });
     const tvRack = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 0.6), rackMat);
-    tvRack.position.set(x + 2.0, y + 0.3, z - 0.1);
+    tvRack.position.set(x + 2.0, floorY + 0.3, z - 0.1);
     this.scene.add(tvRack);
 
     // CRT TV Body
     const tvMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
     const tv = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.65, 0.55), tvMat);
-    tv.position.set(x + 2.0, y + 0.925, z - 0.1);
+    tv.position.set(x + 2.0, floorY + 0.925, z - 0.1);
     this.scene.add(tv);
 
     // CRT Screen with subtle glow
     const screenMat = new THREE.MeshBasicMaterial({ color: 0x5599cc });
     const tvScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.45), screenMat);
-    tvScreen.position.set(x + 2.0, y + 0.925, z - 0.38);
+    tvScreen.position.set(x + 2.0, floorY + 0.925, z - 0.38);
     tvScreen.rotation.y = Math.PI;
     this.scene.add(tvScreen);
 
@@ -18709,66 +18732,66 @@ class CityBuilder {
     const crochetMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const crochet = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.4), crochetMat);
     crochet.rotation.x = -Math.PI / 2;
-    crochet.position.set(x + 2.0, y + 1.26, z - 0.1);
+    crochet.position.set(x + 2.0, floorY + 1.26, z - 0.1);
     this.scene.add(crochet);
 
     // 4. White Refrigerator in Kitchenette Corner
     const fridgeMat = new THREE.MeshLambertMaterial({ color: 0xf5f5f5 });
     const fridge = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.8, 0.85), fridgeMat);
-    fridge.position.set(x + 2.5, y + 0.9, z + 1.6);
+    fridge.position.set(x + 2.5, floorY + 0.9, z + 1.6);
     this.scene.add(fridge);
 
     // 5. Cozy Warm Overhead Ceiling Light
     const warmLight = new THREE.PointLight(0xffd59e, 1.3, 9);
-    warmLight.position.set(x, y + 2.8, z);
+    warmLight.position.set(x, floorY + 2.8, z);
     this.scene.add(warmLight);
 
     // 6. Solid Physics Colliders for Walls & Furnishings
     // Back wall
     this.physics.addBoxCollider(
-      new THREE.Vector3(x - w / 2, y, z + d / 2 - 0.4),
-      new THREE.Vector3(x + w / 2, y + h, z + d / 2 + 0.1),
+      new THREE.Vector3(x - w / 2, floorY, z + d / 2 - 0.4),
+      new THREE.Vector3(x + w / 2, floorY + h, z + d / 2 + 0.1),
       'solid'
     );
     // Left wall
     this.physics.addBoxCollider(
-      new THREE.Vector3(x - w / 2 - 0.1, y, z - d / 2),
-      new THREE.Vector3(x - w / 2 + 0.4, y + h, z + d / 2),
+      new THREE.Vector3(x - w / 2 - 0.1, floorY, z - d / 2),
+      new THREE.Vector3(x - w / 2 + 0.4, floorY + h, z + d / 2),
       'solid'
     );
     // Right wall
     this.physics.addBoxCollider(
-      new THREE.Vector3(x + w / 2 - 0.4, y, z - d / 2),
-      new THREE.Vector3(x + w / 2 + 0.1, y + h, z + d / 2),
+      new THREE.Vector3(x + w / 2 - 0.4, floorY, z - d / 2),
+      new THREE.Vector3(x + w / 2 + 0.1, floorY + h, z + d / 2),
       'solid'
     );
     // Front wall Left
     this.physics.addBoxCollider(
-      new THREE.Vector3(x - w / 2, y, z - d / 2 - 0.1),
-      new THREE.Vector3(x - doorW / 2, y + h, z - d / 2 + 0.4),
+      new THREE.Vector3(x - w / 2, floorY, z - d / 2 - 0.1),
+      new THREE.Vector3(x - doorW / 2, floorY + h, z - d / 2 + 0.4),
       'solid'
     );
     // Front wall Right
     this.physics.addBoxCollider(
-      new THREE.Vector3(x + doorW / 2, y, z - d / 2 - 0.1),
-      new THREE.Vector3(x + w / 2, y + h, z - d / 2 + 0.4),
+      new THREE.Vector3(x + doorW / 2, floorY, z - d / 2 - 0.1),
+      new THREE.Vector3(x + w / 2, floorY + h, z - d / 2 + 0.4),
       'solid'
     );
     // Sofa & TV colliders
     this.physics.addBoxCollider(
-      new THREE.Vector3(x - 3.2, y, z + 0.7),
-      new THREE.Vector3(x - 0.8, y + 1.2, z + 1.7),
+      new THREE.Vector3(x - 3.2, floorY, z + 0.7),
+      new THREE.Vector3(x - 0.8, floorY + 1.2, z + 1.7),
       'solid'
     );
     this.physics.addBoxCollider(
-      new THREE.Vector3(x + 1.2, y, z - 0.4),
-      new THREE.Vector3(x + 2.8, y + 1.5, z + 0.2),
+      new THREE.Vector3(x + 1.2, floorY, z - 0.4),
+      new THREE.Vector3(x + 2.8, floorY + 1.5, z + 0.2),
       'solid'
     );
 
     // 7. Interactive Front Wooden Door (Opens when punched with [E] or hit)
     const doorPivot = new THREE.Group();
-    doorPivot.position.set(x - doorW / 2, y, z - d / 2 + 0.15);
+    doorPivot.position.set(x - doorW / 2, floorY, z - d / 2 + 0.15);
 
     const doorMesh = new THREE.Mesh(
       new THREE.BoxGeometry(doorW, doorH, 0.08),
@@ -18779,15 +18802,15 @@ class CityBuilder {
     this.scene.add(doorPivot);
 
     const doorCollider = this.physics.addBoxCollider(
-      new THREE.Vector3(x - doorW / 2, y, z - d / 2 - 0.2),
-      new THREE.Vector3(x + doorW / 2, y + doorH, z - d / 2 + 0.3),
+      new THREE.Vector3(x - doorW / 2, floorY, z - d / 2 - 0.2),
+      new THREE.Vector3(x + doorW / 2, floorY + doorH, z - d / 2 + 0.3),
       'solid'
     );
 
     this.interactiveDoors.push({
       id: `mid_class_house_door`,
       name: 'CASA DO TIO WILSON (EMÍLIO LESSORE)',
-      position: new THREE.Vector3(x, y + 1.2, z - d / 2 - 0.4),
+      position: new THREE.Vector3(x, floorY + 1.2, z - d / 2 - 0.4),
       maxDist: 2.4,
       doorMesh: doorPivot,
       collider: doorCollider,
@@ -18796,13 +18819,13 @@ class CityBuilder {
     });
 
     // 8. Resident: Tio Wilson relaxing on the sofa
-    this.buildResidentNpc(x - 2.0, y, z + 1.2, 0xd47a24, 0x9e6840, 0x1f2937, true, 0);
+    this.buildResidentNpc(x - 2.0, floorY, z + 1.2, 0xd47a24, 0x9e6840, 0x1f2937, true, 0);
 
     // 9. Domestic Parrot in cage on front porch
-    this.buildParrot(x + doorW / 2 + 0.6, y + 2.2, z - d / 2 - 0.3);
+    this.buildParrot(x + doorW / 2 + 0.6, floorY + 2.2, z - d / 2 - 0.3);
 
     // 10. Domestic Chicken in backyard
-    this.buildChicken(x + 2.0, y, z + d / 2 + 1.5, 0.8);
+    this.buildChicken(x + 2.0, floorY, z + d / 2 + 1.5, 0.8);
   }
 
   // 26. High-Rise Luxury Apartment Tower & Penthouse with 180° Glass View of Pico do Jaraguá & Elevator
@@ -19332,7 +19355,7 @@ class CityBuilder {
 
     // Block between Bento Bicudo and Emílio Lessore (Z = -12.0)
     addSobrado(-20.0, -12.0, 9.0, 5.5, 6.0, 'painted', '#4682b4');
-    this.buildMidClassHouse(-8.0, 0.0, -12.0);
+    this.buildMidClassHouse(-8.0, 0.25, -12.0);
     addSobrado(38.0, -12.0, 8.5, 5.5, 6.0, 'reboco');
 
     // South of Bento Bicudo (Z = 4.5)
@@ -24637,7 +24660,7 @@ const SOCIAL_CLASSES = {
     perigo: 20,
     ginga: 65,
     decay: { fomePerHour: 3.5, sanidadePerHour: 3.0 },
-    spawn: { x: -8.0, y: 0.25, z: -12.5 }, // Casa do Tiozão CLT na Rua Emílio Lessore
+    spawn: { x: -8.0, y: 0.28, z: -12.5 }, // Casa do Tiozão CLT na Rua Emílio Lessore
     inventory: [
       { id: 'chave_carro', name: 'Chave do Celta 2004', desc: 'Está estacionado perto do posto, 2 portas na reserva.' },
       { id: 'boleto_enel', name: 'Boleto Enel (Vence Hoje!)', desc: 'R$ 124,50. Se não pagar cortam a luz amanhã.' },

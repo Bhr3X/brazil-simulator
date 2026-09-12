@@ -39,7 +39,7 @@ export const SOCIAL_CLASSES = {
     perigo: 20,
     ginga: 65,
     decay: { fomePerHour: 3.5, sanidadePerHour: 3.0 },
-    spawn: { x: -8.0, y: 0.25, z: -12.5 }, // Casa do Tiozão CLT na Rua Emílio Lessore
+    spawn: { x: -8.0, y: 0.28, z: -12.5 }, // Casa do Tiozão CLT na Rua Emílio Lessore
     inventory: [
       { id: 'chave_carro', name: 'Chave do Celta 2004', desc: 'Está estacionado perto do posto, 2 portas na reserva.' },
       { id: 'boleto_enel', name: 'Boleto Enel (Vence Hoje!)', desc: 'R$ 124,50. Se não pagar cortam a luz amanhã.' },
