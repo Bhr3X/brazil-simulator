@@ -2337,6 +2337,44 @@ export class CityBuilder {
     this.buildTireStack(x + 3.8, floorY, z - 1.5, 5);
     this.buildTireStack(x + 3.8, floorY, z - 0.5, 4);
 
+    // --- ICONIC LUMA DE OLIVEIRA WORKSHOP CALENDAR POSTER ---
+    // Mounted prominently on the main workshop wall directly in front of the entrance & crosshairs
+    const posterW = 1.6;
+    const posterH = 2.5;
+    const posterTexture = this.textures.createLumaDeOliveiraPoster();
+    const posterMat = new THREE.MeshBasicMaterial({
+      map: posterTexture,
+      side: THREE.DoubleSide
+    });
+    const lumaPoster = new THREE.Mesh(new THREE.PlaneGeometry(posterW, posterH), posterMat);
+    lumaPoster.name = 'poster_luma_de_oliveira';
+    lumaPoster.position.set(-39.57, floorY + 2.4, 42.0);
+    lumaPoster.rotation.y = Math.PI / 2;
+    this.scene.add(lumaPoster);
+
+    // Backing wooden frame mounted against wall
+    const frameGeo = new THREE.BoxGeometry(0.04, posterH + 0.1, posterW + 0.1);
+    const frameMat = new THREE.MeshLambertMaterial({ color: 0x2e1b10 });
+    const posterFrame = new THREE.Mesh(frameGeo, frameMat);
+    posterFrame.position.set(-39.60, floorY + 2.4, 42.0);
+    this.scene.add(posterFrame);
+
+    // Warm work-lamp illuminating the poster
+    const posterLight = new THREE.PointLight(0xfff1cc, 2.0, 8.0, 1.2);
+    posterLight.position.set(-38.8, floorY + 3.4, 42.0);
+    this.scene.add(posterLight);
+
+    // Secondary calendar poster on the opposite wall near Beto (facing West -X)
+    const eastPoster = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 2.2), posterMat);
+    eastPoster.name = 'poster_luma_de_oliveira_east';
+    eastPoster.position.set(-34.12, floorY + 2.4, 41.2);
+    eastPoster.rotation.y = -Math.PI / 2;
+    this.scene.add(eastPoster);
+
+    const eastFrame = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.3, 1.5), frameMat);
+    eastFrame.position.set(-34.09, floorY + 2.4, 41.2);
+    this.scene.add(eastFrame);
+
     // --- MECHANIC BETO NPC ---
     this.buildResidentNpc(x + 0.2, floorY, z + 0.8, 0x114488, 0x8a5530, 0x1c2b3a, false, -Math.PI / 4);
   }

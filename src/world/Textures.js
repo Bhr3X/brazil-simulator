@@ -3711,6 +3711,302 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 82. Iconic Brazilian Auto Shop Calendar Poster: "Luma de Oliveira"
+  createLumaDeOliveiraPoster() {
+    const key = 'poster_luma_de_oliveira';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 512);
+
+    // 1. Deep burgundy/crimson gradient background
+    const grad = ctx.createLinearGradient(0, 0, 0, 512);
+    grad.addColorStop(0, '#450a0a');
+    grad.addColorStop(0.12, '#7f1d1d');
+    grad.addColorStop(0.42, '#991b1b');
+    grad.addColorStop(0.72, '#450a0a');
+    grad.addColorStop(1.0, '#1c0505');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 512);
+
+    // 2. Gold decorative border frame
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, 244, 500);
+
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(10, 10, 236, 492);
+
+    // Corner rosettes
+    [
+      [10, 10], [246, 10], [10, 502], [246, 502]
+    ].forEach(([cx, cy]) => {
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 3. Top Header: Workshop & Sponsor branding
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 12px "Arial Black", Impact, sans-serif';
+    ctx.fillText('OFICINA & AUTO PEÇAS // BORRACHARIA', 128, 28);
+
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('DISTRIBUIDORA PIRITUBA • SP', 128, 42);
+
+    // Thin gold separator line
+    ctx.strokeStyle = '#eab308';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(24, 48);
+    ctx.lineTo(232, 48);
+    ctx.stroke();
+
+    // 4. Main Star Name: "LUMA DE OLIVEIRA"
+    ctx.fillStyle = '#fef08a';
+    ctx.font = '900 22px "Arial Black", Impact, sans-serif';
+    ctx.shadowColor = '#000000';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText('LUMA DE OLIVEIRA', 128, 76);
+
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Subtitle ribbon
+    ctx.fillStyle = '#fef9c3';
+    ctx.font = 'italic bold 11px sans-serif';
+    ctx.fillText('★ RAINHA DO CARNAVAL & MUSA DA OFICINA ★', 128, 92);
+
+    // 5. Centerfold / Portrait Illustration
+    const cx = 128;
+    const cy = 200;
+
+    // Radiant halo rays behind portrait
+    for (let i = 0; i < 18; i++) {
+      const angle = (i / 18) * Math.PI * 2;
+      ctx.strokeStyle = i % 2 === 0 ? 'rgba(254, 240, 138, 0.22)' : 'rgba(234, 179, 8, 0.12)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(angle) * 110, cy + Math.sin(angle) * 110);
+      ctx.stroke();
+    }
+
+    // Oval portrait background vignette
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 10, 78, 95, 0, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Warm tropical sunset gradient inside oval
+    const portraitGrad = ctx.createLinearGradient(cx, cy - 90, cx, cy + 100);
+    portraitGrad.addColorStop(0, '#fbbf24');
+    portraitGrad.addColorStop(0.5, '#f43f5e');
+    portraitGrad.addColorStop(1, '#881337');
+    ctx.fillStyle = portraitGrad;
+    ctx.fillRect(cx - 85, cy - 95, 170, 200);
+
+    // Shoulders / torso
+    ctx.fillStyle = '#ca8a4b';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 85, 58, 40, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Neck
+    ctx.fillStyle = '#b47336';
+    ctx.fillRect(cx - 16, cy + 25, 32, 45);
+
+    // Cascading dark brunette hair (back volume)
+    ctx.fillStyle = '#18181b';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 8, 48, 52, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hair curls flowing over shoulders
+    ctx.beginPath();
+    ctx.ellipse(cx - 36, cy + 45, 18, 45, 0.2, 0, Math.PI * 2);
+    ctx.ellipse(cx + 36, cy + 45, 18, 45, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Face
+    ctx.fillStyle = '#ca8a4b';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 15, 30, 36, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Flowing front hair bangs
+    ctx.fillStyle = '#18181b';
+    ctx.beginPath();
+    ctx.moveTo(cx - 30, cy - 10);
+    ctx.quadraticCurveTo(cx, cy - 26, cx + 30, cy - 10);
+    ctx.quadraticCurveTo(cx + 20, cy + 10, cx + 28, cy + 35);
+    ctx.quadraticCurveTo(cx + 10, cy, cx, cy - 6);
+    ctx.quadraticCurveTo(cx - 10, cy, cx - 28, cy + 35);
+    ctx.quadraticCurveTo(cx - 20, cy + 10, cx - 30, cy - 10);
+    ctx.fill();
+
+    // Feline eyes
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath();
+    ctx.ellipse(cx - 12, cy + 12, 7, 3.5, -0.15, 0, Math.PI * 2);
+    ctx.ellipse(cx + 12, cy + 12, 7, 3.5, 0.15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye catchlights
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(cx - 11, cy + 11, 2, 0, Math.PI * 2);
+    ctx.arc(cx + 13, cy + 11, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Red lips
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 32, 9, 4.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#fecaca';
+    ctx.fillRect(cx - 2, cy + 31, 4, 1.5);
+
+    // Iconic Black & Gold Collar ("A Famosa Coleira da Luma")
+    ctx.fillStyle = '#111111';
+    ctx.fillRect(cx - 20, cy + 50, 40, 10);
+    ctx.fillStyle = '#facc15';
+    for (let s = -14; s <= 14; s += 7) {
+      ctx.beginPath();
+      ctx.arc(cx + s, cy + 55, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Golden carnival top
+    ctx.fillStyle = '#eab308';
+    ctx.beginPath();
+    ctx.ellipse(cx - 22, cy + 90, 22, 14, 0.2, 0, Math.PI * 2);
+    ctx.ellipse(cx + 22, cy + 90, 22, 14, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sparkles
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('✨', cx - 45, cy - 20);
+    ctx.fillText('✨', cx + 38, cy + 10);
+    ctx.fillText('⭐', cx + 42, cy - 35);
+
+    ctx.restore();
+
+    // Oval gold border around portrait
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 10, 78, 95, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 6. Slogan
+    ctx.fillStyle = '#fde047';
+    ctx.font = 'bold 12px "Arial Black", sans-serif';
+    ctx.fillText('"A PAIXÃO DA MECÂNICA BRASILEIRA"', 128, 322);
+
+    // 7. Workshop Calendar Grid (Calendário 1998)
+    const calBoxY = 332;
+    ctx.fillStyle = '#fefce8';
+    ctx.fillRect(16, calBoxY, 224, 128);
+
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(16, calBoxY, 224, 128);
+
+    // Calendar Header
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(16, calBoxY, 224, 22);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.font = '900 12px "Arial Black", sans-serif';
+    ctx.fillText('★ CALENDÁRIO OFICIAL 1998 ★', 128, calBoxY + 16);
+
+    // 12 Months Grid (4 cols x 3 rows)
+    const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+    const colW = 54;
+    const rowH = 34;
+    const startX = 18;
+    const startY = calBoxY + 24;
+
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 4; c++) {
+        const mIdx = r * 4 + c;
+        const mx = startX + c * colW;
+        const my = startY + r * rowH;
+
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 0.8;
+        ctx.strokeRect(mx, my, colW - 2, rowH - 2);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 8px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(months[mIdx], mx + (colW - 2) / 2, my + 9);
+
+        // Simulated day dots
+        for (let week = 0; week < 3; week++) {
+          const dy = my + 14 + week * 5;
+          ctx.fillStyle = '#ef4444'; // Sunday
+          ctx.fillRect(mx + 4, dy, 4, 3);
+
+          ctx.fillStyle = '#64748b'; // Weekdays
+          for (let d = 1; d < 6; d++) {
+            ctx.fillRect(mx + 4 + d * 7.5, dy, 4, 3);
+          }
+        }
+      }
+    }
+
+    // 8. Footer Sponsor & Phone
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fef08a';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('PNEUS • SUSPENSÃO • FREIOS • ALINHAMENTO', 128, 476);
+
+    ctx.fillStyle = '#86efac';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText('FONE: (011) 3975-BETO • PIRITUBA / SP', 128, 492);
+
+    // 9. Realistic Pushpins in 4 corners
+    [
+      [14, 14], [242, 14], [14, 498], [242, 498]
+    ].forEach(([px, py]) => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.beginPath();
+      ctx.arc(px + 1.5, py + 1.5, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      const pinGrad = ctx.createRadialGradient(px - 1, py - 1, 1, px, py, 4);
+      pinGrad.addColorStop(0, '#ffffff');
+      pinGrad.addColorStop(0.5, '#cbd5e1');
+      pinGrad.addColorStop(1, '#64748b');
+      ctx.fillStyle = pinGrad;
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 10. Grease smudge in corner
+    ctx.fillStyle = 'rgba(40, 30, 20, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(230, 485, 14, 8, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 
 
