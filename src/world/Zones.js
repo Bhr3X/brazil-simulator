@@ -34,8 +34,8 @@ export const WORLD_ZONES = [
   {
     id: 'POSTO_PIRITUBA',
     name: 'POSTO PIRITUBA 24H (BR / PETROBRAS)',
-    min: { x: -55.0, y: 0.0, z: 34.0 },
-    max: { x: -35.0, y: 7.0, z: 48.0 },
+    min: { x: -57.0, y: 0.0, z: 34.0 },
+    max: { x: -40.0, y: 7.0, z: 48.0 },
     openHour: 0.0,
     closeHour: 24.0, // 24 hours
     description: 'Posto de combustíveis 24h. Bebedouro gratuito, calibrador de pneu e loja de conveniência.'

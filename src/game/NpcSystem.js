@@ -1780,7 +1780,7 @@ export class NpcSystem {
         capColor: 0x15803d, // Green Petrobras cap
         stationary: true,
         defaultYaw: Math.PI / 2, // Facing +X
-        waypoints: [{ x: -38.0, y: 0.25, z: 41.5 }],
+        waypoints: [{ x: -43.0, y: 0.25, z: 41.5 }],
         interactable: false,
         animationMode: 'IDLE_HOST',
         baseY: 0.25

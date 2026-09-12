@@ -161,7 +161,7 @@ export const CITY_EMITTERS = [
   {
     id: 'POSTO_PIRITUBA',
     name: 'Posto Pirituba 24h (Rádio da Conveniência)',
-    x: -42.0,
+    x: -45.0,
     y: 1.2,
     z: 41.0,
     refDist: 3.5,

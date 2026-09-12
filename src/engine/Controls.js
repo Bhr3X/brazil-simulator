@@ -97,6 +97,7 @@ export class FirstPersonControls {
     this.bobTimer = 0;
     this.stepDistance = 0;
     this.lastFootstepDist = 0;
+    this.stuckWatchdogTime = 0;
 
     // 3rd Person Perspective & Player Character Avatar
     this.isThirdPerson = false;
@@ -639,6 +640,23 @@ export class FirstPersonControls {
     }
     const actualMoveDist = Math.hypot(resolved.x - this.position.x, resolved.z - this.position.z);
     this.position.copy(resolved);
+
+    // 5.4 Active Stuck-Watchdog Protection
+    // If movement input is active (isMoving) but displacement is clamped to zero near colliders,
+    // apply an unstick pushout along moveDir tangent or outward to prevent corner wedges.
+    if (isMoving && actualMoveDist < 0.001) {
+      this.stuckWatchdogTime = (this.stuckWatchdogTime || 0) + delta;
+      if (this.stuckWatchdogTime > 0.35) {
+        const nudgeX = (moveDir.x !== 0 ? moveDir.x : 1) * 0.08;
+        const nudgeZ = (moveDir.z !== 0 ? moveDir.z : 1) * 0.08;
+        const nudgeTarget = new THREE.Vector3(this.position.x + nudgeX, this.position.y, this.position.z + nudgeZ);
+        const unstickResolved = this.physics.resolveMovement(this.position, nudgeTarget, this.playerRadius, 0.45);
+        this.position.copy(unstickResolved);
+        this.stuckWatchdogTime = 0;
+      }
+    } else {
+      this.stuckWatchdogTime = 0;
+    }
 
     // 5.5 Check collision against painted illusion walls (Wile E. Coyote head bonk)
     if (this.illusionWalls && this.illusionWalls.length > 0 && isMoving) {

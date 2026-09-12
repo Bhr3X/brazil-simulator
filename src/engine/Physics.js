@@ -229,7 +229,7 @@ export class PhysicsEngine {
     return groundY;
   }
 
-  // Resolve player movement with wall sliding and step climbing
+  // Resolve player movement with wall sliding, step climbing, and multi-pass penetration pushout
   resolveMovement(oldPos, targetPos, playerRadius = 0.38, maxStepHeight = 0.5) {
     const resolved = targetPos.clone();
 
@@ -237,19 +237,69 @@ export class PhysicsEngine {
     resolved.x = Math.max(this.worldBounds.minX + playerRadius, Math.min(this.worldBounds.maxX - playerRadius, resolved.x));
     resolved.z = Math.max(this.worldBounds.minZ + playerRadius, Math.min(this.worldBounds.maxZ - playerRadius, resolved.z));
 
-    // 2. Check X axis movement against solid colliders
-    const testPosX = new THREE.Vector3(resolved.x, oldPos.y, oldPos.z);
-    if (this.collidesWithSolids(testPosX, playerRadius, maxStepHeight)) {
-      resolved.x = oldPos.x; // Block X movement
+    // 2. Multi-pass penetration resolution (up to 3 iterations for corners, wedges, and multi-collider pinches)
+    const playerMinY = oldPos.y + maxStepHeight;
+    const playerMaxY = oldPos.y + 1.7;
+
+    for (let iter = 0; iter < 3; iter++) {
+      let collided = false;
+
+      for (const box of this.colliders) {
+        if (box.type !== 'solid') continue;
+        if (playerMaxY < box.min.y || playerMinY > box.max.y) continue;
+
+        // Find closest point on horizontal AABB
+        const closestX = Math.max(box.min.x, Math.min(resolved.x, box.max.x));
+        const closestZ = Math.max(box.min.z, Math.min(resolved.z, box.max.z));
+
+        const dx = resolved.x - closestX;
+        const dz = resolved.z - closestZ;
+        const distSq = dx * dx + dz * dz;
+
+        // Case A: Player center is inside the solid box volume
+        if (resolved.x >= box.min.x && resolved.x <= box.max.x &&
+            resolved.z >= box.min.z && resolved.z <= box.max.z) {
+          const dLeft = resolved.x - box.min.x;
+          const dRight = box.max.x - resolved.x;
+          const dBack = resolved.z - box.min.z;
+          const dFront = box.max.z - resolved.z;
+          const minD = Math.min(dLeft, dRight, dBack, dFront);
+
+          if (minD === dLeft) {
+            resolved.x = box.min.x - playerRadius - 0.01;
+          } else if (minD === dRight) {
+            resolved.x = box.max.x + playerRadius + 0.01;
+          } else if (minD === dBack) {
+            resolved.z = box.min.z - playerRadius - 0.01;
+          } else {
+            resolved.z = box.max.z + playerRadius + 0.01;
+          }
+          collided = true;
+        }
+        // Case B: Player bounding circle overlaps the solid box surface within playerRadius
+        else if (distSq < playerRadius * playerRadius) {
+          const dist = Math.sqrt(distSq);
+          if (dist > 0.0001) {
+            const overlap = playerRadius - dist;
+            resolved.x += (dx / dist) * (overlap + 0.005);
+            resolved.z += (dz / dist) * (overlap + 0.005);
+          } else {
+            // Degenerate center match: push away from box center
+            const boxCx = (box.min.x + box.max.x) / 2;
+            const boxCz = (box.min.z + box.max.z) / 2;
+            const pushDirX = resolved.x >= boxCx ? 1 : -1;
+            const pushDirZ = resolved.z >= boxCz ? 1 : -1;
+            resolved.x += pushDirX * (playerRadius + 0.02);
+            resolved.z += pushDirZ * (playerRadius + 0.02);
+          }
+          collided = true;
+        }
+      }
+
+      if (!collided) break;
     }
 
-    // 3. Check Z axis movement against solid colliders
-    const testPosZ = new THREE.Vector3(resolved.x, oldPos.y, resolved.z);
-    if (this.collidesWithSolids(testPosZ, playerRadius, maxStepHeight)) {
-      resolved.z = oldPos.z; // Block Z movement
-    }
-
-    // 4. Ground height check (respecting current vertical position for multi-floor buildings)
+    // 3. Ground height check (respecting current vertical position for multi-floor buildings)
     const floorY = this.getGroundHeight(resolved.x, resolved.z, oldPos.y);
     if (resolved.y < floorY) {
       resolved.y = floorY;

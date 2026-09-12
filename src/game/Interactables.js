@@ -104,7 +104,7 @@ export class InteractableSystem {
         id: 'posto',
         name: 'POSTO PIRITUBA 24H',
         prompt: 'ABASTECER OU TOMAR ÁGUA NO BEBEDOURO',
-        position: new THREE.Vector3(-42.0, 1.2, 41.0),
+        position: new THREE.Vector3(-45.0, 1.2, 41.0),
         maxDist: 4.5,
         encounterId: 'POSTO_PIRITUBA',
         zoneId: 'POSTO_PIRITUBA'

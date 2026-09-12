@@ -4383,6 +4383,53 @@ async function runTestSuite(url) {
       throw new Error(`TEST 38 FAILED: Single Rolling Radio Stream & 23 Spatial Projection Nodes failed. ${JSON.stringify(radioArchitectureTested)}`);
     }
 
+    // TEST 39: Player Mobility & Unstuck Resolution at Posto Pirituba & Shop Corridors
+    const mobilityTested = await evaluate(`
+      (() => {
+        const controls = window.app.controls;
+        const physics = window.app.physics;
+        const radius = controls.playerRadius || 0.38;
+
+        // 1. Test static pushout from previously stuck coordinate (-40.0, 0.3, 38.0)
+        const stuckSpot = new THREE.Vector3(-40.0, 0.3, 38.0);
+        const resolvedStatic = physics.resolveMovement(stuckSpot, stuckSpot, radius, 0.45);
+        const staticPushedOut = resolvedStatic.x <= -40.25;
+
+        // 2. Test movement in 8 directions from (-40.0, 0.3, 38.0)
+        const directions = [
+          [1, 0], [-1, 0], [0, 1], [0, -1],
+          [0.707, 0.707], [-0.707, 0.707], [0.707, -0.707], [-0.707, -0.707]
+        ];
+
+        let stuckCount = 0;
+        for (const [dx, dz] of directions) {
+          const target = new THREE.Vector3(stuckSpot.x + dx * 0.1, stuckSpot.y, stuckSpot.z + dz * 0.1);
+          const resolved = physics.resolveMovement(stuckSpot, target, radius, 0.45);
+          const dist = Math.hypot(resolved.x - stuckSpot.x, resolved.z - stuckSpot.z);
+          if (dist < 0.001) {
+            stuckCount++;
+          }
+        }
+
+        // 3. Test open walkway between Posto Pirituba (X = -48) and Borracharia (X = -34)
+        // Midpoint at X = -41.5, Z = 38.0 should be clear of all solid collisions
+        const walkwayClear = !physics.collidesWithSolids(new THREE.Vector3(-41.5, 0.3, 38.0), radius, 0.45);
+
+        const ok = staticPushedOut && stuckCount === 0 && walkwayClear;
+        return {
+          ok,
+          staticPushedOut,
+          resolvedStatic: { x: resolvedStatic.x.toFixed(3), z: resolvedStatic.z.toFixed(3) },
+          stuckCount,
+          walkwayClear
+        };
+      })()
+    `);
+    console.log(`[TEST 39] Player Mobility & Unstuck Resolution at Posto Pirituba:`, mobilityTested);
+    if (!mobilityTested.ok) {
+      throw new Error(`TEST 39 FAILED: Player Mobility & Unstuck Resolution failed: ${JSON.stringify(mobilityTested)}`);
+    }
+
     // Check Console Errors
     console.log(`[CONSOLE ERRORS]: count = ${consoleErrors.length}`);
     if (consoleErrors.length > 0) {

@@ -3815,7 +3815,7 @@ export class CityBuilder {
     this.scene.add(radarSign);
 
     // 19.4 Gas Station Canopy ("Posto Pirituba 24H")
-    this.buildGasStation(-45, 0.25, 41);
+    this.buildGasStation(-48, 0.25, 41);
   }
 
   // 19.5 Gas Station Architecture & Fuel Pumps
@@ -3827,7 +3827,7 @@ export class CityBuilder {
     const canopyFasciaTex = this.textures.createGasStationCanopy();
     const canopyFasciaMat = new THREE.MeshBasicMaterial({ map: canopyFasciaTex });
 
-    const canopyGeo = new THREE.BoxGeometry(18, 1.2, 12);
+    const canopyGeo = new THREE.BoxGeometry(15, 1.2, 12);
     const canopyMaterials = [
       canopyFasciaMat, // Front
       canopyFasciaMat, // Back
@@ -3841,7 +3841,7 @@ export class CityBuilder {
     stationGroup.add(canopyMesh);
 
     // Under-canopy fluorescent illumination fixtures
-    for (let lx = -6; lx <= 6; lx += 4) {
+    for (let lx = -4.5; lx <= 4.5; lx += 4.5) {
       for (let lz = -3; lz <= 3; lz += 3) {
         const lightBox = new THREE.Mesh(
           new THREE.BoxGeometry(1.6, 0.08, 0.5),
@@ -3855,8 +3855,8 @@ export class CityBuilder {
     // 4 Support Concrete/Steel Pillars
     const pillarMat = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
     const pillarPositions = [
-      [-6, -3], [6, -3],
-      [-6, 3],  [6, 3]
+      [-5.0, -3], [5.0, -3],
+      [-5.0, 3],  [5.0, 3]
     ];
 
     pillarPositions.forEach(([px, pz]) => {
@@ -3877,26 +3877,26 @@ export class CityBuilder {
       stationGroup.add(pillar);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(x + px - 0.5, y, z + pz - 0.5),
-        new THREE.Vector3(x + px + 0.5, y + 4.8, z + pz + 0.5),
+        new THREE.Vector3(x + px - 0.38, y, z + pz - 0.38),
+        new THREE.Vector3(x + px + 0.38, y + 4.8, z + pz + 0.38),
         'solid'
       );
     });
 
     // Central Fuel Pump Concrete Island (Ilha de Bombas)
     const islandMat = new THREE.MeshLambertMaterial({ color: 0xd8d8d8 });
-    const island = new THREE.Mesh(new THREE.BoxGeometry(12, 0.25, 2.2), islandMat);
+    const island = new THREE.Mesh(new THREE.BoxGeometry(10.5, 0.25, 2.2), islandMat);
     island.position.set(0, 0.125, 0);
     stationGroup.add(island);
 
     this.physics.addBoxCollider(
-      new THREE.Vector3(x - 6.0, y, z - 1.1),
-      new THREE.Vector3(x + 6.0, y + 0.25, z + 1.1),
+      new THREE.Vector3(x - 5.25, y, z - 1.1),
+      new THREE.Vector3(x + 5.25, y + 0.25, z + 1.1),
       'walkable'
     );
 
     // 2 Modern Fuel Dispensers (Bombas de Gasolina / Etanol / Diesel)
-    [-3.0, 3.0].forEach(bx => {
+    [-2.6, 2.6].forEach(bx => {
       const pumpGroup = new THREE.Group();
 
       // Main dispenser cabinet
@@ -3939,8 +3939,8 @@ export class CityBuilder {
       stationGroup.add(pumpGroup);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(x + bx - 0.6, y, z - 0.4),
-        new THREE.Vector3(x + bx + 0.6, y + 2.0, z + 0.4),
+        new THREE.Vector3(x + bx - 0.55, y, z - 0.35),
+        new THREE.Vector3(x + bx + 0.55, y + 2.0, z + 0.35),
         'solid'
       );
     });
@@ -5201,7 +5201,7 @@ export class CityBuilder {
     // West Boundary (Northern Favela section)
     this.physics.addBoxCollider(
       new THREE.Vector3(-60.0, 0, -84.0),
-      new THREE.Vector3(-34.0, 10, 35.0),
+      new THREE.Vector3(-34.0, 10, -24.0),
       'solid'
     );
     // East Boundary (Northern section beside Bento Bicudo / Tower)

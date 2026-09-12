@@ -7948,7 +7948,7 @@ class PhysicsEngine {
     return groundY;
   }
 
-  // Resolve player movement with wall sliding and step climbing
+  // Resolve player movement with wall sliding, step climbing, and multi-pass penetration pushout
   resolveMovement(oldPos, targetPos, playerRadius = 0.38, maxStepHeight = 0.5) {
     const resolved = targetPos.clone();
 
@@ -7956,19 +7956,69 @@ class PhysicsEngine {
     resolved.x = Math.max(this.worldBounds.minX + playerRadius, Math.min(this.worldBounds.maxX - playerRadius, resolved.x));
     resolved.z = Math.max(this.worldBounds.minZ + playerRadius, Math.min(this.worldBounds.maxZ - playerRadius, resolved.z));
 
-    // 2. Check X axis movement against solid colliders
-    const testPosX = new THREE.Vector3(resolved.x, oldPos.y, oldPos.z);
-    if (this.collidesWithSolids(testPosX, playerRadius, maxStepHeight)) {
-      resolved.x = oldPos.x; // Block X movement
+    // 2. Multi-pass penetration resolution (up to 3 iterations for corners, wedges, and multi-collider pinches)
+    const playerMinY = oldPos.y + maxStepHeight;
+    const playerMaxY = oldPos.y + 1.7;
+
+    for (let iter = 0; iter < 3; iter++) {
+      let collided = false;
+
+      for (const box of this.colliders) {
+        if (box.type !== 'solid') continue;
+        if (playerMaxY < box.min.y || playerMinY > box.max.y) continue;
+
+        // Find closest point on horizontal AABB
+        const closestX = Math.max(box.min.x, Math.min(resolved.x, box.max.x));
+        const closestZ = Math.max(box.min.z, Math.min(resolved.z, box.max.z));
+
+        const dx = resolved.x - closestX;
+        const dz = resolved.z - closestZ;
+        const distSq = dx * dx + dz * dz;
+
+        // Case A: Player center is inside the solid box volume
+        if (resolved.x >= box.min.x && resolved.x <= box.max.x &&
+            resolved.z >= box.min.z && resolved.z <= box.max.z) {
+          const dLeft = resolved.x - box.min.x;
+          const dRight = box.max.x - resolved.x;
+          const dBack = resolved.z - box.min.z;
+          const dFront = box.max.z - resolved.z;
+          const minD = Math.min(dLeft, dRight, dBack, dFront);
+
+          if (minD === dLeft) {
+            resolved.x = box.min.x - playerRadius - 0.01;
+          } else if (minD === dRight) {
+            resolved.x = box.max.x + playerRadius + 0.01;
+          } else if (minD === dBack) {
+            resolved.z = box.min.z - playerRadius - 0.01;
+          } else {
+            resolved.z = box.max.z + playerRadius + 0.01;
+          }
+          collided = true;
+        }
+        // Case B: Player bounding circle overlaps the solid box surface within playerRadius
+        else if (distSq < playerRadius * playerRadius) {
+          const dist = Math.sqrt(distSq);
+          if (dist > 0.0001) {
+            const overlap = playerRadius - dist;
+            resolved.x += (dx / dist) * (overlap + 0.005);
+            resolved.z += (dz / dist) * (overlap + 0.005);
+          } else {
+            // Degenerate center match: push away from box center
+            const boxCx = (box.min.x + box.max.x) / 2;
+            const boxCz = (box.min.z + box.max.z) / 2;
+            const pushDirX = resolved.x >= boxCx ? 1 : -1;
+            const pushDirZ = resolved.z >= boxCz ? 1 : -1;
+            resolved.x += pushDirX * (playerRadius + 0.02);
+            resolved.z += pushDirZ * (playerRadius + 0.02);
+          }
+          collided = true;
+        }
+      }
+
+      if (!collided) break;
     }
 
-    // 3. Check Z axis movement against solid colliders
-    const testPosZ = new THREE.Vector3(resolved.x, oldPos.y, resolved.z);
-    if (this.collidesWithSolids(testPosZ, playerRadius, maxStepHeight)) {
-      resolved.z = oldPos.z; // Block Z movement
-    }
-
-    // 4. Ground height check (respecting current vertical position for multi-floor buildings)
+    // 3. Ground height check (respecting current vertical position for multi-floor buildings)
     const floorY = this.getGroundHeight(resolved.x, resolved.z, oldPos.y);
     if (resolved.y < floorY) {
       resolved.y = floorY;
@@ -8168,7 +8218,7 @@ const CITY_EMITTERS = [
   {
     id: 'POSTO_PIRITUBA',
     name: 'Posto Pirituba 24h (Rádio da Conveniência)',
-    x: -42.0,
+    x: -45.0,
     y: 1.2,
     z: 41.0,
     refDist: 3.5,
@@ -11046,8 +11096,8 @@ const WORLD_ZONES = [
   {
     id: 'POSTO_PIRITUBA',
     name: 'POSTO PIRITUBA 24H (BR / PETROBRAS)',
-    min: { x: -55.0, y: 0.0, z: 34.0 },
-    max: { x: -35.0, y: 7.0, z: 48.0 },
+    min: { x: -57.0, y: 0.0, z: 34.0 },
+    max: { x: -40.0, y: 7.0, z: 48.0 },
     openHour: 0.0,
     closeHour: 24.0, // 24 hours
     description: 'Posto de combustíveis 24h. Bebedouro gratuito, calibrador de pneu e loja de conveniência.'
@@ -12264,6 +12314,7 @@ class FirstPersonControls {
     this.bobTimer = 0;
     this.stepDistance = 0;
     this.lastFootstepDist = 0;
+    this.stuckWatchdogTime = 0;
 
     // 3rd Person Perspective & Player Character Avatar
     this.isThirdPerson = false;
@@ -12806,6 +12857,23 @@ class FirstPersonControls {
     }
     const actualMoveDist = Math.hypot(resolved.x - this.position.x, resolved.z - this.position.z);
     this.position.copy(resolved);
+
+    // 5.4 Active Stuck-Watchdog Protection
+    // If movement input is active (isMoving) but displacement is clamped to zero near colliders,
+    // apply an unstick pushout along moveDir tangent or outward to prevent corner wedges.
+    if (isMoving && actualMoveDist < 0.001) {
+      this.stuckWatchdogTime = (this.stuckWatchdogTime || 0) + delta;
+      if (this.stuckWatchdogTime > 0.35) {
+        const nudgeX = (moveDir.x !== 0 ? moveDir.x : 1) * 0.08;
+        const nudgeZ = (moveDir.z !== 0 ? moveDir.z : 1) * 0.08;
+        const nudgeTarget = new THREE.Vector3(this.position.x + nudgeX, this.position.y, this.position.z + nudgeZ);
+        const unstickResolved = this.physics.resolveMovement(this.position, nudgeTarget, this.playerRadius, 0.45);
+        this.position.copy(unstickResolved);
+        this.stuckWatchdogTime = 0;
+      }
+    } else {
+      this.stuckWatchdogTime = 0;
+    }
 
     // 5.5 Check collision against painted illusion walls (Wile E. Coyote head bonk)
     if (this.illusionWalls && this.illusionWalls.length > 0 && isMoving) {
@@ -19038,7 +19106,7 @@ class CityBuilder {
     this.scene.add(radarSign);
 
     // 19.4 Gas Station Canopy ("Posto Pirituba 24H")
-    this.buildGasStation(-45, 0.25, 41);
+    this.buildGasStation(-48, 0.25, 41);
   }
 
   // 19.5 Gas Station Architecture & Fuel Pumps
@@ -19050,7 +19118,7 @@ class CityBuilder {
     const canopyFasciaTex = this.textures.createGasStationCanopy();
     const canopyFasciaMat = new THREE.MeshBasicMaterial({ map: canopyFasciaTex });
 
-    const canopyGeo = new THREE.BoxGeometry(18, 1.2, 12);
+    const canopyGeo = new THREE.BoxGeometry(15, 1.2, 12);
     const canopyMaterials = [
       canopyFasciaMat, // Front
       canopyFasciaMat, // Back
@@ -19064,7 +19132,7 @@ class CityBuilder {
     stationGroup.add(canopyMesh);
 
     // Under-canopy fluorescent illumination fixtures
-    for (let lx = -6; lx <= 6; lx += 4) {
+    for (let lx = -4.5; lx <= 4.5; lx += 4.5) {
       for (let lz = -3; lz <= 3; lz += 3) {
         const lightBox = new THREE.Mesh(
           new THREE.BoxGeometry(1.6, 0.08, 0.5),
@@ -19078,8 +19146,8 @@ class CityBuilder {
     // 4 Support Concrete/Steel Pillars
     const pillarMat = new THREE.MeshLambertMaterial({ color: 0xeeeeee });
     const pillarPositions = [
-      [-6, -3], [6, -3],
-      [-6, 3],  [6, 3]
+      [-5.0, -3], [5.0, -3],
+      [-5.0, 3],  [5.0, 3]
     ];
 
     pillarPositions.forEach(([px, pz]) => {
@@ -19100,26 +19168,26 @@ class CityBuilder {
       stationGroup.add(pillar);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(x + px - 0.5, y, z + pz - 0.5),
-        new THREE.Vector3(x + px + 0.5, y + 4.8, z + pz + 0.5),
+        new THREE.Vector3(x + px - 0.38, y, z + pz - 0.38),
+        new THREE.Vector3(x + px + 0.38, y + 4.8, z + pz + 0.38),
         'solid'
       );
     });
 
     // Central Fuel Pump Concrete Island (Ilha de Bombas)
     const islandMat = new THREE.MeshLambertMaterial({ color: 0xd8d8d8 });
-    const island = new THREE.Mesh(new THREE.BoxGeometry(12, 0.25, 2.2), islandMat);
+    const island = new THREE.Mesh(new THREE.BoxGeometry(10.5, 0.25, 2.2), islandMat);
     island.position.set(0, 0.125, 0);
     stationGroup.add(island);
 
     this.physics.addBoxCollider(
-      new THREE.Vector3(x - 6.0, y, z - 1.1),
-      new THREE.Vector3(x + 6.0, y + 0.25, z + 1.1),
+      new THREE.Vector3(x - 5.25, y, z - 1.1),
+      new THREE.Vector3(x + 5.25, y + 0.25, z + 1.1),
       'walkable'
     );
 
     // 2 Modern Fuel Dispensers (Bombas de Gasolina / Etanol / Diesel)
-    [-3.0, 3.0].forEach(bx => {
+    [-2.6, 2.6].forEach(bx => {
       const pumpGroup = new THREE.Group();
 
       // Main dispenser cabinet
@@ -19162,8 +19230,8 @@ class CityBuilder {
       stationGroup.add(pumpGroup);
 
       this.physics.addBoxCollider(
-        new THREE.Vector3(x + bx - 0.6, y, z - 0.4),
-        new THREE.Vector3(x + bx + 0.6, y + 2.0, z + 0.4),
+        new THREE.Vector3(x + bx - 0.55, y, z - 0.35),
+        new THREE.Vector3(x + bx + 0.55, y + 2.0, z + 0.35),
         'solid'
       );
     });
@@ -20424,7 +20492,7 @@ class CityBuilder {
     // West Boundary (Northern Favela section)
     this.physics.addBoxCollider(
       new THREE.Vector3(-60.0, 0, -84.0),
-      new THREE.Vector3(-34.0, 10, 35.0),
+      new THREE.Vector3(-34.0, 10, -24.0),
       'solid'
     );
     // East Boundary (Northern section beside Bento Bicudo / Tower)
@@ -32750,7 +32818,7 @@ class NpcSystem {
         capColor: 0x15803d, // Green Petrobras cap
         stationary: true,
         defaultYaw: Math.PI / 2, // Facing +X
-        waypoints: [{ x: -38.0, y: 0.25, z: 41.5 }],
+        waypoints: [{ x: -43.0, y: 0.25, z: 41.5 }],
         interactable: false,
         animationMode: 'IDLE_HOST',
         baseY: 0.25
@@ -33506,7 +33574,7 @@ class InteractableSystem {
         id: 'posto',
         name: 'POSTO PIRITUBA 24H',
         prompt: 'ABASTECER OU TOMAR ÁGUA NO BEBEDOURO',
-        position: new THREE.Vector3(-42.0, 1.2, 41.0),
+        position: new THREE.Vector3(-45.0, 1.2, 41.0),
         maxDist: 4.5,
         encounterId: 'POSTO_PIRITUBA',
         zoneId: 'POSTO_PIRITUBA'
