@@ -6146,6 +6146,159 @@ class TextureGenerator {
     return texture;
   }
 
+  // Authentic São Paulo Municipal Construction Hoarding / Tapume Metálico da Prefeitura
+  createTapumePrefeitura(repeatX = 4, repeatY = 1) {
+    const key = `tapume_prefeitura_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Deep municipal navy blue base (padrão oficial PMSP)
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Vertical ribbed steel panel seams with 3D beveling
+    const panelW = 64;
+    for (let x = 0; x < 512; x += panelW) {
+      // Dark seam groove
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x, 0, 4, 512);
+
+      // Light highlight edge
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(x + 4, 0, 2, 512);
+
+      // Steel corrugated center rib
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillRect(x + 24, 0, 16, 512);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.fillRect(x + 40, 0, 8, 512);
+
+      // Rivets along the panel edges
+      for (let y = 16; y < 512; y += 48) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(x + 8, y, 2.5, 0, Math.PI * 2);
+        ctx.arc(x + panelW - 8, y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(x + 8.5, y + 0.5, 1.5, 0, Math.PI * 2);
+        ctx.arc(x + panelW - 7.5, y + 0.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Top hazard chevron stripe (32px)
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, 512, 32);
+    ctx.fillStyle = '#f59e0b';
+    for (let x = -32; x < 544; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 32);
+      ctx.lineTo(x + 16, 32);
+      ctx.lineTo(x + 32, 0);
+      ctx.lineTo(x + 16, 0);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Bottom hazard chevron stripe (40px)
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 472, 512, 40);
+    ctx.fillStyle = '#f59e0b';
+    for (let x = -40; x < 544; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 512);
+      ctx.lineTo(x + 20, 512);
+      ctx.lineTo(x + 40, 472);
+      ctx.lineTo(x + 20, 472);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Official Municipal Stencils across the panels
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+    ctx.font = '900 18px "Arial Black", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PREFEITURA DE SÃO PAULO', 256, 80);
+
+    ctx.font = 'bold 12px Arial, sans-serif';
+    ctx.fillStyle = 'rgba(254, 240, 138, 0.95)';
+    ctx.fillText('SECRETARIA MUNICIPAL DE INFRAESTRUTURA URBANA E OBRAS', 256, 102);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(32, 118, 448, 80);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 16px "Arial Black", Arial, sans-serif';
+    ctx.fillText('🚧 ÁREA RESTRITA • HOMENS TRABALHANDO 🚧', 256, 148);
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText('USO OBRIGATÓRIO DE CAPACETE • ENTRADA PROIBIDA A ESTRANHOS', 256, 175);
+
+    // Weathering and subtle grit
+    for (let i = 0; i < 1800; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+      ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Heavy Concrete New Jersey Traffic Barrier Texture (Barreira de Concreto Zebrada CET)
+  createBarreiraNewJersey(repeatX = 1, repeatY = 1) {
+    const key = `barreira_new_jersey_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Concrete base with surface texture
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Concrete speckling & pores
+    for (let i = 0; i < 3000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#cbd5e1' : '#64748b';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+    }
+
+    // Bold 45° hazard warning diagonal stripes in center
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 40, 256, 140);
+    ctx.fillStyle = '#facc15'; // Safety yellow
+    const stripeW = 36;
+    for (let x = -140; x < 256 + 140; x += stripeW * 2) {
+      ctx.beginPath();
+      ctx.moveTo(x, 180);
+      ctx.lineTo(x + stripeW, 180);
+      ctx.lineTo(x + stripeW + 140, 40);
+      ctx.lineTo(x + 140, 40);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Lower skirt tire scuffs and road grime
+    const grimeGrad = ctx.createLinearGradient(0, 180, 0, 256);
+    grimeGrad.addColorStop(0, 'rgba(15, 23, 42, 0)');
+    grimeGrad.addColorStop(0.6, 'rgba(30, 41, 59, 0.45)');
+    grimeGrad.addColorStop(1, 'rgba(15, 23, 42, 0.85)');
+    ctx.fillStyle = grimeGrad;
+    ctx.fillRect(0, 180, 256, 76);
+
+    // Horizontal seam lines and chamfer shadow
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(0, 38, 256, 4);
+    ctx.fillRect(0, 180, 256, 4);
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
   // Orange safety plastic netting / tela fachadeira
   createTelaLaranjaMesh() {
     const key = 'tela_laranja_mesh';
@@ -20882,20 +21035,15 @@ class CityBuilder {
     const concreteMat = new THREE.MeshLambertMaterial({
       map: this.textures.createReboco('#475569', 4, 4)
     });
-    const tapumeMat = new THREE.MeshLambertMaterial({
-      map: this.textures.createTapumeMadeira()
-    });
-    const telaMat = new THREE.MeshBasicMaterial({
-      map: this.textures.createTelaLaranjaMesh(),
-      transparent: true,
-      side: THREE.DoubleSide
-    });
     const sandMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
     const gravelMat = new THREE.MeshLambertMaterial({ color: 0x64748b });
     const pipeMat = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
     const steelMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
     const coneMat = new THREE.MeshLambertMaterial({ color: 0xea580c });
     const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const barrierBaseMat = new THREE.MeshLambertMaterial({ color: 0x64748b });
+    const barrierTexture = this.textures.createBarreiraNewJersey(1, 1);
+    const barrierMat = new THREE.MeshLambertMaterial({ map: barrierTexture });
 
     // Helper: Build huge official construction panel
     const buildHugeObrasSign = (x, y, z, rotY) => {
@@ -20939,6 +21087,121 @@ class CityBuilder {
         pos: new THREE.Vector3(x, y, z)
       });
       return signGroup;
+    };
+
+    // Helper: Modular 3D Concrete New Jersey Traffic Barrier with 45° CET hazard stripes
+    const buildNewJerseyBarrier = (bx, by, bz, rotY = 0, length = 2.4) => {
+      const bGroup = new THREE.Group();
+      bGroup.name = 'newJerseyBarrier';
+
+      // Base: wide concrete footing (0.58m wide, 0.32m high)
+      const baseGeo = new THREE.BoxGeometry(length - 0.06, 0.32, 0.58);
+      const baseMesh = new THREE.Mesh(baseGeo, barrierBaseMat);
+      baseMesh.position.set(0, 0.16, 0);
+      bGroup.add(baseMesh);
+
+      // Upper stem: tapered profile with yellow/black hazard chevron texture (0.24m wide, 0.65m high)
+      const stemGeo = new THREE.BoxGeometry(length - 0.06, 0.65, 0.24);
+      const stemMesh = new THREE.Mesh(stemGeo, barrierMat);
+      stemMesh.position.set(0, 0.32 + 0.325, 0);
+      bGroup.add(stemMesh);
+
+      // Top rounded cap beam (0.18m wide, 0.08m high)
+      const capGeo = new THREE.BoxGeometry(length - 0.06, 0.08, 0.18);
+      const capMesh = new THREE.Mesh(capGeo, barrierBaseMat);
+      capMesh.position.set(0, 0.32 + 0.65 + 0.04, 0);
+      bGroup.add(capMesh);
+
+      bGroup.position.set(bx, by, bz);
+      bGroup.rotation.y = rotY;
+      boundaryGroup.add(bGroup);
+      return bGroup;
+    };
+
+    // Helper: Continuous row of New Jersey barriers spanning a roadway closure
+    const buildBarrierRun = (startX, startZ, endX, endZ, y = 0, segLength = 2.4) => {
+      const dx = endX - startX;
+      const dz = endZ - startZ;
+      const totalDist = Math.hypot(dx, dz);
+      if (totalDist < 0.5) return;
+      const count = Math.max(1, Math.round(totalDist / segLength));
+      const rotY = Math.atan2(dx, dz) + Math.PI / 2;
+      for (let i = 0; i < count; i++) {
+        const t = (i + 0.5) / count;
+        const bx = startX + dx * t;
+        const bz = startZ + dz * t;
+        buildNewJerseyBarrier(bx, y, bz, rotY, segLength);
+      }
+    };
+
+    // Helper: Solid 3D Municipal Tapume Hoarding Wall (Corrugated steel, PMSP stencils, steel posts, concrete backing)
+    const buildHoardingWall = (cx, cy, cz, width, height = 3.8, rotY = 0, backingHeight = 11.0) => {
+      const hGroup = new THREE.Group();
+      hGroup.name = 'municipalHoardingWall';
+
+      const repeatX = Math.max(2, Math.round(width / 4.8));
+      const tapumePrefeituraMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createTapumePrefeitura(repeatX, 1)
+      });
+
+      // 1. Concrete foundation curb (0.6m wide, 0.4m high)
+      const curb = new THREE.Mesh(
+        new THREE.BoxGeometry(width + 0.4, 0.4, 0.6),
+        concreteMat
+      );
+      curb.position.set(0, 0.2, -0.15);
+      hGroup.add(curb);
+
+      // 2. Corrugated steel municipal tapume panel (height 3.8m, thickness 0.12m)
+      // Front face (+Z) has tapumePrefeituraMat, other faces steelMat
+      const panelMaterials = [
+        steelMat,            // +X
+        steelMat,            // -X
+        steelMat,            // +Y
+        steelMat,            // -Y
+        tapumePrefeituraMat, // +Z (facing player)
+        steelMat             // -Z
+      ];
+      const panel = new THREE.Mesh(
+        new THREE.BoxGeometry(width, height, 0.12),
+        panelMaterials
+      );
+      panel.position.set(0, height / 2, 0);
+      hGroup.add(panel);
+
+      // 3. Top coping / steel cap beam
+      const cap = new THREE.Mesh(
+        new THREE.BoxGeometry(width + 0.2, 0.16, 0.22),
+        steelMat
+      );
+      cap.position.set(0, height + 0.08, 0);
+      hGroup.add(cap);
+
+      // 4. Vertical steel I-beam posts every ~3.6m
+      const postSpacing = 3.6;
+      const numPosts = Math.ceil(width / postSpacing);
+      for (let i = 0; i <= numPosts; i++) {
+        const px = -width / 2 + i * (width / numPosts);
+        const post = new THREE.Mesh(
+          new THREE.BoxGeometry(0.16, height + 0.2, 0.2),
+          steelMat
+        );
+        post.position.set(px, (height + 0.2) / 2, 0.05);
+        hGroup.add(post);
+      }
+
+      // 5. Solid concrete retaining wall behind hoarding to seal map boundary against sky leaks
+      const backWall = new THREE.Mesh(
+        new THREE.BoxGeometry(width, backingHeight, 1.2),
+        concreteMat
+      );
+      backWall.position.set(0, backingHeight / 2, -0.7);
+      hGroup.add(backWall);
+
+      hGroup.position.set(cx, cy, cz);
+      hGroup.rotation.y = rotY;
+      boundaryGroup.add(hGroup);
+      return hGroup;
     };
 
     // Helper: Traffic cone
@@ -21001,18 +21264,9 @@ class CityBuilder {
     // 1. WEST EDGAR FACÓ (X = -60.0, Z = 20.0, Y = 0)
     // -----------------------------------------------------------------------
     {
-      const wallW = 38.0, wallH = 11.0;
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(wallW, wallH),
-        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(true) })
-      );
-      plane.rotation.y = Math.PI / 2; // Faces +X (towards player coming west)
-      plane.position.set(-59.4, wallH / 2, 20.0);
-      boundaryGroup.add(plane);
-
-      const back = new THREE.Mesh(new THREE.BoxGeometry(1.6, wallH, wallW), concreteMat);
-      back.position.set(-60.2, wallH / 2, 20.0);
-      boundaryGroup.add(back);
+      const wallW = 38.0;
+      buildHoardingWall(-59.4, 0, 20.0, wallW, 3.8, Math.PI / 2, 12.0);
+      buildBarrierRun(-58.0, 7.0, -58.0, 33.0, 0, 2.4);
 
       this.physics.addBoxCollider(
         new THREE.Vector3(-61.2, 0, 1.0),
@@ -21022,26 +21276,13 @@ class CityBuilder {
 
       this.illusionWalls.push({
         id: 'west_edgar_facco',
-        name: 'Muro Pintado Edgar Facó (Oeste)',
+        name: 'Muro Obras Edgar Facó (Oeste)',
         planePos: new THREE.Vector3(-59.4, 0, 20.0),
         normal: new THREE.Vector3(1, 0, 0),
         bounds: { minX: -61.2, maxX: -59.2, minZ: 1.0, maxZ: 39.0, minY: 0, maxY: 12.0 }
       });
 
       buildHugeObrasSign(-55.5, 6.2, 20.0, Math.PI / 2);
-
-      const tapumeN = new THREE.Mesh(new THREE.BoxGeometry(10.0, 2.6, 0.2), tapumeMat);
-      tapumeN.position.set(-54.5, 1.3, 4.8);
-      boundaryGroup.add(tapumeN);
-
-      const tapumeS = new THREE.Mesh(new THREE.BoxGeometry(10.0, 2.6, 0.2), tapumeMat);
-      tapumeS.position.set(-54.5, 1.3, 35.2);
-      boundaryGroup.add(tapumeS);
-
-      const net = new THREE.Mesh(new THREE.PlaneGeometry(16.0, 1.4), telaMat);
-      net.rotation.y = Math.PI / 2;
-      net.position.set(-57.8, 0.7, 20.0);
-      boundaryGroup.add(net);
 
       addCone(-56.8, 0, 12.0);
       addCone(-56.8, 0, 16.0);
@@ -21057,18 +21298,9 @@ class CityBuilder {
     // 2. EAST EDGAR FACÓ (X = 165.0, Z = 20.0, Y = 0)
     // -----------------------------------------------------------------------
     {
-      const wallW = 38.0, wallH = 11.0;
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(wallW, wallH),
-        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
-      );
-      plane.rotation.y = -Math.PI / 2; // Faces -X (towards player coming east)
-      plane.position.set(164.8, wallH / 2, 20.0);
-      boundaryGroup.add(plane);
-
-      const back = new THREE.Mesh(new THREE.BoxGeometry(1.6, wallH, wallW), concreteMat);
-      back.position.set(165.6, wallH / 2, 20.0);
-      boundaryGroup.add(back);
+      const wallW = 38.0;
+      buildHoardingWall(164.8, 0, 20.0, wallW, 3.8, -Math.PI / 2, 12.0);
+      buildBarrierRun(163.4, 7.0, 163.4, 33.0, 0, 2.4);
 
       this.physics.addBoxCollider(
         new THREE.Vector3(164.5, 0, 1.0),
@@ -21078,17 +21310,13 @@ class CityBuilder {
 
       this.illusionWalls.push({
         id: 'east_edgar_facco',
-        name: 'Muro Pintado Edgar Facó (Leste)',
+        name: 'Muro Obras Edgar Facó (Leste)',
         planePos: new THREE.Vector3(164.8, 0, 20.0),
         normal: new THREE.Vector3(-1, 0, 0),
         bounds: { minX: 164.5, maxX: 166.5, minZ: 1.0, maxZ: 39.0, minY: 0, maxY: 12.0 }
       });
 
       buildHugeObrasSign(160.5, 6.2, 20.0, -Math.PI / 2);
-
-      const tapumeN = new THREE.Mesh(new THREE.BoxGeometry(8.0, 2.6, 0.2), tapumeMat);
-      tapumeN.position.set(160.5, 1.3, 4.8);
-      boundaryGroup.add(tapumeN);
 
       addCone(161.8, 0, 12.0);
       addCone(161.8, 0, 16.0);
@@ -21103,17 +21331,9 @@ class CityBuilder {
     // 3. NORTH PETRÔNIO PORTELA (X = 145.0, Z = -18.0, Y = 0)
     // -----------------------------------------------------------------------
     {
-      const wallW = 22.0, wallH = 9.0;
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(wallW, wallH),
-        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(true) })
-      );
-      plane.position.set(145.0, wallH / 2, -17.8);
-      boundaryGroup.add(plane);
-
-      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(145.0, wallH / 2, -18.6);
-      boundaryGroup.add(back);
+      const wallW = 22.0;
+      buildHoardingWall(145.0, 0, -17.8, wallW, 3.8, 0, 11.0);
+      buildBarrierRun(137.0, -16.4, 153.0, -16.4, 0, 2.4);
 
       this.physics.addBoxCollider(
         new THREE.Vector3(134.0, 0, -19.5),
@@ -21123,7 +21343,7 @@ class CityBuilder {
 
       this.illusionWalls.push({
         id: 'north_petronio',
-        name: 'Muro Pintado Petrônio Portela (Norte)',
+        name: 'Muro Obras Petrônio Portela (Norte)',
         planePos: new THREE.Vector3(145.0, 0, -17.8),
         normal: new THREE.Vector3(0, 0, 1),
         bounds: { minX: 134.0, maxX: 156.0, minZ: -19.5, maxZ: -17.5, minY: 0, maxY: 11.0 }
@@ -21142,18 +21362,9 @@ class CityBuilder {
     // 4. SOUTH PETRÔNIO PORTELA (X = 145.0, Z = 330.0, Y = 0)
     // -----------------------------------------------------------------------
     {
-      const wallW = 22.0, wallH = 9.0;
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(wallW, wallH),
-        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilAvenue(false) })
-      );
-      plane.rotation.y = Math.PI; // Faces -Z (towards player coming south)
-      plane.position.set(145.0, wallH / 2, 329.8);
-      boundaryGroup.add(plane);
-
-      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(145.0, wallH / 2, 330.6);
-      boundaryGroup.add(back);
+      const wallW = 22.0;
+      buildHoardingWall(145.0, 0, 329.8, wallW, 3.8, Math.PI, 11.0);
+      buildBarrierRun(137.0, 328.4, 153.0, 328.4, 0, 2.4);
 
       this.physics.addBoxCollider(
         new THREE.Vector3(134.0, 0, 329.5),
@@ -21163,7 +21374,7 @@ class CityBuilder {
 
       this.illusionWalls.push({
         id: 'south_petronio',
-        name: 'Muro Pintado Petrônio Portela (Sul)',
+        name: 'Muro Obras Petrônio Portela (Sul)',
         planePos: new THREE.Vector3(145.0, 0, 329.8),
         normal: new THREE.Vector3(0, 0, -1),
         bounds: { minX: 134.0, maxX: 156.0, minZ: 329.5, maxZ: 331.5, minY: 0, maxY: 11.0 }
@@ -21175,24 +21386,16 @@ class CityBuilder {
       addCone(145.0, 0, 327.0);
       addCone(150.0, 0, 327.0);
       addHeap(138.0, 0, 326.5, 2.5, 1.3, true);
+      addPipes(152.0, 0, 326.5, Math.PI);
     }
 
     // -----------------------------------------------------------------------
     // 5. SOUTH LARGO DA MATRIZ (Z = 235.0, X = 1.5, Y = 8.5)
     // -----------------------------------------------------------------------
     {
-      const wallW = 36.0, wallH = 9.0;
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(wallW, wallH),
-        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilColonialStreet() })
-      );
-      plane.rotation.y = Math.PI; // Faces -Z (towards player walking south through plaza)
-      plane.position.set(1.5, 8.5 + wallH / 2, 234.8);
-      boundaryGroup.add(plane);
-
-      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(1.5, 8.5 + wallH / 2, 235.6);
-      boundaryGroup.add(back);
+      const wallW = 36.0;
+      buildHoardingWall(1.5, 8.5, 234.8, wallW, 3.8, Math.PI, 11.0);
+      buildBarrierRun(-12.0, 233.4, 15.0, 233.4, 8.5, 2.4);
 
       this.physics.addBoxCollider(
         new THREE.Vector3(-16.5, 8.5, 234.5),
@@ -21202,17 +21405,13 @@ class CityBuilder {
 
       this.illusionWalls.push({
         id: 'south_matriz',
-        name: 'Muro Pintado Largo da Matriz (Sul)',
+        name: 'Muro Obras Largo da Matriz (Sul)',
         planePos: new THREE.Vector3(1.5, 8.5, 234.8),
         normal: new THREE.Vector3(0, 0, -1),
         bounds: { minX: -16.5, maxX: 19.5, minZ: 234.5, maxZ: 236.5, minY: 8.5, maxY: 19.5 }
       });
 
       buildHugeObrasSign(1.5, 8.5 + 5.5, 230.5, Math.PI);
-
-      const tapumeM = new THREE.Mesh(new THREE.BoxGeometry(12.0, 2.8, 0.2), tapumeMat);
-      tapumeM.position.set(-8.0, 8.5 + 1.4, 232.0);
-      boundaryGroup.add(tapumeM);
 
       addScaffold(12.0, 8.5, 232.0);
       addCone(-3.0, 8.5, 231.5);
@@ -21225,17 +21424,9 @@ class CityBuilder {
     // 6. NORTH FAVELA CAMPINHO (Z = -116.0, X = 0.0, Y = 9.5)
     // -----------------------------------------------------------------------
     {
-      const wallW = 44.0, wallH = 7.5;
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(wallW, wallH),
-        new THREE.MeshBasicMaterial({ map: this.textures.createTrompeLoeilFavelaValley() })
-      );
-      plane.position.set(0.0, 9.5 + wallH / 2, -115.8);
-      boundaryGroup.add(plane);
-
-      const back = new THREE.Mesh(new THREE.BoxGeometry(wallW, wallH, 1.5), concreteMat);
-      back.position.set(0.0, 9.5 + wallH / 2, -116.6);
-      boundaryGroup.add(back);
+      const wallW = 44.0;
+      buildHoardingWall(0.0, 9.5, -115.8, wallW, 3.8, 0, 8.5);
+      buildBarrierRun(-16.0, -114.4, 16.0, -114.4, 9.5, 2.4);
 
       this.physics.addBoxCollider(
         new THREE.Vector3(-22.5, 9.5, -117.2),
@@ -21245,7 +21436,7 @@ class CityBuilder {
 
       this.illusionWalls.push({
         id: 'north_campinho',
-        name: 'Muro Pintado Favela Campinho (Norte)',
+        name: 'Muro Obras Favela Campinho (Norte)',
         planePos: new THREE.Vector3(0.0, 9.5, -115.8),
         normal: new THREE.Vector3(0, 0, 1),
         bounds: { minX: -22.5, maxX: 22.5, minZ: -117.2, maxZ: -115.2, minY: 9.5, maxY: 18.0 }

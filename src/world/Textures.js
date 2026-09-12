@@ -2824,6 +2824,159 @@ export class TextureGenerator {
     return texture;
   }
 
+  // Authentic São Paulo Municipal Construction Hoarding / Tapume Metálico da Prefeitura
+  createTapumePrefeitura(repeatX = 4, repeatY = 1) {
+    const key = `tapume_prefeitura_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(512, 512);
+
+    // Deep municipal navy blue base (padrão oficial PMSP)
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Vertical ribbed steel panel seams with 3D beveling
+    const panelW = 64;
+    for (let x = 0; x < 512; x += panelW) {
+      // Dark seam groove
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x, 0, 4, 512);
+
+      // Light highlight edge
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(x + 4, 0, 2, 512);
+
+      // Steel corrugated center rib
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillRect(x + 24, 0, 16, 512);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.fillRect(x + 40, 0, 8, 512);
+
+      // Rivets along the panel edges
+      for (let y = 16; y < 512; y += 48) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(x + 8, y, 2.5, 0, Math.PI * 2);
+        ctx.arc(x + panelW - 8, y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(x + 8.5, y + 0.5, 1.5, 0, Math.PI * 2);
+        ctx.arc(x + panelW - 7.5, y + 0.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Top hazard chevron stripe (32px)
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, 512, 32);
+    ctx.fillStyle = '#f59e0b';
+    for (let x = -32; x < 544; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 32);
+      ctx.lineTo(x + 16, 32);
+      ctx.lineTo(x + 32, 0);
+      ctx.lineTo(x + 16, 0);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Bottom hazard chevron stripe (40px)
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 472, 512, 40);
+    ctx.fillStyle = '#f59e0b';
+    for (let x = -40; x < 544; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 512);
+      ctx.lineTo(x + 20, 512);
+      ctx.lineTo(x + 40, 472);
+      ctx.lineTo(x + 20, 472);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Official Municipal Stencils across the panels
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+    ctx.font = '900 18px "Arial Black", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PREFEITURA DE SÃO PAULO', 256, 80);
+
+    ctx.font = 'bold 12px Arial, sans-serif';
+    ctx.fillStyle = 'rgba(254, 240, 138, 0.95)';
+    ctx.fillText('SECRETARIA MUNICIPAL DE INFRAESTRUTURA URBANA E OBRAS', 256, 102);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(32, 118, 448, 80);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 16px "Arial Black", Arial, sans-serif';
+    ctx.fillText('🚧 ÁREA RESTRITA • HOMENS TRABALHANDO 🚧', 256, 148);
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText('USO OBRIGATÓRIO DE CAPACETE • ENTRADA PROIBIDA A ESTRANHOS', 256, 175);
+
+    // Weathering and subtle grit
+    for (let i = 0; i < 1800; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)';
+      ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // Heavy Concrete New Jersey Traffic Barrier Texture (Barreira de Concreto Zebrada CET)
+  createBarreiraNewJersey(repeatX = 1, repeatY = 1) {
+    const key = `barreira_new_jersey_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+
+    // Concrete base with surface texture
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(0, 0, 256, 256);
+
+    // Concrete speckling & pores
+    for (let i = 0; i < 3000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#cbd5e1' : '#64748b';
+      ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+    }
+
+    // Bold 45° hazard warning diagonal stripes in center
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 40, 256, 140);
+    ctx.fillStyle = '#facc15'; // Safety yellow
+    const stripeW = 36;
+    for (let x = -140; x < 256 + 140; x += stripeW * 2) {
+      ctx.beginPath();
+      ctx.moveTo(x, 180);
+      ctx.lineTo(x + stripeW, 180);
+      ctx.lineTo(x + stripeW + 140, 40);
+      ctx.lineTo(x + 140, 40);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Lower skirt tire scuffs and road grime
+    const grimeGrad = ctx.createLinearGradient(0, 180, 0, 256);
+    grimeGrad.addColorStop(0, 'rgba(15, 23, 42, 0)');
+    grimeGrad.addColorStop(0.6, 'rgba(30, 41, 59, 0.45)');
+    grimeGrad.addColorStop(1, 'rgba(15, 23, 42, 0.85)');
+    ctx.fillStyle = grimeGrad;
+    ctx.fillRect(0, 180, 256, 76);
+
+    // Horizontal seam lines and chamfer shadow
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(0, 38, 256, 4);
+    ctx.fillRect(0, 180, 256, 4);
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
+
   // Orange safety plastic netting / tela fachadeira
   createTelaLaranjaMesh() {
     const key = 'tela_laranja_mesh';
