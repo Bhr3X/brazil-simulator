@@ -7,102 +7,40 @@
  */
 
 export const CITY_EMITTERS = [
+  // --- OS BARES & BOTECOS (Loud Hotspots, High Power) ---
   {
     id: 'BAR_DO_TIAO',
-    name: 'Bar do Tião (Radinho do Balcão)',
+    name: 'Bar do Tião (Radinho do Balcão e Mesinhas)',
     x: 12.0,
     y: 1.2,
     z: 41.5,
     refDist: 4.5,
-    maxDist: 42.0,
+    maxDist: 22.0,
+    power: 1.0,
     preferredGenre: 'PAGODE',
     ambienceFile: 'media/audio/ambience/boteco_chatter.mp3'
   },
   {
     id: 'ADEGA_DO_ZE',
-    name: 'Adega do Zé (Caixa da Calçada)',
+    name: 'Adega do Zé (Caixa de Som da Calçada)',
     x: -14.0,
     y: 1.2,
     z: 37.8,
-    refDist: 4.0,
-    maxDist: 36.0,
+    refDist: 4.5,
+    maxDist: 22.0,
+    power: 1.0,
     preferredGenre: 'SERTANEJO',
     ambienceFile: 'media/audio/ambience/papo_calcada.mp3'
   },
   {
-    id: 'PADARIA_ESTRELA',
-    name: 'Padaria Estrela (Som Ambiente)',
-    x: 32.0,
-    y: 1.2,
-    z: 37.8,
-    refDist: 4.0,
-    maxDist: 36.0,
-    preferredGenre: 'MPB',
-    ambienceFile: null
-  },
-  {
-    id: 'POSTO_PIRITUBA',
-    name: 'Posto Pirituba 24h (Rádio da Conveniência)',
-    x: -42.0,
-    y: 1.2,
-    z: 41.0,
-    refDist: 5.0,
-    maxDist: 45.0,
-    preferredGenre: 'ROCK',
-    ambienceFile: null
-  },
-  {
-    id: 'CRUZAMENTO_EDGAR_FACCO',
-    name: 'Cruzamento Paula Ferreira (Banca / Camelô)',
-    x: 0.0,
-    y: 1.2,
-    z: 16.0,
-    refDist: 5.0,
-    maxDist: 46.0,
-    preferredGenre: 'ROCK',
-    ambienceFile: 'media/audio/ambience/feira_ambulante.mp3'
-  },
-  {
-    id: 'BANCA_JORNAL',
-    name: 'Banca do Seu Mário (Radinho de Pilha)',
-    x: 7.5,
-    y: 1.2,
-    z: 35.8,
-    refDist: 3.5,
-    maxDist: 32.0,
-    preferredGenre: 'MPB',
-    ambienceFile: null
-  },
-  {
-    id: 'BAILE_LAJE',
-    name: 'Baile da Laje no Escadão (Paredão de Som)',
-    x: 0.0,
-    y: 8.4,
-    z: -66.0,
-    refDist: 8.0,
-    maxDist: 70.0,
-    preferredGenre: 'FUNK',
-    ambienceFile: null
-  },
-  {
-    id: 'CAMPINHO_FAVELA',
-    name: 'Campinho da Favela (Radinho da Roda de Samba)',
-    x: 0.0,
-    y: 9.5,
-    z: -99.0,
-    refDist: 6.0,
-    maxDist: 55.0,
-    preferredGenre: 'PAGODE',
-    ambienceFile: null
-  },
-  {
     id: 'BAR_FRANGO',
-    name: 'O Lendário Bar Frangó (Som do Casarão)',
+    name: 'O Lendário Bar Frangó (Som do Casarão Colonial)',
     x: 20.5,
     y: 9.6,
     z: 183.0,
     refDist: 6.0,
-    maxDist: 55.0,
+    maxDist: 26.0,
+    power: 1.0,
     preferredGenre: 'MPB',
     ambienceFile: null
   },
@@ -113,7 +51,8 @@ export const CITY_EMITTERS = [
     y: 1.2,
     z: 68.0,
     refDist: 4.5,
-    maxDist: 40.0,
+    maxDist: 22.0,
+    power: 1.0,
     preferredGenre: 'PAGODE',
     ambienceFile: null
   },
@@ -124,41 +63,9 @@ export const CITY_EMITTERS = [
     y: 1.2,
     z: 38.0,
     refDist: 4.0,
-    maxDist: 36.0,
+    maxDist: 20.0,
+    power: 1.0,
     preferredGenre: 'PAGODE',
-    ambienceFile: null
-  },
-  {
-    id: 'PASTELARIA_BETO',
-    name: 'Pastelaria do Beto (Caixinha de Som)',
-    x: 74.5,
-    y: 1.2,
-    z: 38.0,
-    refDist: 4.0,
-    maxDist: 38.0,
-    preferredGenre: 'PAGODE',
-    ambienceFile: null
-  },
-  {
-    id: 'ESCOLA_LOURENCO',
-    name: 'E.E. Prof. Lourenço Filho (Som da Portaria)',
-    x: 131.5,
-    y: 1.2,
-    z: 74.0,
-    refDist: 5.0,
-    maxDist: 45.0,
-    preferredGenre: 'MPB',
-    ambienceFile: null
-  },
-  {
-    id: 'PARQUE_PETRONIO',
-    name: 'Parque Linear Petrônio Portela (Radinho da Pipoca)',
-    x: 160.5,
-    y: 1.2,
-    z: 72.0,
-    refDist: 5.0,
-    maxDist: 48.0,
-    preferredGenre: 'MPB',
     ambienceFile: null
   },
   {
@@ -168,84 +75,60 @@ export const CITY_EMITTERS = [
     y: 1.2,
     z: 125.0,
     refDist: 4.5,
-    maxDist: 42.0,
-    preferredGenre: 'PAGODE',
-    ambienceFile: null
-  },
-  {
-    id: 'PAPELARIA_BAZAR',
-    name: 'Autoescola & Papelaria (Rádio do Uno)',
-    x: 159.0,
-    y: 1.2,
-    z: 145.0,
-    refDist: 4.5,
-    maxDist: 42.0,
-    preferredGenre: 'ROCK',
-    ambienceFile: null
-  },
-  {
-    id: 'IGREJA_DO_MORRO',
-    name: 'Igrejinha no Morro (Rádio da Sacristia)',
-    x: 176.0,
-    y: 4.5,
-    z: 205.0,
-    refDist: 5.5,
-    maxDist: 50.0,
-    preferredGenre: 'MPB',
-    ambienceFile: null
-  },
-  {
-    id: 'COLEGIO_WELLINGTON',
-    name: 'Colégio Wellington (Som da Cantina)',
-    x: 160.0,
-    y: 1.2,
-    z: 248.0,
-    refDist: 5.5,
-    maxDist: 48.0,
-    preferredGenre: 'MPB',
-    ambienceFile: null
-  },
-  {
-    id: 'MERCADO_PYRITUBA',
-    name: 'Mercado Municipal de Pyrituba (Rádio dos Pastéis)',
-    x: 160.0,
-    y: 1.2,
-    z: 285.0,
-    refDist: 5.5,
-    maxDist: 50.0,
+    maxDist: 22.0,
+    power: 1.0,
     preferredGenre: 'PAGODE',
     ambienceFile: null
   },
   {
     id: 'AMIGOS_DO_PICUI',
-    name: 'Restaurante Amigos do Picuí (Som da Varanda)',
+    name: 'Restaurante & Bar Amigos do Picuí (Som da Varanda)',
     x: 160.0,
     y: 1.2,
     z: 318.0,
-    refDist: 5.5,
-    maxDist: 50.0,
+    refDist: 5.0,
+    maxDist: 22.0,
+    power: 1.0,
     preferredGenre: 'PAGODE',
     ambienceFile: null
   },
+
+  // --- A FAVELA / BAILE ROLANDO (Paredão de Som, Loud & Wide Throw) ---
   {
-    id: 'FARMACIA_PETRONIO',
-    name: 'Drogaria & Farmácia Petrônio (Som Ambiente)',
-    x: 131.0,
-    y: 1.2,
-    z: 218.0,
-    refDist: 4.5,
+    id: 'BAILE_LAJE',
+    name: 'Baile da Laje no Escadão (Paredão de Som da Favela)',
+    x: 0.0,
+    y: 8.4,
+    z: -66.0,
+    refDist: 8.0,
     maxDist: 42.0,
-    preferredGenre: 'MPB',
+    power: 1.0,
+    preferredGenre: 'FUNK',
     ambienceFile: null
   },
   {
+    id: 'CAMPINHO_FAVELA',
+    name: 'Campinho da Favela (Roda de Samba e Churrasco)',
+    x: 0.0,
+    y: 9.5,
+    z: -99.0,
+    refDist: 6.0,
+    maxDist: 28.0,
+    power: 1.0,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+
+  // --- O AP & RESIDÊNCIAS (Som Residencial / Janela do Ap) ---
+  {
     id: 'SOBRADOS_PAULA_FERREIRA',
-    name: 'Sobrado Residencial (Janela do 1º Andar)',
+    name: 'Apartamento / Sobrado Residencial (Som da Janela)',
     x: -10.0,
     y: 2.5,
     z: 0.0,
-    refDist: 4.0,
-    maxDist: 38.0,
+    refDist: 4.5,
+    maxDist: 20.0,
+    power: 1.0,
     preferredGenre: 'MPB',
     ambienceFile: null
   },
@@ -255,9 +138,156 @@ export const CITY_EMITTERS = [
     x: 131.0,
     y: 2.5,
     z: 285.0,
-    refDist: 4.5,
-    maxDist: 42.0,
+    refDist: 4.0,
+    maxDist: 18.0,
+    power: 0.8,
     preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+
+  // --- LOCAIS PÚBLICOS & COMÉRCIOS MENORES (Potência Moderada / Localizada) ---
+  {
+    id: 'PADARIA_ESTRELA',
+    name: 'Padaria Estrela (Som Ambiente da Padoca)',
+    x: 32.0,
+    y: 1.2,
+    z: 37.8,
+    refDist: 3.0,
+    maxDist: 15.0,
+    power: 0.55,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'POSTO_PIRITUBA',
+    name: 'Posto Pirituba 24h (Rádio da Conveniência)',
+    x: -42.0,
+    y: 1.2,
+    z: 41.0,
+    refDist: 3.5,
+    maxDist: 16.0,
+    power: 0.6,
+    preferredGenre: 'ROCK',
+    ambienceFile: null
+  },
+  {
+    id: 'CRUZAMENTO_EDGAR_FACCO',
+    name: 'Cruzamento Paula Ferreira (Som do Camelô)',
+    x: 0.0,
+    y: 1.2,
+    z: 16.0,
+    refDist: 3.0,
+    maxDist: 15.0,
+    power: 0.5,
+    preferredGenre: 'ROCK',
+    ambienceFile: 'media/audio/ambience/feira_ambulante.mp3'
+  },
+  {
+    id: 'BANCA_JORNAL',
+    name: 'Banca do Seu Mário (Radinho de Pilha)',
+    x: 7.5,
+    y: 1.2,
+    z: 35.8,
+    refDist: 2.2,
+    maxDist: 11.0,
+    power: 0.4,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'PASTELARIA_BETO',
+    name: 'Pastelaria do Beto (Caixinha de Som)',
+    x: 74.5,
+    y: 1.2,
+    z: 38.0,
+    refDist: 3.0,
+    maxDist: 15.0,
+    power: 0.5,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'ESCOLA_LOURENCO',
+    name: 'E.E. Prof. Lourenço Filho (Rádio da Portaria)',
+    x: 131.5,
+    y: 1.2,
+    z: 74.0,
+    refDist: 2.5,
+    maxDist: 12.0,
+    power: 0.35,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'PARQUE_PETRONIO',
+    name: 'Parque Linear Petrônio Portela (Radinho da Pipoca)',
+    x: 160.5,
+    y: 1.2,
+    z: 72.0,
+    refDist: 2.5,
+    maxDist: 12.0,
+    power: 0.4,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'PAPELARIA_BAZAR',
+    name: 'Autoescola & Papelaria (Rádio do Carro)',
+    x: 159.0,
+    y: 1.2,
+    z: 145.0,
+    refDist: 2.5,
+    maxDist: 12.0,
+    power: 0.4,
+    preferredGenre: 'ROCK',
+    ambienceFile: null
+  },
+  {
+    id: 'IGREJA_DO_MORRO',
+    name: 'Igrejinha no Morro (Rádio da Sacristia)',
+    x: 176.0,
+    y: 4.5,
+    z: 205.0,
+    refDist: 2.5,
+    maxDist: 12.0,
+    power: 0.3,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'COLEGIO_WELLINGTON',
+    name: 'Colégio Wellington (Som da Cantina)',
+    x: 160.0,
+    y: 1.2,
+    z: 248.0,
+    refDist: 2.5,
+    maxDist: 12.0,
+    power: 0.35,
+    preferredGenre: 'MPB',
+    ambienceFile: null
+  },
+  {
+    id: 'MERCADO_PYRITUBA',
+    name: 'Mercado Municipal de Pyrituba (Rádio dos Pastéis)',
+    x: 160.0,
+    y: 1.2,
+    z: 285.0,
+    refDist: 3.5,
+    maxDist: 16.0,
+    power: 0.6,
+    preferredGenre: 'PAGODE',
+    ambienceFile: null
+  },
+  {
+    id: 'FARMACIA_PETRONIO',
+    name: 'Drogaria & Farmácia Petrônio (Som Ambiente)',
+    x: 131.0,
+    y: 1.2,
+    z: 218.0,
+    refDist: 2.5,
+    maxDist: 12.0,
+    power: 0.35,
+    preferredGenre: 'MPB',
     ambienceFile: null
   }
 ];
@@ -329,47 +359,56 @@ export class SpatialSoundSystem {
       this.currentAudibleGain = 1.0;
       this.currentAudibleFreq = 20000;
     } else {
-      // 2. Find closest emitter to player among all 23 citywide nodes
-      let closest = null;
-      let minDist = Infinity;
+      // 2. Multi-emitter 3D acoustic projection
+      // Bares, o AP, e o Baile da Laje na Favela are the loud primary sound sources.
+      // Sound dynamically attenuates as the player walks across the map into open streets and residential alleys.
+      let maxAudibleGain = 0.0;
+      let targetFreq = 800;
+      let dominantEmitter = null;
 
       for (const em of this.emitters) {
-        const dist = Math.hypot(playerPos.x - em.x, playerPos.z - em.z);
-        if (dist < minDist) {
-          minDist = dist;
-          closest = em;
+        const dx = playerPos.x - em.x;
+        const dy = (playerPos.y !== undefined && playerPos.y !== null ? playerPos.y - em.y : 0);
+        const dz = playerPos.z - em.z;
+        // 3D Euclidean distance
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const power = em.power !== undefined ? em.power : 1.0;
+        const refDist = em.refDist || 4.0;
+        const maxDist = em.maxDist || 20.0;
+
+        if (dist <= refDist) {
+          // Inside hotspot: maximum loud sound and wide open frequency
+          if (power > maxAudibleGain) {
+            maxAudibleGain = power;
+            targetFreq = 20000;
+            dominantEmitter = em;
+          }
+        } else if (dist < maxDist) {
+          // Smooth acoustic attenuation as the player walks away from the sound source
+          const tNorm = (dist - refDist) / (maxDist - refDist);
+          const falloff = 1.0 - tNorm;
+          const gain = power * Math.pow(falloff, 1.6);
+          if (gain > maxAudibleGain) {
+            maxAudibleGain = gain;
+            targetFreq = 800 + 19200 * Math.pow(falloff, 1.6);
+            dominantEmitter = em;
+          }
         }
       }
 
-      this.nearestEmitter = closest;
+      this.nearestEmitter = dominantEmitter;
       const t = this.ctx.currentTime;
 
-      if (!closest || minDist > closest.maxDist) {
-        // Out of range of all emitters: warm distant neighborhood echo
-        const ambientFloor = 0.22;
-        this.spatialGain.gain.setTargetAtTime(ambientFloor, t, 0.3);
-        this.spatialFilter.frequency.setTargetAtTime(2200, t, 0.3);
-        this.spatialGain.gain.value = ambientFloor;
-        this.spatialFilter.frequency.value = 2200;
-        this.currentAudibleGain = ambientFloor;
-        this.currentAudibleFreq = 2200;
-      } else {
-        // Smooth distance attenuation (inverse-power curve)
-        const range = closest.maxDist - closest.refDist;
-        const distDelta = Math.max(0, minDist - closest.refDist);
-        const factor = Math.max(0.0, 1.0 - (distDelta / range));
-        // Organic curve: volume swells smoothly as you approach (minimum 0.25 on open street, 1.0 near node)
-        const calculatedGain = 0.25 + 0.75 * Math.pow(factor, 1.4);
-        // Frequency opens up: from 2,200 Hz (warm muffled street sound) up to 20,000 Hz (crisp, pristine near node)
-        const targetFreq = 2200 + 17800 * Math.pow(factor, 1.5);
+      // When player is far from music sources, the sound fades cleanly to silence / near-silence (0.0)
+      const calculatedGain = Math.min(1.0, maxAudibleGain);
+      const calculatedFreq = Math.min(20000, Math.max(800, targetFreq));
 
-        this.spatialGain.gain.setTargetAtTime(calculatedGain, t, 0.18);
-        this.spatialFilter.frequency.setTargetAtTime(targetFreq, t, 0.18);
-        this.spatialGain.gain.value = calculatedGain;
-        this.spatialFilter.frequency.value = targetFreq;
-        this.currentAudibleGain = calculatedGain;
-        this.currentAudibleFreq = targetFreq;
-      }
+      this.spatialGain.gain.setTargetAtTime(calculatedGain, t, 0.15);
+      this.spatialFilter.frequency.setTargetAtTime(calculatedFreq, t, 0.15);
+      this.spatialGain.gain.value = calculatedGain;
+      this.spatialFilter.frequency.value = calculatedFreq;
+      this.currentAudibleGain = calculatedGain;
+      this.currentAudibleFreq = calculatedFreq;
     }
 
     // 3. Keep chatter audio loops strictly paused so they never compete with or drown out the radio
