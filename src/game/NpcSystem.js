@@ -167,6 +167,7 @@ export class NpcSystem {
     this.initEventCrowds();
     this.initEventHosts();
     this.initEstablishmentNpcs();
+    this.initCitywidePedestrians();
   }
 
   // Build articulated humanoid 3D mesh
@@ -801,7 +802,7 @@ export class NpcSystem {
 
         npc.group.position.x += dirX * moveDist;
         npc.group.position.z += dirZ * moveDist;
-        if (npc.zoneId && targetWp.y != null) {
+        if (targetWp.y != null) {
           const fromY = npc.baseY != null ? npc.baseY : 0;
           const frac = distToWp > 0 ? Math.min(1, moveDist / distToWp) : 1;
           npc.baseY = fromY + (targetWp.y - fromY) * frac;
@@ -1559,5 +1560,276 @@ export class NpcSystem {
     ];
 
     this.establishmentNpcs.forEach(n => this.npcs.push(n));
+  }
+
+  // Citywide roaming pedestrians: Police, Thugs/Malandros, Tias, and Tios
+  initCitywidePedestrians() {
+    this.cityPedestrians = [
+      // ==========================================
+      // 1. POLÍCIA MILITAR (PMESP - Ronda Ostensiva)
+      // ==========================================
+      // Cabo Oliveira: Petrônio Portela Norte (sidewalk and park entrance patrol)
+      this.createHumanoidNpc({
+        id: 'cabo_oliveira',
+        name: 'CABO OLIVEIRA (PMESP)',
+        shirtColor: 0x4f5d6b, // PM grey
+        skinColor: 0x8a5832,
+        pantsColor: 0x1c2430, // Navy dark
+        hasPoliceCap: true,
+        hasPoliceBelt: true,
+        interactable: false,
+        speed: 1.25,
+        waypoints: [
+          { x: 155.5, z: 72.0 },
+          { x: 155.5, z: 105.0 },
+          { x: 159.0, z: 126.0 },
+          { x: 155.5, z: 105.0 },
+          { x: 155.5, z: 72.0 }
+        ]
+      }),
+
+      // Soldado Nascimento: Petrônio Portela Sul (Colégio Wellington & Mercado patrol)
+      this.createHumanoidNpc({
+        id: 'soldado_nascimento',
+        name: 'SOLDADO NASCIMENTO (PMESP)',
+        shirtColor: 0x4f5d6b,
+        skinColor: 0x5a3418,
+        pantsColor: 0x1c2430,
+        hasPoliceCap: true,
+        hasPoliceBelt: true,
+        interactable: false,
+        speed: 1.3,
+        waypoints: [
+          { x: 155.0, z: 195.0 },
+          { x: 155.0, z: 245.0 },
+          { x: 155.0, z: 310.0 },
+          { x: 155.0, z: 245.0 },
+          { x: 155.0, z: 195.0 }
+        ]
+      }),
+
+      // Cabo Santos: Edgar Facó north sidewalk and bridge approach
+      this.createHumanoidNpc({
+        id: 'cabo_santos',
+        name: 'CABO SANTOS (PMESP)',
+        shirtColor: 0x4f5d6b,
+        skinColor: 0xa16843,
+        pantsColor: 0x1c2430,
+        hasPoliceCap: true,
+        hasPoliceBelt: true,
+        hasMustache: true,
+        interactable: false,
+        speed: 1.2,
+        waypoints: [
+          { x: -35.0, z: 5.5 },
+          { x: 5.0, z: 5.5 },
+          { x: 45.0, z: 5.5 },
+          { x: 5.0, z: 5.5 },
+          { x: -35.0, z: 5.5 }
+        ]
+      }),
+
+      // ==========================================
+      // 2. THUGS / MALANDROS / NOIAS (Quebrada)
+      // ==========================================
+      // Vitinho do Grau: Favela Escadão & Mirante (alto da comunidade)
+      this.createHumanoidNpc({
+        id: 'vitinho_grau',
+        name: 'VITINHO DO GRAU (MALANDRO)',
+        shirtColor: 0x15803d, // Palmeiras green jersey
+        skinColor: 0x9c653d,
+        pantsColor: 0x0284c7, // Bermuda tactel azul
+        hasForwardCap: true,
+        capColor: 0xffffff,
+        hasShoulderBag: true,
+        interactable: false,
+        speed: 1.6,
+        baseY: 8.5,
+        waypoints: [
+          { x: -30.0, y: 8.5, z: -72.0 },
+          { x: -22.0, y: 9.0, z: -88.0 },
+          { x: -35.0, y: 9.5, z: -102.0 },
+          { x: -22.0, y: 9.0, z: -88.0 },
+          { x: -30.0, y: 8.5, z: -72.0 }
+        ]
+      }),
+
+      // Diguinho Noia: Petrônio Commercial Alleys & Autoescola
+      this.createHumanoidNpc({
+        id: 'diguinho_noia',
+        name: 'DIGUINHO NOIA',
+        shirtColor: 0x27272a, // Regata preta
+        skinColor: 0x8a5530,
+        pantsColor: 0x3b82f6, // Jeans azul claro
+        hasForwardCap: true,
+        capColor: 0xd97706,
+        hasShoulderBag: true,
+        interactable: false,
+        speed: 1.45,
+        waypoints: [
+          { x: 134.5, z: 115.0 },
+          { x: 122.0, z: 114.0 },
+          { x: 134.5, z: 138.0 },
+          { x: 134.5, z: 165.0 },
+          { x: 134.5, z: 138.0 }
+        ]
+      }),
+
+      // Nelsinho Chapa: Petrônio Sul outside Mercado Pyrituba & Amigos do Picuí
+      this.createHumanoidNpc({
+        id: 'nelsinho_chapa',
+        name: 'NELSINHO CHAPA (FLANELINHA)',
+        shirtColor: 0xb91c1c, // Regata vermelha
+        skinColor: 0x6e4325,
+        pantsColor: 0x1e293b, // Bermuda tactel preta
+        hasForwardCap: true,
+        capColor: 0x111111,
+        hasShoulderBag: true,
+        interactable: false,
+        speed: 1.5,
+        waypoints: [
+          { x: 134.5, z: 260.0 },
+          { x: 134.5, z: 295.0 },
+          { x: 134.5, z: 325.0 },
+          { x: 134.5, z: 295.0 },
+          { x: 134.5, z: 260.0 }
+        ]
+      }),
+
+      // ==========================================
+      // 3. TIAS (Bairro & Devoção)
+      // ==========================================
+      // Dona Carmem: Igrejinha no Morro (subindo e descendo as escadarias)
+      this.createHumanoidNpc({
+        id: 'dona_carmem',
+        name: 'DONA CARMEM (IGREJINHA)',
+        shirtColor: 0x7c3aed, // Vestido lilás/roxo
+        skinColor: 0xb58055,
+        pantsColor: 0x6d28d9,
+        hasHairBun: true,
+        hasCross: true,
+        hasBook: true, // Bíblia
+        interactable: false,
+        speed: 0.95,
+        baseY: 0.25,
+        waypoints: [
+          { x: 156.0, y: 0.25, z: 185.0 },
+          { x: 162.0, y: 1.8, z: 195.0 },
+          { x: 172.0, y: 4.5, z: 202.0 },
+          { x: 162.0, y: 1.8, z: 195.0 },
+          { x: 156.0, y: 0.25, z: 185.0 }
+        ]
+      }),
+
+      // Dona Lurdes: Petrônio Portela Norte (calçada comercial com sacolas)
+      this.createHumanoidNpc({
+        id: 'dona_lurdes',
+        name: 'DONA LURDES',
+        shirtColor: 0xec4899, // Blusa rosa
+        skinColor: 0xa86c43,
+        pantsColor: 0xf3f4f6,
+        hasHairBun: true,
+        hasShoppingBags: true,
+        hasGlasses: true,
+        interactable: false,
+        speed: 1.05,
+        waypoints: [
+          { x: 155.5, z: 80.0 },
+          { x: 155.5, z: 110.0 },
+          { x: 155.5, z: 135.0 },
+          { x: 155.5, z: 110.0 },
+          { x: 155.5, z: 80.0 }
+        ]
+      }),
+
+      // Dona Maria do Parque: Caminho interno do Parque Linear
+      this.createHumanoidNpc({
+        id: 'dona_maria_parque',
+        name: 'DONA MARIA (CAMINHADA)',
+        shirtColor: 0x10b981, // Casaquinho verde esmeralda
+        skinColor: 0x94603d,
+        pantsColor: 0x374151,
+        hasHairBun: true,
+        hasGlasses: true,
+        interactable: false,
+        speed: 1.0,
+        waypoints: [
+          { x: 166.5, z: 68.0 },
+          { x: 168.0, z: 92.0 },
+          { x: 167.0, z: 122.0 },
+          { x: 168.0, z: 92.0 },
+          { x: 166.5, z: 68.0 }
+        ]
+      }),
+
+      // ==========================================
+      // 4. TIOS (Comércio & Conversa de Calçada)
+      // ==========================================
+      // Seu Valdir: Petrônio Oeste (em frente aos sobrados e espetinho)
+      this.createHumanoidNpc({
+        id: 'seu_valdir',
+        name: 'SEU VALDIR',
+        shirtColor: 0xd97706, // Polo mostarda
+        skinColor: 0x8a5832,
+        pantsColor: 0x4b5563,
+        hasMustache: true,
+        hasGlasses: true,
+        hasCap: true,
+        capColor: 0x78350f,
+        interactable: false,
+        speed: 1.1,
+        waypoints: [
+          { x: 134.5, z: 120.0 },
+          { x: 134.5, z: 145.0 },
+          { x: 134.5, z: 172.0 },
+          { x: 134.5, z: 145.0 },
+          { x: 134.5, z: 120.0 }
+        ]
+      }),
+
+      // Seu Geraldo: Edgar Facó Sul (caminhando com jornal matinal)
+      this.createHumanoidNpc({
+        id: 'seu_geraldo',
+        name: 'SEU GERALDO',
+        shirtColor: 0x3b82f6, // Camisa social azul clara
+        skinColor: 0x784421,
+        pantsColor: 0x1f2937,
+        hasMustache: true,
+        hasGlasses: true,
+        hasBook: true, // Jornal do dia
+        interactable: false,
+        speed: 1.15,
+        waypoints: [
+          { x: -28.0, z: 35.5 },
+          { x: 0.0, z: 35.5 },
+          { x: 28.0, z: 35.5 },
+          { x: 0.0, z: 35.5 },
+          { x: -28.0, z: 35.5 }
+        ]
+      }),
+
+      // Seu Osvaldo: Petrônio Sul (calçada do Mercado Pyrituba)
+      this.createHumanoidNpc({
+        id: 'seu_osvaldo',
+        name: 'SEU OSVALDO',
+        shirtColor: 0x15803d, // Camisa verde xadrez
+        skinColor: 0x9a653f,
+        pantsColor: 0x78350f,
+        hasMustache: true,
+        hasCap: true,
+        capColor: 0xca8a04,
+        interactable: false,
+        speed: 1.1,
+        waypoints: [
+          { x: 155.0, z: 250.0 },
+          { x: 155.0, z: 280.0 },
+          { x: 155.0, z: 305.0 },
+          { x: 155.0, z: 280.0 },
+          { x: 155.0, z: 250.0 }
+        ]
+      })
+    ];
+
+    this.cityPedestrians.forEach(p => this.npcs.push(p));
   }
 }

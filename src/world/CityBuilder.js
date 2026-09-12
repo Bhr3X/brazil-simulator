@@ -97,6 +97,16 @@ export class CityBuilder {
 
   // 3. Avenida General Edgar Facó & Rua Paula Ferreira Crossing
   buildTerrainAndRoads() {
+    // 3.0 Continuous Urban Sub-Base Bed (Prevents any black holes or void to infinity)
+    const worldGroundGeo = new THREE.PlaneGeometry(360, 500);
+    const worldGroundMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createAsfalto(36, 50)
+    });
+    const worldGround = new THREE.Mesh(worldGroundGeo, worldGroundMat);
+    worldGround.rotation.x = -Math.PI / 2;
+    worldGround.position.set(60.0, -0.01, 110.0);
+    this.scene.add(worldGround);
+
     // 3.1 Main Arterial Avenue: Avenida General Edgar Facó (Westbound & Eastbound lanes)
     const roadGeo = new THREE.PlaneGeometry(120, 24);
     const roadMat = new THREE.MeshLambertMaterial({
@@ -5949,6 +5959,15 @@ export class CityBuilder {
       this.physics.addBoxCollider(new THREE.Vector3(104.0, 0, 78.0), new THREE.Vector3(130.0, 8.5, 106.0), 'solid');
       this.physics.addBoxCollider(new THREE.Vector3(130.8, 0, 64.0), new THREE.Vector3(131.4, 3.5, 71.6), 'solid');
       this.physics.addBoxCollider(new THREE.Vector3(130.8, 0, 76.4), new THREE.Vector3(131.4, 3.5, 108.0), 'solid');
+
+      // Paved Access Alleyway & Courtyard between School and Espetinho (Z = 108.0 to 118.0, X = 114.0 to 131.0)
+      const westAlleyMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createCalcadaPaulista(4, 2)
+      });
+      const westAlley = new THREE.Mesh(new THREE.PlaneGeometry(17.0, 10.0), westAlleyMat);
+      westAlley.rotation.x = -Math.PI / 2;
+      westAlley.position.set(122.5, 0.13, 113.0);
+      this.scene.add(westAlley);
     }
 
     // -------------------------------------------------------------------------
@@ -6118,6 +6137,29 @@ export class CityBuilder {
       this.buildIpeTree(165.0, 0.25, 92.0);
       this.buildIpeTree(178.0, 0.25, 108.0);
       this.buildIpeTree(165.0, 0.25, 120.0);
+
+      // Seamless Connecting Plaza & Promenade between Linear Park and Commercial Frontage (Z = 124.5 to 132.5, X = 159.0 to 186.0)
+      const connectPlazaMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createCalcadaPaulista(6, 2)
+      });
+      const connectPlaza = new THREE.Mesh(new THREE.PlaneGeometry(27.0, 8.0), connectPlazaMat);
+      connectPlaza.rotation.x = -Math.PI / 2;
+      connectPlaza.position.set(172.5, 0.135, 128.5);
+      this.scene.add(connectPlaza);
+
+      // Storefront Apron along commercial frontage (Z = 132.0 to 178.0, X = 158.5 to 161.5)
+      const apronMat = new THREE.MeshLambertMaterial({
+        map: this.textures.createCalcadaPaulista(2, 10)
+      });
+      const storefrontApron = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 46.0), apronMat);
+      storefrontApron.rotation.x = -Math.PI / 2;
+      storefrontApron.position.set(160.0, 0.13, 155.0);
+      this.scene.add(storefrontApron);
+
+      // Bench and planter in connecting promenade
+      const connBench = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 2.4), new THREE.MeshLambertMaterial({ color: 0x15803d }));
+      connBench.position.set(164.2, 0.35, 128.5);
+      this.scene.add(connBench);
     }
 
     // -------------------------------------------------------------------------
@@ -6274,6 +6316,22 @@ export class CityBuilder {
       this.buildUtilityPole(136.5, 0.25, pz, idx % 2 === 0);
       this.buildUtilityPole(153.5, 0.25, pz + 12.0, idx % 2 === 1);
     });
+
+    // Continuous base pavement aprons under all buildings along South Petrônio corridor
+    const southApronMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createCalcadaPaulista(8, 30)
+    });
+    // East building apron (X = 158.0 to 194.0, Z = 178.0 to 330.0)
+    const eastApron = new THREE.Mesh(new THREE.PlaneGeometry(36.0, 152.0), southApronMat);
+    eastApron.rotation.x = -Math.PI / 2;
+    eastApron.position.set(176.0, 0.13, 254.0);
+    this.scene.add(eastApron);
+
+    // West building apron (X = 110.0 to 132.0, Z = 178.0 to 330.0)
+    const westApron = new THREE.Mesh(new THREE.PlaneGeometry(22.0, 152.0), southApronMat);
+    westApron.rotation.x = -Math.PI / 2;
+    westApron.position.set(121.0, 0.13, 254.0);
+    this.scene.add(westApron);
 
     // -------------------------------------------------------------------------
     // 4. EAST SIDE: PRACINHA COM UMA IGREJINHA EM UM MORRO (Z = 185 to 225, X = 160 to 192)
