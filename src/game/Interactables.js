@@ -370,7 +370,7 @@ export class InteractableSystem {
       return;
     }
 
-    const inGameHour = runClock.inGameHour;
+    const inGameHour = runClock ? runClock.inGameHour : 12.0;
     let closestTarget = null;
     let closestDist = Infinity;
 
@@ -610,8 +610,17 @@ export class InteractableSystem {
     }
 
     const outcome = opt.execute(game.state, this.sound);
-    if (game.hud && outcome) {
-      game.hud.showToast(outcome, 4000);
+    let finalOutcome = outcome;
+    if (game.state.lastDiminishing && game.state.lastDiminishing.isDiminished) {
+      const dim = game.state.lastDiminishing;
+      if (dim.isExhausted) {
+        finalOutcome = `⚠️ <strong>${opt.label}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito)`;
+      } else if (finalOutcome) {
+        finalOutcome += `<div style="margin-top:3px;font-size:10px;color:#ffcc00;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</div>`;
+      }
+    }
+    if (game.hud && finalOutcome) {
+      game.hud.showToast(finalOutcome, 2800);
     }
 
     // Check item robbery or police confiscation hooks
@@ -752,10 +761,19 @@ export class InteractableSystem {
     this.dialog.open(dialogData, (chosenOption) => {
       const outcomeText = chosenOption.execute(gameState, this.sound);
       if (outcomeText) {
+        let finalOutcomeText = outcomeText;
+        if (gameState.lastDiminishing && gameState.lastDiminishing.isDiminished) {
+          const dim = gameState.lastDiminishing;
+          if (dim.isExhausted) {
+            finalOutcomeText = `⚠️ <strong>${chosenOption.label}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito adicional)`;
+          } else {
+            finalOutcomeText += `<br><span style="color:#ffcc00;font-size:11px;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</span>`;
+          }
+        }
         const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
         this.dialog.open({
           title: isEn ? 'ENCOUNTER OUTCOME' : 'DESFECHO DO ENCONTRO',
-          text: `<p>${outcomeText}</p>`,
+          text: `<p>${finalOutcomeText}</p>`,
           options: [
             { label: isEn ? 'Continue the day' : 'Continuar o dia', execute: () => {} }
           ]

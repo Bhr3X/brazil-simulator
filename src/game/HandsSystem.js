@@ -551,9 +551,17 @@ export class HandsSystem {
     const activeState = passedState || this.state || window.app?.game?.state;
     if (this.leftHand && ITEM_TYPES[this.leftHand]) {
       const item = ITEM_TYPES[this.leftHand];
-      const msg = item.use ? item.use(activeState, this.sound) : null;
-      if (this.onToast && msg) this.onToast(msg, 3500);
-      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 3500);
+      let msg = item.use ? item.use(activeState, this.sound) : null;
+      if (activeState?.lastDiminishing?.isDiminished) {
+        const dim = activeState.lastDiminishing;
+        if (dim.isExhausted) {
+          msg = `⚠️ <strong>${item.name}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito)`;
+        } else if (msg) {
+          msg += `<div style="margin-top:3px;font-size:10px;color:#ffcc00;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</div>`;
+        }
+      }
+      if (this.onToast && msg) this.onToast(msg, 2600);
+      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 2600);
 
       // If consumable (beer, food, water), clear slot after use
       if (item.consumable) {
@@ -573,9 +581,17 @@ export class HandsSystem {
     const activeState = passedState || this.state || window.app?.game?.state;
     if (this.rightHand && ITEM_TYPES[this.rightHand]) {
       const item = ITEM_TYPES[this.rightHand];
-      const msg = item.use ? item.use(activeState, this.sound) : null;
-      if (this.onToast && msg) this.onToast(msg, 3500);
-      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 3500);
+      let msg = item.use ? item.use(activeState, this.sound) : null;
+      if (activeState?.lastDiminishing?.isDiminished) {
+        const dim = activeState.lastDiminishing;
+        if (dim.isExhausted) {
+          msg = `⚠️ <strong>${item.name}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito)`;
+        } else if (msg) {
+          msg += `<div style="margin-top:3px;font-size:10px;color:#ffcc00;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</div>`;
+        }
+      }
+      if (this.onToast && msg) this.onToast(msg, 2600);
+      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 2600);
 
       // If consumable, clear slot after use
       if (item.consumable) {

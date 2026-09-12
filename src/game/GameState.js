@@ -35,8 +35,61 @@ export class GameState {
     this.currentHourFormatted = '06:00';
     this.elapsedSeconds = 0;
 
+    // Repetitive action tracker for diminishing returns
+    this.actionTracker = new Map();
+    this.lastDiminishing = null;
+
     // Change listener
     this.listeners = [];
+  }
+
+  // Diminishing returns calculation for repetitive actions
+  getActionDiminishing(reason) {
+    if (!reason) {
+      return { mult: 1.0, reps: 1, isDiminished: false, isExhausted: false };
+    }
+    const key = reason.trim().toLowerCase();
+    const now = typeof this.elapsedSeconds === 'number' && this.elapsedSeconds > 0
+      ? this.elapsedSeconds
+      : (Date.now() / 1000);
+
+    let record = this.actionTracker.get(key);
+    if (!record) {
+      record = { count: 0, lastTime: now };
+      this.actionTracker.set(key, record);
+    }
+
+    // Natural recovery over time: 1 repetition level recovered every 18 seconds of rest
+    const dt = Math.max(0, now - record.lastTime);
+    const recovered = Math.floor(dt / 18.0);
+    if (recovered > 0) {
+      record.count = Math.max(0, record.count - recovered);
+    }
+
+    record.count += 1;
+    record.lastTime = now;
+
+    const reps = record.count;
+    let mult = 1.0;
+    if (reps === 1) {
+      mult = 1.0;
+    } else if (reps === 2) {
+      mult = 0.50;
+    } else if (reps === 3) {
+      mult = 0.25;
+    } else if (reps === 4) {
+      mult = 0.10;
+    } else {
+      mult = 0.0;
+    }
+
+    return {
+      key,
+      mult,
+      reps,
+      isDiminished: reps > 1,
+      isExhausted: mult === 0
+    };
   }
 
   hasItem(id) {
@@ -80,8 +133,35 @@ export class GameState {
     return this.grana >= centavos;
   }
 
-  // Atomic state mutation
+  // Atomic state mutation with diminishing returns on repetition
   apply(deltas = {}, reason = '', isDecay = false) {
+    const appliedDeltas = { ...deltas };
+
+    // Diminishing returns on repetitive non-decay actions
+    let diminishing = { mult: 1.0, reps: 1, isDiminished: false, isExhausted: false };
+    if (!isDecay && reason && reason !== 'Desgaste biológico/urbano contínuo') {
+      diminishing = this.getActionDiminishing(reason);
+      const mult = diminishing.mult;
+
+      // Scale beneficial deltas
+      if (typeof appliedDeltas.sanidade === 'number' && appliedDeltas.sanidade > 0) {
+        appliedDeltas.sanidade = Math.round(appliedDeltas.sanidade * mult);
+      }
+      if (typeof appliedDeltas.fome === 'number' && appliedDeltas.fome > 0) {
+        appliedDeltas.fome = Math.round(appliedDeltas.fome * mult);
+      }
+      if (typeof appliedDeltas.perigo === 'number' && appliedDeltas.perigo < 0) {
+        appliedDeltas.perigo = Math.round(appliedDeltas.perigo * mult);
+      }
+      if (typeof appliedDeltas.grana === 'number' && appliedDeltas.grana > 0) {
+        appliedDeltas.grana = Math.round(appliedDeltas.grana * mult);
+      }
+      if (typeof appliedDeltas.ginga === 'number' && appliedDeltas.ginga > 0) {
+        appliedDeltas.ginga = Math.round(appliedDeltas.ginga * mult);
+      }
+    }
+    this.lastDiminishing = diminishing;
+
     const oldState = {
       grana: this.grana,
       debt: this.debt,
@@ -91,48 +171,48 @@ export class GameState {
       ginga: this.ginga
     };
 
-    if (typeof deltas.grana === 'number') {
-      if (deltas.allowDebt && this.grana + deltas.grana < 0) {
-        const remainingCost = -(this.grana + deltas.grana);
+    if (typeof appliedDeltas.grana === 'number') {
+      if (appliedDeltas.allowDebt && this.grana + appliedDeltas.grana < 0) {
+        const remainingCost = -(this.grana + appliedDeltas.grana);
         this.debt += remainingCost;
         this.grana = 0;
-      } else if (deltas.allowNegative) {
-        this.grana = Math.round(this.grana + deltas.grana);
+      } else if (appliedDeltas.allowNegative) {
+        this.grana = Math.round(this.grana + appliedDeltas.grana);
       } else {
-        this.grana = Math.max(0, Math.round(this.grana + deltas.grana));
+        this.grana = Math.max(0, Math.round(this.grana + appliedDeltas.grana));
       }
     }
 
-    if (typeof deltas.debt === 'number') {
-      this.debt = Math.max(0, Math.round(this.debt + deltas.debt));
+    if (typeof appliedDeltas.debt === 'number') {
+      this.debt = Math.max(0, Math.round(this.debt + appliedDeltas.debt));
     }
 
-    if (typeof deltas.fome === 'number') {
-      this.fome = Math.max(0, Math.min(100, Math.round(this.fome + deltas.fome)));
+    if (typeof appliedDeltas.fome === 'number') {
+      this.fome = Math.max(0, Math.min(100, Math.round(this.fome + appliedDeltas.fome)));
     }
 
-    if (typeof deltas.sanidade === 'number') {
-      this.sanidade = Math.max(0, Math.min(100, Math.round(this.sanidade + deltas.sanidade)));
+    if (typeof appliedDeltas.sanidade === 'number') {
+      this.sanidade = Math.max(0, Math.min(100, Math.round(this.sanidade + appliedDeltas.sanidade)));
     }
 
-    if (typeof deltas.perigo === 'number') {
-      this.perigo = Math.max(0, Math.min(100, Math.round(this.perigo + deltas.perigo)));
+    if (typeof appliedDeltas.perigo === 'number') {
+      this.perigo = Math.max(0, Math.min(100, Math.round(this.perigo + appliedDeltas.perigo)));
     }
 
-    if (typeof deltas.ginga === 'number') {
-      this.ginga = Math.max(0, Math.min(100, Math.round(this.ginga + deltas.ginga)));
+    if (typeof appliedDeltas.ginga === 'number') {
+      this.ginga = Math.max(0, Math.min(100, Math.round(this.ginga + appliedDeltas.ginga)));
     }
 
-    if (deltas.addInventory) {
-      this.inventory.push(deltas.addInventory);
+    if (appliedDeltas.addInventory) {
+      this.inventory.push(appliedDeltas.addInventory);
     }
 
-    if (deltas.removeInventoryId) {
-      this.inventory = this.inventory.filter(item => item.id !== deltas.removeInventoryId);
+    if (appliedDeltas.removeInventoryId) {
+      this.inventory = this.inventory.filter(item => item.id !== appliedDeltas.removeInventoryId);
     }
 
-    if (deltas.setFlags || deltas.flags) {
-      Object.assign(this.flags, deltas.setFlags || deltas.flags);
+    if (appliedDeltas.setFlags || appliedDeltas.flags) {
+      Object.assign(this.flags, appliedDeltas.setFlags || appliedDeltas.flags);
     }
 
     if (reason) {
@@ -141,8 +221,9 @@ export class GameState {
         hour: this.currentHourFormatted || '06:00',
         reason,
         desc: reason,
-        isDecay: Boolean(isDecay || deltas.isDecay),
-        deltas,
+        isDecay: Boolean(isDecay || appliedDeltas.isDecay),
+        deltas: appliedDeltas,
+        diminishing: diminishing.isDiminished ? diminishing : null,
         diff: {
           grana: this.grana - oldState.grana,
           fome: this.fome - oldState.fome,

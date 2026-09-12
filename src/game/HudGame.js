@@ -70,8 +70,12 @@ export class HudGame {
     if (this.objectiveElem) this.objectiveElem.textContent = `${objPrefix} ${state.dailyObjective}`;
   }
 
-  showToast(message, duration = 3500) {
-    if (!this.toastContainer) return;
+  showToast(message, duration = 2600) {
+    if (!this.toastContainer || !message) return;
+
+    // Single-toast hygiene: dismiss any existing toasts immediately so they never stack
+    const activeToasts = this.toastContainer.querySelectorAll('.hud-toast');
+    activeToasts.forEach(oldToast => oldToast.remove());
 
     const toast = document.createElement('div');
     toast.className = 'hud-toast';
@@ -80,7 +84,9 @@ export class HudGame {
 
     setTimeout(() => {
       toast.classList.add('fade-out');
-      setTimeout(() => toast.remove(), 400);
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 250);
     }, duration);
   }
 

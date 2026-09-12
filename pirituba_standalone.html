@@ -620,16 +620,16 @@ html, body {
    ========================================================================== */
 #npc-quick-dock {
   position: fixed;
-  bottom: 68px;
+  bottom: 64px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 50;
-  width: 92vw;
-  max-width: 780px;
-  background: linear-gradient(180deg, rgba(8, 16, 12, 0.95) 0%, rgba(4, 8, 6, 0.98) 100%);
-  border: 2px solid #00ff88;
-  box-shadow: 0 0 26px rgba(0, 255, 136, 0.35);
-  border-radius: 8px;
+  width: min(660px, 92vw);
+  max-width: 660px;
+  background: linear-gradient(180deg, rgba(8, 16, 12, 0.94) 0%, rgba(4, 8, 6, 0.98) 100%);
+  border: 1.5px solid #00ff88;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.28);
+  border-radius: 6px;
   backdrop-filter: blur(8px);
   overflow: hidden;
   pointer-events: auto;
@@ -637,7 +637,7 @@ html, body {
 }
 
 @keyframes quickDockIn {
-  0% { opacity: 0; transform: translate(-50%, 15px); }
+  0% { opacity: 0; transform: translate(-50%, 12px); }
   100% { opacity: 1; transform: translate(-50%, 0); }
 }
 
@@ -645,43 +645,43 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 12px;
-  background: rgba(0, 255, 136, 0.12);
-  border-bottom: 1px solid rgba(0, 255, 136, 0.25);
+  padding: 3px 10px;
+  background: rgba(0, 255, 136, 0.10);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.22);
 }
 
 .npc-quick-title-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .npc-quick-avatar {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .npc-quick-name {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   color: #00ff88;
   letter-spacing: 0.5px;
-  text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
+  text-shadow: 0 0 5px rgba(0, 255, 136, 0.35);
 }
 
 .npc-quick-hint {
-  font-size: 10px;
+  font-size: 9px;
   color: #ffcc00;
   letter-spacing: 0.5px;
-  background: rgba(255, 204, 0, 0.15);
-  padding: 2px 6px;
+  background: rgba(255, 204, 0, 0.12);
+  padding: 1px 5px;
   border-radius: 3px;
-  border: 1px solid rgba(255, 204, 0, 0.3);
+  border: 1px solid rgba(255, 204, 0, 0.25);
 }
 
 .npc-quick-options {
   display: flex;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 6px;
+  padding: 5px 8px;
 }
 
 .npc-action-card {
@@ -689,13 +689,13 @@ html, body {
   min-width: 0;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 6px;
-  padding: 7px 8px;
+  border-radius: 5px;
+  padding: 5px 7px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 5px;
+  gap: 3px;
   transition: all 0.12s ease;
   user-select: none;
   -webkit-user-select: none;
@@ -733,37 +733,37 @@ html, body {
   background: #ffcc00;
   color: #000000;
   font-weight: 900;
-  font-size: 11px;
-  padding: 1px 5px;
-  border-radius: 3px;
-  line-height: 1.2;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  line-height: 1.15;
 }
 
 .npc-card-verb {
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: bold;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .npc-card-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
 }
 
 .pip-pill {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: bold;
-  padding: 1px 5px;
-  border-radius: 3px;
+  padding: 1px 4px;
+  border-radius: 2px;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .pip-green {
@@ -1542,35 +1542,39 @@ body.mobile-touch-active #hud-hands .hand-slot {
    ========================================================================== */
 #hud-toast-container {
   position: fixed;
-  top: 75px;
-  right: 18px;
+  top: 54px;
+  right: 12px;
   z-index: 140;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   pointer-events: none;
+  max-width: min(290px, calc(100vw - 24px));
 }
 
 .hud-toast {
-  background: rgba(6, 12, 8, 0.94);
-  border: 1px solid #00ff66;
+  background: rgba(6, 14, 10, 0.90);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 255, 102, 0.6);
   color: #ffffff;
-  padding: 10px 16px;
+  padding: 6px 11px;
   border-radius: 4px;
-  font-size: 12px;
-  line-height: 1.4;
-  box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
-  max-width: 320px;
-  animation: toastIn 0.3s ease-out;
-  transition: opacity 0.4s ease;
+  font-size: 11px;
+  line-height: 1.35;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 255, 102, 0.2);
+  max-width: 100%;
+  animation: toastIn 0.2s ease-out;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .hud-toast.fade-out {
   opacity: 0;
+  transform: translateY(-6px);
 }
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateX(20px); }
+  from { opacity: 0; transform: translateX(14px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
@@ -2493,31 +2497,61 @@ body.mobile-touch-active #touch-actions-cluster {
 
   /* NPC Quick Action Dock on Mobile */
   #npc-quick-dock {
-    bottom: calc(100px + env(safe-area-inset-bottom, 0px)) !important;
-    width: calc(100vw - 16px) !important;
-    max-width: 440px !important;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+    width: min(390px, calc(100vw - 16px)) !important;
+    max-width: 390px !important;
     z-index: 75 !important;
   }
 
   .npc-quick-options {
     flex-direction: column !important;
-    gap: 6px !important;
-    padding: 6px 8px !important;
+    gap: 4px !important;
+    padding: 4px 6px !important;
   }
 
   .npc-action-card {
     width: 100% !important;
-    padding: 8px 10px !important;
-    min-height: 42px !important;
+    padding: 5px 8px !important;
+    min-height: 32px !important;
+    gap: 2px !important;
   }
 
   .npc-card-key {
-    font-size: 12px !important;
-    padding: 2px 6px !important;
+    font-size: 10px !important;
+    padding: 1px 4px !important;
   }
 
   .npc-card-verb {
-    font-size: 12px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Compact rules for landscape or short height screens (e.g. mobile landscape) */
+@media (max-height: 540px) {
+  #npc-quick-dock {
+    bottom: 50px !important;
+    width: min(620px, calc(100vw - 16px)) !important;
+    max-width: 620px !important;
+  }
+  .npc-quick-options {
+    flex-direction: row !important;
+    gap: 5px !important;
+    padding: 4px 6px !important;
+  }
+  .npc-action-card {
+    width: auto !important;
+    flex: 1 !important;
+    padding: 4px 6px !important;
+    min-height: 30px !important;
+  }
+  #hud-toast-container {
+    top: 42px !important;
+    right: 8px !important;
+    max-width: 250px !important;
+  }
+  .hud-toast {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
   }
 }
 
@@ -24055,8 +24089,61 @@ class GameState {
     this.currentHourFormatted = '06:00';
     this.elapsedSeconds = 0;
 
+    // Repetitive action tracker for diminishing returns
+    this.actionTracker = new Map();
+    this.lastDiminishing = null;
+
     // Change listener
     this.listeners = [];
+  }
+
+  // Diminishing returns calculation for repetitive actions
+  getActionDiminishing(reason) {
+    if (!reason) {
+      return { mult: 1.0, reps: 1, isDiminished: false, isExhausted: false };
+    }
+    const key = reason.trim().toLowerCase();
+    const now = typeof this.elapsedSeconds === 'number' && this.elapsedSeconds > 0
+      ? this.elapsedSeconds
+      : (Date.now() / 1000);
+
+    let record = this.actionTracker.get(key);
+    if (!record) {
+      record = { count: 0, lastTime: now };
+      this.actionTracker.set(key, record);
+    }
+
+    // Natural recovery over time: 1 repetition level recovered every 18 seconds of rest
+    const dt = Math.max(0, now - record.lastTime);
+    const recovered = Math.floor(dt / 18.0);
+    if (recovered > 0) {
+      record.count = Math.max(0, record.count - recovered);
+    }
+
+    record.count += 1;
+    record.lastTime = now;
+
+    const reps = record.count;
+    let mult = 1.0;
+    if (reps === 1) {
+      mult = 1.0;
+    } else if (reps === 2) {
+      mult = 0.50;
+    } else if (reps === 3) {
+      mult = 0.25;
+    } else if (reps === 4) {
+      mult = 0.10;
+    } else {
+      mult = 0.0;
+    }
+
+    return {
+      key,
+      mult,
+      reps,
+      isDiminished: reps > 1,
+      isExhausted: mult === 0
+    };
   }
 
   hasItem(id) {
@@ -24100,8 +24187,35 @@ class GameState {
     return this.grana >= centavos;
   }
 
-  // Atomic state mutation
+  // Atomic state mutation with diminishing returns on repetition
   apply(deltas = {}, reason = '', isDecay = false) {
+    const appliedDeltas = { ...deltas };
+
+    // Diminishing returns on repetitive non-decay actions
+    let diminishing = { mult: 1.0, reps: 1, isDiminished: false, isExhausted: false };
+    if (!isDecay && reason && reason !== 'Desgaste biológico/urbano contínuo') {
+      diminishing = this.getActionDiminishing(reason);
+      const mult = diminishing.mult;
+
+      // Scale beneficial deltas
+      if (typeof appliedDeltas.sanidade === 'number' && appliedDeltas.sanidade > 0) {
+        appliedDeltas.sanidade = Math.round(appliedDeltas.sanidade * mult);
+      }
+      if (typeof appliedDeltas.fome === 'number' && appliedDeltas.fome > 0) {
+        appliedDeltas.fome = Math.round(appliedDeltas.fome * mult);
+      }
+      if (typeof appliedDeltas.perigo === 'number' && appliedDeltas.perigo < 0) {
+        appliedDeltas.perigo = Math.round(appliedDeltas.perigo * mult);
+      }
+      if (typeof appliedDeltas.grana === 'number' && appliedDeltas.grana > 0) {
+        appliedDeltas.grana = Math.round(appliedDeltas.grana * mult);
+      }
+      if (typeof appliedDeltas.ginga === 'number' && appliedDeltas.ginga > 0) {
+        appliedDeltas.ginga = Math.round(appliedDeltas.ginga * mult);
+      }
+    }
+    this.lastDiminishing = diminishing;
+
     const oldState = {
       grana: this.grana,
       debt: this.debt,
@@ -24111,48 +24225,48 @@ class GameState {
       ginga: this.ginga
     };
 
-    if (typeof deltas.grana === 'number') {
-      if (deltas.allowDebt && this.grana + deltas.grana < 0) {
-        const remainingCost = -(this.grana + deltas.grana);
+    if (typeof appliedDeltas.grana === 'number') {
+      if (appliedDeltas.allowDebt && this.grana + appliedDeltas.grana < 0) {
+        const remainingCost = -(this.grana + appliedDeltas.grana);
         this.debt += remainingCost;
         this.grana = 0;
-      } else if (deltas.allowNegative) {
-        this.grana = Math.round(this.grana + deltas.grana);
+      } else if (appliedDeltas.allowNegative) {
+        this.grana = Math.round(this.grana + appliedDeltas.grana);
       } else {
-        this.grana = Math.max(0, Math.round(this.grana + deltas.grana));
+        this.grana = Math.max(0, Math.round(this.grana + appliedDeltas.grana));
       }
     }
 
-    if (typeof deltas.debt === 'number') {
-      this.debt = Math.max(0, Math.round(this.debt + deltas.debt));
+    if (typeof appliedDeltas.debt === 'number') {
+      this.debt = Math.max(0, Math.round(this.debt + appliedDeltas.debt));
     }
 
-    if (typeof deltas.fome === 'number') {
-      this.fome = Math.max(0, Math.min(100, Math.round(this.fome + deltas.fome)));
+    if (typeof appliedDeltas.fome === 'number') {
+      this.fome = Math.max(0, Math.min(100, Math.round(this.fome + appliedDeltas.fome)));
     }
 
-    if (typeof deltas.sanidade === 'number') {
-      this.sanidade = Math.max(0, Math.min(100, Math.round(this.sanidade + deltas.sanidade)));
+    if (typeof appliedDeltas.sanidade === 'number') {
+      this.sanidade = Math.max(0, Math.min(100, Math.round(this.sanidade + appliedDeltas.sanidade)));
     }
 
-    if (typeof deltas.perigo === 'number') {
-      this.perigo = Math.max(0, Math.min(100, Math.round(this.perigo + deltas.perigo)));
+    if (typeof appliedDeltas.perigo === 'number') {
+      this.perigo = Math.max(0, Math.min(100, Math.round(this.perigo + appliedDeltas.perigo)));
     }
 
-    if (typeof deltas.ginga === 'number') {
-      this.ginga = Math.max(0, Math.min(100, Math.round(this.ginga + deltas.ginga)));
+    if (typeof appliedDeltas.ginga === 'number') {
+      this.ginga = Math.max(0, Math.min(100, Math.round(this.ginga + appliedDeltas.ginga)));
     }
 
-    if (deltas.addInventory) {
-      this.inventory.push(deltas.addInventory);
+    if (appliedDeltas.addInventory) {
+      this.inventory.push(appliedDeltas.addInventory);
     }
 
-    if (deltas.removeInventoryId) {
-      this.inventory = this.inventory.filter(item => item.id !== deltas.removeInventoryId);
+    if (appliedDeltas.removeInventoryId) {
+      this.inventory = this.inventory.filter(item => item.id !== appliedDeltas.removeInventoryId);
     }
 
-    if (deltas.setFlags || deltas.flags) {
-      Object.assign(this.flags, deltas.setFlags || deltas.flags);
+    if (appliedDeltas.setFlags || appliedDeltas.flags) {
+      Object.assign(this.flags, appliedDeltas.setFlags || appliedDeltas.flags);
     }
 
     if (reason) {
@@ -24161,8 +24275,9 @@ class GameState {
         hour: this.currentHourFormatted || '06:00',
         reason,
         desc: reason,
-        isDecay: Boolean(isDecay || deltas.isDecay),
-        deltas,
+        isDecay: Boolean(isDecay || appliedDeltas.isDecay),
+        deltas: appliedDeltas,
+        diminishing: diminishing.isDiminished ? diminishing : null,
         diff: {
           grana: this.grana - oldState.grana,
           fome: this.fome - oldState.fome,
@@ -29762,7 +29877,7 @@ class InteractableSystem {
       return;
     }
 
-    const inGameHour = runClock.inGameHour;
+    const inGameHour = runClock ? runClock.inGameHour : 12.0;
     let closestTarget = null;
     let closestDist = Infinity;
 
@@ -30002,8 +30117,17 @@ class InteractableSystem {
     }
 
     const outcome = opt.execute(game.state, this.sound);
-    if (game.hud && outcome) {
-      game.hud.showToast(outcome, 4000);
+    let finalOutcome = outcome;
+    if (game.state.lastDiminishing && game.state.lastDiminishing.isDiminished) {
+      const dim = game.state.lastDiminishing;
+      if (dim.isExhausted) {
+        finalOutcome = `⚠️ <strong>${opt.label}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito)`;
+      } else if (finalOutcome) {
+        finalOutcome += `<div style="margin-top:3px;font-size:10px;color:#ffcc00;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</div>`;
+      }
+    }
+    if (game.hud && finalOutcome) {
+      game.hud.showToast(finalOutcome, 2800);
     }
 
     // Check item robbery or police confiscation hooks
@@ -30144,10 +30268,19 @@ class InteractableSystem {
     this.dialog.open(dialogData, (chosenOption) => {
       const outcomeText = chosenOption.execute(gameState, this.sound);
       if (outcomeText) {
+        let finalOutcomeText = outcomeText;
+        if (gameState.lastDiminishing && gameState.lastDiminishing.isDiminished) {
+          const dim = gameState.lastDiminishing;
+          if (dim.isExhausted) {
+            finalOutcomeText = `⚠️ <strong>${chosenOption.label}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito adicional)`;
+          } else {
+            finalOutcomeText += `<br><span style="color:#ffcc00;font-size:11px;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</span>`;
+          }
+        }
         const isEn = typeof getLanguage === 'function' && getLanguage() === 'en';
         this.dialog.open({
           title: isEn ? 'ENCOUNTER OUTCOME' : 'DESFECHO DO ENCONTRO',
-          text: `<p>${outcomeText}</p>`,
+          text: `<p>${finalOutcomeText}</p>`,
           options: [
             { label: isEn ? 'Continue the day' : 'Continuar o dia', execute: () => {} }
           ]
@@ -30228,8 +30361,12 @@ class HudGame {
     if (this.objectiveElem) this.objectiveElem.textContent = `${objPrefix} ${state.dailyObjective}`;
   }
 
-  showToast(message, duration = 3500) {
-    if (!this.toastContainer) return;
+  showToast(message, duration = 2600) {
+    if (!this.toastContainer || !message) return;
+
+    // Single-toast hygiene: dismiss any existing toasts immediately so they never stack
+    const activeToasts = this.toastContainer.querySelectorAll('.hud-toast');
+    activeToasts.forEach(oldToast => oldToast.remove());
 
     const toast = document.createElement('div');
     toast.className = 'hud-toast';
@@ -30238,7 +30375,9 @@ class HudGame {
 
     setTimeout(() => {
       toast.classList.add('fade-out');
-      setTimeout(() => toast.remove(), 400);
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 250);
     }, duration);
   }
 
@@ -30824,9 +30963,17 @@ class HandsSystem {
     const activeState = passedState || this.state || window.app?.game?.state;
     if (this.leftHand && ITEM_TYPES[this.leftHand]) {
       const item = ITEM_TYPES[this.leftHand];
-      const msg = item.use ? item.use(activeState, this.sound) : null;
-      if (this.onToast && msg) this.onToast(msg, 3500);
-      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 3500);
+      let msg = item.use ? item.use(activeState, this.sound) : null;
+      if (activeState?.lastDiminishing?.isDiminished) {
+        const dim = activeState.lastDiminishing;
+        if (dim.isExhausted) {
+          msg = `⚠️ <strong>${item.name}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito)`;
+        } else if (msg) {
+          msg += `<div style="margin-top:3px;font-size:10px;color:#ffcc00;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</div>`;
+        }
+      }
+      if (this.onToast && msg) this.onToast(msg, 2600);
+      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 2600);
 
       // If consumable (beer, food, water), clear slot after use
       if (item.consumable) {
@@ -30846,9 +30993,17 @@ class HandsSystem {
     const activeState = passedState || this.state || window.app?.game?.state;
     if (this.rightHand && ITEM_TYPES[this.rightHand]) {
       const item = ITEM_TYPES[this.rightHand];
-      const msg = item.use ? item.use(activeState, this.sound) : null;
-      if (this.onToast && msg) this.onToast(msg, 3500);
-      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 3500);
+      let msg = item.use ? item.use(activeState, this.sound) : null;
+      if (activeState?.lastDiminishing?.isDiminished) {
+        const dim = activeState.lastDiminishing;
+        if (dim.isExhausted) {
+          msg = `⚠️ <strong>${item.name}:</strong> Efeito esgotado pela repetição contínua! (0% de efeito)`;
+        } else if (msg) {
+          msg += `<div style="margin-top:3px;font-size:10px;color:#ffcc00;font-weight:bold;">⚠️ Ação repetitiva: rendimento reduzido (${Math.round(dim.mult * 100)}% de efeito)</div>`;
+        }
+      }
+      if (this.onToast && msg) this.onToast(msg, 2600);
+      else if (window.app?.game?.hud?.showToast && msg) window.app.game.hud.showToast(msg, 2600);
 
       // If consumable, clear slot after use
       if (item.consumable) {
