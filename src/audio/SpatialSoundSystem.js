@@ -14,8 +14,8 @@ export const CITY_EMITTERS = [
     x: 12.0,
     y: 1.2,
     z: 41.5,
-    refDist: 4.5,
-    maxDist: 22.0,
+    refDist: 6.5,
+    maxDist: 26.0,
     power: 1.0,
     preferredGenre: 'PAGODE',
     ambienceFile: 'media/audio/ambience/boteco_chatter.mp3'

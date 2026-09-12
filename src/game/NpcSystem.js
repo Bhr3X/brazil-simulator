@@ -25,6 +25,8 @@ export class NpcSystem {
 
     this.npcs = [];
     this.establishmentNpcs = [];
+    this.pastelariaNpcs = [];
+    this.barTiaoNpcs = [];
     this.activeTalkingNpc = null;
     this.blocoSpectatorGroup = null;
     this.campinhoSpectatorGroup = null;
@@ -169,6 +171,7 @@ export class NpcSystem {
     this.initEstablishmentNpcs();
     this.initCitywidePedestrians();
     this.initPastelariaNpcs();
+    this.initBarTiaoNpcs();
   }
 
   // Build articulated humanoid 3D mesh
@@ -509,6 +512,107 @@ export class NpcSystem {
       trayGroup.add(cup2);
 
       group.add(trayGroup);
+    } else if (config.hasSinucaCue) {
+      const cueGroup = new THREE.Group();
+      cueGroup.name = 'npc_sinuca_cue';
+      const shaftMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.022, 1.4, 8), shaftMat);
+      shaft.rotation.x = Math.PI / 2;
+      shaft.position.set(0, -0.28, 0.45);
+      cueGroup.add(shaft);
+
+      const tipMat = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+      const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.04, 8), tipMat);
+      tip.rotation.x = Math.PI / 2;
+      tip.position.set(0, -0.28, 1.16);
+      cueGroup.add(tip);
+
+      const gripMat = new THREE.MeshLambertMaterial({ color: 0x3d1d0c });
+      const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.35, 8), gripMat);
+      grip.rotation.x = Math.PI / 2;
+      grip.position.set(0, -0.28, -0.1);
+      cueGroup.add(grip);
+
+      rightArm.add(cueGroup);
+    }
+
+    if (config.hasVerticalCue) {
+      const vCueGroup = new THREE.Group();
+      vCueGroup.name = 'npc_vertical_cue';
+      const shaftMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.024, 1.45, 8), shaftMat);
+      shaft.position.set(-0.25, 0.72, 0.22);
+      vCueGroup.add(shaft);
+
+      const tipMat = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+      const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.04, 8), tipMat);
+      tip.position.set(-0.25, 1.46, 0.22);
+      vCueGroup.add(tip);
+
+      const gripMat = new THREE.MeshLambertMaterial({ color: 0x3d1d0c });
+      const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.36, 8), gripMat);
+      grip.position.set(-0.25, 0.18, 0.22);
+      vCueGroup.add(grip);
+
+      group.add(vCueGroup);
+    }
+
+    if (config.hasBeerBottle) {
+      const bottleGroup = new THREE.Group();
+      bottleGroup.name = 'npc_beer_bottle';
+      const glassMat = new THREE.MeshLambertMaterial({ color: config.bottleColor || 0x78350f });
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.22, 8), glassMat);
+      bottleGroup.add(body);
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.038, 0.12, 8), glassMat);
+      neck.position.y = 0.16;
+      bottleGroup.add(neck);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.02, 8), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+      cap.position.y = 0.23;
+      bottleGroup.add(cap);
+      const label = new THREE.Mesh(new THREE.CylinderGeometry(0.044, 0.044, 0.08, 8), new THREE.MeshLambertMaterial({ color: 0xdc2626 }));
+      label.position.y = 0.0;
+      bottleGroup.add(label);
+
+      bottleGroup.position.set(0, -0.36, 0.1);
+      rightArm.add(bottleGroup);
+    }
+
+    if (config.hasShotGlass) {
+      const glassGroup = new THREE.Group();
+      glassGroup.name = 'npc_shot_glass';
+      const glassMat = new THREE.MeshLambertMaterial({ color: 0xe2e8f0, transparent: true, opacity: 0.75 });
+      const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.028, 0.08, 8), glassMat);
+      glassGroup.add(cup);
+      const pingaMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+      const pinga = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.05, 8), pingaMat);
+      pinga.position.y = -0.01;
+      glassGroup.add(pinga);
+
+      glassGroup.position.set(0, -0.32, 0.08);
+      rightArm.add(glassGroup);
+    }
+
+    if (config.hasTorresmoPlate) {
+      const dishGroup = new THREE.Group();
+      dishGroup.name = 'npc_torresmo_plate';
+      const dishMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.16, 0.03, 12), dishMat);
+      dishGroup.add(plate);
+      const porkMat = new THREE.MeshLambertMaterial({ color: 0x92400e });
+      for (let p = 0; p < 5; p++) {
+        const piece = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.04, 0.05), porkMat);
+        const ang = (p / 5) * Math.PI * 2;
+        piece.position.set(Math.cos(ang) * 0.08, 0.03, Math.sin(ang) * 0.08);
+        piece.rotation.y = ang;
+        dishGroup.add(piece);
+      }
+      const limeMat = new THREE.MeshLambertMaterial({ color: 0x65a30d });
+      const lime = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.015, 6), limeMat);
+      lime.position.set(0, 0.035, 0);
+      dishGroup.add(lime);
+
+      dishGroup.position.set(0, 0.82, 0.38);
+      group.add(dishGroup);
     }
 
     if (config.isSitting) {
@@ -552,6 +656,7 @@ export class NpcSystem {
       isSitting: Boolean(config.isSitting),
       costumeId: config.costumeId || null,
       stationary: config.stationary || false,
+      lockYaw: Boolean(config.lockYaw),
       defaultYaw: config.defaultYaw != null ? config.defaultYaw : 0
     };
   }
@@ -775,6 +880,7 @@ export class NpcSystem {
     const hour = (gameState && typeof gameState.currentHour === 'number') ? gameState.currentHour : 6;
     this.currentHour = hour;
     this.updateEventVisibility(hour);
+    this.lastPlayerPos = playerPos;
 
     for (const npc of this.npcs) {
       // 1. Companion logic: If Caramelo is player's companion, follow player!
@@ -801,7 +907,7 @@ export class NpcSystem {
 
       // 3. Stationary establishment shopkeepers (Tião, Zé, Manuel, etc.)
       if (npc.stationary) {
-        if (distToPlayer < 7.5) {
+        if (!npc.lockYaw && distToPlayer < 7.5) {
           const lookAngle = Math.atan2(playerPos.x - npc.group.position.x, playerPos.z - npc.group.position.z);
           let angleDiff = lookAngle - npc.group.rotation.y;
           while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
@@ -998,6 +1104,108 @@ export class NpcSystem {
       npc.leftArm.rotation.x = -0.35 + Math.cos(npc.animTimer * 1.4) * 0.1;
       npc.headGroup.rotation.y = Math.sin(npc.animTimer * 1.2) * 0.18;
       npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.02;
+      return;
+    }
+
+    if (npc.animationMode === 'PLAY_SINUCA') {
+      const cycle = (npc.animTimer * 2.6) % (Math.PI * 2);
+      const stroke = Math.sin(cycle) * 0.22;
+      // Cue stroke with right arm
+      npc.rightArm.rotation.x = -1.15 + stroke;
+      npc.rightArm.rotation.z = -0.15;
+      // Bridge hand extended on felt rail
+      npc.leftArm.rotation.x = -1.1;
+      npc.leftArm.rotation.z = 0.25;
+      // Head looking forward down cue line
+      npc.headGroup.rotation.x = 0.28;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 0.8) * 0.08;
+      // Aiming stance posture
+      npc.group.position.y = baseY - 0.05;
+
+      // Ball impact click audio sync
+      npc.cueStrikeCooldown = (npc.cueStrikeCooldown || 0) + delta;
+      if (npc.cueStrikeCooldown > 3.6 && stroke > 0.18) {
+        npc.cueStrikeCooldown = 0;
+        if (this.sound && typeof this.sound.playSnookerHit === 'function') {
+          const pPos = this.lastPlayerPos;
+          if (pPos) {
+            const dist = Math.hypot(pPos.x - npc.group.position.x, pPos.z - npc.group.position.z);
+            if (dist < 18.0) {
+              this.sound.playSnookerHit();
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    if (npc.animationMode === 'WATCH_SINUCA') {
+      // Left arm holds the vertical cue resting on ground
+      npc.leftArm.rotation.x = -0.55;
+      npc.leftArm.rotation.z = -0.22;
+      // Right arm holds beer bottle and periodically sips
+      const sip = Math.max(0, Math.sin(npc.animTimer * 0.6) - 0.6) * 2.5;
+      npc.rightArm.rotation.x = -0.35 - sip * 0.65;
+      npc.rightArm.rotation.z = -0.15 - sip * 0.15;
+      // Head tilts back slightly when sipping, otherwise scans table
+      npc.headGroup.rotation.x = -sip * 0.2;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 1.2) * 0.18;
+      npc.group.position.y = baseY;
+      return;
+    }
+
+    if (npc.animationMode === 'DRUNK_TALK') {
+      // Drunken body sway & gentle roll
+      const sway = Math.sin(npc.animTimer * 1.8) * 0.08;
+      const roll = Math.cos(npc.animTimer * 1.3) * 0.06;
+      npc.group.rotation.z = roll;
+      npc.group.rotation.x = sway * 0.5;
+      // Left arm resting on bar counter
+      npc.leftArm.rotation.x = -0.95 + sway * 0.4;
+      npc.leftArm.rotation.z = 0.2;
+      // Right arm with shot glass gesticulating passionately
+      const talkGesture = Math.sin(npc.animTimer * 3.5) * 0.25;
+      npc.rightArm.rotation.x = -0.7 + talkGesture;
+      npc.rightArm.rotation.z = -0.3 + Math.cos(npc.animTimer * 2.8) * 0.15;
+      // Head nodding and wobbling
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 2.0) * 0.22;
+      npc.headGroup.rotation.x = 0.1 + Math.sin(npc.animTimer * 2.6) * 0.1;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.8)) * 0.02;
+      return;
+    }
+
+    if (npc.animationMode === 'DRUNK_SIT') {
+      // High stool seating posture
+      npc.leftLeg.rotation.x = -Math.PI / 2.3;
+      npc.rightLeg.rotation.x = -Math.PI / 2.3;
+      npc.group.position.y = baseY + 0.16;
+      // Left arm resting on bar counter
+      npc.leftArm.rotation.x = -0.85;
+      npc.leftArm.rotation.z = 0.18;
+      // Right arm raising 600ml beer bottle for toasts & laughing
+      const toast = Math.max(0, Math.sin(npc.animTimer * 0.7) - 0.4) * 1.8;
+      npc.rightArm.rotation.x = -0.5 - toast * 0.6;
+      npc.rightArm.rotation.z = -0.22 - toast * 0.15;
+      const chuckle = Math.sin(npc.animTimer * 6.0) * 0.04;
+      npc.headGroup.rotation.x = chuckle;
+      npc.headGroup.rotation.y = -0.2 + Math.sin(npc.animTimer * 1.4) * 0.16;
+      return;
+    }
+
+    if (npc.animationMode === 'BOTECO_EAT') {
+      // Sitting at boteco dining table
+      npc.leftLeg.rotation.x = -Math.PI / 2;
+      npc.rightLeg.rotation.x = -Math.PI / 2;
+      npc.group.position.y = baseY - 0.28;
+      // Reaching for torresmo and eating
+      const eat = Math.sin(npc.animTimer * 2.0);
+      const lift = Math.max(0, eat);
+      npc.rightArm.rotation.x = -0.7 - lift * 0.5;
+      npc.rightArm.rotation.z = -0.2;
+      npc.leftArm.rotation.x = -0.6;
+      npc.leftArm.rotation.z = 0.2;
+      npc.headGroup.rotation.x = lift * 0.15;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 1.0) * 0.1;
       return;
     }
 
@@ -2037,5 +2245,109 @@ export class NpcSystem {
     ];
 
     this.pastelariaNpcs.forEach(n => this.npcs.push(n));
+  }
+
+  // Populate Bar do Tião with authentic boteco patrons (Sinuca players, drunk counter customers, torresmo eater)
+  initBarTiaoNpcs() {
+    this.barTiaoNpcs = [
+      // 1. Baixinho da Sinuca (Aiming cue on felt table)
+      this.createHumanoidNpc({
+        id: 'baixinho_sinuca',
+        name: 'BAIXINHO DA SINUCA',
+        shirtColor: 0x15803d, // Green boteco polo
+        skinColor: 0x8a5832,
+        pantsColor: 0xb45309, // Khaki calça
+        hasMustache: true,
+        hasForwardCap: true,
+        capColor: 0x374151,
+        hasSinucaCue: true,
+        stationary: true,
+        lockYaw: true,
+        defaultYaw: Math.PI / 2, // Facing East (+X towards pool table center)
+        waypoints: [{ x: 10.2, y: 0.25, z: 42.0 }],
+        interactable: false,
+        animationMode: 'PLAY_SINUCA',
+        baseY: 0.25
+      }),
+
+      // 2. Zé do Taco (Opponent standing with vertical cue & cold beer)
+      this.createHumanoidNpc({
+        id: 'ze_taco',
+        name: 'ZÉ DO TACO',
+        shirtColor: 0xb91c1c, // Red polo shirt
+        skinColor: 0x6e4324,
+        pantsColor: 0x1e3a8a, // Blue jeans
+        hasCap: true,
+        capColor: 0x111111,
+        hasVerticalCue: true,
+        hasBeerBottle: true,
+        bottleColor: 0x78350f,
+        stationary: true,
+        lockYaw: true,
+        defaultYaw: -2.3, // Facing West-Southwest towards pool table
+        waypoints: [{ x: 13.8, y: 0.25, z: 41.2 }],
+        interactable: false,
+        animationMode: 'WATCH_SINUCA',
+        baseY: 0.25
+      }),
+
+      // 3. Rubão da 51 (Drunk patron leaning on bar counter passionately talking to Seu Tião)
+      this.createHumanoidNpc({
+        id: 'rubao_pinga',
+        name: 'RUBÃO DA 51',
+        shirtColor: 0xf59e0b, // Yellow regata
+        skinColor: 0x94603d,
+        pantsColor: 0x334155, // Tactel bermuda
+        hasMustache: true,
+        hasShotGlass: true,
+        stationary: true,
+        lockYaw: true,
+        defaultYaw: 0.1, // Facing North-East (+Z towards Seu Tião behind counter)
+        waypoints: [{ x: 14.5, y: 0.25, z: 43.7 }],
+        interactable: false,
+        animationMode: 'DRUNK_TALK',
+        baseY: 0.25
+      }),
+
+      // 4. Chicão do Litrão (Seated on high barstool laughing with 600ml beer bottle)
+      this.createHumanoidNpc({
+        id: 'chicao_litrao',
+        name: 'CHICÃO DO LITRÃO',
+        shirtColor: 0x475569, // Slate tee
+        skinColor: 0xa16843,
+        pantsColor: 0x1e293b,
+        hasBeerBottle: true,
+        bottleColor: 0x15803d, // Green 600ml bottle
+        isSitting: true,
+        stationary: true,
+        lockYaw: true,
+        defaultYaw: -0.3, // Facing North-West towards Rubão and Seu Tião
+        waypoints: [{ x: 15.8, y: 0.25, z: 43.75 }],
+        interactable: false,
+        animationMode: 'DRUNK_SIT',
+        baseY: 0.25
+      }),
+
+      // 5. Seu Pedro do Torresmo (Seated at boteco dining table eating crunchy torresmo)
+      this.createHumanoidNpc({
+        id: 'seu_pedro_torresmo',
+        name: 'SEU PEDRO DO TORRESMO',
+        shirtColor: 0xf1f5f9, // White regata
+        skinColor: 0xb58055,
+        pantsColor: 0x3b82f6,
+        hasGlasses: true,
+        hasMustache: true,
+        isSitting: true,
+        stationary: true,
+        lockYaw: true,
+        defaultYaw: Math.PI, // Facing South (-Z towards table & entrance)
+        waypoints: [{ x: 8.4, y: 0.25, z: 44.05 }],
+        interactable: false,
+        animationMode: 'BOTECO_EAT',
+        baseY: 0.25
+      })
+    ];
+
+    this.barTiaoNpcs.forEach(n => this.npcs.push(n));
   }
 }

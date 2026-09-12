@@ -3621,6 +3621,96 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 80. "FIADO SÓ AMANHÃ" Chalkboard Sign for Boteco
+  createFiadoSign() {
+    const key = 'sign_fiado_tiao';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+    // Dark slate chalkboard
+    ctx.fillStyle = '#18241d';
+    ctx.fillRect(0, 0, 256, 128);
+
+    // Rustic wooden frame border
+    ctx.strokeStyle = '#854d0e';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(4, 4, 248, 120);
+
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(8, 8, 240, 112);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 20px "Arial Black", sans-serif';
+    ctx.fillText('FIADO', 128, 38);
+
+    ctx.fillStyle = '#ef4444';
+    ctx.font = '900 24px "Arial Black", sans-serif';
+    ctx.fillText('SÓ AMANHÃ!', 128, 68);
+
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'italic bold 13px sans-serif';
+    ctx.fillText('(Hoje Não, Amanhã Sim!)', 128, 92);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px monospace';
+    ctx.fillText('— A DIREÇÃO DO SEU TIÃO —', 128, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 81. Boteco Cerveja Estupidamente Gelada Poster
+  createCervejaPoster() {
+    const key = 'poster_cerveja_gelada';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(128, 256);
+    // Amber/gold boteco gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#f59e0b');
+    grad.addColorStop(0.6, '#b45309');
+    grad.addColorStop(1, '#78350f');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 128, 256);
+
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, 120, 248);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('CERVEJA', 64, 40);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.font = '900 13px "Arial Black", sans-serif';
+    ctx.fillText('ESTUPIDAMENTE', 64, 62);
+    ctx.font = '900 18px "Arial Black", sans-serif';
+    ctx.fillText('GELADA!', 64, 84);
+
+    // Beer glass icon
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '32px sans-serif';
+    ctx.fillText('🍺', 64, 130);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('LITRÃO 600ml', 64, 168);
+    ctx.fillText('TORRESMO', 64, 188);
+    ctx.fillText('PORÇÃO R$ 13', 64, 208);
+
+    ctx.fillStyle = '#86efac';
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('BAR DO TIÃO', 64, 238);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
 
 

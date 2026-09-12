@@ -1482,6 +1482,327 @@ export class CityBuilder {
       new THREE.Vector3(x + 2.8 + counterW / 2, floorY + counterH, z + 2.6 + counterD / 2),
       'solid'
     );
+
+    // Authentic Brazilian boteco interior props & decor
+    this.buildBotecoInterior(x, floorY, z, w, h, d);
+  }
+
+  // Detailed authentic Brazilian boteco interior props for Bar do Tião
+  buildBotecoInterior(x, floorY, z, w, h, d) {
+    const halfW = w / 2;
+    const halfD = d / 2;
+    const backZ = z + halfD;
+    const leftX = x - halfW;
+    const frameMat = new THREE.MeshLambertMaterial({ color: 0x27272a }); // Dark metal
+
+    // 1. Multi-tier wooden liquor shelf on back wall behind Seu Tião (X in [13.1, 16.5])
+    const shelfWoodMat = new THREE.MeshLambertMaterial({ color: 0x45220d });
+    const shelfHeights = [floorY + 1.8, floorY + 2.25, floorY + 2.7];
+    shelfHeights.forEach(shY => {
+      const shelf = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.05, 0.28), shelfWoodMat);
+      shelf.position.set(x + 2.8, shY, backZ - 0.16);
+      this.scene.add(shelf);
+
+      [-1.3, 0, 1.3].forEach(bOff => {
+        const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.26), shelfWoodMat);
+        bracket.position.set(x + 2.8 + bOff, shY - 0.11, backZ - 0.15);
+        this.scene.add(bracket);
+      });
+    });
+
+    // Populated liquor & cachaça bottles on shelves (51, Velho Barreiro, Pitú, Dreher, Gin, Campari)
+    const bottleColors = [
+      0xca8a04, // Golden cachaça envelhecida
+      0x15803d, // Green 51 / Pitú
+      0xb45309, // Dark rum / Dreher
+      0x38bdf8, // Blue gin / curaçao
+      0xd97706, // Amber Velho Barreiro
+      0xef4444, // Campari bitter red
+      0xf1f5f9  // White cachaça prata
+    ];
+    for (let row = 0; row < shelfHeights.length; row++) {
+      const shY = shelfHeights[row];
+      for (let col = 0; col < 9; col++) {
+        const bX = x + 1.4 + col * 0.35;
+        const colMat = new THREE.MeshLambertMaterial({
+          color: bottleColors[(row * 9 + col) % bottleColors.length],
+          transparent: true,
+          opacity: 0.85
+        });
+        const bottleH = 0.28 + ((col % 3) * 0.04);
+        const bMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.042, bottleH, 8), colMat);
+        bMesh.position.set(bX, shY + 0.025 + bottleH / 2, backZ - 0.16);
+        this.scene.add(bMesh);
+
+        // Bottle cap
+        const cap = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.02, 0.02, 0.03, 8),
+          new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+        );
+        cap.position.set(bX, shY + 0.025 + bottleH + 0.015, backZ - 0.16);
+        this.scene.add(cap);
+      }
+    }
+
+    // 2. Retro Transistor Radio ("Radinho do Tião") on counter
+    const radioGroup = new THREE.Group();
+    radioGroup.name = 'radinho_tiao';
+    radioGroup.position.set(x + 4.4, floorY + 1.05 + 0.18, z + 2.6);
+
+    const radioBoxMat = new THREE.MeshLambertMaterial({ color: 0x5c3317 }); // Vintage brown faux-wood
+    const radioBody = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.20, 0.14), radioBoxMat);
+    radioGroup.add(radioBody);
+
+    const faceMat = new THREE.MeshLambertMaterial({ color: 0xd1d5db });
+    const facePlate = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.18, 0.02), faceMat);
+    facePlate.position.set(0, 0, -0.07);
+    radioGroup.add(facePlate);
+
+    const grilleMat = new THREE.MeshLambertMaterial({ color: 0x374151 });
+    const grille = new THREE.Mesh(new THREE.CircleGeometry(0.065, 16), grilleMat);
+    grille.position.set(-0.065, 0, -0.082);
+    radioGroup.add(grille);
+
+    const dialMat = new THREE.MeshBasicMaterial({ color: 0x1f2937 });
+    const dial = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.04, 0.01), dialMat);
+    dial.position.set(0.065, 0.03, -0.082);
+    radioGroup.add(dial);
+
+    const needle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.006, 0.035, 0.015),
+      new THREE.MeshBasicMaterial({ color: 0xef4444 })
+    );
+    needle.position.set(0.06, 0.03, -0.083);
+    radioGroup.add(needle);
+
+    const knobMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+    const knob1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.02, 8), knobMat);
+    knob1.rotation.x = Math.PI / 2;
+    knob1.position.set(0.04, -0.04, -0.082);
+    radioGroup.add(knob1);
+
+    const knob2 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.02, 8), knobMat);
+    knob2.rotation.x = Math.PI / 2;
+    knob2.position.set(0.09, -0.04, -0.082);
+    radioGroup.add(knob2);
+
+    const antMat = new THREE.MeshLambertMaterial({ color: 0x9ca3af });
+    const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.008, 0.46, 6), antMat);
+    antenna.position.set(0.12, 0.26, 0);
+    antenna.rotation.z = -0.38;
+    radioGroup.add(antenna);
+
+    this.scene.add(radioGroup);
+
+    // 3. "FIADO SÓ AMANHÃ!" Chalkboard Sign on back wall
+    const fiadoMat = new THREE.MeshBasicMaterial({ map: this.textures.createFiadoSign() });
+    const fiadoSign = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.9), fiadoMat);
+    fiadoSign.position.set(x + 0.6, floorY + 2.5, backZ - 0.16);
+    fiadoSign.rotation.y = Math.PI;
+    this.scene.add(fiadoSign);
+
+    // 4. "CERVEJA ESTUPIDAMENTE GELADA!" Poster on West wall
+    const cervMat = new THREE.MeshBasicMaterial({ map: this.textures.createCervejaPoster() });
+    const cervPoster = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 1.8), cervMat);
+    cervPoster.position.set(leftX + 0.16, floorY + 2.3, z - 0.8);
+    cervPoster.rotation.y = Math.PI / 2;
+    this.scene.add(cervPoster);
+
+    // 5. Wall Cue Rack ("Taqueira de Parede") on West wall
+    const rackGroup = new THREE.Group();
+    rackGroup.position.set(leftX + 0.16, floorY + 1.8, z + 1.5);
+    rackGroup.rotation.y = Math.PI / 2;
+
+    const boardMat = new THREE.MeshLambertMaterial({ color: 0x3d1d0c });
+    const backBoard = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.6, 0.04), boardMat);
+    rackGroup.add(backBoard);
+
+    const cueShaftMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+    const cueGripMat = new THREE.MeshLambertMaterial({ color: 0x1e1b18 });
+    const cueTipMat = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+    [-0.3, -0.1, 0.1, 0.3].forEach(cx => {
+      const cueShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.02, 1.35, 6), cueShaftMat);
+      cueShaft.position.set(cx, 0.05, 0.04);
+      rackGroup.add(cueShaft);
+
+      const cueGrip = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.32, 6), cueGripMat);
+      cueGrip.position.set(cx, -0.45, 0.04);
+      rackGroup.add(cueGrip);
+
+      const cueTip = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.03, 6), cueTipMat);
+      cueTip.position.set(cx, 0.73, 0.04);
+      rackGroup.add(cueTip);
+    });
+    this.scene.add(rackGroup);
+
+    // 6. Pickled Pink Egg Jar ("Ovos em Conserva") on Counter
+    const jarGroup = new THREE.Group();
+    jarGroup.name = 'jar_ovos_conserva';
+    jarGroup.position.set(x + 1.4, floorY + 1.05 + 0.24, z + 2.6);
+
+    const jarGlassMat = new THREE.MeshLambertMaterial({ color: 0xfce7f3, transparent: true, opacity: 0.65 });
+    const jarBody = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.32, 12), jarGlassMat);
+    jarGroup.add(jarBody);
+
+    const lidMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+    const jarLid = new THREE.Mesh(new THREE.CylinderGeometry(0.125, 0.125, 0.04, 12), lidMat);
+    jarLid.position.y = 0.17;
+    jarGroup.add(jarLid);
+
+    const eggMat = new THREE.MeshLambertMaterial({ color: 0xf472b6 });
+    const eggGeo = new THREE.SphereGeometry(0.035, 8, 8);
+    [
+      [0, -0.08, 0],
+      [0.04, -0.02, 0.03],
+      [-0.04, -0.02, -0.03],
+      [0.03, 0.05, -0.02],
+      [-0.03, 0.05, 0.03]
+    ].forEach(([ex, ey, ez]) => {
+      const egg = new THREE.Mesh(eggGeo, eggMat);
+      egg.scale.set(1.0, 1.3, 1.0);
+      egg.position.set(ex, ey, ez);
+      jarGroup.add(egg);
+    });
+    this.scene.add(jarGroup);
+
+    // 7. High Barstools ("Bancos Altos de Boteco") at counter customer side
+    const stoolMat = new THREE.MeshLambertMaterial({ color: 0x991b1b }); // Red vinyl seat
+    [x + 1.4, x + 3.8].forEach(sx => {
+      const stool = new THREE.Group();
+      stool.position.set(sx, floorY, z + 1.75);
+
+      [-0.14, 0.14].forEach(lx => {
+        [-0.14, 0.14].forEach(lz => {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.72, 6), frameMat);
+          leg.position.set(lx, 0.36, lz);
+          stool.add(leg);
+        });
+      });
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.015, 6, 12), frameMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = 0.25;
+      stool.add(ring);
+
+      const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.08, 12), stoolMat);
+      seat.position.y = 0.72;
+      stool.add(seat);
+
+      this.scene.add(stool);
+    });
+
+    // 8. Boteco Dining Tables and Chairs
+    const tableMat = new THREE.MeshLambertMaterial({ color: 0x78350f });
+    const chairYellowMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+
+    const createBotecoTable = (tx, tz, hasTorresmo = false) => {
+      const tGroup = new THREE.Group();
+      tGroup.position.set(tx, floorY, tz);
+
+      const top = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.04, 0.85), tableMat);
+      top.position.y = 0.74;
+      tGroup.add(top);
+
+      [-0.36, 0.36].forEach(lx => {
+        [-0.36, 0.36].forEach(lz => {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.74, 6), frameMat);
+          leg.position.set(lx, 0.37, lz);
+          tGroup.add(leg);
+        });
+      });
+
+      const bCol = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.24, 8), bCol);
+      bottle.position.set(0.15, 0.88, 0.1);
+      tGroup.add(bottle);
+
+      const gMat = new THREE.MeshLambertMaterial({ color: 0xfef08a, transparent: true, opacity: 0.8 });
+      const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.028, 0.10, 8), gMat);
+      glass.position.set(-0.15, 0.81, 0.1);
+      tGroup.add(glass);
+
+      if (hasTorresmo) {
+        const dishMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+        const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.16, 0.03, 12), dishMat);
+        plate.position.set(0, 0.77, -0.1);
+        tGroup.add(plate);
+
+        const porkMat = new THREE.MeshLambertMaterial({ color: 0x92400e });
+        for (let p = 0; p < 5; p++) {
+          const piece = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.035, 0.05), porkMat);
+          const ang = (p / 5) * Math.PI * 2;
+          piece.position.set(Math.cos(ang) * 0.07, 0.79, -0.1 + Math.sin(ang) * 0.07);
+          tGroup.add(piece);
+        }
+      }
+
+      [-0.55, 0.55].forEach((cz, idx) => {
+        const chair = new THREE.Group();
+        chair.position.set(0, 0, cz);
+        if (idx === 1) chair.rotation.y = Math.PI;
+
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.04, 0.42), chairYellowMat);
+        seat.position.y = 0.44;
+        chair.add(seat);
+
+        const back = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.44, 0.03), chairYellowMat);
+        back.position.set(0, 0.66, -0.2);
+        chair.add(back);
+
+        [-0.18, 0.18].forEach(lx => {
+          [-0.18, 0.18].forEach(lz => {
+            const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.44, 6), chairYellowMat);
+            leg.position.set(lx, 0.22, lz);
+            chair.add(leg);
+          });
+        });
+        tGroup.add(chair);
+      });
+
+      this.scene.add(tGroup);
+
+      this.physics.addBoxCollider(
+        new THREE.Vector3(tx - 0.45, floorY, tz - 0.45),
+        new THREE.Vector3(tx + 0.45, floorY + 0.9, tz + 0.45),
+        'solid'
+      );
+    };
+
+    createBotecoTable(x - 3.6, z - 1.5, false);
+    createBotecoTable(x - 3.6, z + 2.0, true);
+
+    // 9. Stack of Yellow Beer Crates in corner
+    const crateMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+    const crateW = 0.44;
+    const crateH = 0.30;
+    const crateD = 0.32;
+    [
+      [x - 4.6, floorY, z + 3.2],
+      [x - 4.6, floorY + crateH, z + 3.2],
+      [x - 4.15, floorY, z + 3.2]
+    ].forEach(([cx, cy, cz]) => {
+      const crate = new THREE.Mesh(new THREE.BoxGeometry(crateW, crateH, crateD), crateMat);
+      crate.position.set(cx, cy + crateH / 2, cz);
+      this.scene.add(crate);
+
+      const neckCol = new THREE.MeshLambertMaterial({ color: 0x78350f });
+      [-0.12, 0, 0.12].forEach(ox => {
+        [-0.08, 0.08].forEach(oz => {
+          const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.02, 0.08, 6), neckCol);
+          neck.position.set(cx + ox, cy + crateH + 0.03, cz + oz);
+          this.scene.add(neck);
+        });
+      });
+    });
+
+    // 10. Blue Chalk Cubes on snooker table rail
+    const chalkMat = new THREE.MeshBasicMaterial({ color: 0x2563eb });
+    const chalk1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.04), chalkMat);
+    chalk1.position.set(x - 1.25, floorY + 0.85 + 0.02, z + 0.74);
+    this.scene.add(chalk1);
+
+    const chalk2 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.04), chalkMat);
+    chalk2.position.set(x + 1.25, floorY + 0.85 + 0.02, z - 0.74);
+    this.scene.add(chalk2);
   }
 
   // 18.2 Walkable Adega do Zé with Illuminated Beverage Coolers (Version 2 Update)
