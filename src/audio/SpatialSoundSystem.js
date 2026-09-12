@@ -399,8 +399,9 @@ export class SpatialSoundSystem {
       this.nearestEmitter = dominantEmitter;
       const t = this.ctx.currentTime;
 
-      // When player is far from music sources, the sound fades cleanly to silence / near-silence (0.0)
-      const calculatedGain = Math.min(1.0, maxAudibleGain);
+      // When player is far from music sources, maintain a subtle muffled city acoustic floor (0.05)
+      // so open streets feel atmospheric while never dropping into uncanny dead silence
+      const calculatedGain = Math.min(1.0, Math.max(0.05, maxAudibleGain));
       const calculatedFreq = Math.min(20000, Math.max(800, targetFreq));
 
       this.spatialGain.gain.setTargetAtTime(calculatedGain, t, 0.15);

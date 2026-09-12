@@ -94,6 +94,7 @@ export class RadioBroadcast {
     this.isBroadcastingNews = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration = 0;
+    this.sessionGeneration = 0;
 
     this.audioElement.addEventListener('ended', () => this.handleAudioEnded());
 
@@ -115,6 +116,7 @@ export class RadioBroadcast {
     this.isPlaying = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration++;
+    this.sessionGeneration++;
     if (this.newsDesk && this.newsDesk.stop) {
       this.newsDesk.stop();
     }
@@ -129,6 +131,7 @@ export class RadioBroadcast {
     this.pendingEndedCallback = null;
     this.isBroadcastingNews = false;
     this.playbackGeneration++;
+    this.sessionGeneration++;
     if (this.newsDesk && this.newsDesk.stop) {
       this.newsDesk.stop();
     }
@@ -265,16 +268,16 @@ export class RadioBroadcast {
     }
 
     // 1. Play Station Vinheta
+    const sessionGen = this.sessionGeneration;
     const vinheta = VINHETAS_CATALOGUE[this.vinhetaIndex % VINHETAS_CATALOGUE.length];
     this.vinhetaIndex++;
     this.playAudioFile(vinheta.src, () => {
-      if (!this.isPlaying || this.activeStation === 'OFF') {
+      if (this.sessionGeneration !== sessionGen || !this.isPlaying || this.activeStation === 'OFF') {
         this.isBroadcastingNews = false;
         return;
       }
-      const newsGen = this.playbackGeneration;
       const finishIntermission = () => {
-        if (this.playbackGeneration !== newsGen || !this.isPlaying || this.activeStation === 'OFF') {
+        if (this.sessionGeneration !== sessionGen || !this.isPlaying || this.activeStation === 'OFF') {
           this.isBroadcastingNews = false;
           return;
         }
@@ -339,6 +342,12 @@ export class RadioBroadcast {
       playPromise.catch(err => {
         if (err.name !== 'AbortError') {
           console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
+          // Safety recovery watchdog: if play failed or was blocked, recover after brief delay
+          setTimeout(() => {
+            if (this.playbackGeneration === gen && this.isPlaying && this.activeStation !== 'OFF') {
+              this.handleAudioEnded();
+            }
+          }, 1200);
         }
       });
     }

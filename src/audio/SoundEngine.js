@@ -65,6 +65,24 @@ export class SoundEngine {
 
       this.isInitialized = true;
       this.startAmbience();
+
+      // Auto-resume AudioContext and active radio stream on tab focus / visibility
+      if (typeof document !== 'undefined') {
+        const resumeAudioIfActive = () => {
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          if (this.radioBroadcast && this.radioBroadcast.isPlaying && this.radioBroadcast.activeStation !== 'OFF') {
+            if (this.radioBroadcast.audioElement && this.radioBroadcast.audioElement.paused && !this.radioBroadcast.isBroadcastingNews) {
+              this.radioBroadcast.audioElement.play().catch(() => {});
+            }
+          }
+        };
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) resumeAudioIfActive();
+        });
+        window.addEventListener('focus', resumeAudioIfActive);
+      }
     } catch (e) {
       console.warn('Web Audio could not be initialized:', e);
     }

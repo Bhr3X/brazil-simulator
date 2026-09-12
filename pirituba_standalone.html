@@ -8056,8 +8056,9 @@ class SpatialSoundSystem {
       this.nearestEmitter = dominantEmitter;
       const t = this.ctx.currentTime;
 
-      // When player is far from music sources, the sound fades cleanly to silence / near-silence (0.0)
-      const calculatedGain = Math.min(1.0, maxAudibleGain);
+      // When player is far from music sources, maintain a subtle muffled city acoustic floor (0.05)
+      // so open streets feel atmospheric while never dropping into uncanny dead silence
+      const calculatedGain = Math.min(1.0, Math.max(0.05, maxAudibleGain));
       const calculatedFreq = Math.min(20000, Math.max(800, targetFreq));
 
       this.spatialGain.gain.setTargetAtTime(calculatedGain, t, 0.15);
@@ -8578,6 +8579,7 @@ class RadioBroadcast {
     this.isBroadcastingNews = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration = 0;
+    this.sessionGeneration = 0;
 
     this.audioElement.addEventListener('ended', () => this.handleAudioEnded());
 
@@ -8599,6 +8601,7 @@ class RadioBroadcast {
     this.isPlaying = false;
     this.pendingEndedCallback = null;
     this.playbackGeneration++;
+    this.sessionGeneration++;
     if (this.newsDesk && this.newsDesk.stop) {
       this.newsDesk.stop();
     }
@@ -8613,6 +8616,7 @@ class RadioBroadcast {
     this.pendingEndedCallback = null;
     this.isBroadcastingNews = false;
     this.playbackGeneration++;
+    this.sessionGeneration++;
     if (this.newsDesk && this.newsDesk.stop) {
       this.newsDesk.stop();
     }
@@ -8749,16 +8753,16 @@ class RadioBroadcast {
     }
 
     // 1. Play Station Vinheta
+    const sessionGen = this.sessionGeneration;
     const vinheta = VINHETAS_CATALOGUE[this.vinhetaIndex % VINHETAS_CATALOGUE.length];
     this.vinhetaIndex++;
     this.playAudioFile(vinheta.src, () => {
-      if (!this.isPlaying || this.activeStation === 'OFF') {
+      if (this.sessionGeneration !== sessionGen || !this.isPlaying || this.activeStation === 'OFF') {
         this.isBroadcastingNews = false;
         return;
       }
-      const newsGen = this.playbackGeneration;
       const finishIntermission = () => {
-        if (this.playbackGeneration !== newsGen || !this.isPlaying || this.activeStation === 'OFF') {
+        if (this.sessionGeneration !== sessionGen || !this.isPlaying || this.activeStation === 'OFF') {
           this.isBroadcastingNews = false;
           return;
         }
@@ -8823,6 +8827,12 @@ class RadioBroadcast {
       playPromise.catch(err => {
         if (err.name !== 'AbortError') {
           console.warn('[RadioBroadcast] Autoplay blocked or error:', err);
+          // Safety recovery watchdog: if play failed or was blocked, recover after brief delay
+          setTimeout(() => {
+            if (this.playbackGeneration === gen && this.isPlaying && this.activeStation !== 'OFF') {
+              this.handleAudioEnded();
+            }
+          }, 1200);
         }
       });
     }
@@ -9500,6 +9510,24 @@ class SoundEngine {
 
       this.isInitialized = true;
       this.startAmbience();
+
+      // Auto-resume AudioContext and active radio stream on tab focus / visibility
+      if (typeof document !== 'undefined') {
+        const resumeAudioIfActive = () => {
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          if (this.radioBroadcast && this.radioBroadcast.isPlaying && this.radioBroadcast.activeStation !== 'OFF') {
+            if (this.radioBroadcast.audioElement && this.radioBroadcast.audioElement.paused && !this.radioBroadcast.isBroadcastingNews) {
+              this.radioBroadcast.audioElement.play().catch(() => {});
+            }
+          }
+        };
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) resumeAudioIfActive();
+        });
+        window.addEventListener('focus', resumeAudioIfActive);
+      }
     } catch (e) {
       console.warn('Web Audio could not be initialized:', e);
     }
