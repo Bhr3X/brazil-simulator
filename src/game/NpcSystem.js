@@ -168,6 +168,7 @@ export class NpcSystem {
     this.initEventHosts();
     this.initEstablishmentNpcs();
     this.initCitywidePedestrians();
+    this.initPastelariaNpcs();
   }
 
   // Build articulated humanoid 3D mesh
@@ -463,13 +464,64 @@ export class NpcSystem {
       const chain = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.15), chainMat);
       chain.position.set(0.0, 1.34, 0.12);
       group.add(chain);
+    } else if (config.hasPastelInHands) {
+      const pastelMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+      const pastelGroup = new THREE.Group();
+      pastelGroup.name = 'npc_pastel';
+      pastelGroup.position.set(0, 1.15, 0.28);
+
+      const pastelBody = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.04, 0.18), pastelMat);
+      pastelGroup.add(pastelBody);
+
+      const paperWrap = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.045, 0.19),
+        new THREE.MeshLambertMaterial({ color: 0xffffff })
+      );
+      paperWrap.position.x = -0.07;
+      pastelGroup.add(paperWrap);
+
+      group.add(pastelGroup);
+    } else if (config.hasPastelPlatter) {
+      const trayGroup = new THREE.Group();
+      trayGroup.name = 'npc_pastel_tray';
+      trayGroup.position.set(0, 1.0, 0.35);
+
+      const trayMat = new THREE.MeshLambertMaterial({ color: 0xd4d4d8 });
+      const tray = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.03, 0.38), trayMat);
+      trayGroup.add(tray);
+
+      const pMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+      const p1 = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.035, 0.12), pMat);
+      p1.position.set(-0.12, 0.03, 0.05);
+      trayGroup.add(p1);
+
+      const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.035, 0.12), pMat);
+      p2.position.set(0.12, 0.03, -0.05);
+      trayGroup.add(p2);
+
+      const cupMat = new THREE.MeshLambertMaterial({ color: 0x84cc16, transparent: true, opacity: 0.85 });
+      const cup1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.14, 8), cupMat);
+      cup1.position.set(-0.12, 0.08, -0.1);
+      trayGroup.add(cup1);
+
+      const cup2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.14, 8), cupMat);
+      cup2.position.set(0.12, 0.08, 0.1);
+      trayGroup.add(cup2);
+
+      group.add(trayGroup);
+    }
+
+    if (config.isSitting) {
+      leftLeg.rotation.x = -Math.PI / 2;
+      rightLeg.rotation.x = -Math.PI / 2;
     }
 
     this.applyCarnivalCostume(group, headGroup, config.costumeId);
 
     // Set initial position (waypoint y / baseY keep elevated NPCs off the street plane)
     const startWp = config.waypoints[0];
-    const startY = startWp.y != null ? startWp.y : (config.baseY != null ? config.baseY : 0);
+    const rawY = startWp.y != null ? startWp.y : (config.baseY != null ? config.baseY : 0);
+    const startY = rawY - (config.isSitting ? 0.28 : 0);
     group.position.set(startWp.x, startY, startWp.z);
     if (config.defaultYaw != null) group.rotation.y = config.defaultYaw;
     if (config.zoneId) group.visible = false;
@@ -496,7 +548,8 @@ export class NpcSystem {
       zoneId: config.zoneId || null,
       interactable: config.interactable !== false,
       animationMode: config.animationMode || null,
-      baseY: config.baseY != null ? config.baseY : startY,
+      baseY: config.baseY != null ? config.baseY : rawY,
+      isSitting: Boolean(config.isSitting),
       costumeId: config.costumeId || null,
       stationary: config.stationary || false,
       defaultYaw: config.defaultYaw != null ? config.defaultYaw : 0
@@ -907,7 +960,55 @@ export class NpcSystem {
       return;
     }
 
+    if (npc.animationMode === 'EAT_PASTEL') {
+      const eatCycle = Math.sin(npc.animTimer * 2.2);
+      const lift = Math.max(0, eatCycle);
+      npc.leftArm.rotation.x = -0.85 - lift * 0.45;
+      npc.rightArm.rotation.x = -0.85 - lift * 0.45;
+      npc.leftArm.rotation.z = 0.3;
+      npc.rightArm.rotation.z = -0.3;
+      npc.headGroup.rotation.x = lift * 0.2;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 5.0) * 0.04;
+      if (npc.isSitting) {
+        npc.leftLeg.rotation.x = -Math.PI / 2;
+        npc.rightLeg.rotation.x = -Math.PI / 2;
+        npc.group.position.y = baseY - 0.28 + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.01;
+      } else {
+        npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.02;
+      }
+      return;
+    }
+
+    if (npc.animationMode === 'SERVE_PASTEL') {
+      npc.leftArm.rotation.x = -0.85;
+      npc.rightArm.rotation.x = -0.85;
+      npc.leftArm.rotation.z = 0.18;
+      npc.rightArm.rotation.z = -0.18;
+      const legSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.45;
+      npc.leftLeg.rotation.x = legSwing;
+      npc.rightLeg.rotation.x = -legSwing;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 1.5) * 0.12;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.04;
+      return;
+    }
+
+    if (npc.animationMode === 'FRY_PASTEL') {
+      const fry = Math.sin(npc.animTimer * 2.8) * 0.25;
+      npc.rightArm.rotation.x = -0.8 + fry;
+      npc.leftArm.rotation.x = -0.35 + Math.cos(npc.animTimer * 1.4) * 0.1;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 1.2) * 0.18;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.02;
+      return;
+    }
+
     if (npc.type === 'HUMANOID') {
+      if (npc.isSitting) {
+        npc.leftLeg.rotation.x = -Math.PI / 2;
+        npc.rightLeg.rotation.x = -Math.PI / 2;
+        npc.group.position.y = baseY - 0.28;
+        return;
+      }
+
       const legSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.55;
       const armSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.45;
 
@@ -1831,5 +1932,110 @@ export class NpcSystem {
     ];
 
     this.cityPedestrians.forEach(p => this.npcs.push(p));
+  }
+
+  // Pastelaria do Beto salon NPCs: Frying, Serving, and Eating Pastéis
+  initPastelariaNpcs() {
+    this.pastelariaNpcs = [
+      // 1. Seu Beto (O Mestre Pasteleiro frying pastéis behind the counter)
+      this.createHumanoidNpc({
+        id: 'beto_pasteleiro',
+        name: 'SEU BETO (MESTRE PASTELEIRO)',
+        shirtColor: 0xffffff,
+        skinColor: 0x94603d,
+        pantsColor: 0x27272a,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xdc2626, // Red & white pastelaria apron
+        hasMustache: true,
+        hasTongs: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East (+X towards salon)
+        waypoints: [{ x: 72.0, y: 0.05, z: 43.0 }],
+        interactable: false,
+        animationMode: 'FRY_PASTEL',
+        baseY: 0.05
+      }),
+
+      // 2. Marquinhos (Garçom do salão carrying tray with pastéis and caldo de cana)
+      this.createHumanoidNpc({
+        id: 'marquinhos_garcom',
+        name: 'MARQUINHOS (GARÇOM DO SALÃO)',
+        shirtColor: 0xdc2626, // Red polo uniform
+        skinColor: 0x7c4e2d,
+        pantsColor: 0x18181b,
+        hasApron: true,
+        apronColor: 0x18181b,
+        hasPastelPlatter: true,
+        interactable: false,
+        speed: 1.05,
+        animationMode: 'SERVE_PASTEL',
+        baseY: 0.05,
+        waypoints: [
+          { x: 73.8, y: 0.05, z: 41.5 },
+          { x: 75.8, y: 0.05, z: 40.0 },
+          { x: 75.8, y: 0.05, z: 43.5 },
+          { x: 73.8, y: 0.05, z: 41.5 }
+        ]
+      }),
+
+      // 3. Tio Carlinhos (Cliente na Mesa 1 comendo pastel de 30cm)
+      this.createHumanoidNpc({
+        id: 'tio_carlinhos_cliente',
+        name: 'TIO CARLINHOS (CLIENTE)',
+        shirtColor: 0x2563eb, // Blue polo
+        skinColor: 0x8a5832,
+        pantsColor: 0xd97706, // Khaki
+        hasMustache: true,
+        hasGlasses: true,
+        hasPastelInHands: true,
+        isSitting: true,
+        stationary: true,
+        defaultYaw: 0, // Facing North (+Z towards table)
+        waypoints: [{ x: 76.9, y: 0.05, z: 39.55 }],
+        interactable: false,
+        animationMode: 'EAT_PASTEL',
+        baseY: 0.05
+      }),
+
+      // 4. Dona Ivone (Cliente na Mesa 2 comendo pastel e caldo de cana)
+      this.createHumanoidNpc({
+        id: 'dona_ivone_cliente',
+        name: 'DONA IVONE (CLIENTE)',
+        shirtColor: 0xfacc15, // Yellow blouse
+        skinColor: 0xb58055,
+        pantsColor: 0x475569,
+        hasHairBun: true,
+        hasGlasses: true,
+        hasPastelInHands: true,
+        isSitting: true,
+        stationary: true,
+        defaultYaw: Math.PI, // Facing South (-Z towards table)
+        waypoints: [{ x: 76.9, y: 0.05, z: 45.25 }],
+        interactable: false,
+        animationMode: 'EAT_PASTEL',
+        baseY: 0.05
+      }),
+
+      // 5. Luquinhas (Cliente em pé no balcão comendo pastel quente)
+      this.createHumanoidNpc({
+        id: 'luquinhas_balcao',
+        name: 'LUQUINHAS (CLIENTE NO BALCÃO)',
+        shirtColor: 0x18181b, // Black tank top
+        skinColor: 0xa16843,
+        pantsColor: 0x0284c7, // Tactel azul
+        hasForwardCap: true,
+        capColor: 0xdc2626,
+        hasPastelInHands: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West (-X towards counter)
+        waypoints: [{ x: 73.9, y: 0.05, z: 41.5 }],
+        interactable: false,
+        animationMode: 'EAT_PASTEL',
+        baseY: 0.05
+      })
+    ];
+
+    this.pastelariaNpcs.forEach(n => this.npcs.push(n));
   }
 }

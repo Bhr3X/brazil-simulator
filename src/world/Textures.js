@@ -3560,5 +3560,67 @@ export class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 78. Pastelaria Menu Blackboard
+  createPastelariaMenuBoard() {
+    const key = 'pastelaria_menu_board';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+    // Dark slate chalkboard
+    ctx.fillStyle = '#1c1917';
+    ctx.fillRect(0, 0, 256, 128);
+
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(4, 4, 248, 120);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 16px "Arial Black", sans-serif';
+    ctx.fillText('🥟 CARDÁPIO DO BETO 🥟', 128, 26);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CARNE • QUEIJO • PIZZA • PALMITO', 128, 48);
+    ctx.fillText('FRANGO C/ CATUPIRY • CALABRESA', 128, 68);
+
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('⭐ ESPECIAL DO BETO 30CM ⭐', 128, 90);
+
+    ctx.fillStyle = '#86efac';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('🥤 CALDO DE CANA GELADO C/ LIMÃO', 128, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 79. Pastelaria Checkered Floor Tiles
+  createPisoPastelaria(repeatX = 4, repeatY = 4) {
+    const key = `piso_pastelaria_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Light cream & golden checkered tiles
+    const tileSize = 64;
+    for (let x = 0; x < 256; x += tileSize) {
+      for (let y = 0; y < 256; y += tileSize) {
+        const isAlt = ((x / tileSize) + (y / tileSize)) % 2 === 0;
+        ctx.fillStyle = isAlt ? '#fef3c7' : '#f59e0b';
+        ctx.fillRect(x, y, tileSize, tileSize);
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, tileSize, tileSize);
+      }
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
+
 

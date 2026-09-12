@@ -6882,7 +6882,69 @@ class TextureGenerator {
     this.cache[key] = texture;
     return texture;
   }
+
+  // 78. Pastelaria Menu Blackboard
+  createPastelariaMenuBoard() {
+    const key = 'pastelaria_menu_board';
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 128);
+    // Dark slate chalkboard
+    ctx.fillStyle = '#1c1917';
+    ctx.fillRect(0, 0, 256, 128);
+
+    ctx.strokeStyle = '#ca8a04';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(4, 4, 248, 120);
+
+    ctx.fillStyle = '#fef08a';
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 16px "Arial Black", sans-serif';
+    ctx.fillText('🥟 CARDÁPIO DO BETO 🥟', 128, 26);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CARNE • QUEIJO • PIZZA • PALMITO', 128, 48);
+    ctx.fillText('FRANGO C/ CATUPIRY • CALABRESA', 128, 68);
+
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('⭐ ESPECIAL DO BETO 30CM ⭐', 128, 90);
+
+    ctx.fillStyle = '#86efac';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('🥤 CALDO DE CANA GELADO C/ LIMÃO', 128, 112);
+
+    const texture = this.toThreeTexture(canvas, 1, 1);
+    this.cache[key] = texture;
+    return texture;
+  }
+
+  // 79. Pastelaria Checkered Floor Tiles
+  createPisoPastelaria(repeatX = 4, repeatY = 4) {
+    const key = `piso_pastelaria_${repeatX}_${repeatY}`;
+    if (this.cache[key]) return this.cache[key];
+
+    const { canvas, ctx } = this.createCanvas(256, 256);
+    // Light cream & golden checkered tiles
+    const tileSize = 64;
+    for (let x = 0; x < 256; x += tileSize) {
+      for (let y = 0; y < 256; y += tileSize) {
+        const isAlt = ((x / tileSize) + (y / tileSize)) % 2 === 0;
+        ctx.fillStyle = isAlt ? '#fef3c7' : '#f59e0b';
+        ctx.fillRect(x, y, tileSize, tileSize);
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, tileSize, tileSize);
+      }
+    }
+
+    const texture = this.toThreeTexture(canvas, repeatX, repeatY);
+    this.cache[key] = texture;
+    return texture;
+  }
 }
+
 
 
 /**
@@ -16283,6 +16345,381 @@ class CityBuilder {
     this.buildResidentNpc(x + 0.2, floorY, z + 0.8, 0x114488, 0x8a5530, 0x1c2b3a, false, -Math.PI / 4);
   }
 
+  // 18.2e Walkable "Pastelaria do Beto" with Dining Salon, Estufa, Sugarcane Press & Tables
+  buildWalkablePastelaria(x, y, z) {
+    const w = 11.0;
+    const h = 4.8;
+    const d = 11.0;
+    const halfW = w / 2;
+    const halfD = d / 2;
+    const floorY = y;
+    const roofY = y + h;
+
+    const wallMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPaintedWall('#fef08a', 2, 2)
+    });
+    const intTileMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    const floorMat = new THREE.MeshLambertMaterial({
+      map: this.textures.createPisoPastelaria(4, 4)
+    });
+    const ceilingMat = new THREE.MeshLambertMaterial({ color: 0x827d75 });
+    const chromeMat = new THREE.MeshLambertMaterial({ color: 0xd4d4d8 });
+    const counterFormicaMat = new THREE.MeshLambertMaterial({ color: 0x9a3412 }); // Amber formica
+    const counterTopMat = new THREE.MeshLambertMaterial({ color: 0xf1f5f9 }); // Stainless steel top
+    const pastelMat = new THREE.MeshLambertMaterial({ color: 0xeab308 }); // Golden fried pastry
+    const caneMat = new THREE.MeshLambertMaterial({ color: 0x65a30d }); // Sugarcane stalks
+    const chairRedMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+    const chairYellowMat = new THREE.MeshLambertMaterial({ color: 0xfacc15 });
+    const tableMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+
+    // 1. Floor
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, d), floorMat);
+    floor.position.set(x, floorY + 0.05, z);
+    this.scene.add(floor);
+
+    // Register walkable interior floor
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - halfW, 0, z - halfD),
+      new THREE.Vector3(x + halfW, floorY + 0.15, z + halfD),
+      'walkable'
+    );
+
+    // 2. Ceiling / Laje with water tank
+    const ceiling = new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, d), ceilingMat);
+    ceiling.position.set(x, roofY, z);
+    this.scene.add(ceiling);
+    this.buildWaterTank(x - 2.0, roofY + 0.1, z + 1.5);
+
+    // 3. Back Wall (Z = z + halfD) with Menu Board
+    const backWall = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.3), intTileMat);
+    backWall.position.set(x, floorY + h / 2, z + halfD);
+    this.scene.add(backWall);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - halfW, floorY, z + halfD - 0.2),
+      new THREE.Vector3(x + halfW, roofY, z + halfD + 0.2),
+      'solid'
+    );
+
+    // Large Menu Blackboard on Back Wall
+    const menuMat = new THREE.MeshBasicMaterial({ map: this.textures.createPastelariaMenuBoard() });
+    const menuBoard = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.8), menuMat);
+    menuBoard.position.set(x + 1.2, floorY + 2.6, z + halfD - 0.16);
+    menuBoard.rotation.y = Math.PI;
+    this.scene.add(menuBoard);
+
+    // Kitchen pass-through door / curtain on back wall
+    const kitchenDoor = new THREE.Mesh(
+      new THREE.BoxGeometry(1.4, 2.6, 0.05),
+      new THREE.MeshLambertMaterial({ color: 0x334155 })
+    );
+    kitchenDoor.position.set(x - 3.2, floorY + 1.3, z + halfD - 0.14);
+    this.scene.add(kitchenDoor);
+
+    // 4. Left Wall (West: X = x - halfW, adjacent to Lotérica)
+    const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, h, d), wallMat);
+    leftWall.position.set(x - halfW, floorY + h / 2, z);
+    this.scene.add(leftWall);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - halfW - 0.2, floorY, z - halfD),
+      new THREE.Vector3(x - halfW + 0.2, roofY, z + halfD),
+      'solid'
+    );
+
+    // 5. Right Wall (East: X = x + halfW)
+    const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, h, d), wallMat);
+    rightWall.position.set(x + halfW, floorY + h / 2, z);
+    this.scene.add(rightWall);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + halfW - 0.2, floorY, z - halfD),
+      new THREE.Vector3(x + halfW + 0.2, roofY, z + halfD),
+      'solid'
+    );
+
+    // 6. Front Facade with Wide Open Central Entrance (doorW = 6.8m)
+    const doorW = 6.8;
+    const sideWallW = (w - doorW) / 2; // 2.1m each side
+
+    // Left front pier
+    const fLeft = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, h, 0.3), wallMat);
+    fLeft.position.set(x - halfW + sideWallW / 2, floorY + h / 2, z - halfD);
+    this.scene.add(fLeft);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - halfW, floorY, z - halfD - 0.15),
+      new THREE.Vector3(x - halfW + sideWallW, roofY, z - halfD + 0.15),
+      'solid'
+    );
+
+    // Right front pier
+    const fRight = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, h, 0.3), wallMat);
+    fRight.position.set(x + halfW - sideWallW / 2, floorY + h / 2, z - halfD);
+    this.scene.add(fRight);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x + halfW - sideWallW, floorY, z - halfD - 0.15),
+      new THREE.Vector3(x + halfW, roofY, z - halfD + 0.15),
+      'solid'
+    );
+
+    // Overhead lintel
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorW, 1.4, 0.3), wallMat);
+    lintel.position.set(x, floorY + h - 0.7, z - halfD);
+    this.scene.add(lintel);
+
+    // Rolled-up steel shutter door overhead
+    const shutterMat = new THREE.MeshLambertMaterial({ map: this.textures.createPortaAco('#475569') });
+    const shutter = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, doorW - 0.1, 12), shutterMat);
+    shutter.rotation.z = Math.PI / 2;
+    shutter.position.set(x, floorY + h - 1.45, z - halfD);
+    this.scene.add(shutter);
+
+    // Signboard "PASTELARIA DO BETO"
+    const pastSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createPastelariaBetoSign() });
+    const pastSign = new THREE.Mesh(new THREE.BoxGeometry(5.8, 1.25, 0.1), pastSignMat);
+    pastSign.position.set(x, floorY + h - 0.75, z - halfD - 0.18);
+    this.scene.add(pastSign);
+
+    // Red & yellow awning over entrance
+    const pastAwningMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
+    const pastAwning = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.1, 1.6), pastAwningMat);
+    pastAwning.rotation.x = -0.25;
+    pastAwning.position.set(x, floorY + 3.2, z - halfD - 0.8);
+    this.scene.add(pastAwning);
+
+    // 7. Interior Warm Lighting (Pendant lights & Estufa glow)
+    const intLight = new THREE.PointLight(0xffe6aa, 2.4, 16, 1.1);
+    intLight.position.set(x + 1.0, floorY + 3.6, z);
+    this.scene.add(intLight);
+
+    const intLight2 = new THREE.PointLight(0xfff7ed, 1.8, 12, 1.1);
+    intLight2.position.set(x - 2.0, floorY + 3.6, z + 2.0);
+    this.scene.add(intLight2);
+
+    // Pendant shades
+    [x + 1.0, x - 2.0].forEach(lx => {
+      const shade = new THREE.Mesh(
+        new THREE.ConeGeometry(0.35, 0.22, 8, 1, true),
+        new THREE.MeshLambertMaterial({ color: 0x991b1b, side: THREE.DoubleSide })
+      );
+      shade.position.set(lx, floorY + 3.7, z + 1.0);
+      this.scene.add(shade);
+    });
+
+    // 8. Service Counter (Balcão em L)
+    const counterW = 0.8;
+    const counterH = 1.05;
+    const counterD = 5.0;
+    const counterBase = new THREE.Mesh(new THREE.BoxGeometry(counterW, counterH, counterD), counterFormicaMat);
+    counterBase.position.set(x - 1.5, floorY + counterH / 2, z + 0.5);
+    this.scene.add(counterBase);
+
+    const counterTop = new THREE.Mesh(new THREE.BoxGeometry(counterW + 0.15, 0.08, counterD + 0.2), counterTopMat);
+    counterTop.position.set(x - 1.5, floorY + counterH + 0.04, z + 0.5);
+    this.scene.add(counterTop);
+
+    // Counter solid collider
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - 1.5 - counterW / 2, floorY, z + 0.5 - counterD / 2),
+      new THREE.Vector3(x - 1.5 + counterW / 2, floorY + counterH, z + 0.5 + counterD / 2),
+      'solid'
+    );
+
+    // Return counter at the back (Z = z + 3.0)
+    const retW = 3.5;
+    const retBase = new THREE.Mesh(new THREE.BoxGeometry(retW, counterH, 0.8), counterFormicaMat);
+    retBase.position.set(x - 3.25, floorY + counterH / 2, z + 2.6);
+    this.scene.add(retBase);
+    const retTop = new THREE.Mesh(new THREE.BoxGeometry(retW + 0.1, 0.08, 0.9), counterTopMat);
+    retTop.position.set(x - 3.25, floorY + counterH + 0.04, z + 2.6);
+    this.scene.add(retTop);
+    this.physics.addBoxCollider(
+      new THREE.Vector3(x - 3.25 - retW / 2, floorY, z + 2.6 - 0.4),
+      new THREE.Vector3(x - 3.25 + retW / 2, floorY + counterH, z + 2.6 + 0.4),
+      'solid'
+    );
+
+    // 9. Estufa de Pastéis Aquecida (Curved Glass Display Warmer)
+    const estufaGeo = new THREE.BoxGeometry(0.7, 0.55, 1.4);
+    const estufaGlass = new THREE.Mesh(
+      estufaGeo,
+      new THREE.MeshLambertMaterial({ color: 0xffedd5, transparent: true, opacity: 0.65 })
+    );
+    estufaGlass.position.set(x - 1.5, floorY + counterH + 0.32, z - 0.5);
+    this.scene.add(estufaGlass);
+
+    // Warm golden glow inside the estufa
+    const estufaGlow = new THREE.PointLight(0xf59e0b, 2.0, 4.0);
+    estufaGlow.position.set(x - 1.5, floorY + counterH + 0.35, z - 0.5);
+    this.scene.add(estufaGlow);
+
+    // Wire rack inside estufa
+    const rack = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.02, 1.2), chromeMat);
+    rack.position.set(x - 1.5, floorY + counterH + 0.18, z - 0.5);
+    this.scene.add(rack);
+
+    // Golden pastéis displayed inside the estufa
+    for (let p = 0; p < 4; p++) {
+      const past = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.04, 0.16), pastelMat);
+      past.rotation.y = 0.2 * (p % 2 === 0 ? 1 : -1);
+      past.position.set(x - 1.5, floorY + counterH + 0.22, z - 0.95 + p * 0.3);
+      this.scene.add(past);
+    }
+
+    // 10. Moenda Elétrica de Caldo de Cana & Sugarcane Props
+    const moendaBase = new THREE.Mesh(
+      new THREE.BoxGeometry(0.55, 0.55, 0.7),
+      new THREE.MeshLambertMaterial({ color: 0x15803d }) // Green chassis
+    );
+    moendaBase.position.set(x - 1.5, floorY + counterH + 0.3, z + 1.5);
+    this.scene.add(moendaBase);
+
+    // Stainless steel rollers and feed chute
+    const roller = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.3, 10), chromeMat);
+    roller.rotation.x = Math.PI / 2;
+    roller.position.set(x - 1.35, floorY + counterH + 0.38, z + 1.5);
+    this.scene.add(roller);
+
+    const chute = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.04, 0.3), chromeMat);
+    chute.rotation.z = -0.3;
+    chute.position.set(x - 1.25, floorY + counterH + 0.42, z + 1.5);
+    this.scene.add(chute);
+
+    // Sugarcane stalks basket beside the press
+    for (let c = 0; c < 6; c++) {
+      const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.6, 8), caneMat);
+      cane.rotation.z = 0.1 + (c % 2) * 0.08;
+      cane.position.set(x - 2.1 + (c % 3) * 0.09, floorY + 0.8, z + 2.1 + Math.floor(c / 3) * 0.09);
+      this.scene.add(cane);
+    }
+
+    // Pitcher of Iced Caldo de Cana
+    const jug = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.1, 0.35, 8),
+      new THREE.MeshLambertMaterial({ color: 0x84cc16, transparent: true, opacity: 0.8 })
+    );
+    jug.position.set(x - 1.5, floorY + counterH + 0.22, z + 2.1);
+    this.scene.add(jug);
+
+    // 11. Condiments on Counter (Vinagrete, Pimenta, Guardanapos)
+    const potMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
+    const vinagretePot = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.12, 8), potMat);
+    vinagretePot.position.set(x - 1.5, floorY + counterH + 0.1, z + 0.5);
+    this.scene.add(vinagretePot);
+
+    const spoon = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.16, 0.02), chromeMat);
+    spoon.rotation.z = 0.2;
+    spoon.position.set(x - 1.5, floorY + counterH + 0.14, z + 0.5);
+    this.scene.add(spoon);
+
+    // Squeeze bottles (Ketchup & Mustard)
+    const mustard = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.035, 0.18, 8),
+      new THREE.MeshLambertMaterial({ color: 0xeab308 })
+    );
+    mustard.position.set(x - 1.5, floorY + counterH + 0.13, z + 0.7);
+    this.scene.add(mustard);
+
+    const ketchup = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.035, 0.18, 8),
+      new THREE.MeshLambertMaterial({ color: 0xdc2626 })
+    );
+    ketchup.position.set(x - 1.5, floorY + counterH + 0.13, z + 0.8);
+    this.scene.add(ketchup);
+
+    // Napkin dispenser
+    const napkinBox = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.16, 0.12), chromeMat);
+    napkinBox.position.set(x - 1.5, floorY + counterH + 0.12, z + 0.3);
+    this.scene.add(napkinBox);
+
+    // 12. Counter Barstools
+    [-1.2, 0.8].forEach(sz => {
+      const stoolBase = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.04, 10), chromeMat);
+      stoolBase.position.set(x - 0.75, floorY + 0.02, z + sz);
+      this.scene.add(stoolBase);
+      const stoolPole = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.68, 8), chromeMat);
+      stoolPole.position.set(x - 0.75, floorY + 0.35, z + sz);
+      this.scene.add(stoolPole);
+      const stoolSeat = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.06, 10), chairRedMat);
+      stoolSeat.position.set(x - 0.75, floorY + 0.72, z + sz);
+      this.scene.add(stoolSeat);
+    });
+
+    // 13. Salão Dining Area: 2 Dining Tables with Chairs & Props
+    const createDiningTable = (tx, tz, chairMat, pastelCount) => {
+      // Pedestal & Tabletop
+      const tablePost = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 8), chromeMat);
+      tablePost.position.set(tx, floorY + 0.35, tz);
+      this.scene.add(tablePost);
+      const tableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.04, 12), chromeMat);
+      tableBase.position.set(tx, floorY + 0.02, tz);
+      this.scene.add(tableBase);
+      const tableTop = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 1.0), tableMat);
+      tableTop.position.set(tx, floorY + 0.73, tz);
+      this.scene.add(tableTop);
+
+      // Table collider
+      this.physics.addBoxCollider(
+        new THREE.Vector3(tx - 0.5, floorY, tz - 0.5),
+        new THREE.Vector3(tx + 0.5, floorY + 0.8, tz + 0.5),
+        'solid'
+      );
+
+      // 2 Chairs (North & South)
+      [-0.75, 0.75].forEach(cz => {
+        const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.05, 0.42), chairMat);
+        chairSeat.position.set(tx, floorY + 0.45, tz + cz);
+        this.scene.add(chairSeat);
+
+        const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.04), chairMat);
+        chairBack.position.set(tx, floorY + 0.72, tz + cz + (cz > 0 ? 0.2 : -0.2));
+        this.scene.add(chairBack);
+
+        // Legs
+        [-0.18, 0.18].forEach(lx => {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.45, 6), chromeMat);
+          leg.position.set(tx + lx, floorY + 0.225, tz + cz);
+          this.scene.add(leg);
+        });
+      });
+
+      // Tabletop Food Props: Plate with 30cm pastel & Caldo de cana
+      const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.22, 0.03, 12), tableMat);
+      plate.position.set(tx - 0.1, floorY + 0.77, tz);
+      this.scene.add(plate);
+
+      for (let i = 0; i < pastelCount; i++) {
+        const past = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.04, 0.16), pastelMat);
+        past.position.set(tx - 0.1, floorY + 0.8 + i * 0.04, tz);
+        this.scene.add(past);
+      }
+
+      // Cup of Caldo de Cana with straw
+      const cup = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.045, 0.035, 0.16, 8),
+        new THREE.MeshLambertMaterial({ color: 0x84cc16, transparent: true, opacity: 0.85 })
+      );
+      cup.position.set(tx + 0.25, floorY + 0.84, tz - 0.18);
+      this.scene.add(cup);
+
+      const straw = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.008, 0.008, 0.24, 6),
+        new THREE.MeshLambertMaterial({ color: 0xdc2626 })
+      );
+      straw.rotation.z = 0.25;
+      straw.position.set(tx + 0.28, floorY + 0.94, tz - 0.18);
+      this.scene.add(straw);
+
+      // Mini napkin holder
+      const nap = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.08), chromeMat);
+      nap.position.set(tx + 0.22, floorY + 0.82, tz + 0.2);
+      this.scene.add(nap);
+    };
+
+    // Table 1 (North dining spot) with red chairs
+    createDiningTable(x + 2.4, z - 2.2, chairRedMat, 1);
+
+    // Table 2 (South dining spot) with yellow chairs
+    createDiningTable(x + 2.4, z + 2.0, chairYellowMat, 2);
+  }
+
   // 18.2d Walkable "Banco Pirituba" with Glass Revolving Entrance, Teller Counters & Security Guard
   buildWalkableBanco(x, y, z) {
     const w = 12.5;
@@ -19336,43 +19773,8 @@ class CityBuilder {
 
     this.physics.addBoxCollider(new THREE.Vector3(57.0, 0, 37.0), new THREE.Vector3(68.0, 5.5, 47.0), 'solid');
 
-    // 5. Pastelaria do Beto (South side: X = 69.0 to 80.0, Z = 37.0 to 47.0)
-    const pastGeo = new THREE.BoxGeometry(11.0, 5.2, 10.0);
-    const pastMat = new THREE.MeshLambertMaterial({
-      map: this.textures.createPaintedWall('#fef08a', 2, 2)
-    });
-    const pastMesh = new THREE.Mesh(pastGeo, pastMat);
-    pastMesh.position.set(74.5, 2.6, 42.0);
-    this.scene.add(pastMesh);
-
-    // Pastelaria Signboard
-    const pastSignMat = new THREE.MeshBasicMaterial({ map: this.textures.createPastelariaBetoSign() });
-    const pastSign = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.2, 0.1), pastSignMat);
-    pastSign.position.set(74.5, 4.0, 36.95);
-    this.scene.add(pastSign);
-
-    // Red & yellow awning over sidewalk
-    const pastAwningMat = new THREE.MeshLambertMaterial({ color: 0xdc2626 });
-    const pastAwning = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.1, 1.6), pastAwningMat);
-    pastAwning.rotation.x = -0.25;
-    pastAwning.position.set(74.5, 3.2, 36.2);
-    this.scene.add(pastAwning);
-
-    // Stainless steel frying station & sugarcane press
-    const fryStation = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 0.8), chromeMat);
-    fryStation.position.set(73.2, 0.45, 36.0);
-    this.scene.add(fryStation);
-
-    // Sugarcane green stalks prop
-    const caneMat = new THREE.MeshLambertMaterial({ color: 0x65a30d });
-    for (let c = 0; c < 5; c++) {
-      const cane = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 8), caneMat);
-      cane.rotation.z = 0.15;
-      cane.position.set(75.2 + c * 0.08, 0.8, 36.1);
-      this.scene.add(cane);
-    }
-
-    this.physics.addBoxCollider(new THREE.Vector3(69.0, 0, 37.0), new THREE.Vector3(80.0, 5.5, 47.0), 'solid');
+    // 5. Pastelaria do Beto: Walk-in Salon with Dining Tables, Estufa, Moenda de Caldo & Seating
+    this.buildWalkablePastelaria(74.5, 0, 42.5);
 
     // 6. Bar & Petiscaria Cantinho do Peixe (North side: X = 96.0 to 112.0, Z = -8.0 to 2.0)
     const peixeGeo = new THREE.BoxGeometry(16.0, 5.5, 10.0);
@@ -27119,6 +27521,7 @@ class NpcSystem {
     this.initEventHosts();
     this.initEstablishmentNpcs();
     this.initCitywidePedestrians();
+    this.initPastelariaNpcs();
   }
 
   // Build articulated humanoid 3D mesh
@@ -27414,13 +27817,64 @@ class NpcSystem {
       const chain = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.15), chainMat);
       chain.position.set(0.0, 1.34, 0.12);
       group.add(chain);
+    } else if (config.hasPastelInHands) {
+      const pastelMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+      const pastelGroup = new THREE.Group();
+      pastelGroup.name = 'npc_pastel';
+      pastelGroup.position.set(0, 1.15, 0.28);
+
+      const pastelBody = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.04, 0.18), pastelMat);
+      pastelGroup.add(pastelBody);
+
+      const paperWrap = new THREE.Mesh(
+        new THREE.BoxGeometry(0.18, 0.045, 0.19),
+        new THREE.MeshLambertMaterial({ color: 0xffffff })
+      );
+      paperWrap.position.x = -0.07;
+      pastelGroup.add(paperWrap);
+
+      group.add(pastelGroup);
+    } else if (config.hasPastelPlatter) {
+      const trayGroup = new THREE.Group();
+      trayGroup.name = 'npc_pastel_tray';
+      trayGroup.position.set(0, 1.0, 0.35);
+
+      const trayMat = new THREE.MeshLambertMaterial({ color: 0xd4d4d8 });
+      const tray = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.03, 0.38), trayMat);
+      trayGroup.add(tray);
+
+      const pMat = new THREE.MeshLambertMaterial({ color: 0xeab308 });
+      const p1 = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.035, 0.12), pMat);
+      p1.position.set(-0.12, 0.03, 0.05);
+      trayGroup.add(p1);
+
+      const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.035, 0.12), pMat);
+      p2.position.set(0.12, 0.03, -0.05);
+      trayGroup.add(p2);
+
+      const cupMat = new THREE.MeshLambertMaterial({ color: 0x84cc16, transparent: true, opacity: 0.85 });
+      const cup1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.14, 8), cupMat);
+      cup1.position.set(-0.12, 0.08, -0.1);
+      trayGroup.add(cup1);
+
+      const cup2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.14, 8), cupMat);
+      cup2.position.set(0.12, 0.08, 0.1);
+      trayGroup.add(cup2);
+
+      group.add(trayGroup);
+    }
+
+    if (config.isSitting) {
+      leftLeg.rotation.x = -Math.PI / 2;
+      rightLeg.rotation.x = -Math.PI / 2;
     }
 
     this.applyCarnivalCostume(group, headGroup, config.costumeId);
 
     // Set initial position (waypoint y / baseY keep elevated NPCs off the street plane)
     const startWp = config.waypoints[0];
-    const startY = startWp.y != null ? startWp.y : (config.baseY != null ? config.baseY : 0);
+    const rawY = startWp.y != null ? startWp.y : (config.baseY != null ? config.baseY : 0);
+    const startY = rawY - (config.isSitting ? 0.28 : 0);
     group.position.set(startWp.x, startY, startWp.z);
     if (config.defaultYaw != null) group.rotation.y = config.defaultYaw;
     if (config.zoneId) group.visible = false;
@@ -27447,7 +27901,8 @@ class NpcSystem {
       zoneId: config.zoneId || null,
       interactable: config.interactable !== false,
       animationMode: config.animationMode || null,
-      baseY: config.baseY != null ? config.baseY : startY,
+      baseY: config.baseY != null ? config.baseY : rawY,
+      isSitting: Boolean(config.isSitting),
       costumeId: config.costumeId || null,
       stationary: config.stationary || false,
       defaultYaw: config.defaultYaw != null ? config.defaultYaw : 0
@@ -27858,7 +28313,55 @@ class NpcSystem {
       return;
     }
 
+    if (npc.animationMode === 'EAT_PASTEL') {
+      const eatCycle = Math.sin(npc.animTimer * 2.2);
+      const lift = Math.max(0, eatCycle);
+      npc.leftArm.rotation.x = -0.85 - lift * 0.45;
+      npc.rightArm.rotation.x = -0.85 - lift * 0.45;
+      npc.leftArm.rotation.z = 0.3;
+      npc.rightArm.rotation.z = -0.3;
+      npc.headGroup.rotation.x = lift * 0.2;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 5.0) * 0.04;
+      if (npc.isSitting) {
+        npc.leftLeg.rotation.x = -Math.PI / 2;
+        npc.rightLeg.rotation.x = -Math.PI / 2;
+        npc.group.position.y = baseY - 0.28 + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.01;
+      } else {
+        npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.02;
+      }
+      return;
+    }
+
+    if (npc.animationMode === 'SERVE_PASTEL') {
+      npc.leftArm.rotation.x = -0.85;
+      npc.rightArm.rotation.x = -0.85;
+      npc.leftArm.rotation.z = 0.18;
+      npc.rightArm.rotation.z = -0.18;
+      const legSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.45;
+      npc.leftLeg.rotation.x = legSwing;
+      npc.rightLeg.rotation.x = -legSwing;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 1.5) * 0.12;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * npc.animSpeed)) * 0.04;
+      return;
+    }
+
+    if (npc.animationMode === 'FRY_PASTEL') {
+      const fry = Math.sin(npc.animTimer * 2.8) * 0.25;
+      npc.rightArm.rotation.x = -0.8 + fry;
+      npc.leftArm.rotation.x = -0.35 + Math.cos(npc.animTimer * 1.4) * 0.1;
+      npc.headGroup.rotation.y = Math.sin(npc.animTimer * 1.2) * 0.18;
+      npc.group.position.y = baseY + Math.abs(Math.sin(npc.animTimer * 1.5)) * 0.02;
+      return;
+    }
+
     if (npc.type === 'HUMANOID') {
+      if (npc.isSitting) {
+        npc.leftLeg.rotation.x = -Math.PI / 2;
+        npc.rightLeg.rotation.x = -Math.PI / 2;
+        npc.group.position.y = baseY - 0.28;
+        return;
+      }
+
       const legSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.55;
       const armSwing = Math.sin(npc.animTimer * npc.animSpeed) * 0.45;
 
@@ -28783,6 +29286,111 @@ class NpcSystem {
 
     this.cityPedestrians.forEach(p => this.npcs.push(p));
   }
+
+  // Pastelaria do Beto salon NPCs: Frying, Serving, and Eating Pastéis
+  initPastelariaNpcs() {
+    this.pastelariaNpcs = [
+      // 1. Seu Beto (O Mestre Pasteleiro frying pastéis behind the counter)
+      this.createHumanoidNpc({
+        id: 'beto_pasteleiro',
+        name: 'SEU BETO (MESTRE PASTELEIRO)',
+        shirtColor: 0xffffff,
+        skinColor: 0x94603d,
+        pantsColor: 0x27272a,
+        hasChefHat: true,
+        hasApron: true,
+        apronColor: 0xdc2626, // Red & white pastelaria apron
+        hasMustache: true,
+        hasTongs: true,
+        stationary: true,
+        defaultYaw: Math.PI / 2, // Facing East (+X towards salon)
+        waypoints: [{ x: 72.0, y: 0.05, z: 43.0 }],
+        interactable: false,
+        animationMode: 'FRY_PASTEL',
+        baseY: 0.05
+      }),
+
+      // 2. Marquinhos (Garçom do salão carrying tray with pastéis and caldo de cana)
+      this.createHumanoidNpc({
+        id: 'marquinhos_garcom',
+        name: 'MARQUINHOS (GARÇOM DO SALÃO)',
+        shirtColor: 0xdc2626, // Red polo uniform
+        skinColor: 0x7c4e2d,
+        pantsColor: 0x18181b,
+        hasApron: true,
+        apronColor: 0x18181b,
+        hasPastelPlatter: true,
+        interactable: false,
+        speed: 1.05,
+        animationMode: 'SERVE_PASTEL',
+        baseY: 0.05,
+        waypoints: [
+          { x: 73.8, y: 0.05, z: 41.5 },
+          { x: 75.8, y: 0.05, z: 40.0 },
+          { x: 75.8, y: 0.05, z: 43.5 },
+          { x: 73.8, y: 0.05, z: 41.5 }
+        ]
+      }),
+
+      // 3. Tio Carlinhos (Cliente na Mesa 1 comendo pastel de 30cm)
+      this.createHumanoidNpc({
+        id: 'tio_carlinhos_cliente',
+        name: 'TIO CARLINHOS (CLIENTE)',
+        shirtColor: 0x2563eb, // Blue polo
+        skinColor: 0x8a5832,
+        pantsColor: 0xd97706, // Khaki
+        hasMustache: true,
+        hasGlasses: true,
+        hasPastelInHands: true,
+        isSitting: true,
+        stationary: true,
+        defaultYaw: 0, // Facing North (+Z towards table)
+        waypoints: [{ x: 76.9, y: 0.05, z: 39.55 }],
+        interactable: false,
+        animationMode: 'EAT_PASTEL',
+        baseY: 0.05
+      }),
+
+      // 4. Dona Ivone (Cliente na Mesa 2 comendo pastel e caldo de cana)
+      this.createHumanoidNpc({
+        id: 'dona_ivone_cliente',
+        name: 'DONA IVONE (CLIENTE)',
+        shirtColor: 0xfacc15, // Yellow blouse
+        skinColor: 0xb58055,
+        pantsColor: 0x475569,
+        hasHairBun: true,
+        hasGlasses: true,
+        hasPastelInHands: true,
+        isSitting: true,
+        stationary: true,
+        defaultYaw: Math.PI, // Facing South (-Z towards table)
+        waypoints: [{ x: 76.9, y: 0.05, z: 45.25 }],
+        interactable: false,
+        animationMode: 'EAT_PASTEL',
+        baseY: 0.05
+      }),
+
+      // 5. Luquinhas (Cliente em pé no balcão comendo pastel quente)
+      this.createHumanoidNpc({
+        id: 'luquinhas_balcao',
+        name: 'LUQUINHAS (CLIENTE NO BALCÃO)',
+        shirtColor: 0x18181b, // Black tank top
+        skinColor: 0xa16843,
+        pantsColor: 0x0284c7, // Tactel azul
+        hasForwardCap: true,
+        capColor: 0xdc2626,
+        hasPastelInHands: true,
+        stationary: true,
+        defaultYaw: -Math.PI / 2, // Facing West (-X towards counter)
+        waypoints: [{ x: 73.9, y: 0.05, z: 41.5 }],
+        interactable: false,
+        animationMode: 'EAT_PASTEL',
+        baseY: 0.05
+      })
+    ];
+
+    this.pastelariaNpcs.forEach(n => this.npcs.push(n));
+  }
 }
 
 /**
@@ -29039,8 +29647,8 @@ class InteractableSystem {
         id: 'pastelaria_beto',
         name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)',
         prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA',
-        position: new THREE.Vector3(74.5, 1.2, 38.0),
-        maxDist: 3.5,
+        position: new THREE.Vector3(74.5, 1.2, 39.5),
+        maxDist: 4.5,
         encounterId: 'PASTELARIA_BETO',
         zoneId: 'PASTELARIA_BETO'
       },

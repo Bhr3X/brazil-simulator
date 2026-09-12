@@ -255,8 +255,8 @@ export class InteractableSystem {
         id: 'pastelaria_beto',
         name: 'PASTELARIA DO BETO (PASTEL GIGANTE & CALDO)',
         prompt: 'PEDIR PASTEL DE 30CM & CALDO DE CANA',
-        position: new THREE.Vector3(74.5, 1.2, 38.0),
-        maxDist: 3.5,
+        position: new THREE.Vector3(74.5, 1.2, 39.5),
+        maxDist: 4.5,
         encounterId: 'PASTELARIA_BETO',
         zoneId: 'PASTELARIA_BETO'
       },
